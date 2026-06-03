@@ -69,7 +69,7 @@ if os.path.exists(DB_FILE):
         # Build DataFrame
         df = pd.DataFrame(data.values())
         
-        # Fallbacks for older databases
+        # Fallbacks für leere oder nicht existierende Spalten (schützt vor NaN-Vergleichsfehlern)
         fallback_cols = {
             'registered': False,
             'logo_url': '',
@@ -82,6 +82,12 @@ if os.path.exists(DB_FILE):
         for col, default in fallback_cols.items():
             if col not in df.columns:
                 df[col] = default
+            else:
+                # Füllt alle NaN-Werte explizit mit dem Standardwert
+                df[col] = df[col].fillna(default)
+        
+        # Erzwinge booleschen Datentyp für die Registrierungsspalte
+        df['registered'] = df['registered'].astype(bool)
 
         # Convert dates for chronological sorting
         df['Start_Date_Obj'] = pd.to_datetime(df['start_date'], format='%d.%m.%Y', errors='coerce').dt.date
@@ -105,33 +111,30 @@ if os.path.exists(DB_FILE):
         if not df_upcoming.empty:
             for idx, item in df_upcoming.iterrows():
                 with st.container(border=True):
-                    # Spaltenbreite angepasst [1.5, 6, 2], um dem größeren Logo Raum zu geben
                     col_logo, col_info, col_link = st.columns([1.5, 6, 2])
                     
                     with col_logo:
                         logo_to_show = item['logo_url']
-                        # Falls kein Logo existiert oder das 'no-photo' Platzhalter-Logo geladen wird, ersetzen
                         if not logo_to_show or "no-photo" in logo_to_show:
                             logo_to_show = DEFAULT_LOGO
-                        
-                        # Logogröße auf 140 verdoppelt
                         st.image(logo_to_show, width=140)
                             
                     with col_info:
-                        # Display registered badge if applicable
-                        if item.get('registered', False):
-                            st.markdown("💚 **Ich bin für dieses Turnier gemeldet!**")
+                        # Muskel-Emoji anstelle des grünen Herzes
+                        if bool(item.get('registered', False)):
+                            st.markdown("💪 **Ich bin für dieses Turnier gemeldet!**")
 
                         st.markdown(f"### {item['title']}")
                         dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
                         st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
                         st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                         
-                        # Admin view: show toggle checkbox inside the card
+                        # Admin-Ansicht: Checkbox
                         if IS_ADMIN:
                             reg_key = f"reg_toggle_{item['id']}"
-                            is_reg = st.checkbox("Meldestatus", value=item.get('registered', False), key=reg_key)
-                            if is_reg != item.get('registered', False):
+                            # Explizites Casting zu bool(), um NaN-Vergleiche komplett auszuschließen
+                            is_reg = st.checkbox("Meldestatus", value=bool(item.get('registered', False)), key=reg_key)
+                            if is_reg != bool(item.get('registered', False)):
                                 data[item['id']]['registered'] = is_reg
                                 with open(DB_FILE, "w", encoding="utf-8") as f:
                                     json.dump(data, f, ensure_ascii=False, indent=4)
@@ -160,12 +163,12 @@ if os.path.exists(DB_FILE):
                             logo_to_show = item['logo_url']
                             if not logo_to_show or "no-photo" in logo_to_show:
                                 logo_to_show = DEFAULT_LOGO
-                                
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
-                            if item.get('registered', False):
-                                st.markdown("💚 *Teilgenommen*")
+                            # Muskel-Emoji anstelle des grünen Herzes
+                            if bool(item.get('registered', False)):
+                                st.markdown("💪 *Teilgenommen*")
 
                             st.markdown(f"### {item['title']} *(Beendet)*")
                             dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
