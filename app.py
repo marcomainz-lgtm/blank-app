@@ -69,7 +69,7 @@ if os.path.exists(DB_FILE):
         # Build DataFrame
         df = pd.DataFrame(data.values())
         
-        # Fallbacks für leere oder nicht existierende Spalten (schützt vor NaN-Vergleichsfehlern)
+        # Fallbacks for older databases
         fallback_cols = {
             'registered': False,
             'logo_url': '',
@@ -111,6 +111,7 @@ if os.path.exists(DB_FILE):
         if not df_upcoming.empty:
             for idx, item in df_upcoming.iterrows():
                 with st.container(border=True):
+                    # Spaltenbreite angepasst [1.5, 6, 2], um dem größeren Logo Raum zu geben
                     col_logo, col_info, col_link = st.columns([1.5, 6, 2])
                     
                     with col_logo:
@@ -120,19 +121,33 @@ if os.path.exists(DB_FILE):
                         st.image(logo_to_show, width=140)
                             
                     with col_info:
-                        # Muskel-Emoji anstelle des grünen Herzes
+                        # Prägnantes rotes Alert-Banner für gemeldete Turniere (Kursiv und hervorgehoben)
                         if bool(item.get('registered', False)):
-                            st.markdown("💪 **Ich bin für dieses Turnier gemeldet!**")
+                            st.markdown(
+                                """
+                                <div style="
+                                    background-color: #fef2f2;
+                                    border-left: 5px solid #ef4444;
+                                    padding: 8px 12px;
+                                    border-radius: 6px;
+                                    margin-bottom: 12px;
+                                    color: #b91c1c;
+                                    font-weight: bold;
+                                ">
+                                    ❤️ <i>Ich bin für dieses Turnier gemeldet!</i>
+                                </div>
+                                """,
+                                unsafe_allow_html=True
+                            )
 
                         st.markdown(f"### {item['title']}")
                         dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
                         st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
                         st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                         
-                        # Admin-Ansicht: Checkbox
+                        # Admin view: show toggle checkbox inside the card
                         if IS_ADMIN:
                             reg_key = f"reg_toggle_{item['id']}"
-                            # Explizites Casting zu bool(), um NaN-Vergleiche komplett auszuschließen
                             is_reg = st.checkbox("Meldestatus", value=bool(item.get('registered', False)), key=reg_key)
                             if is_reg != bool(item.get('registered', False)):
                                 data[item['id']]['registered'] = is_reg
@@ -166,9 +181,24 @@ if os.path.exists(DB_FILE):
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
-                            # Muskel-Emoji anstelle des grünen Herzes
+                            # Dezentes graues Alert-Banner für vergangene Turniere
                             if bool(item.get('registered', False)):
-                                st.markdown("💪 *Teilgenommen*")
+                                st.markdown(
+                                    """
+                                    <div style="
+                                        background-color: #f8fafc;
+                                        border-left: 5px solid #64748b;
+                                        padding: 6px 10px;
+                                        border-radius: 6px;
+                                        margin-bottom: 12px;
+                                        color: #475569;
+                                        font-weight: bold;
+                                    ">
+                                        ❤️ <i>Teilgenommen</i>
+                                    </div>
+                                    """,
+                                    unsafe_allow_html=True
+                                )
 
                             st.markdown(f"### {item['title']} *(Beendet)*")
                             dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
@@ -185,4 +215,4 @@ if os.path.exists(DB_FILE):
     else:
         st.info("Der Suchlauf war erfolgreich, aber es wurden keine Turniere in Ihrem Umkreis gefunden.")
 else:
-    st.warning("Keine Turnier-Datenbank gefunden. Bitte klicken Sie oben auf 'Datenbank aktualisieren' für den ersten Suchlauf.")
+    st.warning("Keine Turnier-Datenbank gefunden. Bitte klicken Sie oben auf 'Datenbank aktualisieren' für
