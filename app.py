@@ -7,15 +7,36 @@ from tracker import check_for_updates, DB_FILE
 
 st.set_page_config(page_title="Badminton Turniere für Marco", layout="wide")
 
-# Stealth-Login ganz oben (komplett unauffällig, ohne Label, nur mit '...')
-admin_password = st.text_input("", type="password", label_visibility="collapsed", placeholder="...", key="secret_login")
+# Custom CSS to hide the password visibility button (the eye icon)
+st.markdown(
+    """
+    <style>
+    button[data-testid="stTextInput-VisibilityButton"] {
+        display: none !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Constrain the login field width by placing it in a top-right column
+col_spacer, col_login = st.columns([4, 1])
+with col_login:
+    admin_password = st.text_input(
+        "", 
+        type="password", 
+        label_visibility="collapsed", 
+        placeholder="Admin Login", 
+        key="secret_login"
+    )
+
 IS_ADMIN = (admin_password == "marco2026")
 
-# 1. Überschrift & Reiner Sachtext (Hildesheim-Witz entfernt)
+# Title & Subtitle
 st.title("🏸 Badminton Turniere für Marco")
 st.write("Diese Seite zeigt alle Turniere an, die sich im Umkreis von 100 Kilometern von Hilden (40723) befinden.")
 
-# 2. Status der letzten Datenaktualisierung ermitteln
+# Retrieve DB modification timestamp
 last_retrieved_str = "Unbekannt"
 if os.path.exists(DB_FILE):
     try:
@@ -27,13 +48,13 @@ if os.path.exists(DB_FILE):
 
 st.caption(f"🕒 Letztes Update der Datenbank: {last_retrieved_str}")
 
-# Datenbank aktualisieren per Button
+# Database update trigger
 if st.button("Datenbank aktualisieren"):
     with st.spinner("Suche nach neuen Turnieren auf turnier.de..."):
         check_for_updates()
     st.toast("Datenbank erfolgreich aktualisiert!")
 
-# Datenbank laden und als Karten visualisieren
+# Load and present database
 if os.path.exists(DB_FILE):
     try:
         with open(DB_FILE, "r", encoding="utf-8") as f:
@@ -42,10 +63,10 @@ if os.path.exists(DB_FILE):
         data = {}
 
     if data:
-        # DataFrame aufbauen
+        # Build DataFrame
         df = pd.DataFrame(data.values())
         
-        # Fallbacks für ältere Datensätze
+        # Fallbacks for older databases
         fallback_cols = {
             'registered': False,
             'logo_url': '',
@@ -59,25 +80,23 @@ if os.path.exists(DB_FILE):
             if col not in df.columns:
                 df[col] = default
 
-        # Datumsfelder für die chronologische Einteilung konvertieren
+        # Convert dates for chronological sorting
         df['Start_Date_Obj'] = pd.to_datetime(df['start_date'], format='%d.%m.%Y', errors='coerce').dt.date
         df['End_Date_Obj'] = pd.to_datetime(df['end_date'], format='%d.%m.%Y', errors='coerce').dt.date
 
-        # Aktuelles Datum ermitteln (Mittwoch, 3. Juni 2026)
+        # Retrieve current date (dynamic)
         today = datetime.date.today()
 
-        # Datensätze aufsplitten:
-        # 1. Anstehend / Laufend (Enddatum liegt heute oder in der Zukunft)
+        # Split data chronologically
+        # 1. Upcoming / Ongoing (End Date is today or in the future)
         df_upcoming = df[df['End_Date_Obj'] >= today].copy()
-        # Sortierung: Nächstes Turnier zuerst (Chronologisch aufsteigend)
         df_upcoming = df_upcoming.sort_values(by='Start_Date_Obj', ascending=True)
 
-        # 2. Vergangene Turniere (Enddatum liegt in der Vergangenheit)
+        # 2. Past Tournaments (End Date is in the past)
         df_past = df[df['End_Date_Obj'] < today].copy()
-        # Sortierung: Zuletzt beendetes Turnier zuerst (Chronologisch absteigend)
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
-        # --- A. ANSTEHENDE TURNIERE ---
+        # --- A. UPCOMING TOURNAMENTS ---
         st.subheader(f"📅 Anstehende Turniere ({len(df_upcoming)})")
         
         if not df_upcoming.empty:
@@ -92,7 +111,7 @@ if os.path.exists(DB_FILE):
                             st.markdown("<h2 style='text-align: center; margin-top: 10px;'>🏸</h2>", unsafe_allow_html=True)
                             
                     with col_info:
-                        # Grünes Meldesymbol anzeigen, falls gemeldet
+                        # Display registered badge if applicable
                         if item.get('registered', False):
                             st.markdown("💚 **Ich bin für dieses Turnier gemeldet!**")
 
@@ -101,7 +120,7 @@ if os.path.exists(DB_FILE):
                         st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
                         st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                         
-                        # Silent-Meldestatus im Admin-Modus aktivieren
+                        # Admin view: show toggle checkbox inside the card
                         if IS_ADMIN:
                             reg_key = f"reg_toggle_{item['id']}"
                             is_reg = st.checkbox("Meldestatus", value=item.get('registered', False), key=reg_key)
@@ -121,7 +140,7 @@ if os.path.exists(DB_FILE):
         st.write("")
         st.write("")
 
-        # --- B. VERGANGENE TURNIERE ---
+        # --- B. PAST TOURNAMENTS ---
         st.subheader(f"🕰️ Vergangene Turniere ({len(df_past)})")
         
         with st.expander("Vergangene Turniere anzeigen", expanded=False):
@@ -153,6 +172,4 @@ if os.path.exists(DB_FILE):
                 st.write("Keine vergangenen Turniere in der Datenbank.")
 
     else:
-        st.info("Der Suchlauf war erfolgreich, aber es wurden keine Turniere in Ihrem Umkreis gefunden.")
-else:
-    st.warning("Keine Turnier-Datenbank gefunden. Bitte klicken Sie oben auf 'Datenbank aktualisieren' für den ersten Suchlauf.")
+        st.
