@@ -5,8 +5,8 @@ import requests
 from bs4 import BeautifulSoup
 import urllib.parse
 
-# Wählen Sie einen eindeutigen Kanalnamen für Ihre Push-Benachrichtigungen
-NTFY_TOPIC = "my_badminton_tournaments_40723_alert" 
+# Wir ändern das Topic leicht auf '_v2', um die heutige ntfy-Sperre sofort zu umgehen
+NTFY_TOPIC = "my_badminton_tournaments_40723_v2" 
 
 DB_FILE = "known_tournaments.json"
 
@@ -179,7 +179,7 @@ def scrape_tournaments():
                 })
                 page_tournaments_count += 1
 
-        print(f"Page {page} yielded {page_tournaments_count} non-youth tournament(s).")
+        print(f"Page {page} yielded {page_tournaments_count} tournament(s).")
         
         if page_tournaments_count == 0:
             pass
@@ -195,27 +195,36 @@ def scrape_tournaments():
     return tournaments
 
 def send_push_notification(new_items):
-    for item in new_items:
-        message = (
-            f"Tournament: {item['title']}\n"
-            f"Team: {item['organizer']}\n"
-            f"Location: {item['city']} ({item['distance']} km)\n"
-            f"Date: {item['start_date']} - {item['end_date']}\n"
-            f"Link: {item['link']}"
+    if not new_items:
+        return
+
+    count = len(new_items)
+    
+    # 1. Zusammenfassung bauen
+    summary_lines = []
+    for idx, item in enumerate(new_items[:5]):  # Zeigt maximal die ersten 5 Turniere direkt an
+        summary_lines.append(f"- {item['title']} in {item['city']} ({item['start_date']})")
+        
+    if count > 5:
+        summary_lines.append(f"... sowie {count - 5} weitere neue Turniere.")
+        
+    summary_lines.append("\nDashboard öffnen: https://turniere.streamlit.app")
+    message = "\n".join(summary_lines)
+    
+    try:
+        # Sendet genau EINE Anfrage für die gesamte Liste
+        requests.post(
+            f"https://ntfy.sh/{NTFY_TOPIC}",
+            data=message.encode('utf-8'),
+            headers={
+                "Title": f"🏸 {count} neue(s) Turnier(e) gefunden",
+                "Priority": "high",
+                "Tags": "badminton,sports,exclamation"
+            }
         )
-        try:
-            requests.post(
-                f"https://ntfy.sh/{NTFY_TOPIC}",
-                data=message.encode('utf-8'),
-                headers={
-                    "Title": "New Badminton Tournament Available",
-                    "Priority": "high",
-                    "Tags": "badminton,sports,exclamation"
-                }
-            )
-            print(f"Notification sent for: {item['title']}")
-        except Exception as e:
-            print(f"Error sending notification: {e}")
+        print(f"Consolidated notification sent for {count} tournament(s).")
+    except Exception as e:
+        print(f"Error sending notification: {e}")
 
 def check_for_updates():
     print("Checking for tournament updates...")
