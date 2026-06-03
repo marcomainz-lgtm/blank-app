@@ -243,12 +243,21 @@ def check_for_updates():
             new_tournaments.append(t)
             known_tournaments[t_id] = t
         else:
-            # Wichtig: Den bereits gesetzten "Gemeldet"-Status sowie Details beibehalten!
+            # Wichtig: Den bereits gesetzten "Gemeldet"-Status sowie neue Einzelfelder dauerhaft beibehalten!
             is_registered = known_tournaments[t_id].get('registered', False)
-            reg_details = known_tournaments[t_id].get('details', '')
+            reg_he = known_tournaments[t_id].get('reg_he', False)
+            reg_hd = known_tournaments[t_id].get('reg_hd', False)
+            reg_mx = known_tournaments[t_id].get('reg_mx', False)
+            partner_hd = known_tournaments[t_id].get('partner_hd', '')
+            partner_mx = known_tournaments[t_id].get('partner_mx', '')
+
             known_tournaments[t_id] = t
             known_tournaments[t_id]['registered'] = is_registered
-            known_tournaments[t_id]['details'] = reg_details
+            known_tournaments[t_id]['reg_he'] = reg_he
+            known_tournaments[t_id]['reg_hd'] = reg_hd
+            known_tournaments[t_id]['reg_mx'] = reg_mx
+            known_tournaments[t_id]['partner_hd'] = partner_hd
+            known_tournaments[t_id]['partner_mx'] = partner_mx
 
     with open(DB_FILE, "w", encoding="utf-8") as f:
         json.dump(known_tournaments, f, ensure_ascii=False, indent=4)

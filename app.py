@@ -69,10 +69,14 @@ if os.path.exists(DB_FILE):
         # Build DataFrame
         df = pd.DataFrame(data.values())
         
-        # Fallbacks for older databases
+        # Fallbacks für older databases (schützt vor NaN-Werten)
         fallback_cols = {
             'registered': False,
-            'details': '',
+            'reg_he': False,
+            'reg_hd': False,
+            'reg_mx': False,
+            'partner_hd': '',
+            'partner_mx': '',
             'logo_url': '',
             'city': 'Unbekannt',
             'distance': None,
@@ -86,8 +90,9 @@ if os.path.exists(DB_FILE):
             else:
                 df[col] = df[col].fillna(default)
         
-        # Erzwinge booleschen Datentyp für die Registrierungsspalte
-        df['registered'] = df['registered'].astype(bool)
+        # Datentypen für die Checkbox-Spalten erzwingen
+        for col in ['registered', 'reg_he', 'reg_hd', 'reg_mx']:
+            df[col] = df[col].astype(bool)
 
         # Convert dates for chronological sorting
         df['Start_Date_Obj'] = pd.to_datetime(df['start_date'], format='%d.%m.%Y', errors='coerce').dt.date
@@ -97,11 +102,9 @@ if os.path.exists(DB_FILE):
         today = datetime.date.today()
 
         # Split data chronologically
-        # 1. Upcoming / Ongoing (End Date is today or in the future)
         df_upcoming = df[df['End_Date_Obj'] >= today].copy()
         df_upcoming = df_upcoming.sort_values(by='Start_Date_Obj', ascending=True)
 
-        # 2. Past Tournaments (End Date is in the past)
         df_past = df[df['End_Date_Obj'] < today].copy()
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
@@ -120,9 +123,19 @@ if os.path.exists(DB_FILE):
                         st.image(logo_to_show, width=140)
                             
                     with col_info:
-                        # Grünes Alert-Banner für gemeldete Turniere mit optionalen Disziplinen-/Partner-Details
+                        # Automatische Formatierung der Disziplinen und Partner-Details für das grüne Banner
                         if bool(item.get('registered', False)):
-                            details_text = item.get('details', '').strip()
+                            parts = []
+                            if bool(item.get('reg_he', False)):
+                                parts.append("Herren-Einzel")
+                            if bool(item.get('reg_hd', False)):
+                                p_hd = item.get('partner_hd', '').strip()
+                                parts.append(f"Herren-Doppel mit {p_hd}" if p_hd else "Herren-Doppel")
+                            if bool(item.get('reg_mx', False)):
+                                p_mx = item.get('partner_mx', '').strip()
+                                parts.append(f"Mixed mit {p_mx}" if p_mx else "Mixed")
+                                
+                            details_text = ", ".join(parts)
                             details_html = ""
                             if details_text:
                                 details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>Disziplinen: {details_text}</div>"
@@ -151,26 +164,55 @@ if os.path.exists(DB_FILE):
                         st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
                         st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                         
-                        # Admin-Ansicht: Checkbox & Textfeld für Details
+                        # Admin-Ansicht: Strukturierte Eingabe
                         if IS_ADMIN:
-                            reg_key = f"reg_toggle_{item['id']}"
-                            is_reg = st.checkbox("Für dieses Turnier gemeldet?", value=bool(item.get('registered', False)), key=reg_key)
+                            st.write("---")
+                            # 1. Reihe: Drei Checkboxen nebeneinander
+                            col_he, col_hd, col_mx = st.columns(3)
+                            with col_he:
+                                val_he = st.checkbox("Herren-Einzel", value=bool(item.get('reg_he', False)), key=f"he_{item['id']}")
+                            with col_hd:
+                                val_hd = st.checkbox("Herren-Doppel", value=bool(item.get('reg_hd', False)), key=f"hd_{item['id']}")
+                            with col_mx:
+                                val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_{item['id']}")
                             
-                            # Wenn "Gemeldet" angehakt ist, blenden wir das Textfeld für Disziplinen ein
-                            details_val = item.get('details', '')
-                            details_text = ""
-                            if is_reg:
-                                details_key = f"details_input_{item['id']}"
-                                details_text = st.text_input(
-                                    "Disziplinen & Partner (z. B. Herrendoppel mit Max, Mixed mit Anna, Herreneinzel)",
-                                    value=details_val,
-                                    key=details_key
-                                )
+                            # 2. Reihe: Dynamische Partner-Eingabefelder (erscheinen nur wenn HD oder MX angehakt ist)
+                            p_col1, p_col2 = st.columns(2)
+                            val_partner_hd = item.get('partner_hd', '')
+                            val_partner_mx = item.get('partner_mx', '')
                             
-                            # Falls sich der Haken oder der Detailtext ändert, sofort in der JSON speichern
-                            if is_reg != bool(item.get('registered', False)) or details_text != details_val:
-                                data[item['id']]['registered'] = is_reg
-                                data[item['id']]['details'] = details_text
+                            with p_col1:
+                                if val_hd:
+                                    val_partner_hd = st.text_input("Doppelpartner", value=val_partner_hd, key=f"p_hd_{item['id']}", placeholder="Name des Partners")
+                                else:
+                                    val_partner_hd = ""
+                                    
+                            with p_col2:
+                                if val_mx:
+                                    val_partner_mx = st.text_input("Mixedpartner", value=val_partner_mx, key=f"p_mx_{item['id']}", placeholder="Name des Partners")
+                                else:
+                                    val_partner_mx = ""
+                                    
+                            # Allgemeiner Status ermitteln (mindestens eine Disziplin muss gewählt sein)
+                            is_registered = (val_he or val_hd or val_mx)
+                            
+                            # Überprüfung auf Änderungen
+                            has_changed = (
+                                val_he != bool(item.get('reg_he', False)) or
+                                val_hd != bool(item.get('reg_hd', False)) or
+                                val_mx != bool(item.get('reg_mx', False)) or
+                                val_partner_hd != item.get('partner_hd', '') or
+                                val_partner_mx != item.get('partner_mx', '')
+                            )
+                            
+                            if has_changed:
+                                data[item['id']]['registered'] = is_registered
+                                data[item['id']]['reg_he'] = val_he
+                                data[item['id']]['reg_hd'] = val_hd
+                                data[item['id']]['reg_mx'] = val_mx
+                                data[item['id']]['partner_hd'] = val_partner_hd
+                                data[item['id']]['partner_mx'] = val_partner_mx
+                                
                                 with open(DB_FILE, "w", encoding="utf-8") as f:
                                     json.dump(data, f, ensure_ascii=False, indent=4)
                                 st.rerun()
@@ -201,9 +243,19 @@ if os.path.exists(DB_FILE):
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
-                            # Sanftes grünes Alert-Banner für vergangene Turniere mit grünem Hashtag
+                            # Muted grünes Alert-Banner für vergangene Turniere mit denselben dynamischen Details
                             if bool(item.get('registered', False)):
-                                details_text = item.get('details', '').strip()
+                                parts = []
+                                if bool(item.get('reg_he', False)):
+                                    parts.append("Herren-Einzel")
+                                if bool(item.get('reg_hd', False)):
+                                    p_hd = item.get('partner_hd', '').strip()
+                                    parts.append(f"Herren-Doppel mit {p_hd}" if p_hd else "Herren-Doppel")
+                                if bool(item.get('reg_mx', False)):
+                                    p_mx = item.get('partner_mx', '').strip()
+                                    parts.append(f"Mixed mit {p_mx}" if p_mx else "Mixed")
+                                    
+                                details_text = ", ".join(parts)
                                 details_html = ""
                                 if details_text:
                                     details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>Disziplinen: {details_text}</div>"
