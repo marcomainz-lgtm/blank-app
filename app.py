@@ -7,15 +7,13 @@ from tracker import check_for_updates, DB_FILE
 
 st.set_page_config(page_title="Badminton Turniere für Marco", layout="wide")
 
-# Custom-Logo für Turniere ohne eigenes Emblem
-DEFAULT_LOGO = "https://content.tournamentsoftware.com/images/club/72FB92A4-34AF-41F1-8A4E-BBD56634E66E.jpg"
-
-# Alphabetisch sortierte Spielerprofile für Herrendoppel
+# Alphabetisch sortierte Spielerprofile für Herrendoppel (Matthias Knaupp hinzugefügt)
 PARTNERS_HD = {
     "Dominik Gric": "https://dbv.turnier.de/player-profile/B6646621-C82C-4FEF-B7F1-42FC2A947DCD",
     "Jan Hammer": "https://dbv.turnier.de/player-profile/9070AF83-4EA3-40E0-B402-F41456147AB5",
     "Jesper Städtler": "https://dbv.turnier.de/player-profile/5CFDBFE1-E055-4479-B657-FD1CB6DEFF48",
     "Karl Olschewski": "https://dbv.turnier.de/player-profile/E2FB7DDF-AB7C-43EE-A78A-389874F1E440",
+    "Matthias Knaupp": "https://dbv.turnier.de/player-profile/6DD055FA-B009-4A2B-BBDA-43D15F0F894F",
     "Pascal Ziehe": "https://dbv.turnier.de/player-profile/6c7076f7-d154-4a45-ad71-0b6e2d747b2b"
 }
 
@@ -37,22 +35,37 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Login-Session-State initialisieren
+if 'logged_in' not in st.session_state:
+    st.session_state['logged_in'] = False
+
 # Constrain the login field width by placing it in a top-right column
 col_spacer, col_login = st.columns([4, 1])
 with col_login:
-    admin_password = st.text_input(
-        "", 
-        type="password", 
-        label_visibility="collapsed", 
-        placeholder="Admin Login", 
-        key="secret_login"
-    )
+    if st.session_state['logged_in']:
+        # Wenn eingeloggt, unauffälligen Logout-Button anstelle des Passwortfeldes anzeigen
+        if st.button("Abmelden", use_container_width=True, key="logout_btn"):
+            st.session_state['logged_in'] = False
+            if 'secret_login' in st.session_state:
+                st.session_state['secret_login'] = ""
+            st.rerun()
+    else:
+        admin_password = st.text_input(
+            "", 
+            type="password", 
+            label_visibility="collapsed", 
+            placeholder="Admin Login", 
+            key="secret_login"
+        )
+        if admin_password == "marco2026":
+            st.session_state['logged_in'] = True
+            st.rerun()
 
-IS_ADMIN = (admin_password == "marco2026")
+IS_ADMIN = st.session_state['logged_in']
 
-# Title & Subtitle
+# Title & Subtitle (Wunschtext eingepflegt)
 st.title("🏸 Badminton Turniere für Marco")
-st.write("Diese Seite zeigt alle Turniere an, die sich im Umkreis von 100 Kilometern von Hilden (40723) befinden.")
+st.write("Auf dieser Seite findet ihr alle Seniorenturniere 2026, die im Umkreis von 100 Kilometern um Hilden (40723) stattfinden.")
 
 # Retrieve DB modification timestamp
 last_retrieved_str = "Unbekannt"
@@ -126,131 +139,133 @@ if os.path.exists(DB_FILE):
         # --- A. UPCOMING TOURNAMENTS ---
         st.subheader(f"📅 Anstehende Turniere ({len(df_upcoming)})")
         
-        if not df_upcoming.empty:
-            for idx, item in df_upcoming.iterrows():
-                with st.container(border=True):
-                    col_logo, col_info, col_link = st.columns([1.5, 6, 2])
-                    
-                    with col_logo:
-                        logo_to_show = item['logo_url']
-                        if not logo_to_show or "no-photo" in logo_to_show:
-                            logo_to_show = DEFAULT_LOGO
-                        st.image(logo_to_show, width=140)
-                            
-                    with col_info:
-                        # Automatische Formatierung der Disziplinen und Partner-Details für das grüne Banner
-                        if bool(item.get('registered', False)):
-                            parts = []
-                            if bool(item.get('reg_he', False)):
-                                parts.append("Herreneinzel")
-                            
-                            if bool(item.get('reg_hd', False)):
-                                p_hd = item.get('partner_hd', '').strip()
-                                if p_hd in PARTNERS_HD:
-                                    parts.append(f"Herrendoppel mit <a href='{PARTNERS_HD[p_hd]}' target='_blank' style='color: #15803d; text-decoration: underline; font-weight: bold;'>{p_hd}</a>")
-                                else:
-                                    parts.append(f"Herrendoppel mit {p_hd}" if p_hd else "Herrendoppel")
-                            
-                            if bool(item.get('reg_mx', False)):
-                                p_mx = item.get('partner_mx', '').strip()
-                                if p_mx in PARTNERS_MX:
-                                    parts.append(f"Mixed mit <a href='{PARTNERS_MX[p_mx]}' target='_blank' style='color: #15803d; text-decoration: underline; font-weight: bold;'>{p_mx}</a>")
-                                else:
-                                    parts.append(f"Mixed mit {p_mx}" if p_mx else "Mixed")
+        # Anstehende Turniere im einklappbaren Akkordeon (standardmäßig geöffnet)
+        with st.expander("Anstehende Turniere anzeigen", expanded=True):
+            if not df_upcoming.empty:
+                for idx, item in df_upcoming.iterrows():
+                    with st.container(border=True):
+                        col_logo, col_info, col_link = st.columns([1.5, 6, 2])
+                        
+                        with col_logo:
+                            logo_to_show = item['logo_url']
+                            if not logo_to_show or "no-photo" in logo_to_show:
+                                logo_to_show = DEFAULT_LOGO
+                            st.image(logo_to_show, width=140)
                                 
-                            details_text = ", ".join(parts)
-                            details_html = ""
-                            if details_text:
-                                details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>Disziplinen: {details_text}</div>"
+                        with col_info:
+                            # Formatierte Details
+                            if bool(item.get('registered', False)):
+                                parts = []
+                                if bool(item.get('reg_he', False)):
+                                    parts.append("Herreneinzel")
                                 
-                            st.markdown(
-                                f"""
-                                <div style="
-                                    background-color: #f0fdf4;
-                                    border-left: 5px solid #22c55e;
-                                    padding: 8px 12px;
-                                    border-radius: 6px;
-                                    margin-bottom: 12px;
-                                    color: #15803d;
-                                    font-weight: bold;
-                                ">
-                                    <span style="font-style: normal; margin-right: 6px;">✅</span>
-                                    Ich bin für dieses Turnier gemeldet!
-                                    {details_html}
-                                </div>
-                                """,
-                                unsafe_allow_html=True
-                            )
+                                if bool(item.get('reg_hd', False)):
+                                    p_hd = item.get('partner_hd', '').strip()
+                                    if p_hd in PARTNERS_HD:
+                                        parts.append(f"Herrendoppel mit <a href='{PARTNERS_HD[p_hd]}' target='_blank' style='color: #15803d; text-decoration: underline; font-weight: bold;'>{p_hd}</a>")
+                                    else:
+                                        parts.append(f"Herrendoppel mit {p_hd}" if p_hd else "Herrendoppel")
+                                
+                                if bool(item.get('reg_mx', False)):
+                                    p_mx = item.get('partner_mx', '').strip()
+                                    if p_mx in PARTNERS_MX:
+                                        parts.append(f"Mixed mit <a href='{PARTNERS_MX[p_mx]}' target='_blank' style='color: #15803d; text-decoration: underline; font-weight: bold;'>{p_mx}</a>")
+                                    else:
+                                        parts.append(f"Mixed mit {p_mx}" if p_mx else "Mixed")
+                                    
+                                details_text = ", ".join(parts)
+                                details_html = ""
+                                if details_text:
+                                    details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>Disziplinen: {details_text}</div>"
+                                    
+                                st.markdown(
+                                    f"""
+                                    <div style="
+                                        background-color: #f0fdf4;
+                                        border-left: 5px solid #22c55e;
+                                        padding: 8px 12px;
+                                        border-radius: 6px;
+                                        margin-bottom: 12px;
+                                        color: #15803d;
+                                        font-weight: bold;
+                                    ">
+                                        <span style="font-style: normal; margin-right: 6px;">✅</span>
+                                        Ich bin für dieses Turnier gemeldet!
+                                        {details_html}
+                                    </div>
+                                    """,
+                                    unsafe_allow_html=True
+                                )
 
-                        st.markdown(f"### {item['title']}")
-                        dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
-                        st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
-                        st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
-                        
-                        # Admin-Ansicht: Strukturierte Eingabe
-                        if IS_ADMIN:
-                            st.write("---")
-                            col_he, col_hd, col_mx = st.columns(3)
-                            with col_he:
-                                val_he = st.checkbox("Herreneinzel", value=bool(item.get('reg_he', False)), key=f"he_{item['id']}")
-                            with col_hd:
-                                val_hd = st.checkbox("Herrendoppel", value=bool(item.get('reg_hd', False)), key=f"hd_{item['id']}")
-                            with col_mx:
-                                val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_{item['id']}")
+                            st.markdown(f"### {item['title']}")
+                            dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
+                            st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
+                            st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                             
-                            p_col1, p_col2 = st.columns(2)
-                            val_partner_hd = item.get('partner_hd', '')
-                            val_partner_mx = item.get('partner_mx', '')
-                            
-                            hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
-                            mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
-                            
-                            with p_col1:
-                                if val_hd:
-                                    default_idx_hd = hd_options.index(val_partner_hd) if val_partner_hd in hd_options else 0
-                                    val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_{item['id']}")
-                                    if val_partner_hd == "-- Kein Partner --":
-                                        val_partner_hd = ""
-                                else:
-                                    val_partner_hd = ""
-                                    
-                            with p_col2:
-                                if val_mx:
-                                    default_idx_mx = mx_options.index(val_partner_mx) if val_partner_mx in mx_options else 0
-                                    val_partner_mx = st.selectbox("Partner Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_{item['id']}")
-                                    if val_partner_mx == "-- Kein Partner --":
-                                        val_partner_mx = ""
-                                else:
-                                    val_partner_mx = ""
-                                    
-                            is_registered = (val_he or val_hd or val_mx)
-                            
-                            has_changed = (
-                                val_he != bool(item.get('reg_he', False)) or
-                                val_hd != bool(item.get('reg_hd', False)) or
-                                val_mx != bool(item.get('reg_mx', False)) or
-                                val_partner_hd != item.get('partner_hd', '') or
-                                val_partner_mx != item.get('partner_mx', '')
-                            )
-                            
-                            if has_changed:
-                                data[item['id']]['registered'] = is_registered
-                                data[item['id']]['reg_he'] = val_he
-                                data[item['id']]['reg_hd'] = val_hd
-                                data[item['id']]['reg_mx'] = val_mx
-                                data[item['id']]['partner_hd'] = val_partner_hd
-                                data[item['id']]['partner_mx'] = val_partner_mx
+                            # Admin-Ansicht
+                            if IS_ADMIN:
+                                st.write("---")
+                                col_he, col_hd, col_mx = st.columns(3)
+                                with col_he:
+                                    val_he = st.checkbox("Herreneinzel", value=bool(item.get('reg_he', False)), key=f"he_{item['id']}")
+                                with col_hd:
+                                    val_hd = st.checkbox("Herrendoppel", value=bool(item.get('reg_hd', False)), key=f"hd_{item['id']}")
+                                with col_mx:
+                                    val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_{item['id']}")
                                 
-                                with open(DB_FILE, "w", encoding="utf-8") as f:
-                                    json.dump(data, f, ensure_ascii=False, indent=4)
-                                st.rerun()
-                        
-                    with col_link:
-                        st.write("")
-                        st.write("")
-                        st.link_button("Meldung / Info", item['link'], use_container_width=True)
-        else:
-            st.info("Aktuell gibt es keine anstehenden Turniere mehr in der Liste.")
+                                p_col1, p_col2 = st.columns(2)
+                                val_partner_hd = item.get('partner_hd', '')
+                                val_partner_mx = item.get('partner_mx', '')
+                                
+                                hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
+                                mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
+                                
+                                with p_col1:
+                                    if val_hd:
+                                        default_idx_hd = hd_options.index(val_partner_hd) if val_partner_hd in hd_options else 0
+                                        val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_{item['id']}")
+                                        if val_partner_hd == "-- Kein Partner --":
+                                            val_partner_hd = ""
+                                    else:
+                                        val_partner_hd = ""
+                                        
+                                with p_col2:
+                                    if val_mx:
+                                        default_idx_mx = mx_options.index(val_partner_mx) if val_partner_mx in mx_options else 0
+                                        val_partner_mx = st.selectbox("Partner Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_{item['id']}")
+                                        if val_partner_mx == "-- Kein Partner --":
+                                            val_partner_mx = ""
+                                    else:
+                                        val_partner_mx = ""
+                                        
+                                is_registered = (val_he or val_hd or val_mx)
+                                
+                                has_changed = (
+                                    val_he != bool(item.get('reg_he', False)) or
+                                    val_hd != bool(item.get('reg_hd', False)) or
+                                    val_mx != bool(item.get('reg_mx', False)) or
+                                    val_partner_hd != item.get('partner_hd', '') or
+                                    val_partner_mx != item.get('partner_mx', '')
+                                )
+                                
+                                if has_changed:
+                                    data[item['id']]['registered'] = is_registered
+                                    data[item['id']]['reg_he'] = val_he
+                                    data[item['id']]['reg_hd'] = val_hd
+                                    data[item['id']]['reg_mx'] = val_mx
+                                    data[item['id']]['partner_hd'] = val_partner_hd
+                                    data[item['id']]['partner_mx'] = val_partner_mx
+                                    
+                                    with open(DB_FILE, "w", encoding="utf-8") as f:
+                                        json.dump(data, f, ensure_ascii=False, indent=4)
+                                    st.rerun()
+                            
+                        with col_link:
+                            st.write("")
+                            st.write("")
+                            st.link_button("Turnierseite", item['link'], use_container_width=True)
+            else:
+                st.info("Aktuell gibt es keine anstehenden Turniere mehr in der Liste.")
 
         st.write("")
         st.write("")
@@ -258,6 +273,7 @@ if os.path.exists(DB_FILE):
         # --- B. PAST TOURNAMENTS ---
         st.subheader(f"🕰️ Vergangene Turniere ({len(df_past)})")
         
+        # Vergangene Turniere im einklappbaren Akkordeon (standardmäßig geschlossen)
         with st.expander("Vergangene Turniere anzeigen", expanded=False):
             if not df_past.empty:
                 for idx, item in df_past.iterrows():
@@ -271,7 +287,6 @@ if os.path.exists(DB_FILE):
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
-                            # Sanftes grünes Alert-Banner für vergangene Turniere mit denselben Verlinkungen
                             if bool(item.get('registered', False)):
                                 parts = []
                                 if bool(item.get('reg_he', False)):
@@ -318,7 +333,6 @@ if os.path.exists(DB_FILE):
                             st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
                             st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                             
-                            # Admin-Ansicht auch im Archiv freigeschaltet (mit past-spezifischen Keys für st.checkbox / st.selectbox)
                             if IS_ADMIN:
                                 st.write("---")
                                 col_he, col_hd, col_mx = st.columns(3)
@@ -379,7 +393,7 @@ if os.path.exists(DB_FILE):
                         with col_link:
                             st.write("")
                             st.write("")
-                            st.link_button("Ergebnisse / Details", item['link'], use_container_width=True)
+                            st.link_button("Turnierseite", item['link'], use_container_width=True)
             else:
                 st.write("Keine vergangenen Turniere in der Datenbank.")
 
