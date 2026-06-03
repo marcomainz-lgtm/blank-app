@@ -144,7 +144,6 @@ if os.path.exists(DB_FILE):
                             if bool(item.get('reg_he', False)):
                                 parts.append("Herreneinzel")
                             
-                            # Herrendoppel mit verlinktem Partnerprofil (falls in DB und gemappt)
                             if bool(item.get('reg_hd', False)):
                                 p_hd = item.get('partner_hd', '').strip()
                                 if p_hd in PARTNERS_HD:
@@ -152,7 +151,6 @@ if os.path.exists(DB_FILE):
                                 else:
                                     parts.append(f"Herrendoppel mit {p_hd}" if p_hd else "Herrendoppel")
                             
-                            # Mixed mit verlinktem Partnerinnenprofil (falls in DB und gemappt)
                             if bool(item.get('reg_mx', False)):
                                 p_mx = item.get('partner_mx', '').strip()
                                 if p_mx in PARTNERS_MX:
@@ -189,7 +187,7 @@ if os.path.exists(DB_FILE):
                         st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
                         st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                         
-                        # Admin-Ansicht: Strukturierte Dropdown-Eingaben
+                        # Admin-Ansicht: Strukturierte Eingabe
                         if IS_ADMIN:
                             st.write("---")
                             col_he, col_hd, col_mx = st.columns(3)
@@ -204,13 +202,11 @@ if os.path.exists(DB_FILE):
                             val_partner_hd = item.get('partner_hd', '')
                             val_partner_mx = item.get('partner_mx', '')
                             
-                            # Optionslisten für Selectboxen zusammenbauen
                             hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
                             mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
                             
                             with p_col1:
                                 if val_hd:
-                                    # Ermittelt den Index des ausgewählten Partners für das standardmäßige Laden
                                     default_idx_hd = hd_options.index(val_partner_hd) if val_partner_hd in hd_options else 0
                                     val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_{item['id']}")
                                     if val_partner_hd == "-- Kein Partner --":
@@ -321,6 +317,64 @@ if os.path.exists(DB_FILE):
                             dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
                             st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
                             st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
+                            
+                            # Admin-Ansicht auch im Archiv freigeschaltet (mit past-spezifischen Keys für st.checkbox / st.selectbox)
+                            if IS_ADMIN:
+                                st.write("---")
+                                col_he, col_hd, col_mx = st.columns(3)
+                                with col_he:
+                                    val_he = st.checkbox("Herreneinzel", value=bool(item.get('reg_he', False)), key=f"he_past_{item['id']}")
+                                with col_hd:
+                                    val_hd = st.checkbox("Herrendoppel", value=bool(item.get('reg_hd', False)), key=f"hd_past_{item['id']}")
+                                with col_mx:
+                                    val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_past_{item['id']}")
+                                
+                                p_col1, p_col2 = st.columns(2)
+                                val_partner_hd = item.get('partner_hd', '')
+                                val_partner_mx = item.get('partner_mx', '')
+                                
+                                hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
+                                mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
+                                
+                                with p_col1:
+                                    if val_hd:
+                                        default_idx_hd = hd_options.index(val_partner_hd) if val_partner_hd in hd_options else 0
+                                        val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_past_{item['id']}")
+                                        if val_partner_hd == "-- Kein Partner --":
+                                            val_partner_hd = ""
+                                    else:
+                                        val_partner_hd = ""
+                                        
+                                with p_col2:
+                                    if val_mx:
+                                        default_idx_mx = mx_options.index(val_partner_mx) if val_partner_mx in mx_options else 0
+                                        val_partner_mx = st.selectbox("Partner Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_past_{item['id']}")
+                                        if val_partner_mx == "-- Kein Partner --":
+                                            val_partner_mx = ""
+                                    else:
+                                        val_partner_mx = ""
+                                        
+                                is_registered = (val_he or val_hd or val_mx)
+                                
+                                has_changed = (
+                                    val_he != bool(item.get('reg_he', False)) or
+                                    val_hd != bool(item.get('reg_hd', False)) or
+                                    val_mx != bool(item.get('reg_mx', False)) or
+                                    val_partner_hd != item.get('partner_hd', '') or
+                                    val_partner_mx != item.get('partner_mx', '')
+                                )
+                                
+                                if has_changed:
+                                    data[item['id']]['registered'] = is_registered
+                                    data[item['id']]['reg_he'] = val_he
+                                    data[item['id']]['reg_hd'] = val_hd
+                                    data[item['id']]['reg_mx'] = val_mx
+                                    data[item['id']]['partner_hd'] = val_partner_hd
+                                    data[item['id']]['partner_mx'] = val_partner_mx
+                                    
+                                    with open(DB_FILE, "w", encoding="utf-8") as f:
+                                        json.dump(data, f, ensure_ascii=False, indent=4)
+                                    st.rerun()
                             
                         with col_link:
                             st.write("")
