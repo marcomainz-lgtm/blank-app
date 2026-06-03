@@ -1,0 +1,38 @@
+name: Weekly Badminton Scraper
+
+on:
+  schedule:
+    # Runs every Monday at 08:00 UTC (9:00 AM German Time)
+    - cron: '0 8 * * 1'
+  workflow_dispatch: # Allows you to trigger it manually via the GitHub website
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Allows the bot to save new tournaments back to your repo
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: Run Scraper
+        run: python tracker.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add known_tournaments.json
+          git commit -m "Auto-update tournaments database [skip ci]" || echo "No new tournaments to commit"
+          git push
