@@ -15,7 +15,7 @@ if st.button("Datenbank aktualisieren"):
         check_for_updates()
     st.toast("Datenbank erfolgreich aktualisiert!")
 
-# Datenbank laden und visualisieren
+# Datenbank laden und als Karten visualisieren
 if os.path.exists(DB_FILE):
     try:
         with open(DB_FILE, "r", encoding="utf-8") as f:
@@ -27,56 +27,60 @@ if os.path.exists(DB_FILE):
         # DataFrame aufbauen
         df = pd.DataFrame(data.values())
         
-        # Fallbacks für ältere Datensätze (Sicherheitshalber)
+        # Fallbacks für ältere Datensätze
         fallback_cols = {
             'logo_url': '',
             'city': 'Unbekannt',
             'distance': None,
             'start_date': None,
-            'end_date': None
+            'end_date': None,
+            'organizer': 'Unbekannt'
         }
         for col, default in fallback_cols.items():
             if col not in df.columns:
                 df[col] = default
             
-        # Nur die angeforderten Spalten selektieren (Logo, Turnier, Stadt, Distanz, Startdatum, Enddatum, Link)
-        df_display = df[['logo_url', 'title', 'city', 'distance', 'start_date', 'end_date', 'link']].copy()
-        df_display.columns = [
-            'Logo',
-            'Turnier', 
-            'Stadt', 
-            'Distanz', 
-            'Startdatum', 
-            'Enddatum', 
-            'Link'
-        ]
-        
-        # Datumsfelder für korrekte chronologische Sortierung konvertieren
-        df_display['Startdatum_Parsed'] = pd.to_datetime(df_display['Startdatum'], format='%d.%m.%Y', errors='coerce')
+        # Datumsfelder für korrekte chronologische Sortierung temporär konvertieren
+        df['Startdatum_Parsed'] = pd.to_datetime(df['start_date'], format='%d.%m.%Y', errors='coerce')
         
         # Sortierung: Chronologisch nach Startdatum
-        df_display = df_display.sort_values(by='Startdatum_Parsed', ascending=True, na_position='last')
+        df_sorted = df.sort_values(by='Startdatum_Parsed', ascending=True, na_position='last')
         
-        # Hilfsspalte entfernen
-        df_display = df_display.drop(columns=['Startdatum_Parsed'])
-        
-        # Tabelle im Browser rendern
-        st.dataframe(
-            df_display,
-            column_config={
-                "Logo": st.column_config.ImageColumn(
-                    "Logo",
-                    help="Vereins- / Verbandsemblem"
-                ),
-                "Distanz": st.column_config.NumberColumn(
-                    "Distanz",
-                    format="%d km"
-                ),
-                "Link": st.column_config.LinkColumn("Meldung / Info")
-            },
-            hide_index=True,
-            use_container_width=True
-        )
+        st.write(f"Insgesamt **{len(df_sorted)}** Turniere gefunden:")
+        st.divider()
+
+        # Jedes Turnier als native Karte direkt auf der Seite rendern
+        for idx, item in df_sorted.iterrows():
+            # Ein schicker nativer Container mit feinem Rand für jedes Turnier
+            with st.container(border=True):
+                # Spalten-Layout aufteilen: [Logo, Infos, Link-Button]
+                col_logo, col_info, col_link = st.columns([1, 6, 2])
+                
+                with col_logo:
+                    # Logo zentriert anzeigen
+                    if item['logo_url']:
+                        st.image(item['logo_url'], width=70)
+                    else:
+                        # Hübsches Fallback-Icon, falls kein Logo vorhanden ist
+                        st.markdown("<h2 style='text-align: center; margin-top: 10px;'>🏸</h2>", unsafe_allow_html=True)
+                        
+                with col_info:
+                    # Titel des Turniers
+                    st.markdown(f"### {item['title']}")
+                    
+                    # Wichtigste Infos (Ort, Distanz, Datum)
+                    dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
+                    st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
+                    
+                    # Ausrichtender Verein / Verband
+                    st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
+                    
+                with col_link:
+                    # Großer Link-Button zur Turnieranmeldung (für Handys leicht nach unten versetzt)
+                    st.write("")
+                    st.write("")
+                    st.link_button("Meldung / Info", item['link'], use_container_width=True)
+
     else:
         st.info("Der Suchlauf war erfolgreich, aber es wurden keine Turniere in Ihrem Umkreis gefunden.")
 else:
