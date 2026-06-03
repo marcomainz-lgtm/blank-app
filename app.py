@@ -9,9 +9,40 @@ st.set_page_config(page_title="Badminton Turniere für Marco", layout="wide")
 
 # 1. Überschrift & Neue Texte
 st.title("🏸 Badminton Turniere für Marco")
-st.write(
-    "Diese Seite zeigt alle Turniere an, die sich im Umkreis von 100 Kilometern von Hilden (40723) befinden"
-    )
+st.write("Diese Seite zeigt alle Turniere an, die sich im Umkreis von 100 Kilometern von Hilden (40723) befinden.")
+
+# 2. Status der letzten Datenaktualisierung ermitteln
+last_retrieved_str = "Unbekannt"
+if os.path.exists(DB_FILE):
+    try:
+        last_modified = os.path.getmtime(DB_FILE)
+        last_retrieved_dt = datetime.datetime.fromtimestamp(last_modified)
+        last_retrieved_str = last_retrieved_dt.strftime("%d.%m.%Y um %H:%M Uhr")
+    except Exception:
+        pass
+
+st.caption(f"🕒 Letztes Update der Datenbank: {last_retrieved_str}")
+
+# --- LINKER SIDEBAR-BEREICH ---
+st.sidebar.title("📢 Live-Ankündigungen")
+st.sidebar.write(
+    "Möchten Sie oder Ihre Vereinskollegen sofort benachrichtigt werden, "
+    "wenn ein neues Turnier eingetragen wird? \n\n"
+    "1. Laden Sie die kostenlose App **ntfy** auf Ihr Smartphone.\n"
+    "2. Abonnieren Sie darin das Thema:\n"
+    "`my_badminton_tournaments_40723_v2`"
+)
+
+st.sidebar.divider()
+
+st.sidebar.subheader("🔒 Admin-Bereich")
+admin_password = st.sidebar.text_input("Passwort zur Bearbeitung", type="password", help="Geben Sie Ihr Passwort ein, um Ihren Meldestatus zu bearbeiten.")
+
+# Ihr geheimes Passwort (können Sie hier im Code beliebig anpassen)
+IS_ADMIN = (admin_password == "marco2026")
+
+if IS_ADMIN:
+    st.sidebar.success("🔑 Admin-Modus aktiv. Sie können Ihren Meldestatus jetzt direkt in den Karten bearbeiten.")
 
 # Datenbank aktualisieren per Button
 if st.button("Datenbank aktualisieren"):
@@ -33,6 +64,7 @@ if os.path.exists(DB_FILE):
         
         # Fallbacks für ältere Datensätze
         fallback_cols = {
+            'registered': False,
             'logo_url': '',
             'city': 'Unbekannt',
             'distance': None,
@@ -57,12 +89,12 @@ if os.path.exists(DB_FILE):
         # Sortierung: Nächstes Turnier zuerst (Chronologisch aufsteigend)
         df_upcoming = df_upcoming.sort_values(by='Start_Date_Obj', ascending=True)
 
-        # 2. Archiv / Vergangen (Enddatum liegt in der Vergangenheit)
+        # 2. Vergangene Turniere (Enddatum liegt in der Vergangenheit)
         df_past = df[df['End_Date_Obj'] < today].copy()
         # Sortierung: Zuletzt beendetes Turnier zuerst (Chronologisch absteigend)
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
-        # --- A. ANSTEHENDE TURNIERE (RELEVANT) ---
+        # --- A. ANSTEHENDE TURNIERE ---
         st.subheader(f"📅 Anstehende Turniere ({len(df_upcoming)})")
         
         if not df_upcoming.empty:
@@ -77,10 +109,24 @@ if os.path.exists(DB_FILE):
                             st.markdown("<h2 style='text-align: center; margin-top: 10px;'>🏸</h2>", unsafe_allow_html=True)
                             
                     with col_info:
+                        # Grünes Meldesymbol anzeigen, falls der Haken in der DB gesetzt ist
+                        if item.get('registered', False):
+                            st.markdown("💚 **Ich bin für dieses Turnier gemeldet!**")
+
                         st.markdown(f"### {item['title']}")
                         dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
                         st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
                         st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
+                        
+                        # Wenn Sie als Admin eingeloggt sind, zeigen wir die Bearbeitungsoption direkt in der Karte
+                        if IS_ADMIN:
+                            reg_key = f"reg_toggle_{item['id']}"
+                            is_reg = st.checkbox("Meldestatus bearbeiten", value=item.get('registered', False), key=reg_key)
+                            if is_reg != item.get('registered', False):
+                                data[item['id']]['registered'] = is_reg
+                                with open(DB_FILE, "w", encoding="utf-8") as f:
+                                    json.dump(data, f, ensure_ascii=False, indent=4)
+                                st.rerun()
                         
                     with col_link:
                         st.write("")
@@ -92,11 +138,10 @@ if os.path.exists(DB_FILE):
         st.write("")
         st.write("")
 
-        # --- B. VERGANGENE TURNIERE (ARCHIV) ---
-        st.subheader(f"📁 Archiv & Vergangene Turniere ({len(df_past)})")
+        # --- B. VERGANGENE TURNIERE ---
+        st.subheader(f"🕰️ Vergangene Turniere ({len(df_past)})")
         
-        # Packt alte Turniere in einen einklappbaren Expander, damit sie den Bildschirm nicht verstopfen
-        with st.expander("Vergangene Turniere & Archiv anzeigen", expanded=False):
+        with st.expander("Vergangene Turniere anzeigen", expanded=False):
             if not df_past.empty:
                 for idx, item in df_past.iterrows():
                     with st.container(border=True):
@@ -109,6 +154,9 @@ if os.path.exists(DB_FILE):
                                 st.markdown("<h2 style='text-align: center; margin-top: 10px;'>🏸</h2>", unsafe_allow_html=True)
                                 
                         with col_info:
+                            if item.get('registered', False):
+                                st.markdown("💚 *Teilgenommen*")
+
                             st.markdown(f"### {item['title']} *(Beendet)*")
                             dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
                             st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
