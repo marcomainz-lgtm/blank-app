@@ -72,6 +72,7 @@ if os.path.exists(DB_FILE):
         # Fallbacks for older databases
         fallback_cols = {
             'registered': False,
+            'details': '',
             'logo_url': '',
             'city': 'Unbekannt',
             'distance': None,
@@ -83,7 +84,6 @@ if os.path.exists(DB_FILE):
             if col not in df.columns:
                 df[col] = default
             else:
-                # Füllt alle NaN-Werte explizit mit dem Standardwert
                 df[col] = df[col].fillna(default)
         
         # Erzwinge booleschen Datentyp für die Registrierungsspalte
@@ -111,7 +111,6 @@ if os.path.exists(DB_FILE):
         if not df_upcoming.empty:
             for idx, item in df_upcoming.iterrows():
                 with st.container(border=True):
-                    # Spaltenbreite angepasst [1.5, 6, 2], um dem größeren Logo Raum zu geben
                     col_logo, col_info, col_link = st.columns([1.5, 6, 2])
                     
                     with col_logo:
@@ -121,10 +120,15 @@ if os.path.exists(DB_FILE):
                         st.image(logo_to_show, width=140)
                             
                     with col_info:
-                        # Prägnantes grünes Alert-Banner für gemeldete Turniere mit grünem Hashtag
+                        # Grünes Alert-Banner für gemeldete Turniere mit optionalen Disziplinen-/Partner-Details
                         if bool(item.get('registered', False)):
+                            details_text = item.get('details', '').strip()
+                            details_html = ""
+                            if details_text:
+                                details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>Disziplinen: {details_text}</div>"
+                                
                             st.markdown(
-                                """
+                                f"""
                                 <div style="
                                     background-color: #f0fdf4;
                                     border-left: 5px solid #22c55e;
@@ -133,11 +137,10 @@ if os.path.exists(DB_FILE):
                                     margin-bottom: 12px;
                                     color: #15803d;
                                     font-weight: bold;
-                                    display: flex;
-                                    align-items: center;
                                 ">
-                                    <span style="color: #22c55e; font-weight: 900; font-size: 1.25em; font-style: normal; margin-right: 6px;">✅ </span>
+                                    <span style="color: #22c55e; font-weight: 900; font-size: 1.25em; font-style: normal; margin-right: 6px;">#</span>
                                     <i>Ich bin für dieses Turnier gemeldet!</i>
+                                    {details_html}
                                 </div>
                                 """,
                                 unsafe_allow_html=True
@@ -148,12 +151,26 @@ if os.path.exists(DB_FILE):
                         st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
                         st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                         
-                        # Admin view: show toggle checkbox inside the card
+                        # Admin-Ansicht: Checkbox & Textfeld für Details
                         if IS_ADMIN:
                             reg_key = f"reg_toggle_{item['id']}"
-                            is_reg = st.checkbox("Meldestatus", value=bool(item.get('registered', False)), key=reg_key)
-                            if is_reg != bool(item.get('registered', False)):
+                            is_reg = st.checkbox("Für dieses Turnier gemeldet?", value=bool(item.get('registered', False)), key=reg_key)
+                            
+                            # Wenn "Gemeldet" angehakt ist, blenden wir das Textfeld für Disziplinen ein
+                            details_val = item.get('details', '')
+                            details_text = ""
+                            if is_reg:
+                                details_key = f"details_input_{item['id']}"
+                                details_text = st.text_input(
+                                    "Disziplinen & Partner (z. B. Herrendoppel mit Max, Mixed mit Anna, Herreneinzel)",
+                                    value=details_val,
+                                    key=details_key
+                                )
+                            
+                            # Falls sich der Haken oder der Detailtext ändert, sofort in der JSON speichern
+                            if is_reg != bool(item.get('registered', False)) or details_text != details_val:
                                 data[item['id']]['registered'] = is_reg
+                                data[item['id']]['details'] = details_text
                                 with open(DB_FILE, "w", encoding="utf-8") as f:
                                     json.dump(data, f, ensure_ascii=False, indent=4)
                                 st.rerun()
@@ -186,8 +203,13 @@ if os.path.exists(DB_FILE):
                         with col_info:
                             # Sanftes grünes Alert-Banner für vergangene Turniere mit grünem Hashtag
                             if bool(item.get('registered', False)):
+                                details_text = item.get('details', '').strip()
+                                details_html = ""
+                                if details_text:
+                                    details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>Disziplinen: {details_text}</div>"
+
                                 st.markdown(
-                                    """
+                                    f"""
                                     <div style="
                                         background-color: #f4fbf7;
                                         border-left: 5px solid #86efac;
@@ -196,11 +218,10 @@ if os.path.exists(DB_FILE):
                                         margin-bottom: 12px;
                                         color: #166534;
                                         font-weight: bold;
-                                        display: flex;
-                                        align-items: center;
                                     ">
                                         <span style="color: #86efac; font-weight: 900; font-size: 1.15em; font-style: normal; margin-right: 5px;">#</span>
                                         <i>Teilgenommen</i>
+                                        {details_html}
                                     </div>
                                     """,
                                     unsafe_allow_html=True

@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 import urllib.parse
 
-# Wir ändern das Topic leicht auf '_v2', um die heutige ntfy-Sperre sofort zu umgehen
+# Wählen Sie einen eindeutigen Kanalnamen für Ihre Push-Benachrichtigungen
 NTFY_TOPIC = "my_badminton_tournaments_40723_v2" 
 
 DB_FILE = "known_tournaments.json"
@@ -200,9 +200,8 @@ def send_push_notification(new_items):
 
     count = len(new_items)
     
-    # 1. Zusammenfassung bauen
     summary_lines = []
-    for idx, item in enumerate(new_items[:5]):  # Zeigt maximal die ersten 5 Turniere direkt an
+    for idx, item in enumerate(new_items[:5]):
         summary_lines.append(f"- {item['title']} in {item['city']} ({item['start_date']})")
         
     if count > 5:
@@ -212,12 +211,11 @@ def send_push_notification(new_items):
     message = "\n".join(summary_lines)
     
     try:
-        # Sendet genau EINE Anfrage für die gesamte Liste
         requests.post(
             f"https://ntfy.sh/{NTFY_TOPIC}",
             data=message.encode('utf-8'),
             headers={
-                "Title": f"🏸 {count} neue(s) Turnier(e) gefunden",
+                "Title": "Letztes Update der Datenbank",
                 "Priority": "high",
                 "Tags": "badminton,sports,exclamation"
             }
@@ -244,6 +242,13 @@ def check_for_updates():
         if t_id not in known_tournaments:
             new_tournaments.append(t)
             known_tournaments[t_id] = t
+        else:
+            # Wichtig: Den bereits gesetzten "Gemeldet"-Status sowie Details beibehalten!
+            is_registered = known_tournaments[t_id].get('registered', False)
+            reg_details = known_tournaments[t_id].get('details', '')
+            known_tournaments[t_id] = t
+            known_tournaments[t_id]['registered'] = is_registered
+            known_tournaments[t_id]['details'] = reg_details
 
     with open(DB_FILE, "w", encoding="utf-8") as f:
         json.dump(known_tournaments, f, ensure_ascii=False, indent=4)
