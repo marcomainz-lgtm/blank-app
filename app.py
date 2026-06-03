@@ -83,4 +83,76 @@ if os.path.exists(DB_FILE):
         if not df_upcoming.empty:
             for idx, item in df_upcoming.iterrows():
                 with st.container(border=True):
-                    col_logo, col_info, col_link = st.
+                    col_logo, col_info, col_link = st.columns([1, 6, 2])
+                    
+                    with col_logo:
+                        if item['logo_url']:
+                            st.image(item['logo_url'], width=70)
+                        else:
+                            st.markdown("<h2 style='text-align: center; margin-top: 10px;'>🏸</h2>", unsafe_allow_html=True)
+                            
+                    with col_info:
+                        # Grünes Meldesymbol anzeigen, falls gemeldet
+                        if item.get('registered', False):
+                            st.markdown("💚 **Ich bin für dieses Turnier gemeldet!**")
+
+                        st.markdown(f"### {item['title']}")
+                        dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
+                        st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
+                        st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
+                        
+                        # Silent-Meldestatus im Admin-Modus aktivieren
+                        if IS_ADMIN:
+                            reg_key = f"reg_toggle_{item['id']}"
+                            is_reg = st.checkbox("Meldestatus", value=item.get('registered', False), key=reg_key)
+                            if is_reg != item.get('registered', False):
+                                data[item['id']]['registered'] = is_reg
+                                with open(DB_FILE, "w", encoding="utf-8") as f:
+                                    json.dump(data, f, ensure_ascii=False, indent=4)
+                                st.rerun()
+                        
+                    with col_link:
+                        st.write("")
+                        st.write("")
+                        st.link_button("Meldung / Info", item['link'], use_container_width=True)
+        else:
+            st.info("Aktuell gibt es keine anstehenden Turniere mehr in der Liste.")
+
+        st.write("")
+        st.write("")
+
+        # --- B. VERGANGENE TURNIERE ---
+        st.subheader(f"🕰️ Vergangene Turniere ({len(df_past)})")
+        
+        with st.expander("Vergangene Turniere anzeigen", expanded=False):
+            if not df_past.empty:
+                for idx, item in df_past.iterrows():
+                    with st.container(border=True):
+                        col_logo, col_info, col_link = st.columns([1, 6, 2])
+                        
+                        with col_logo:
+                            if item['logo_url']:
+                                st.image(item['logo_url'], width=70)
+                            else:
+                                st.markdown("<h2 style='text-align: center; margin-top: 10px;'>🏸</h2>", unsafe_allow_html=True)
+                                
+                        with col_info:
+                            if item.get('registered', False):
+                                st.markdown("💚 *Teilgenommen*")
+
+                            st.markdown(f"### {item['title']} *(Beendet)*")
+                            dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
+                            st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
+                            st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
+                            
+                        with col_link:
+                            st.write("")
+                            st.write("")
+                            st.link_button("Ergebnisse / Details", item['link'], use_container_width=True)
+            else:
+                st.write("Keine vergangenen Turniere in der Datenbank.")
+
+    else:
+        st.info("Der Suchlauf war erfolgreich, aber es wurden keine Turniere in Ihrem Umkreis gefunden.")
+else:
+    st.warning("Keine Turnier-Datenbank gefunden. Bitte klicken Sie oben auf 'Datenbank aktualisieren' für den ersten Suchlauf.")
