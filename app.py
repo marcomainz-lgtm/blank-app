@@ -7,6 +7,9 @@ from tracker import check_for_updates, DB_FILE
 
 st.set_page_config(page_title="Badminton Turniere für Marco", layout="wide")
 
+# Custom-Logo für Turniere ohne eigenes Emblem
+DEFAULT_LOGO = "https://content.tournamentsoftware.com/images/club/72FB92A4-34AF-41F1-8A4E-BBD56634E66E.jpg"
+
 # Custom CSS to hide the password visibility button (the eye icon)
 st.markdown(
     """
@@ -102,13 +105,17 @@ if os.path.exists(DB_FILE):
         if not df_upcoming.empty:
             for idx, item in df_upcoming.iterrows():
                 with st.container(border=True):
-                    col_logo, col_info, col_link = st.columns([1, 6, 2])
+                    # Spaltenbreite angepasst [1.5, 6, 2], um dem größeren Logo Raum zu geben
+                    col_logo, col_info, col_link = st.columns([1.5, 6, 2])
                     
                     with col_logo:
-                        if item['logo_url']:
-                            st.image(item['logo_url'], width=70)
-                        else:
-                            st.markdown("<h2 style='text-align: center; margin-top: 10px;'>🏸</h2>", unsafe_allow_html=True)
+                        logo_to_show = item['logo_url']
+                        # Falls kein Logo existiert oder das 'no-photo' Platzhalter-Logo geladen wird, ersetzen
+                        if not logo_to_show or "no-photo" in logo_to_show:
+                            logo_to_show = DEFAULT_LOGO
+                        
+                        # Logogröße auf 140 verdoppelt
+                        st.image(logo_to_show, width=140)
                             
                     with col_info:
                         # Display registered badge if applicable
@@ -147,13 +154,14 @@ if os.path.exists(DB_FILE):
             if not df_past.empty:
                 for idx, item in df_past.iterrows():
                     with st.container(border=True):
-                        col_logo, col_info, col_link = st.columns([1, 6, 2])
+                        col_logo, col_info, col_link = st.columns([1.5, 6, 2])
                         
                         with col_logo:
-                            if item['logo_url']:
-                                st.image(item['logo_url'], width=70)
-                            else:
-                                st.markdown("<h2 style='text-align: center; margin-top: 10px;'>🏸</h2>", unsafe_allow_html=True)
+                            logo_to_show = item['logo_url']
+                            if not logo_to_show or "no-photo" in logo_to_show:
+                                logo_to_show = DEFAULT_LOGO
+                                
+                            st.image(logo_to_show, width=140)
                                 
                         with col_info:
                             if item.get('registered', False):
