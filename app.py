@@ -10,6 +10,21 @@ st.set_page_config(page_title="Badminton Turniere für Marco", layout="wide")
 # Custom-Logo für Turniere ohne eigenes Emblem
 DEFAULT_LOGO = "https://content.tournamentsoftware.com/images/club/72FB92A4-34AF-41F1-8A4E-BBD56634E66E.jpg"
 
+# Alphabetisch sortierte Spielerprofile für Herrendoppel
+PARTNERS_HD = {
+    "Dominik Gric": "https://dbv.turnier.de/player-profile/B6646621-C82C-4FEF-B7F1-42FC2A947DCD",
+    "Jan Hammer": "https://dbv.turnier.de/player-profile/9070AF83-4EA3-40E0-B402-F41456147AB5",
+    "Jesper Städtler": "https://dbv.turnier.de/player-profile/5CFDBFE1-E055-4479-B657-FD1CB6DEFF48",
+    "Karl Olschewski": "https://dbv.turnier.de/player-profile/E2FB7DDF-AB7C-43EE-A78A-389874F1E440",
+    "Pascal Ziehe": "https://dbv.turnier.de/player-profile/6c7076f7-d154-4a45-ad71-0b6e2d747b2b"
+}
+
+# Alphabetisch sortierte Spielerprofilen für Mixed
+PARTNERS_MX = {
+    "Thea Renate Sommer": "https://dbv.turnier.de/player-profile/033259D7-903F-4928-B87B-BB8896DBF827",
+    "Vanessa Joppien": "https://dbv.turnier.de/player-profile/76DA93E6-43E2-45CE-B28F-FDA12433FDBA"
+}
+
 # Custom CSS to hide the password visibility button (the eye icon)
 st.markdown(
     """
@@ -128,12 +143,22 @@ if os.path.exists(DB_FILE):
                             parts = []
                             if bool(item.get('reg_he', False)):
                                 parts.append("Herreneinzel")
+                            
+                            # Herrendoppel mit verlinktem Partnerprofil (falls in DB und gemappt)
                             if bool(item.get('reg_hd', False)):
                                 p_hd = item.get('partner_hd', '').strip()
-                                parts.append(f"Herrendoppel mit {p_hd}" if p_hd else "Herrendoppel")
+                                if p_hd in PARTNERS_HD:
+                                    parts.append(f"Herrendoppel mit <a href='{PARTNERS_HD[p_hd]}' target='_blank' style='color: #15803d; text-decoration: underline; font-weight: bold;'>{p_hd}</a>")
+                                else:
+                                    parts.append(f"Herrendoppel mit {p_hd}" if p_hd else "Herrendoppel")
+                            
+                            # Mixed mit verlinktem Partnerinnenprofil (falls in DB und gemappt)
                             if bool(item.get('reg_mx', False)):
                                 p_mx = item.get('partner_mx', '').strip()
-                                parts.append(f"Mixed mit {p_mx}" if p_mx else "Mixed")
+                                if p_mx in PARTNERS_MX:
+                                    parts.append(f"Mixed mit <a href='{PARTNERS_MX[p_mx]}' target='_blank' style='color: #15803d; text-decoration: underline; font-weight: bold;'>{p_mx}</a>")
+                                else:
+                                    parts.append(f"Mixed mit {p_mx}" if p_mx else "Mixed")
                                 
                             details_text = ", ".join(parts)
                             details_html = ""
@@ -164,7 +189,7 @@ if os.path.exists(DB_FILE):
                         st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
                         st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                         
-                        # Admin-Ansicht: Strukturierte Eingabe
+                        # Admin-Ansicht: Strukturierte Dropdown-Eingaben
                         if IS_ADMIN:
                             st.write("---")
                             col_he, col_hd, col_mx = st.columns(3)
@@ -179,15 +204,26 @@ if os.path.exists(DB_FILE):
                             val_partner_hd = item.get('partner_hd', '')
                             val_partner_mx = item.get('partner_mx', '')
                             
+                            # Optionslisten für Selectboxen zusammenbauen
+                            hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
+                            mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
+                            
                             with p_col1:
                                 if val_hd:
-                                    val_partner_hd = st.text_input("Partner Herrendoppel", value=val_partner_hd, key=f"p_hd_{item['id']}", placeholder="Name des Partners")
+                                    # Ermittelt den Index des ausgewählten Partners für das standardmäßige Laden
+                                    default_idx_hd = hd_options.index(val_partner_hd) if val_partner_hd in hd_options else 0
+                                    val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_{item['id']}")
+                                    if val_partner_hd == "-- Kein Partner --":
+                                        val_partner_hd = ""
                                 else:
                                     val_partner_hd = ""
                                     
                             with p_col2:
                                 if val_mx:
-                                    val_partner_mx = st.text_input("Partner Mixed", value=val_partner_mx, key=f"p_mx_{item['id']}", placeholder="Name des Partners")
+                                    default_idx_mx = mx_options.index(val_partner_mx) if val_partner_mx in mx_options else 0
+                                    val_partner_mx = st.selectbox("Partner Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_{item['id']}")
+                                    if val_partner_mx == "-- Kein Partner --":
+                                        val_partner_mx = ""
                                 else:
                                     val_partner_mx = ""
                                     
@@ -239,17 +275,23 @@ if os.path.exists(DB_FILE):
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
-                            # Grünes Haken-Banner für vergangene Turniere
+                            # Sanftes grünes Alert-Banner für vergangene Turniere mit denselben Verlinkungen
                             if bool(item.get('registered', False)):
                                 parts = []
                                 if bool(item.get('reg_he', False)):
                                     parts.append("Herreneinzel")
                                 if bool(item.get('reg_hd', False)):
                                     p_hd = item.get('partner_hd', '').strip()
-                                    parts.append(f"Herrendoppel mit {p_hd}" if p_hd else "Herrendoppel")
+                                    if p_hd in PARTNERS_HD:
+                                        parts.append(f"Herrendoppel mit <a href='{PARTNERS_HD[p_hd]}' target='_blank' style='color: #166534; text-decoration: underline; font-weight: bold;'>{p_hd}</a>")
+                                    else:
+                                        parts.append(f"Herrendoppel mit {p_hd}" if p_hd else "Herrendoppel")
                                 if bool(item.get('reg_mx', False)):
                                     p_mx = item.get('partner_mx', '').strip()
-                                    parts.append(f"Mixed mit {p_mx}" if p_mx else "Mixed")
+                                    if p_mx in PARTNERS_MX:
+                                        parts.append(f"Mixed mit <a href='{PARTNERS_MX[p_mx]}' target='_blank' style='color: #166534; text-decoration: underline; font-weight: bold;'>{p_mx}</a>")
+                                    else:
+                                        parts.append(f"Mixed mit {p_mx}" if p_mx else "Mixed")
                                     
                                 details_text = ", ".join(parts)
                                 details_html = ""
