@@ -69,7 +69,7 @@ if os.path.exists(DB_FILE):
         # Build DataFrame
         df = pd.DataFrame(data.values())
         
-        # Fallbacks für older databases (schützt vor NaN-Werten)
+        # Fallbacks for older databases
         fallback_cols = {
             'registered': False,
             'reg_he': False,
@@ -127,10 +127,10 @@ if os.path.exists(DB_FILE):
                         if bool(item.get('registered', False)):
                             parts = []
                             if bool(item.get('reg_he', False)):
-                                parts.append("Herren-Einzel")
+                                parts.append("Herreneinzel")
                             if bool(item.get('reg_hd', False)):
                                 p_hd = item.get('partner_hd', '').strip()
-                                parts.append(f"Herren-Doppel mit {p_hd}" if p_hd else "Herren-Doppel")
+                                parts.append(f"Herrendoppel mit {p_hd}" if p_hd else "Herrendoppel")
                             if bool(item.get('reg_mx', False)):
                                 p_mx = item.get('partner_mx', '').strip()
                                 parts.append(f"Mixed mit {p_mx}" if p_mx else "Mixed")
@@ -151,8 +151,8 @@ if os.path.exists(DB_FILE):
                                     color: #15803d;
                                     font-weight: bold;
                                 ">
-                                    <span style="color: #22c55e; font-weight: 900; font-size: 1.25em; font-style: normal; margin-right: 6px;">#</span>
-                                    <i>Ich bin für dieses Turnier gemeldet!</i>
+                                    <span style="font-style: normal; margin-right: 6px;">✅</span>
+                                    Ich bin für dieses Turnier gemeldet!
                                     {details_html}
                                 </div>
                                 """,
@@ -167,36 +167,32 @@ if os.path.exists(DB_FILE):
                         # Admin-Ansicht: Strukturierte Eingabe
                         if IS_ADMIN:
                             st.write("---")
-                            # 1. Reihe: Drei Checkboxen nebeneinander
                             col_he, col_hd, col_mx = st.columns(3)
                             with col_he:
-                                val_he = st.checkbox("Herren-Einzel", value=bool(item.get('reg_he', False)), key=f"he_{item['id']}")
+                                val_he = st.checkbox("Herreneinzel", value=bool(item.get('reg_he', False)), key=f"he_{item['id']}")
                             with col_hd:
-                                val_hd = st.checkbox("Herren-Doppel", value=bool(item.get('reg_hd', False)), key=f"hd_{item['id']}")
+                                val_hd = st.checkbox("Herrendoppel", value=bool(item.get('reg_hd', False)), key=f"hd_{item['id']}")
                             with col_mx:
                                 val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_{item['id']}")
                             
-                            # 2. Reihe: Dynamische Partner-Eingabefelder (erscheinen nur wenn HD oder MX angehakt ist)
                             p_col1, p_col2 = st.columns(2)
                             val_partner_hd = item.get('partner_hd', '')
                             val_partner_mx = item.get('partner_mx', '')
                             
                             with p_col1:
                                 if val_hd:
-                                    val_partner_hd = st.text_input("Doppelpartner", value=val_partner_hd, key=f"p_hd_{item['id']}", placeholder="Name des Partners")
+                                    val_partner_hd = st.text_input("Partner Herrendoppel", value=val_partner_hd, key=f"p_hd_{item['id']}", placeholder="Name des Partners")
                                 else:
                                     val_partner_hd = ""
                                     
                             with p_col2:
                                 if val_mx:
-                                    val_partner_mx = st.text_input("Mixedpartner", value=val_partner_mx, key=f"p_mx_{item['id']}", placeholder="Name des Partners")
+                                    val_partner_mx = st.text_input("Partner Mixed", value=val_partner_mx, key=f"p_mx_{item['id']}", placeholder="Name des Partners")
                                 else:
                                     val_partner_mx = ""
                                     
-                            # Allgemeiner Status ermitteln (mindestens eine Disziplin muss gewählt sein)
                             is_registered = (val_he or val_hd or val_mx)
                             
-                            # Überprüfung auf Änderungen
                             has_changed = (
                                 val_he != bool(item.get('reg_he', False)) or
                                 val_hd != bool(item.get('reg_hd', False)) or
@@ -243,14 +239,14 @@ if os.path.exists(DB_FILE):
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
-                            # Muted grünes Alert-Banner für vergangene Turniere mit denselben dynamischen Details
+                            # Grünes Haken-Banner für vergangene Turniere
                             if bool(item.get('registered', False)):
                                 parts = []
                                 if bool(item.get('reg_he', False)):
-                                    parts.append("Herren-Einzel")
+                                    parts.append("Herreneinzel")
                                 if bool(item.get('reg_hd', False)):
                                     p_hd = item.get('partner_hd', '').strip()
-                                    parts.append(f"Herren-Doppel mit {p_hd}" if p_hd else "Herren-Doppel")
+                                    parts.append(f"Herrendoppel mit {p_hd}" if p_hd else "Herrendoppel")
                                 if bool(item.get('reg_mx', False)):
                                     p_mx = item.get('partner_mx', '').strip()
                                     parts.append(f"Mixed mit {p_mx}" if p_mx else "Mixed")
@@ -271,8 +267,8 @@ if os.path.exists(DB_FILE):
                                         color: #166534;
                                         font-weight: bold;
                                     ">
-                                        <span style="color: #86efac; font-weight: 900; font-size: 1.15em; font-style: normal; margin-right: 5px;">#</span>
-                                        <i>Teilgenommen</i>
+                                        <span style="color: #86efac; font-style: normal; margin-right: 5px;">✅</span>
+                                        Teilgenommen
                                         {details_html}
                                     </div>
                                     """,
