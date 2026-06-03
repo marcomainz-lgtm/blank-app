@@ -136,7 +136,7 @@ if os.path.exists(DB_FILE):
                                     display: flex;
                                     align-items: center;
                                 ">
-                                    <span style="color: #22c55e; font-weight: 900; font-size: 1.25em; font-style: normal; margin-right: 6px;">#</span>
+                                    <span style="color: #22c55e; font-weight: 900; font-size: 1.25em; font-style: normal; margin-right: 6px;"></span>
                                     <i>✅ Ich bin für dieses Turnier gemeldet!</i>
                                 </div>
                                 """,
