@@ -7,7 +7,10 @@ from tracker import check_for_updates, DB_FILE
 
 st.set_page_config(page_title="Badminton Turniere für Marco", layout="wide")
 
-# Alphabetisch sortierte Spielerprofile für Herrendoppel (Matthias Knaupp hinzugefügt)
+# Custom-Logo für Turniere ohne eigenes Emblem
+DEFAULT_LOGO = "https://content.tournamentsoftware.com/images/club/72FB92A4-34AF-41F1-8A4E-BBD56634E66E.jpg"
+
+# Alphabetisch sortierte Spielerprofile für Herrendoppel
 PARTNERS_HD = {
     "Dominik Gric": "https://dbv.turnier.de/player-profile/B6646621-C82C-4FEF-B7F1-42FC2A947DCD",
     "Jan Hammer": "https://dbv.turnier.de/player-profile/9070AF83-4EA3-40E0-B402-F41456147AB5",
@@ -63,7 +66,7 @@ with col_login:
 
 IS_ADMIN = st.session_state['logged_in']
 
-# Title & Subtitle (Wunschtext eingepflegt)
+# Title & Subtitle
 st.title("🏸 Badminton Turniere für Marco")
 st.write("Auf dieser Seite findet ihr alle Seniorenturniere 2026, die im Umkreis von 100 Kilometern um Hilden (40723) stattfinden.")
 
