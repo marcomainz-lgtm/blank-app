@@ -121,20 +121,23 @@ if os.path.exists(DB_FILE):
                         st.image(logo_to_show, width=140)
                             
                     with col_info:
-                        # Prägnantes rotes Alert-Banner für gemeldete Turniere (Kursiv und hervorgehoben)
+                        # Prägnantes grünes Alert-Banner für gemeldete Turniere mit grünem Hashtag
                         if bool(item.get('registered', False)):
                             st.markdown(
                                 """
                                 <div style="
-                                    background-color: #fef2f2;
-                                    border-left: 5px solid #ef4444;
+                                    background-color: #f0fdf4;
+                                    border-left: 5px solid #22c55e;
                                     padding: 8px 12px;
                                     border-radius: 6px;
                                     margin-bottom: 12px;
-                                    color: #b91c1c;
+                                    color: #15803d;
                                     font-weight: bold;
+                                    display: flex;
+                                    align-items: center;
                                 ">
-                                    ❤️ <i>Ich bin für dieses Turnier gemeldet!</i>
+                                    <span style="color: #22c55e; font-weight: 900; font-size: 1.25em; font-style: normal; margin-right: 6px;">#</span>
+                                    <i>Ich bin für dieses Turnier gemeldet!</i>
                                 </div>
                                 """,
                                 unsafe_allow_html=True
@@ -181,20 +184,23 @@ if os.path.exists(DB_FILE):
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
-                            # Dezentes graues Alert-Banner für vergangene Turniere
+                            # Sanftes grünes Alert-Banner für vergangene Turniere mit grünem Hashtag
                             if bool(item.get('registered', False)):
                                 st.markdown(
                                     """
                                     <div style="
-                                        background-color: #f8fafc;
-                                        border-left: 5px solid #64748b;
+                                        background-color: #f4fbf7;
+                                        border-left: 5px solid #86efac;
                                         padding: 6px 10px;
                                         border-radius: 6px;
                                         margin-bottom: 12px;
-                                        color: #475569;
+                                        color: #166534;
                                         font-weight: bold;
+                                        display: flex;
+                                        align-items: center;
                                     ">
-                                        ❤️ <i>Teilgenommen</i>
+                                        <span style="color: #86efac; font-weight: 900; font-size: 1.15em; font-style: normal; margin-right: 5px;">#</span>
+                                        <i>Teilgenommen</i>
                                     </div>
                                     """,
                                     unsafe_allow_html=True
@@ -215,4 +221,4 @@ if os.path.exists(DB_FILE):
     else:
         st.info("Der Suchlauf war erfolgreich, aber es wurden keine Turniere in Ihrem Umkreis gefunden.")
 else:
-    st.warning("Keine Turnier-Datenbank gefunden. Bitte klicken Sie oben auf 'Datenbank aktualisieren' für den ersten Suchlauf.")
+    st.warning("Keine Turnier-Datenbank gefunde
