@@ -27,42 +27,9 @@ PARTNERS_MX = {
     "Vanessa Joppien": "https://dbv.turnier.de/player-profile/76DA93E6-43E2-45CE-B28F-FDA12433FDBA"
 }
 
-# Custom CSS to hide the password visibility button (the eye icon)
-st.markdown(
-    """
-    <style>
-    button[data-testid="stTextInput-VisibilityButton"] {
-        display: none !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 # Login-Session-State initialisieren
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
-
-# Constrain the login field width by placing it in a top-right column
-col_spacer, col_login = st.columns([4, 1])
-with col_login:
-    if st.session_state['logged_in']:
-        if st.button("Abmelden", use_container_width=True, key="logout_btn"):
-            st.session_state['logged_in'] = False
-            if 'secret_login' in st.session_state:
-                st.session_state['secret_login'] = ""
-            st.rerun()
-    else:
-        admin_password = st.text_input(
-            "", 
-            type="password", 
-            label_visibility="collapsed", 
-            placeholder="Admin Login", 
-            key="secret_login"
-        )
-        if admin_password == "marco2026":
-            st.session_state['logged_in'] = True
-            st.rerun()
 
 IS_ADMIN = st.session_state['logged_in']
 
@@ -90,114 +57,11 @@ if os.path.exists(DB_FILE):
     except Exception:
         data = {}
 
-    # --- BUTTON-BEREICH (KALENDER NUR FÜR ADMINS SICHTBAR) ---
-    if IS_ADMIN:
-        col_update, col_export = st.columns([1, 1])
-        
-        with col_update:
-            if st.button("Datenbank aktualisieren", use_container_width=True):
-                with st.spinner("Suche nach neuen Turnieren auf turnier.de..."):
-                    check_for_updates()
-                st.toast("Datenbank erfolgreich aktualisiert!")
-
-        with col_export:
-            # Prüfen, für welche Turniere wir gemeldet sind, um die ICS-Datei zu bauen
-            registered_items = [val for val in data.values() if val.get('registered', False)]
-            
-            if registered_items:
-                ics_lines = [
-                    "BEGIN:VCALENDAR",
-                    "VERSION:2.0",
-                    "PRODID:-//Badminton Tournament Tracker//DE",
-                    "CALSCALE:GREGORIAN",
-                    "METHOD:PUBLISH"
-                ]
-                
-                for item in registered_items:
-                    # Ermittle die einzelnen gemeldeten Disziplinen dieses Turniers
-                    disciplines_to_export = []
-                    
-                    if bool(item.get('reg_he', False)):
-                        disciplines_to_export.append(('he', "Herreneinzel", item.get('day_he', 'gesamt')))
-                        
-                    if bool(item.get('reg_hd', False)):
-                        p_hd = item.get('partner_hd', '').strip()
-                        hd_lbl = f"Herrendoppel mit {p_hd}" if p_hd else "Herrendoppel"
-                        disciplines_to_export.append(('hd', hd_lbl, item.get('day_hd', 'gesamt')))
-                        
-                    if bool(item.get('reg_mx', False)):
-                        p_mx = item.get('partner_mx', '').strip()
-                        mx_lbl = f"Mixed mit {p_mx}" if p_mx else "Mixed"
-                        disciplines_to_export.append(('mx', mx_lbl, item.get('day_mx', 'gesamt')))
-                    
-                    # Jede Disziplin erhält einen eigenen, präzisen Kalendereintrag auf ihrem jeweiligen Tag!
-                    for key_type, label, day_type in disciplines_to_export:
-                        try:
-                            start_dt = datetime.datetime.strptime(item['start_date'], "%d.%m.%Y").date()
-                            end_dt = datetime.datetime.strptime(item['end_date'], "%d.%m.%Y").date()
-                            
-                            # Datumsberechnung basierend auf dem eingestellten Spieltag
-                            if day_type == "tag1":
-                                event_start = start_dt
-                                event_end = start_dt + datetime.timedelta(days=1)
-                            elif day_type == "tag2":
-                                event_start = end_dt
-                                event_end = end_dt + datetime.timedelta(days=1)
-                            else:
-                                event_start = start_dt
-                                event_end = end_dt + datetime.timedelta(days=1)
-                            
-                            dtstart_str = event_start.strftime("%Y%m%d")
-                            dtend_str = event_end.strftime("%Y%m%d")
-                            
-                            summary = f"🏸 {item['title']} ({label})"
-                            desc = f"Ausrichter: {item.get('organizer', 'Unbekannt')}\\nTurnierseite: {item.get('link', '')}"
-                            loc = item.get('city', 'Unbekannt')
-                            
-                            # Die UID muss pro Disziplin eindeutig sein, um Überschreibungen in Google Kalender zu verhindern
-                            uid = f"{item['id']}_{key_type}@turniere.streamlit.app"
-                            dtstamp_str = datetime.datetime.now().strftime("%Y%m%dT%H%M%SZ")
-                            
-                            ics_lines.extend([
-                                "BEGIN:VEVENT",
-                                f"UID:{uid}",
-                                f"DTSTAMP:{dtstamp_str}",
-                                f"DTSTART;VALUE=DATE:{dtstart_str}",
-                                f"DTEND;VALUE=DATE:{dtend_str}",
-                                f"SUMMARY:{summary}",
-                                f"DESCRIPTION:{desc}",
-                                f"LOCATION:{loc}",
-                                "END:VEVENT"
-                            ])
-                        except Exception:
-                            continue
-                        
-                ics_lines.append("END:VCALENDAR")
-                ics_data = "\r\n".join(ics_lines)
-                
-                # Aktiver Download-Button
-                st.download_button(
-                    label="📅 Kalender-Export (.ics)",
-                    data=ics_data,
-                    file_name="badminton_termine_marco.ics",
-                    mime="text/calendar",
-                    use_container_width=True,
-                    help="Lade eine .ics-Datei deiner gemeldeten Turniere herunter. Jede Disziplin wird auf ihren exakten Wochentag gebucht!"
-                )
-            else:
-                st.download_button(
-                    label="📅 Kalender-Export (.ics)",
-                    data="",
-                    disabled=True,
-                    use_container_width=True,
-                    help="Melde dich erst im Admin-Bereich für ein Turnier an, um den Kalender-Export freizuschalten!"
-                )
-    else:
-        # Im Gäste-Modus wird nur ein sauberer, voller Button zur Aktualisierung gerendert
-        if st.button("Datenbank aktualisieren", use_container_width=True):
-            with st.spinner("Suche nach neuen Turnieren auf turnier.de..."):
-                check_for_updates()
-            st.toast("Datenbank erfolgreich aktualisiert!")
+    # --- DATENBANK-AKTUALISIERUNGS-BUTTON ---
+    if st.button("Datenbank aktualisieren", use_container_width=True):
+        with st.spinner("Suche nach neuen Turnieren auf turnier.de..."):
+            check_for_updates()
+        st.toast("Datenbank erfolgreich aktualisiert!")
 
     # --- MELDUNGSFILTER (TOGGLE) ---
     only_registered = st.toggle("Nur gemeldete Turniere anzeigen", value=False)
@@ -248,7 +112,7 @@ if os.path.exists(DB_FILE):
         df_past = df[df['End_Date_Obj'] < today].copy()
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
-        # Robusten Filter über die JSON-Rohdaten anwenden, um Pandas NaN-Fehler auszuschließen
+        # Robusten Filter über die JSON-Rohdaten anwenden
         if only_registered:
             registered_ids = {t_id for t_id, val in data.items() if val.get('registered', False)}
             df_upcoming = df_upcoming[df_upcoming['id'].isin(registered_ids)]
@@ -280,7 +144,6 @@ if os.path.exists(DB_FILE):
                         st.write("")
                         st.markdown(f"#### 📆 {current_month_str}")
                     
-                    # --- DIREKTE PYTHON-DATENABFRAGE (BYPASS PANDAS) ---
                     t_id = item['id']
                     raw_item = data.get(t_id, {})
                     is_registered = bool(raw_item.get('registered', False))
@@ -304,7 +167,6 @@ if os.path.exists(DB_FILE):
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
-                            # Das Haken-Banner wird nur gerendert, wenn der Status in den JSON-Rohdaten TRUE ist
                             if is_registered:
                                 parts = []
                                 if reg_he:
@@ -371,7 +233,7 @@ if os.path.exists(DB_FILE):
                             st.write("")
                             st.link_button("Turnierseite", item['link'], use_container_width=True)
 
-                        # --- FIX: ADMIN-BEDIENELEMENTE DIREKT AUF CONTAINER-EBENE (UNGESTAUCHT) ---
+                        # --- ADMIN-BEDIENELEMENTE DIREKT AUF CONTAINER-EBENE (UNGESTAUCHT) ---
                         if IS_ADMIN:
                             st.write("---")
                             col_he, col_hd, col_mx = st.columns(3)
@@ -386,7 +248,6 @@ if os.path.exists(DB_FILE):
                             hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
                             mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
                             
-                            # Tag-Auswahloptionen für 2-Tages-Turniere berechnen
                             day_options_labels = {
                                 "gesamt": f"Ganzes Turnier ({item['start_date']} - {item['end_date']})",
                                 "tag1": f"Nur Samstag ({item['start_date']})",
@@ -412,7 +273,6 @@ if os.path.exists(DB_FILE):
                                 else:
                                     val_partner_mx = ""
                             
-                            # Wochentags-Dropdowns rendern, wenn Disziplin gewählt ist und es ein echtes 2-Tages-Turnier ist
                             val_day_he = day_he
                             val_day_hd = day_hd
                             val_day_mx = day_mx
@@ -491,7 +351,6 @@ if os.path.exists(DB_FILE):
                         st.write("")
                         st.markdown(f"#### 🕰️ {current_month_str}")
                     
-                    # --- DIREKTE PYTHON-DATENABFRAGE (BYPASS PANDAS) ---
                     t_id = item['id']
                     raw_item = data.get(t_id, {})
                     is_registered = bool(raw_item.get('registered', False))
@@ -580,7 +439,7 @@ if os.path.exists(DB_FILE):
                             st.write("")
                             st.link_button("Turnierseite", item['link'], use_container_width=True)
 
-                        # --- FIX: ADMIN-BEDIENELEMENTE DIREKT AUF CONTAINER-EBENE (UNGESTAUCHT) ---
+                        # --- ADMIN-BEDIENELEMENTE DIREKT AUF CONTAINER-EBENE (UNGESTAUCHT) ---
                         if IS_ADMIN:
                             st.write("---")
                             col_he, col_hd, col_mx = st.columns(3)
@@ -679,7 +538,7 @@ if os.path.exists(DB_FILE):
                             st.write("")
                             st.link_button("Turnierseite", item['link'], use_container_width=True)
             else:
-                st.write("Keine vergangenen Turniere gefunden.")
+                st.info("Keine vergangenen Turniere gefunden.")
 
         # --- BEREICH: BACKUP-TOOL (FÜR ADMINS SICHTBAR) ---
         if IS_ADMIN:
@@ -692,8 +551,27 @@ if os.path.exists(DB_FILE):
                     "fügen ihn in Ihre lokale Datei `known_tournaments.json` in VS Code ein und pushen diese zu GitHub:"
                 )
                 st.code(json.dumps(data, indent=4, ensure_ascii=False), language="json")
-                
-    else:
-        st.info("Der Suchlauf war erfolgreich, aber es wurden keine Turniere in Ihrem Umkreis gefunden.")
+
+# --- DER NEUE MINIMALISTISCHE LOGIN-BEREICH GANZ UNTEN (VOLLE BREITE, KEINE STAUCHUNG) ---
+st.write("")
+st.write("")
+st.divider()
+
+if st.session_state['logged_in']:
+    # Wenn eingeloggt, Abmelde-Button ganz unten vollflächig anzeigen
+    if st.button("Abmelden (Logout)", use_container_width=True, key="logout_bottom"):
+        st.session_state['logged_in'] = False
+        if 'secret_login' in st.session_state:
+            st.session_state['secret_login'] = ""
+        st.rerun()
 else:
-    st.warning("Keine Turnier-Datenbank gefunden. Bitte klicken Sie oben auf 'Datenbank aktualisieren' für den ersten Suchlauf.")
+    # Unauffälliger Login ganz unten über die volle Breite
+    admin_password = st.text_input(
+        "Admin-Bereich zur Bearbeitung freischalten:", 
+        type="password", 
+        placeholder="Passwort eingeben...", 
+        key="secret_login"
+    )
+    if admin_password == "marco2026":
+        st.session_state['logged_in'] = True
+        st.rerun()
