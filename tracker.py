@@ -250,6 +250,11 @@ def check_for_updates():
             reg_mx = known_tournaments[t_id].get('reg_mx', False)
             partner_hd = known_tournaments[t_id].get('partner_hd', '')
             partner_mx = known_tournaments[t_id].get('partner_mx', '')
+            
+            # Wochentags-Zuweisung schützen
+            day_he = known_tournaments[t_id].get('day_he', 'gesamt')
+            day_hd = known_tournaments[t_id].get('day_hd', 'gesamt')
+            day_mx = known_tournaments[t_id].get('day_mx', 'gesamt')
 
             known_tournaments[t_id] = t
             known_tournaments[t_id]['registered'] = is_registered
@@ -258,6 +263,9 @@ def check_for_updates():
             known_tournaments[t_id]['reg_mx'] = reg_mx
             known_tournaments[t_id]['partner_hd'] = partner_hd
             known_tournaments[t_id]['partner_mx'] = partner_mx
+            known_tournaments[t_id]['day_he'] = day_he
+            known_tournaments[t_id]['day_hd'] = day_hd
+            known_tournaments[t_id]['day_mx'] = day_mx
 
     with open(DB_FILE, "w", encoding="utf-8") as f:
         json.dump(known_tournaments, f, ensure_ascii=False, indent=4)
