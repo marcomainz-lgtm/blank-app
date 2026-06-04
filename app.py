@@ -4,7 +4,6 @@ import json
 import os
 import datetime
 import urllib.parse
-from zoneinfo import ZoneInfo  # Ermöglicht präzise Zeitzonen-Konvertierung (Python 3.9+)
 from tracker import check_for_updates, DB_FILE
 
 st.set_page_config(page_title="Badminton Turniere für Marco", layout="wide")
@@ -71,24 +70,17 @@ IS_ADMIN = st.session_state['logged_in']
 st.title("🏸 Badminton Turniere für Marco")
 st.write("Auf dieser Seite findet ihr alle Seniorenturniere 2026, die im Umkreis von 100 Kilometern um Hilden (40723) stattfinden.")
 
-# Retrieve DB modification timestamp & convert from UTC to Europe/Berlin timezone
+# Retrieve DB modification timestamp
 last_retrieved_str = "Unbekannt"
 if os.path.exists(DB_FILE):
     try:
         last_modified = os.path.getmtime(DB_FILE)
-        # Erstelle ein bewusstes UTC-datetime Objekt
-        last_retrieved_dt = datetime.datetime.fromtimestamp(last_modified, tz=datetime.timezone.utc)
-        # In deutsche Ortzeit Europe/Berlin umrechnen (berücksichtigt Sommer-/Winterzeit automatisch!)
-        berlin_tz = ZoneInfo("Europe/Berlin")
-        last_retrieved_berlin = last_retrieved_dt.astimezone(berlin_tz)
-        last_retrieved_str = last_retrieved_berlin.strftime("%d.%m.%Y um %H:%M Uhr")
+        last_retrieved_dt = datetime.datetime.fromtimestamp(last_modified)
+        last_retrieved_str = last_retrieved_dt.strftime("%d.%m.%Y um %H:%M Uhr")
     except Exception:
         pass
 
 st.caption(f"🕒 Letztes Update der Datenbank: {last_retrieved_str}")
-
-# --- MELDUNGSFILTER (TOGGLE) ---
-only_registered = st.toggle("Nur gemeldete Turniere anzeigen", value=False)
 
 # Load and present database
 if os.path.exists(DB_FILE):
@@ -97,6 +89,116 @@ if os.path.exists(DB_FILE):
             data = json.load(f)
     except Exception:
         data = {}
+
+    # --- BUTTON-BEREICH (KALENDER NUR FÜR ADMINS SICHTBAR) ---
+    if IS_ADMIN:
+        col_update, col_export = st.columns([1, 1])
+        
+        with col_update:
+            if st.button("Datenbank aktualisieren", use_container_width=True):
+                with st.spinner("Suche nach neuen Turnieren auf turnier.de..."):
+                    check_for_updates()
+                st.toast("Datenbank erfolgreich aktualisiert!")
+
+        with col_export:
+            # Prüfen, für welche Turniere wir gemeldet sind, um die ICS-Datei zu bauen
+            registered_items = [val for val in data.values() if val.get('registered', False)]
+            
+            if registered_items:
+                ics_lines = [
+                    "BEGIN:VCALENDAR",
+                    "VERSION:2.0",
+                    "PRODID:-//Badminton Tournament Tracker//DE",
+                    "CALSCALE:GREGORIAN",
+                    "METHOD:PUBLISH"
+                ]
+                
+                for item in registered_items:
+                    # Ermittle die einzelnen gemeldeten Disziplinen dieses Turniers
+                    disciplines_to_export = []
+                    
+                    if bool(item.get('reg_he', False)):
+                        disciplines_to_export.append(('he', "Herreneinzel", item.get('day_he', 'gesamt')))
+                        
+                    if bool(item.get('reg_hd', False)):
+                        p_hd = item.get('partner_hd', '').strip()
+                        hd_lbl = f"Herrendoppel mit {p_hd}" if p_hd else "Herrendoppel"
+                        disciplines_to_export.append(('hd', hd_lbl, item.get('day_hd', 'gesamt')))
+                        
+                    if bool(item.get('reg_mx', False)):
+                        p_mx = item.get('partner_mx', '').strip()
+                        mx_lbl = f"Mixed mit {p_mx}" if p_mx else "Mixed"
+                        disciplines_to_export.append(('mx', mx_lbl, item.get('day_mx', 'gesamt')))
+                    
+                    # Jede Disziplin erhält einen eigenen, präzisen Kalendereintrag auf ihrem jeweiligen Tag!
+                    for key_type, label, day_type in disciplines_to_export:
+                        try:
+                            start_dt = datetime.datetime.strptime(item['start_date'], "%d.%m.%Y").date()
+                            end_dt = datetime.datetime.strptime(item['end_date'], "%d.%m.%Y").date()
+                            
+                            # Datumsberechnung basierend auf dem eingestellten Spieltag
+                            if day_type == "tag1":
+                                # Nur am Samstag (Erster Tag)
+                                event_start = start_dt
+                                event_end = start_dt + datetime.timedelta(days=1)
+                            elif day_type == "tag2":
+                                # Nur am Sonntag (Zweiter Tag)
+                                event_start = end_dt
+                                event_end = end_dt + datetime.timedelta(days=1)
+                            else:
+                                # Ganzes Wochenende
+                                event_start = start_dt
+                                event_end = end_dt + datetime.timedelta(days=1)
+                            
+                            dtstart_str = event_start.strftime("%Y%m%d")
+                            dtend_str = event_end.strftime("%Y%m%d")
+                            
+                            summary = f"🏸 {item['title']} ({label})"
+                            desc = f"Ausrichter: {item.get('organizer', 'Unbekannt')}\\nTurnierseite: {item.get('link', '')}"
+                            loc = item.get('city', 'Unbekannt')
+                            
+                            # Die UID muss pro Disziplin eindeutig sein, um Überschreibungen in Google Kalender zu verhindern
+                            uid = f"{item['id']}_{key_type}@turniere.streamlit.app"
+                            dtstamp_str = datetime.datetime.now().strftime("%Y%m%dT%H%M%SZ")
+                            
+                            ics_lines.extend([
+                                "BEGIN:VEVENT",
+                                f"UID:{uid}",
+                                f"DTSTAMP:{dtstamp_str}",
+                                f"DTSTART;VALUE=DATE:{dtstart_str}",
+                                f"DTEND;VALUE=DATE:{dtend_str}",
+                                f"SUMMARY:{summary}",
+                                f"DESCRIPTION:{desc}",
+                                f"LOCATION:{loc}",
+                                "END:VEVENT"
+                            ])
+                        except Exception:
+                            continue
+                    
+            ics_lines.append("END:VCALENDAR")
+            ics_data = "\r\n".join(ics_lines)
+            
+            # Aktiver Download-Button
+            st.download_button(
+                label="📅 Kalender-Export (.ics)",
+                data=ics_data,
+                file_name="badminton_termine_marco.ics",
+                mime="text/calendar",
+                use_container_width=True,
+                help="Lade eine .ics-Datei deiner gemeldeten Turniere herunter. Jede Disziplin wird auf ihren exakten Wochentag gebucht!"
+            )
+        else:
+            # Deaktivierter Button, wenn noch keine Meldungen eingetragen sind
+            st.download_button(
+                label="📅 Kalender-Export (.ics)",
+                data="",
+                disabled=True,
+                use_container_width=True,
+                help="Melde dich erst im Admin-Bereich für ein Turnier an, um den Kalender-Export freizuschalten!"
+            )
+
+    # --- MELDUNGSFILTER (TOGGLE) ---
+    only_registered = st.toggle("Nur gemeldete Turniere anzeigen", value=False)
 
     if data:
         # Build DataFrame
@@ -201,7 +303,7 @@ if os.path.exists(DB_FILE):
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
-                            # Das Haken-Banner wird nur gerendert, wenn der Status in den JSON-Rohdaten TRUE ist
+                            # FIX: Wir nutzen hier konsequent die oben abgefragte direkte Variable is_registered!
                             if is_registered:
                                 parts = []
                                 if reg_he:
@@ -363,11 +465,6 @@ if os.path.exists(DB_FILE):
                                 with open(DB_FILE, "w", encoding="utf-8") as f:
                                     json.dump(data, f, ensure_ascii=False, indent=4)
                                 st.rerun()
-                            
-                        with col_link:
-                            st.write("")
-                            st.write("")
-                            st.link_button("Turnierseite", item['link'], use_container_width=True)
             else:
                 st.info("Keine anstehenden Turniere gefunden.")
 
@@ -485,9 +582,9 @@ if os.path.exists(DB_FILE):
                                 with col_he:
                                     val_he = st.checkbox("Herreneinzel", value=reg_he, key=f"he_past_{t_id}")
                                 with col_hd:
-                                    val_hd = st.checkbox("Herrendoppel", value=bool(item.get('reg_hd', False)), key=f"hd_past_{t_id}")
+                                    val_hd = st.checkbox("Herrendoppel", value=reg_hd, key=f"hd_past_{t_id}")
                                 with col_mx:
-                                    val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_past_{t_id}")
+                                    val_mx = st.checkbox("Mixed", value=reg_mx, key=f"mx_past_{t_id}")
                                 
                                 p_col1, p_col2 = st.columns(2)
                                 hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
