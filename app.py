@@ -104,12 +104,6 @@ if os.path.exists(DB_FILE):
         
         # Fallbacks for older databases
         fallback_cols = {
-            'registered': False,
-            'reg_he': False,
-            'reg_hd': False,
-            'reg_mx': False,
-            'partner_hd': '',
-            'partner_mx': '',
             'logo_url': '',
             'city': 'Unbekannt',
             'distance': None,
@@ -122,10 +116,6 @@ if os.path.exists(DB_FILE):
                 df[col] = default
             else:
                 df[col] = df[col].fillna(default)
-        
-        # Datentypen für die Checkbox-Spalten erzwingen
-        for col in ['registered', 'reg_he', 'reg_hd', 'reg_mx']:
-            df[col] = df[col].astype(bool)
 
         # Convert dates for chronological sorting
         df['Start_Date_Obj'] = pd.to_datetime(df['start_date'], format='%d.%m.%Y', errors='coerce').dt.date
@@ -141,10 +131,11 @@ if os.path.exists(DB_FILE):
         df_past = df[df['End_Date_Obj'] < today].copy()
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
-        # Filter anwenden, wenn der Toggle aktiv ist
+        # Robusten Filter über die JSON-Rohdaten anwenden, um Pandas NaN-Fehler auszuschließen
         if only_registered:
-            df_upcoming = df_upcoming[df_upcoming['registered'] == True]
-            df_past = df_past[df_past['registered'] == True]
+            registered_ids = {t_id for t_id, val in data.items() if val.get('registered', False)}
+            df_upcoming = df_upcoming[df_upcoming['id'].isin(registered_ids)]
+            df_past = df_past[df_past['id'].isin(registered_ids)]
 
         # Deutsche Monatsnamen-Mapping
         month_names = {
@@ -167,11 +158,20 @@ if os.path.exists(DB_FILE):
                     else:
                         item_month_str = f"{month_names[start_date.month]} {start_date.year}"
                     
-                    # Reinstate the clean text subheadings
                     if item_month_str != current_month_str:
                         current_month_str = item_month_str
                         st.write("")
                         st.markdown(f"#### 📆 {current_month_str}")
+                    
+                    # --- DIREKTE PYTHON-DATENABFRAGE (BYPASS PANDAS) ---
+                    t_id = item['id']
+                    raw_item = data.get(t_id, {})
+                    is_registered = bool(raw_item.get('registered', False))
+                    reg_he = bool(raw_item.get('reg_he', False))
+                    reg_hd = bool(raw_item.get('reg_hd', False))
+                    reg_mx = bool(raw_item.get('reg_mx', False))
+                    p_hd = raw_item.get('partner_hd', '').strip()
+                    p_mx = raw_item.get('partner_mx', '').strip()
                     
                     with st.container(border=True):
                         col_logo, col_info, col_link = st.columns([1.5, 6, 2])
@@ -183,13 +183,12 @@ if os.path.exists(DB_FILE):
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
-                            if bool(item.get('registered', False)):
+                            # Das Haken-Banner wird nur gerendert, wenn der Status in den JSON-Rohdaten TRUE ist
+                            if is_registered:
                                 parts = []
-                                if bool(item.get('reg_he', False)):
+                                if reg_he:
                                     parts.append("Herreneinzel")
-                                
-                                if bool(item.get('reg_hd', False)):
-                                    p_hd = item.get('partner_hd', '').strip()
+                                if reg_hd:
                                     if p_hd == "-- Kein Partner --":
                                         p_hd = ""
                                     if p_hd in PARTNERS_HD:
@@ -199,8 +198,7 @@ if os.path.exists(DB_FILE):
                                     else:
                                         parts.append("Herrendoppel")
                                 
-                                if bool(item.get('reg_mx', False)):
-                                    p_mx = item.get('partner_mx', '').strip()
+                                if reg_mx:
                                     if p_mx == "-- Kein Partner --":
                                         p_mx = ""
                                     if p_mx in PARTNERS_MX:
@@ -210,29 +208,29 @@ if os.path.exists(DB_FILE):
                                     else:
                                         parts.append("Mixed")
                                         
-                                    details_text = ", ".join(parts)
-                                    details_html = ""
-                                    if details_text:
-                                        details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>Disziplinen: {details_text}</div>"
-                                        
-                                    st.markdown(
-                                        f"""
-                                        <div style="
-                                            background-color: #f0fdf4;
-                                            border-left: 5px solid #22c55e;
-                                            padding: 8px 12px;
-                                            border-radius: 6px;
-                                            margin-bottom: 12px;
-                                            color: #15803d;
-                                            font-weight: bold;
-                                        ">
-                                            <span style="font-style: normal; margin-right: 6px;">✅</span>
-                                            Ich bin für dieses Turnier gemeldet!
-                                            {details_html}
-                                        </div>
-                                        """,
-                                        unsafe_allow_html=True
-                                    )
+                                details_text = ", ".join(parts)
+                                details_html = ""
+                                if details_text:
+                                    details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>Disziplinen: {details_text}</div>"
+                                    
+                                st.markdown(
+                                    f"""
+                                    <div style="
+                                        background-color: #f0fdf4;
+                                        border-left: 5px solid #22c55e;
+                                        padding: 8px 12px;
+                                        border-radius: 6px;
+                                        margin-bottom: 12px;
+                                        color: #15803d;
+                                        font-weight: bold;
+                                    ">
+                                        <span style="font-style: normal; margin-right: 6px;">✅</span>
+                                        Ich bin für dieses Turnier gemeldet!
+                                        {details_html}
+                                    </div>
+                                    """,
+                                    unsafe_allow_html=True
+                                )
 
                             st.markdown(f"### {item['title']}")
                             dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
@@ -244,23 +242,20 @@ if os.path.exists(DB_FILE):
                                 st.write("---")
                                 col_he, col_hd, col_mx = st.columns(3)
                                 with col_he:
-                                    val_he = st.checkbox("Herreneinzel", value=bool(item.get('reg_he', False)), key=f"he_{item['id']}")
+                                    val_he = st.checkbox("Herreneinzel", value=reg_he, key=f"he_{t_id}")
                                 with col_hd:
-                                    val_hd = st.checkbox("Herrendoppel", value=bool(item.get('reg_hd', False)), key=f"hd_{item['id']}")
+                                    val_hd = st.checkbox("Herrendoppel", value=reg_hd, key=f"hd_{t_id}")
                                 with col_mx:
-                                    val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_{item['id']}")
+                                    val_mx = st.checkbox("Mixed", value=reg_mx, key=f"mx_{t_id}")
                                 
                                 p_col1, p_col2 = st.columns(2)
-                                val_partner_hd = item.get('partner_hd', '')
-                                val_partner_mx = item.get('partner_mx', '')
-                                
                                 hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
                                 mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
                                 
                                 with p_col1:
                                     if val_hd:
-                                        default_idx_hd = hd_options.index(val_partner_hd) if val_partner_hd in hd_options else 0
-                                        val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_{item['id']}")
+                                        default_idx_hd = hd_options.index(p_hd) if p_hd in hd_options else 0
+                                        val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_{t_id}")
                                         if val_partner_hd == "-- Kein Partner --":
                                             val_partner_hd = ""
                                     else:
@@ -268,30 +263,30 @@ if os.path.exists(DB_FILE):
                                         
                                 with p_col2:
                                     if val_mx:
-                                        default_idx_mx = mx_options.index(val_partner_mx) if val_partner_mx in mx_options else 0
-                                        val_partner_mx = st.selectbox("Partner Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_{item['id']}")
+                                        default_idx_mx = mx_options.index(p_mx) if p_mx in mx_options else 0
+                                        val_partner_mx = st.selectbox("Partner Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_{t_id}")
                                         if val_partner_mx == "-- Kein Partner --":
                                             val_partner_mx = ""
                                     else:
                                         val_partner_mx = ""
                                         
-                                is_registered = (val_he or val_hd or val_mx)
+                                is_registered_calc = (val_he or val_hd or val_mx)
                                 
                                 has_changed = (
-                                    val_he != bool(item.get('reg_he', False)) or
-                                    val_hd != bool(item.get('reg_hd', False)) or
-                                    val_mx != bool(item.get('reg_mx', False)) or
-                                    val_partner_hd != item.get('partner_hd', '') or
-                                    val_partner_mx != item.get('partner_mx', '')
+                                    val_he != reg_he or
+                                    val_hd != reg_hd or
+                                    val_mx != reg_mx or
+                                    val_partner_hd != p_hd or
+                                    val_partner_mx != p_mx
                                 )
                                 
                                 if has_changed:
-                                    data[item['id']]['registered'] = is_registered
-                                    data[item['id']]['reg_he'] = val_he
-                                    data[item['id']]['reg_hd'] = val_hd
-                                    data[item['id']]['reg_mx'] = val_mx
-                                    data[item['id']]['partner_hd'] = val_partner_hd
-                                    data[item['id']]['partner_mx'] = val_partner_mx
+                                    data[t_id]['registered'] = is_registered_calc
+                                    data[t_id]['reg_he'] = val_he
+                                    data[t_id]['reg_hd'] = val_hd
+                                    data[t_id]['reg_mx'] = val_mx
+                                    data[t_id]['partner_hd'] = val_partner_hd
+                                    data[t_id]['partner_mx'] = val_partner_mx
                                     
                                     with open(DB_FILE, "w", encoding="utf-8") as f:
                                         json.dump(data, f, ensure_ascii=False, indent=4)
@@ -321,11 +316,20 @@ if os.path.exists(DB_FILE):
                     else:
                         item_month_str = f"{month_names[start_date.month]} {start_date.year}"
                     
-                    # Reinstate the clean text subheadings
                     if item_month_str != current_month_str:
                         current_month_str = item_month_str
                         st.write("")
                         st.markdown(f"#### 🕰️ {current_month_str}")
+                    
+                    # --- DIREKTE PYTHON-DATENABFRAGE (BYPASS PANDAS) ---
+                    t_id = item['id']
+                    raw_item = data.get(t_id, {})
+                    is_registered = bool(raw_item.get('registered', False))
+                    reg_he = bool(raw_item.get('reg_he', False))
+                    reg_hd = bool(raw_item.get('reg_hd', False))
+                    reg_mx = bool(raw_item.get('reg_mx', False))
+                    p_hd = raw_item.get('partner_hd', '').strip()
+                    p_mx = raw_item.get('partner_mx', '').strip()
                     
                     with st.container(border=True):
                         col_logo, col_info, col_link = st.columns([1.5, 6, 2])
@@ -337,12 +341,11 @@ if os.path.exists(DB_FILE):
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
-                            if bool(item.get('registered', False)):
+                            if is_registered:
                                 parts = []
-                                if bool(item.get('reg_he', False)):
+                                if reg_he:
                                     parts.append("Herreneinzel")
-                                if bool(item.get('reg_hd', False)):
-                                    p_hd = item.get('partner_hd', '').strip()
+                                if reg_hd:
                                     if p_hd == "-- Kein Partner --":
                                         p_hd = ""
                                     if p_hd in PARTNERS_HD:
@@ -352,8 +355,7 @@ if os.path.exists(DB_FILE):
                                     else:
                                         parts.append("Herrendoppel")
                                         
-                                if bool(item.get('reg_mx', False)):
-                                    p_mx = item.get('partner_mx', '').strip()
+                                if reg_mx:
                                     if p_mx == "-- Kein Partner --":
                                         p_mx = ""
                                     if p_mx in PARTNERS_MX:
@@ -397,23 +399,20 @@ if os.path.exists(DB_FILE):
                                 st.write("---")
                                 col_he, col_hd, col_mx = st.columns(3)
                                 with col_he:
-                                    val_he = st.checkbox("Herreneinzel", value=bool(item.get('reg_he', False)), key=f"he_past_{item['id']}")
+                                    val_he = st.checkbox("Herreneinzel", value=reg_he, key=f"he_past_{t_id}")
                                 with col_hd:
-                                    val_hd = st.checkbox("Herrendoppel", value=bool(item.get('reg_hd', False)), key=f"hd_past_{item['id']}")
+                                    val_hd = st.checkbox("Herrendoppel", value=reg_hd, key=f"hd_past_{t_id}")
                                 with col_mx:
-                                    val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_past_{item['id']}")
+                                    val_mx = st.checkbox("Mixed", value=reg_mx, key=f"mx_past_{t_id}")
                                 
                                 p_col1, p_col2 = st.columns(2)
-                                val_partner_hd = item.get('partner_hd', '')
-                                val_partner_mx = item.get('partner_mx', '')
-                                
                                 hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
                                 mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
                                 
                                 with p_col1:
                                     if val_hd:
-                                        default_idx_hd = hd_options.index(val_partner_hd) if val_partner_hd in hd_options else 0
-                                        val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_past_{item['id']}")
+                                        default_idx_hd = hd_options.index(p_hd) if p_hd in hd_options else 0
+                                        val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_past_{t_id}")
                                         if val_partner_hd == "-- Kein Partner --":
                                             val_partner_hd = ""
                                     else:
@@ -421,30 +420,30 @@ if os.path.exists(DB_FILE):
                                         
                                 with p_col2:
                                     if val_mx:
-                                        default_idx_mx = mx_options.index(val_partner_mx) if val_partner_mx in mx_options else 0
-                                        val_partner_mx = st.selectbox("Partner Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_past_{item['id']}")
+                                        default_idx_mx = mx_options.index(p_mx) if p_mx in mx_options else 0
+                                        val_partner_mx = st.selectbox("Partner Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_past_{t_id}")
                                         if val_partner_mx == "-- Kein Partner --":
                                             val_partner_mx = ""
                                     else:
                                         val_partner_mx = ""
                                         
-                                is_registered = (val_he or val_hd or val_mx)
+                                is_registered_calc = (val_he or val_hd or val_mx)
                                 
                                 has_changed = (
-                                    val_he != bool(item.get('reg_he', False)) or
-                                    val_hd != bool(item.get('reg_hd', False)) or
-                                    val_mx != bool(item.get('reg_mx', False)) or
-                                    val_partner_hd != item.get('partner_hd', '') or
-                                    val_partner_mx != item.get('partner_mx', '')
+                                    val_he != reg_he or
+                                    val_hd != reg_hd or
+                                    val_mx != reg_mx or
+                                    val_partner_hd != p_hd or
+                                    val_partner_mx != p_mx
                                 )
                                 
                                 if has_changed:
-                                    data[item['id']]['registered'] = is_registered
-                                    data[item['id']]['reg_he'] = val_he
-                                    data[item['id']]['reg_hd'] = val_hd
-                                    data[item['id']]['reg_mx'] = val_mx
-                                    data[item['id']]['partner_hd'] = val_partner_hd
-                                    data[item['id']]['partner_mx'] = val_partner_mx
+                                    data[t_id]['registered'] = is_registered_calc
+                                    data[t_id]['reg_he'] = val_he
+                                    data[t_id]['reg_hd'] = val_hd
+                                    data[t_id]['reg_mx'] = val_mx
+                                    data[t_id]['partner_hd'] = val_partner_hd
+                                    data[t_id]['partner_mx'] = val_partner_mx
                                     
                                     with open(DB_FILE, "w", encoding="utf-8") as f:
                                         json.dump(data, f, ensure_ascii=False, indent=4)
