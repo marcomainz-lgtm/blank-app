@@ -4,6 +4,7 @@ import json
 import os
 import datetime
 import urllib.parse
+from tracker import check_for_updates, DB_FILE
 
 st.set_page_config(page_title="Badminton Turniere für Marco", layout="wide")
 
@@ -318,7 +319,7 @@ if os.path.exists(DB_FILE):
                                     elif p_hd_cleaned:
                                         parts.append(f"Herrendoppel{day_str} mit {p_hd_cleaned}")
                                     else:
-                                        parts.append(f"Herrendoppel{day_str}")
+                                        parts.append("Herrendoppel")
                                 
                                 if reg_mx:
                                     p_mx_cleaned = p_mx
@@ -331,7 +332,7 @@ if os.path.exists(DB_FILE):
                                     elif p_mx_cleaned:
                                         parts.append(f"Mixed{day_str} mit {p_mx_cleaned}")
                                     else:
-                                        parts.append(f"Mixed{day_str}")
+                                        parts.append("Mixed")
                                         
                                     details_text = ", ".join(parts)
                                     details_html = ""
@@ -527,9 +528,9 @@ if os.path.exists(DB_FILE):
                                     elif p_hd_cleaned:
                                         parts.append(f"Herrendoppel{day_str} mit {p_hd_cleaned}")
                                     else:
-                                        parts.append(f"Herrendoppel{day_str}")
+                                        parts.append("Herrendoppel")
                                         
-                                if reg_mx:
+                                if bool(item.get('reg_mx', False)):
                                     p_mx_cleaned = p_mx
                                     if p_mx_cleaned == "-- Kein Partner --":
                                         p_mx_cleaned = ""
