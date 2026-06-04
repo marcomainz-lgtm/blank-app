@@ -459,7 +459,10 @@
         "reg_hd": true,
         "reg_mx": false,
         "partner_hd": "Pascal Ziehe",
-        "partner_mx": ""
+        "partner_mx": "",
+        "day_he": "gesamt",
+        "day_hd": "gesamt",
+        "day_mx": "gesamt"
     },
     "31DB667A-17AF-43BB-A394-99D3618998FF": {
         "id": "31DB667A-17AF-43BB-A394-99D3618998FF",
