@@ -21,7 +21,13 @@
         "distance": 1,
         "start_date": "03.01.2026",
         "end_date": "04.01.2026",
-        "tags": "bis, Open, A, B, C"
+        "tags": "bis, Open, A, B, C",
+        "registered": true,
+        "reg_he": false,
+        "reg_hd": true,
+        "reg_mx": false,
+        "partner_hd": "Pascal Ziehe",
+        "partner_mx": ""
     },
     "D8ED7946-02D1-41EA-99B7-70DFA2EC0D21": {
         "id": "D8ED7946-02D1-41EA-99B7-70DFA2EC0D21",
@@ -57,7 +63,13 @@
         "distance": 33,
         "start_date": "14.02.2026",
         "end_date": "15.02.2026",
-        "tags": "bis, Open, A, B, C"
+        "tags": "bis, Open, A, B, C",
+        "registered": true,
+        "reg_he": false,
+        "reg_hd": true,
+        "reg_mx": false,
+        "partner_hd": "Matthias Knaupp",
+        "partner_mx": ""
     },
     "75D238C8-453F-49FB-BAE5-A3BE6F1A653B": {
         "id": "75D238C8-453F-49FB-BAE5-A3BE6F1A653B",
@@ -141,7 +153,13 @@
         "distance": 41,
         "start_date": "18.04.2026",
         "end_date": "19.04.2026",
-        "tags": "bis, Open, A, B, C, D"
+        "tags": "bis, Open, A, B, C, D",
+        "registered": true,
+        "reg_he": false,
+        "reg_hd": true,
+        "reg_mx": false,
+        "partner_hd": "Pascal Ziehe",
+        "partner_mx": ""
     },
     "4BED8BF5-E46B-4319-8DC9-1BC523500381": {
         "id": "4BED8BF5-E46B-4319-8DC9-1BC523500381",
@@ -393,7 +411,13 @@
         "distance": 5,
         "start_date": "30.05.2026",
         "end_date": "31.05.2026",
-        "tags": "Badminton NRW, bis, Open, A, B, C"
+        "tags": "Badminton NRW, bis, Open, A, B, C",
+        "registered": true,
+        "reg_he": true,
+        "reg_hd": false,
+        "reg_mx": true,
+        "partner_hd": "",
+        "partner_mx": "Vanessa Joppien"
     },
     "CE570623-91C9-47FC-BBD6-28C5E0678C4C": {
         "id": "CE570623-91C9-47FC-BBD6-28C5E0678C4C",
@@ -429,7 +453,13 @@
         "distance": 41,
         "start_date": "06.06.2026",
         "end_date": "07.06.2026",
-        "tags": "Bochum (41 km), bis, Open, A, B, C"
+        "tags": "Bochum (41 km), bis, Open, A, B, C",
+        "registered": true,
+        "reg_he": false,
+        "reg_hd": true,
+        "reg_mx": false,
+        "partner_hd": "Pascal Ziehe",
+        "partner_mx": ""
     },
     "31DB667A-17AF-43BB-A394-99D3618998FF": {
         "id": "31DB667A-17AF-43BB-A394-99D3618998FF",
@@ -561,7 +591,13 @@
         "distance": 48,
         "start_date": "27.06.2026",
         "end_date": "27.06.2026",
-        "tags": "16+, A, 15+, B, Online-Meldung, 11t"
+        "tags": "16+, A, 15+, B, Online-Meldung, 11t",
+        "registered": true,
+        "reg_he": false,
+        "reg_hd": false,
+        "reg_mx": true,
+        "partner_hd": "",
+        "partner_mx": "Vanessa Joppien"
     },
     "C36D1EF2-545A-4EF7-8E33-D996C03E3DC9": {
         "id": "C36D1EF2-545A-4EF7-8E33-D996C03E3DC9",
@@ -621,7 +657,13 @@
         "distance": 25,
         "start_date": "27.06.2026",
         "end_date": "28.06.2026",
-        "tags": "bis, Open, A, B, C, Online-Meldung, 18t"
+        "tags": "bis, Open, A, B, C, Online-Meldung, 18t",
+        "registered": true,
+        "reg_he": false,
+        "reg_hd": true,
+        "reg_mx": false,
+        "partner_hd": "Pascal Ziehe",
+        "partner_mx": ""
     },
     "80F754F8-8959-41E2-95A2-8FF77C475BE7": {
         "id": "80F754F8-8959-41E2-95A2-8FF77C475BE7",
@@ -705,7 +747,13 @@
         "distance": 30,
         "start_date": "11.07.2026",
         "end_date": "12.07.2026",
-        "tags": "bis, Open, A, B"
+        "tags": "bis, Open, A, B",
+        "registered": true,
+        "reg_he": false,
+        "reg_hd": true,
+        "reg_mx": false,
+        "partner_hd": "Pascal Ziehe",
+        "partner_mx": ""
     },
     "CC05C621-19E9-41BE-8307-AA4E72540AEB": {
         "id": "CC05C621-19E9-41BE-8307-AA4E72540AEB",
@@ -741,7 +789,13 @@
         "distance": 30,
         "start_date": "15.08.2026",
         "end_date": "16.08.2026",
-        "tags": "bis, Open, Online-Meldung, 66t"
+        "tags": "bis, Open, Online-Meldung, 66t",
+        "registered": true,
+        "reg_he": false,
+        "reg_hd": true,
+        "reg_mx": false,
+        "partner_hd": "Pascal Ziehe",
+        "partner_mx": ""
     },
     "447AA5D5-8D67-4423-9229-15232C9F3BB1": {
         "id": "447AA5D5-8D67-4423-9229-15232C9F3BB1",
@@ -765,7 +819,13 @@
         "distance": 36,
         "start_date": "29.08.2026",
         "end_date": "30.08.2026",
-        "tags": "Brühl (36 km), bis, Open, A, B, C, D, Online-Meldung, 81t"
+        "tags": "Brühl (36 km), bis, Open, A, B, C, D, Online-Meldung, 81t",
+        "registered": true,
+        "reg_he": false,
+        "reg_hd": true,
+        "reg_mx": false,
+        "partner_hd": "",
+        "partner_mx": ""
     },
     "E99B1C7A-79D2-431F-82DD-E030A4AAF230": {
         "id": "E99B1C7A-79D2-431F-82DD-E030A4AAF230",
@@ -789,7 +849,13 @@
         "distance": 39,
         "start_date": "17.10.2026",
         "end_date": "18.10.2026",
-        "tags": "Oberhausen (39 km), bis, Open, A, B, C, D, Online-Meldung, 121t"
+        "tags": "Oberhausen (39 km), bis, Open, A, B, C, D, Online-Meldung, 121t",
+        "registered": true,
+        "reg_he": false,
+        "reg_hd": true,
+        "reg_mx": false,
+        "partner_hd": "",
+        "partner_mx": ""
     },
     "3535C816-94C6-4718-9CE2-83EF822F845D": {
         "id": "3535C816-94C6-4718-9CE2-83EF822F845D",
