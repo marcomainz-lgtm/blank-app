@@ -46,7 +46,6 @@ if 'logged_in' not in st.session_state:
 col_spacer, col_login = st.columns([4, 1])
 with col_login:
     if st.session_state['logged_in']:
-        # Wenn eingeloggt, unauffälligen Logout-Button anstelle des Passwortfeldes anzeigen
         if st.button("Abmelden", use_container_width=True, key="logout_btn"):
             st.session_state['logged_in'] = False
             if 'secret_login' in st.session_state:
@@ -87,6 +86,9 @@ if st.button("Datenbank aktualisieren"):
     with st.spinner("Suche nach neuen Turnieren auf turnier.de..."):
         check_for_updates()
     st.toast("Datenbank erfolgreich aktualisiert!")
+
+# --- MELDUNGSFILTER (TOGGLE) ---
+only_registered = st.toggle("Nur gemeldete Turniere anzeigen", value=False)
 
 # Load and present database
 if os.path.exists(DB_FILE):
@@ -139,13 +141,37 @@ if os.path.exists(DB_FILE):
         df_past = df[df['End_Date_Obj'] < today].copy()
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
+        # Filter anwenden, wenn der Toggle aktiv ist
+        if only_registered:
+            df_upcoming = df_upcoming[df_upcoming['registered'] == True]
+            df_past = df_past[df_past['registered'] == True]
+
+        # Deutsche Monatsnamen-Mapping
+        month_names = {
+            1: "Januar", 2: "Februar", 3: "März", 4: "April",
+            5: "Mai", 6: "Juni", 7: "Juli", 8: "August",
+            9: "September", 10: "Oktober", 11: "November", 12: "Dezember"
+        }
+
         # --- A. UPCOMING TOURNAMENTS ---
         st.subheader(f"📅 Anstehende Turniere ({len(df_upcoming)})")
         
-        # Anstehende Turniere im einklappbaren Akkordeon (standardmäßig geöffnet)
         with st.expander("Anstehende Turniere anzeigen", expanded=True):
             if not df_upcoming.empty:
+                current_month_str = ""
                 for idx, item in df_upcoming.iterrows():
+                    start_date = item['Start_Date_Obj']
+                    
+                    if pd.isnull(start_date):
+                        item_month_str = "Datum unbekannt"
+                    else:
+                        item_month_str = f"{month_names[start_date.month]} {start_date.year}"
+                    
+                    if item_month_str != current_month_str:
+                        current_month_str = item_month_str
+                        st.write("")
+                        st.markdown(f"#### 📆 {current_month_str}")
+                    
                     with st.container(border=True):
                         col_logo, col_info, col_link = st.columns([1.5, 6, 2])
                         
@@ -156,7 +182,7 @@ if os.path.exists(DB_FILE):
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
-                            # Formatierte Details
+                            # Automatische Formatierung der Disziplinen und Partner-Details für das grüne Banner
                             if bool(item.get('registered', False)):
                                 parts = []
                                 if bool(item.get('reg_he', False)):
@@ -164,17 +190,27 @@ if os.path.exists(DB_FILE):
                                 
                                 if bool(item.get('reg_hd', False)):
                                     p_hd = item.get('partner_hd', '').strip()
+                                    if p_hd == "-- Kein Partner --":
+                                        p_hd = ""
+                                    
                                     if p_hd in PARTNERS_HD:
                                         parts.append(f"Herrendoppel mit <a href='{PARTNERS_HD[p_hd]}' target='_blank' style='color: #15803d; text-decoration: underline; font-weight: bold;'>{p_hd}</a>")
+                                    elif p_hd:
+                                        parts.append(f"Herrendoppel mit {p_hd}")
                                     else:
-                                        parts.append(f"Herrendoppel mit {p_hd}" if p_hd else "Herrendoppel")
+                                        parts.append("Herrendoppel")
                                 
                                 if bool(item.get('reg_mx', False)):
                                     p_mx = item.get('partner_mx', '').strip()
+                                    if p_mx == "-- Kein Partner --":
+                                        p_mx = ""
+                                        
                                     if p_mx in PARTNERS_MX:
                                         parts.append(f"Mixed mit <a href='{PARTNERS_MX[p_mx]}' target='_blank' style='color: #15803d; text-decoration: underline; font-weight: bold;'>{p_mx}</a>")
+                                    elif p_mx:
+                                        parts.append(f"Mixed mit {p_mx}")
                                     else:
-                                        parts.append(f"Mixed mit {p_mx}" if p_mx else "Mixed")
+                                        parts.append("Mixed")
                                     
                                 details_text = ", ".join(parts)
                                 details_html = ""
@@ -268,7 +304,7 @@ if os.path.exists(DB_FILE):
                             st.write("")
                             st.link_button("Turnierseite", item['link'], use_container_width=True)
             else:
-                st.info("Aktuell gibt es keine anstehenden Turniere mehr in der Liste.")
+                st.info("Keine anstehenden Turniere gefunden.")
 
         st.write("")
         st.write("")
@@ -276,10 +312,22 @@ if os.path.exists(DB_FILE):
         # --- B. PAST TOURNAMENTS ---
         st.subheader(f"🕰️ Vergangene Turniere ({len(df_past)})")
         
-        # Vergangene Turniere im einklappbaren Akkordeon (standardmäßig geschlossen)
         with st.expander("Vergangene Turniere anzeigen", expanded=False):
             if not df_past.empty:
+                current_month_str = ""
                 for idx, item in df_past.iterrows():
+                    start_date = item['Start_Date_Obj']
+                    
+                    if pd.isnull(start_date):
+                        item_month_str = "Datum unbekannt"
+                    else:
+                        item_month_str = f"{month_names[start_date.month]} {start_date.year}"
+                    
+                    if item_month_str != current_month_str:
+                        current_month_str = item_month_str
+                        st.write("")
+                        st.markdown(f"#### 🕰️ {current_month_str}")
+                    
                     with st.container(border=True):
                         col_logo, col_info, col_link = st.columns([1.5, 6, 2])
                         
@@ -290,22 +338,34 @@ if os.path.exists(DB_FILE):
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
+                            # Sanftes grünes Alert-Banner für vergangene Turniere mit denselben Verlinkungen
                             if bool(item.get('registered', False)):
                                 parts = []
                                 if bool(item.get('reg_he', False)):
                                     parts.append("Herreneinzel")
                                 if bool(item.get('reg_hd', False)):
                                     p_hd = item.get('partner_hd', '').strip()
+                                    if p_hd == "-- Kein Partner --":
+                                        p_hd = ""
+                                        
                                     if p_hd in PARTNERS_HD:
                                         parts.append(f"Herrendoppel mit <a href='{PARTNERS_HD[p_hd]}' target='_blank' style='color: #166534; text-decoration: underline; font-weight: bold;'>{p_hd}</a>")
+                                    elif p_hd:
+                                        parts.append(f"Herrendoppel mit {p_hd}")
                                     else:
-                                        parts.append(f"Herrendoppel mit {p_hd}" if p_hd else "Herrendoppel")
+                                        parts.append("Herrendoppel")
+                                        
                                 if bool(item.get('reg_mx', False)):
                                     p_mx = item.get('partner_mx', '').strip()
+                                    if p_mx == "-- Kein Partner --":
+                                        p_mx = ""
+                                        
                                     if p_mx in PARTNERS_MX:
                                         parts.append(f"Mixed mit <a href='{PARTNERS_MX[p_mx]}' target='_blank' style='color: #166534; text-decoration: underline; font-weight: bold;'>{p_mx}</a>")
+                                    elif p_mx:
+                                        parts.append(f"Mixed mit {p_mx}")
                                     else:
-                                        parts.append(f"Mixed mit {p_mx}" if p_mx else "Mixed")
+                                        parts.append("Mixed")
                                     
                                 details_text = ", ".join(parts)
                                 details_html = ""
@@ -336,6 +396,7 @@ if os.path.exists(DB_FILE):
                             st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
                             st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                             
+                            # Admin-Ansicht
                             if IS_ADMIN:
                                 st.write("---")
                                 col_he, col_hd, col_mx = st.columns(3)
@@ -398,7 +459,7 @@ if os.path.exists(DB_FILE):
                             st.write("")
                             st.link_button("Turnierseite", item['link'], use_container_width=True)
             else:
-                st.write("Keine vergangenen Turniere in der Datenbank.")
+                st.write("Keine vergangenen Turniere gefunden.")
 
     else:
         st.info("Der Suchlauf war erfolgreich, aber es wurden keine Turniere in Ihrem Umkreis gefunden.")
