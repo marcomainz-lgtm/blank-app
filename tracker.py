@@ -28,7 +28,7 @@ def is_youth_tournament(title, tag_parts):
     return False
 
 
-def detect_discipline_days(tournament_url, start_date_str, end_date_str):
+def detect_discipline_days(session, tournament_url, start_date_str, end_date_str):
     """
     Sucht auf der Turnierseite und deren relevanten Navigations-Unterseiten nach Informationen,
     welche Disziplin an welchem Tag (Samstag/Sonntag) stattfindet. Unterstützt Deutsch & Englisch.
@@ -51,19 +51,18 @@ def detect_discipline_days(tournament_url, start_date_str, end_date_str):
 
     # --- REGEL 2: Heuristische Suche auf Turnier.de ---
     try:
-        session = requests.Session()
-        # Sprach-Cookies setzen, damit wir die deutsche Version erzwingen und Cookie-Einwilligungen umgehen
-        session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain="dbv.turnier.de", path="/")
-        session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain=".turnier.de", path="/")
-        
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
             "Accept-Language": "de-DE,de;q=0.9"
         }
-        r = session.get(tournament_url, headers=headers, timeout=10)
-        if r.status_code != 200:
-            return days
         
+        # Nutzen der übergebenen, erfolgreich verifizierten Session (Cloudflare-Bypass)
+        r = session.get(tournament_url, headers=headers, timeout=10)
+        
+        if r.status_code != 200:
+            print(f" -> Warnung: {tournament_url} lieferte HTTP-Statuscode {r.status_code}. (Evtl. von Cloudflare blockiert)")
+            return days
+            
         soup = BeautifulSoup(r.content, 'html.parser')
         
         # Haupttext extrahieren (Zeilenumbrüche erhalten!)
@@ -112,6 +111,11 @@ def detect_discipline_days(tournament_url, start_date_str, end_date_str):
         found_hd = []
         found_mx = []
         
+        # Hilfsvariablen für Diagnose-Ausgaben
+        has_sa = "samstag" in text or "saturday" in text
+        has_so = "sonntag" in text or "sunday" in text
+        has_doppel = "doppel" in text or "double" in text
+        
         for c in clauses:
             c_lower = c.strip()
             if len(c_lower) < 5:
@@ -159,6 +163,9 @@ def detect_discipline_days(tournament_url, start_date_str, end_date_str):
             if days["he"]: print(f"    * Herreneinzel: {days['he']}")
             if days["hd"]: print(f"    * Herrendoppel: {days['hd']}")
             if days["mx"]: print(f"    * Mixed: {days['mx']}")
+        else:
+            print(f" -> Heuristik-Ergebnis für '{tournament_url}': Keine eindeutigen Spieltage im Text ermittelt.")
+            print(f"    (Text-Check: 'Samstag' vorhanden={has_sa}, 'Sonntag' vorhanden={has_so}, 'Doppel' vorhanden={has_doppel})")
             
     except Exception as e:
         print(f"Fehler bei der Zeitplan-Heuristik für {tournament_url}: {e}")
@@ -166,7 +173,7 @@ def detect_discipline_days(tournament_url, start_date_str, end_date_str):
     return days
 
 
-def scrape_tournaments():
+def scrape_tournaments(s):
     url = "https://dbv.turnier.de/find/tournament/DoSearch"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
@@ -174,10 +181,6 @@ def scrape_tournaments():
         "Referer": "https://dbv.turnier.de/find",
         "X-Requested-With": "XMLHttpRequest"
     }
-
-    s = requests.Session()
-    s.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain="dbv.turnier.de", path="/")
-    s.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain=".turnier.de", path="/")
 
     tournaments = []
     seen_ids = set()
@@ -375,7 +378,11 @@ def send_push_notification(new_items):
 
 def check_for_updates():
     print("Checking for tournament updates...")
-    current_list = scrape_tournaments()
+    session = requests.Session()
+    session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain="dbv.turnier.de", path="/")
+    session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain=".turnier.de", path="/")
+    
+    current_list = scrape_tournaments(session)
     
     known_tournaments = {}
     if os.path.exists(DB_FILE):
@@ -391,7 +398,7 @@ def check_for_updates():
         if t_id not in known_tournaments:
             # 1. Neues Turnier gefunden -> Heuristische Zeitplananalyse durchführen!
             print(f"Neues Turnier gefunden: {t['title']}. Analysiere Zeitplan...")
-            detected_days = detect_discipline_days(t["link"], t["start_date"], t["end_date"])
+            detected_days = detect_discipline_days(session, t["link"], t["start_date"], t["end_date"])
             t["day_he"] = detected_days["he"]
             t["day_hd"] = detected_days["hd"]
             t["day_mx"] = detected_days["mx"]
@@ -420,7 +427,7 @@ def check_for_updates():
             # Falls der Zeitplan noch komplett unbeschrieben ist, versuchen wir ihn nachträglich zu bestimmen (Migration)
             if not day_he and not day_hd and not day_mx:
                 print(f"Analysiere Zeitplan für bestehendes Turnier: {t['title']}...")
-                detected_days = detect_discipline_days(t["link"], t["start_date"], t["end_date"])
+                detected_days = detect_discipline_days(session, t["link"], t["start_date"], t["end_date"])
                 day_he = detected_days["he"]
                 day_hd = detected_days["hd"]
                 day_mx = detected_days["mx"]

@@ -79,9 +79,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Sonntag",
+        "day_hd": "Sonntag",
+        "day_mx": "Sonntag"
     },
     "EA7EE6FD-BF4A-48D1-8C65-25162F9D0FBC": {
         "id": "EA7EE6FD-BF4A-48D1-8C65-25162F9D0FBC",
@@ -142,9 +142,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Samstag",
+        "day_hd": "Samstag",
+        "day_mx": "Samstag"
     },
     "DF97BB7A-B89B-4090-BB2F-39D1CDE06D22": {
         "id": "DF97BB7A-B89B-4090-BB2F-39D1CDE06D22",
@@ -331,9 +331,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Samstag",
+        "day_hd": "Samstag",
+        "day_mx": "Samstag"
     },
     "E6767D9F-CC4A-47FA-9F5E-BB0B84C27E68": {
         "id": "E6767D9F-CC4A-47FA-9F5E-BB0B84C27E68",
@@ -373,9 +373,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Sonntag",
+        "day_hd": "Sonntag",
+        "day_mx": "Sonntag"
     },
     "A0060FD9-89CE-4858-9B21-6CC97412349F": {
         "id": "A0060FD9-89CE-4858-9B21-6CC97412349F",
@@ -394,9 +394,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Sonntag",
+        "day_hd": "Sonntag",
+        "day_mx": "Sonntag"
     },
     "86D7FDB2-B539-4BF9-BFD4-B30404E130EC": {
         "id": "86D7FDB2-B539-4BF9-BFD4-B30404E130EC",
@@ -415,9 +415,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Sonntag",
+        "day_hd": "Sonntag",
+        "day_mx": "Sonntag"
     },
     "F84E05F4-9B6D-491B-9D3A-6604441A1DEE": {
         "id": "F84E05F4-9B6D-491B-9D3A-6604441A1DEE",
@@ -436,9 +436,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Sonntag",
+        "day_hd": "Sonntag",
+        "day_mx": "Sonntag"
     },
     "50FADCC0-76A8-4EFC-80AB-961931F34326": {
         "id": "50FADCC0-76A8-4EFC-80AB-961931F34326",
@@ -457,9 +457,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Sonntag",
+        "day_hd": "Sonntag",
+        "day_mx": "Sonntag"
     },
     "6166EC4D-8578-4344-B165-62F2EADF8152": {
         "id": "6166EC4D-8578-4344-B165-62F2EADF8152",
@@ -646,9 +646,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Samstag",
+        "day_hd": "Samstag",
+        "day_mx": "Samstag"
     },
     "68CF0C34-7AE4-4D6E-8147-4D3F364C5647": {
         "id": "68CF0C34-7AE4-4D6E-8147-4D3F364C5647",
@@ -793,9 +793,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Samstag",
+        "day_hd": "Samstag",
+        "day_mx": "Samstag"
     },
     "CAAA9C7F-5D4C-4E2D-B201-C6A2B7787957": {
         "id": "CAAA9C7F-5D4C-4E2D-B201-C6A2B7787957",
@@ -870,7 +870,7 @@
         "distance": 54,
         "start_date": "13.06.2026",
         "end_date": "14.06.2026",
-        "tags": "bis, Open, A, B, C, D, Online-Meldung, 6s",
+        "tags": "bis, Open, A, B, C, D, Online-Meldung, 5s",
         "registered": false,
         "reg_he": false,
         "reg_hd": false,
@@ -982,9 +982,9 @@
         "reg_mx": true,
         "partner_hd": "",
         "partner_mx": "Vanessa Joppien",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Samstag",
+        "day_hd": "Samstag",
+        "day_mx": "Samstag"
     },
     "C36D1EF2-545A-4EF7-8E33-D996C03E3DC9": {
         "id": "C36D1EF2-545A-4EF7-8E33-D996C03E3DC9",
@@ -1003,9 +1003,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Samstag",
+        "day_hd": "Samstag",
+        "day_mx": "Samstag"
     },
     "3ED0B9E1-4070-4F00-A649-67186A50ED42": {
         "id": "3ED0B9E1-4070-4F00-A649-67186A50ED42",
@@ -1255,9 +1255,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Samstag",
+        "day_hd": "Samstag",
+        "day_mx": "Samstag"
     },
     "8E3FAD55-196A-41FE-A78F-48B19E6500E1": {
         "id": "8E3FAD55-196A-41FE-A78F-48B19E6500E1",
@@ -1444,8 +1444,8 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Samstag",
+        "day_hd": "Samstag",
+        "day_mx": "Samstag"
     }
 }
