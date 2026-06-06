@@ -92,6 +92,37 @@ if IS_ADMIN:
 # --- MELDUNGSFILTER (TOGGLE) ---
 only_registered = st.toggle("Nur gemeldete Turniere anzeigen", value=False)
 
+
+# --- HILFSFUNKTION FÜR DATUMBERECHNUNG ---
+def get_formatted_day(day_selection, start_date_obj):
+    """Berechnet basierend auf dem Turnier-Startdatum den exakten Kalendertag für Samstag/Sonntag."""
+    if not day_selection or day_selection in ["-- Tag wählen --", "Keine Angabe", ""]:
+        return ""
+    if pd.isnull(start_date_obj):
+        return day_selection
+    
+    try:
+        # Finde heraus, welcher Wochentag das Startdatum ist (0=Montag, 5=Samstag, 6=Sonntag)
+        wd = start_date_obj.weekday()
+        
+        # Berechne den Abstand zu Samstag (5) und Sonntag (6) dieses Wochenendes
+        sat_dt = start_date_obj + datetime.timedelta(days=(5 - wd))
+        sun_dt = start_date_obj + datetime.timedelta(days=(6 - wd))
+        
+        sat_str = f"{sat_dt.day}.{sat_dt.month}."
+        sun_str = f"{sun_dt.day}.{sun_dt.month}."
+        
+        if day_selection == "Samstag":
+            return f"Samstag, {sat_str}"
+        elif day_selection == "Sonntag":
+            return f"Sonntag, {sun_str}"
+        elif day_selection == "Samstag & Sonntag":
+            return f"Samstag, {sat_str} & Sonntag, {sun_str}"
+    except Exception:
+        pass
+    return day_selection
+
+
 # Load and present database
 if os.path.exists(DB_FILE):
     try:
@@ -194,10 +225,13 @@ if os.path.exists(DB_FILE):
                             # Automatische Formatierung der Disziplinen und Partner-Details für das grüne Banner
                             if bool(item.get('registered', False)):
                                 parts = []
+                                start_date_obj = item['Start_Date_Obj']
                                 
                                 # Einzel
                                 if bool(item.get('reg_he', False)):
-                                    day_suffix = f" ({item['day_he']})" if item.get('day_he', '') else ""
+                                    day_val = item.get('day_he', '')
+                                    formatted_day = get_formatted_day(day_val, start_date_obj)
+                                    day_suffix = f" ({formatted_day})" if formatted_day else ""
                                     parts.append(f"Herreneinzel{day_suffix}")
                                 
                                 # Doppel
@@ -212,7 +246,9 @@ if os.path.exists(DB_FILE):
                                     elif p_hd:
                                         partner_str = f" mit {p_hd}"
                                         
-                                    day_suffix = f" ({item['day_hd']})" if item.get('day_hd', '') else ""
+                                    day_val = item.get('day_hd', '')
+                                    formatted_day = get_formatted_day(day_val, start_date_obj)
+                                    day_suffix = f" ({formatted_day})" if formatted_day else ""
                                     parts.append(f"Herrendoppel{partner_str}{day_suffix}")
                                 
                                 # Mixed
@@ -227,7 +263,9 @@ if os.path.exists(DB_FILE):
                                     elif p_mx:
                                         partner_str = f" mit {p_mx}"
                                         
-                                    day_suffix = f" ({item['day_mx']})" if item.get('day_mx', '') else ""
+                                    day_val = item.get('day_mx', '')
+                                    formatted_day = get_formatted_day(day_val, start_date_obj)
+                                    day_suffix = f" ({formatted_day})" if formatted_day else ""
                                     parts.append(f"Mixed{partner_str}{day_suffix}")
                                     
                                 details_text = ", ".join(parts)
@@ -391,10 +429,13 @@ if os.path.exists(DB_FILE):
                             # Sanftes grünes Alert-Banner für vergangene Turniere mit denselben Verlinkungen
                             if bool(item.get('registered', False)):
                                 parts = []
+                                start_date_obj = item['Start_Date_Obj']
                                 
                                 # Einzel
                                 if bool(item.get('reg_he', False)):
-                                    day_suffix = f" ({item['day_he']})" if item.get('day_he', '') else ""
+                                    day_val = item.get('day_he', '')
+                                    formatted_day = get_formatted_day(day_val, start_date_obj)
+                                    day_suffix = f" ({formatted_day})" if formatted_day else ""
                                     parts.append(f"Herreneinzel{day_suffix}")
                                 
                                 # Doppel
@@ -409,7 +450,9 @@ if os.path.exists(DB_FILE):
                                     elif p_hd:
                                         partner_str = f" mit {p_hd}"
                                         
-                                    day_suffix = f" ({item['day_hd']})" if item.get('day_hd', '') else ""
+                                    day_val = item.get('day_hd', '')
+                                    formatted_day = get_formatted_day(day_val, start_date_obj)
+                                    day_suffix = f" ({formatted_day})" if formatted_day else ""
                                     parts.append(f"Herrendoppel{partner_str}{day_suffix}")
                                         
                                 # Mixed
@@ -424,7 +467,9 @@ if os.path.exists(DB_FILE):
                                     elif p_mx:
                                         partner_str = f" mit {p_mx}"
                                         
-                                    day_suffix = f" ({item['day_mx']})" if item.get('day_mx', '') else ""
+                                    day_val = item.get('day_mx', '')
+                                    formatted_day = get_formatted_day(day_val, start_date_obj)
+                                    day_suffix = f" ({formatted_day})" if formatted_day else ""
                                     parts.append(f"Mixed{partner_str}{day_suffix}")
                                     
                                 details_text = ", ".join(parts)
