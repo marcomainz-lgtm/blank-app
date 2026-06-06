@@ -304,18 +304,32 @@ if os.path.exists(DB_FILE):
                                 st.write("---")
                                 col_he, col_hd, col_mx = st.columns(3)
                                 
-                                # Konfiguration der Spieltag-Optionen
-                                day_options = ["-- Tag wählen --", "Samstag", "Sonntag", "Samstag & Sonntag"]
+                                # Berechne Samstag und Sonntag Strings für die Backend-Dropdowns
+                                start_date_obj = item['Start_Date_Obj']
+                                sat_str, sun_str = "", ""
+                                if not pd.isnull(start_date_obj):
+                                    wd = start_date_obj.weekday()
+                                    sat_dt = start_date_obj + datetime.timedelta(days=(5 - wd))
+                                    sun_dt = start_date_obj + datetime.timedelta(days=(6 - wd))
+                                    sat_str = sat_dt.strftime("%d.%m.")
+                                    sun_str = sun_dt.strftime("%d.%m.")
+                                
+                                # Erstelle die Sprachoptionen inklusive Datum
+                                if sat_str and sun_str:
+                                    day_options = ["-- Tag wählen --", f"Samstag, {sat_str}", f"Sonntag, {sun_str}"]
+                                else:
+                                    day_options = ["-- Tag wählen --", "Samstag", "Sonntag"]
                                 
                                 with col_he:
                                     st.markdown("**Herreneinzel**")
                                     val_he = st.checkbox("Meldung Einzel", value=bool(item.get('reg_he', False)), key=f"he_{item['id']}")
-                                    val_day_he = item.get('day_he', '')
+                                    val_day_he_db = item.get('day_he', '')
                                     if val_he:
-                                        he_day_idx = day_options.index(val_day_he) if val_day_he in day_options else 0
-                                        val_day_he = st.selectbox("Spieltag Einzel", options=day_options, index=he_day_idx, key=f"day_he_{item['id']}")
-                                        if val_day_he == "-- Tag wählen --":
-                                            val_day_he = ""
+                                        # Index bestimmen für vorausgewählten Wert
+                                        he_idx = 1 if val_day_he_db == "Samstag" else (2 if val_day_he_db == "Sonntag" else 0)
+                                        selected_label_he = st.selectbox("Spieltag Einzel", options=day_options, index=he_idx, key=f"day_he_{item['id']}")
+                                        # Zurück-Mappen auf standardisierte DB-Werte ("Samstag", "Sonntag" oder "")
+                                        val_day_he = "Samstag" if selected_label_he == day_options[1] else ("Sonntag" if selected_label_he == day_options[2] else "")
                                     else:
                                         val_day_he = ""
                                         
@@ -323,7 +337,7 @@ if os.path.exists(DB_FILE):
                                     st.markdown("**Herrendoppel**")
                                     val_hd = st.checkbox("Meldung Doppel", value=bool(item.get('reg_hd', False)), key=f"hd_{item['id']}")
                                     val_partner_hd = item.get('partner_hd', '')
-                                    val_day_hd = item.get('day_hd', '')
+                                    val_day_hd_db = item.get('day_hd', '')
                                     
                                     if val_hd:
                                         hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
@@ -332,10 +346,10 @@ if os.path.exists(DB_FILE):
                                         if val_partner_hd == "-- Kein Partner --":
                                             val_partner_hd = ""
                                             
-                                        hd_day_idx = day_options.index(val_day_hd) if val_day_hd in day_options else 0
-                                        val_day_hd = st.selectbox("Spieltag Doppel", options=day_options, index=hd_day_idx, key=f"day_hd_{item['id']}")
-                                        if val_day_hd == "-- Tag wählen --":
-                                            val_day_hd = ""
+                                        # Index bestimmen für vorausgewählten Wert
+                                        hd_idx = 1 if val_day_hd_db == "Samstag" else (2 if val_day_hd_db == "Sonntag" else 0)
+                                        selected_label_hd = st.selectbox("Spieltag Doppel", options=day_options, index=hd_idx, key=f"day_hd_{item['id']}")
+                                        val_day_hd = "Samstag" if selected_label_hd == day_options[1] else ("Sonntag" if selected_label_hd == day_options[2] else "")
                                     else:
                                         val_partner_hd = ""
                                         val_day_hd = ""
@@ -344,7 +358,7 @@ if os.path.exists(DB_FILE):
                                     st.markdown("**Mixed**")
                                     val_mx = st.checkbox("Meldung Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_{item['id']}")
                                     val_partner_mx = item.get('partner_mx', '')
-                                    val_day_mx = item.get('day_mx', '')
+                                    val_day_mx_db = item.get('day_mx', '')
                                     
                                     if val_mx:
                                         mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
@@ -353,10 +367,10 @@ if os.path.exists(DB_FILE):
                                         if val_partner_mx == "-- Kein Partner --":
                                             val_partner_mx = ""
                                             
-                                        mx_day_idx = day_options.index(val_day_mx) if val_day_mx in day_options else 0
-                                        val_day_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_day_idx, key=f"day_mx_{item['id']}")
-                                        if val_day_mx == "-- Tag wählen --":
-                                            val_day_mx = ""
+                                        # Index bestimmen für vorausgewählten Wert
+                                        mx_idx = 1 if val_day_mx_db == "Samstag" else (2 if val_day_mx_db == "Sonntag" else 0)
+                                        selected_label_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_idx, key=f"day_mx_{item['id']}")
+                                        val_day_mx = "Samstag" if selected_label_mx == day_options[1] else ("Sonntag" if selected_label_mx == day_options[2] else "")
                                     else:
                                         val_partner_mx = ""
                                         val_day_mx = ""
@@ -508,18 +522,30 @@ if os.path.exists(DB_FILE):
                                 st.write("---")
                                 col_he, col_hd, col_mx = st.columns(3)
                                 
-                                # Konfiguration der Spieltag-Optionen
-                                day_options = ["-- Tag wählen --", "Samstag", "Sonntag", "Samstag & Sonntag"]
+                                # Berechne Samstag und Sonntag Strings für die Backend-Dropdowns (past)
+                                start_date_obj = item['Start_Date_Obj']
+                                sat_str, sun_str = "", ""
+                                if not pd.isnull(start_date_obj):
+                                    wd = start_date_obj.weekday()
+                                    sat_dt = start_date_obj + datetime.timedelta(days=(5 - wd))
+                                    sun_dt = start_date_obj + datetime.timedelta(days=(6 - wd))
+                                    sat_str = sat_dt.strftime("%d.%m.")
+                                    sun_str = sun_dt.strftime("%d.%m.")
+                                
+                                # Erstelle die Sprachoptionen inklusive Datum
+                                if sat_str and sun_str:
+                                    day_options = ["-- Tag wählen --", f"Samstag, {sat_str}", f"Sonntag, {sun_str}"]
+                                else:
+                                    day_options = ["-- Tag wählen --", "Samstag", "Sonntag"]
                                 
                                 with col_he:
                                     st.markdown("**Herreneinzel**")
                                     val_he = st.checkbox("Herreneinzel", value=bool(item.get('reg_he', False)), key=f"he_past_{item['id']}")
-                                    val_day_he = item.get('day_he', '')
+                                    val_day_he_db = item.get('day_he', '')
                                     if val_he:
-                                        he_day_idx = day_options.index(val_day_he) if val_day_he in day_options else 0
-                                        val_day_he = st.selectbox("Spieltag Einzel", options=day_options, index=he_day_idx, key=f"day_he_past_{item['id']}")
-                                        if val_day_he == "-- Tag wählen --":
-                                            val_day_he = ""
+                                        he_idx = 1 if val_day_he_db == "Samstag" else (2 if val_day_he_db == "Sonntag" else 0)
+                                        selected_label_he = st.selectbox("Spieltag Einzel", options=day_options, index=he_idx, key=f"day_he_past_{item['id']}")
+                                        val_day_he = "Samstag" if selected_label_he == day_options[1] else ("Sonntag" if selected_label_he == day_options[2] else "")
                                     else:
                                         val_day_he = ""
                                 
@@ -527,7 +553,7 @@ if os.path.exists(DB_FILE):
                                     st.markdown("**Herrendoppel**")
                                     val_hd = st.checkbox("Herrendoppel", value=bool(item.get('reg_hd', False)), key=f"hd_past_{item['id']}")
                                     val_partner_hd = item.get('partner_hd', '')
-                                    val_day_hd = item.get('day_hd', '')
+                                    val_day_hd_db = item.get('day_hd', '')
                                     
                                     if val_hd:
                                         hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
@@ -536,10 +562,9 @@ if os.path.exists(DB_FILE):
                                         if val_partner_hd == "-- Kein Partner --":
                                             val_partner_hd = ""
                                             
-                                        hd_day_idx = day_options.index(val_day_hd) if val_day_hd in day_options else 0
-                                        val_day_hd = st.selectbox("Spieltag Doppel", options=day_options, index=hd_day_idx, key=f"day_hd_past_{item['id']}")
-                                        if val_day_hd == "-- Tag wählen --":
-                                            val_day_hd = ""
+                                        hd_idx = 1 if val_day_hd_db == "Samstag" else (2 if val_day_hd_db == "Sonntag" else 0)
+                                        selected_label_hd = st.selectbox("Spieltag Doppel", options=day_options, index=hd_idx, key=f"day_hd_past_{item['id']}")
+                                        val_day_hd = "Samstag" if selected_label_hd == day_options[1] else ("Sonntag" if selected_label_hd == day_options[2] else "")
                                     else:
                                         val_partner_hd = ""
                                         val_day_hd = ""
@@ -548,7 +573,7 @@ if os.path.exists(DB_FILE):
                                     st.markdown("**Mixed**")
                                     val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_past_{item['id']}")
                                     val_partner_mx = item.get('partner_mx', '')
-                                    val_day_mx = item.get('day_mx', '')
+                                    val_day_mx_db = item.get('day_mx', '')
                                     
                                     if val_mx:
                                         mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
@@ -557,10 +582,9 @@ if os.path.exists(DB_FILE):
                                         if val_partner_mx == "-- Kein Partner --":
                                             val_partner_mx = ""
                                             
-                                        mx_day_idx = day_options.index(val_day_mx) if val_day_mx in day_options else 0
-                                        val_day_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_day_idx, key=f"day_mx_past_{item['id']}")
-                                        if val_day_mx == "-- Tag wählen --":
-                                            val_day_mx = ""
+                                        mx_idx = 1 if val_day_mx_db == "Samstag" else (2 if val_day_mx_db == "Sonntag" else 0)
+                                        selected_label_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_idx, key=f"day_mx_past_{item['id']}")
+                                        val_day_mx = "Samstag" if selected_label_mx == day_options[1] else ("Sonntag" if selected_label_mx == day_options[2] else "")
                                     else:
                                         val_partner_mx = ""
                                         val_day_mx = ""
