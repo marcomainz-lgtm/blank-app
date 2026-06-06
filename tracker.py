@@ -30,9 +30,9 @@ def is_youth_tournament(title, tag_parts):
 
 def detect_discipline_days(session, tournament_url, start_date_str, end_date_str):
     """
-    Sucht auf der Turnierseite und deren relevanten Navigations-Unterseiten (wie Bestimmungen)
-    nach Informationen, welche Disziplin an welchem Tag (Samstag/Sonntag) stattfindet.
-    Ermittelt vorher, welche Disziplinen überhaupt angeboten werden.
+    Sucht auf der Turnierseite und deren relevanten Navigations-Unterseiten nach Informationen,
+    welche Disziplin an welchem Tag (Samstag/Sonntag) stattfindet.
+    Nutzt eine State Machine, um auch Gliederungen/Listen verlässlich zuzuordnen.
     """
     days = {"he": "", "hd": "", "mx": ""}
     weekday_names = {
@@ -430,8 +430,18 @@ def check_for_updates_generator():
     """Generator-Funktion für das Echtzeit-Web-Aktivitätsprotokoll."""
     yield "Suche nach neuen Turnieren auf turnier.de..."
     session = requests.Session()
-    session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain="dbv.turnier.de", path="/")
-    session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain=".turnier.de", path="/")
+    
+    # 1. Startseite aufrufen, um automatisch frische Session-Cookies zu erhalten!
+    headers_init = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+    }
+    try:
+        session.get("https://dbv.turnier.de/find", headers=headers_init, timeout=10)
+        yield "Frische Session-Cookies erfolgreich geladen."
+    except Exception as e:
+        yield f"Warnung beim Laden der Session-Cookies: {e}. Verwende Fallback."
+        session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain="dbv.turnier.de", path="/")
+        session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain=".turnier.de", path="/")
     
     try:
         current_list = scrape_tournaments(session)
@@ -448,6 +458,44 @@ def check_for_updates_generator():
         except Exception:
             yield "Konnte bestehende Datenbank nicht lesen, initialisiere neu."
 
+    # --- SÄULE 2: DATENBANK-ZUERST-SELBSTHEILUNG ---
+    # Wir gehen die gesamte Datenbank durch und analysieren JEDES unbeschriebene Turnier,
+    # völlig unabhängig davon, was die Live-Suche (current_list) zurückgegeben hat!
+    analyzed_count = 0
+    for t_id, t in list(known_tournaments.items()):
+        day_he = t.get('day_he', '')
+        day_hd = t.get('day_hd', '')
+        day_mx = t.get('day_mx', '')
+
+        # Falls Felder noch den alten Default-Wert "gesamt" haben, leeren
+        if day_he == "gesamt": day_he = ""
+        if day_hd == "gesamt": day_hd = ""
+        if day_mx == "gesamt": day_mx = ""
+
+        # Wenn alle drei Felder leer sind, erzwingen wir die Detail-Zeitplananalyse!
+        if not day_he and not day_hd and not day_mx:
+            yield f"Analysiere Zeitplan für: {t['title']}..."
+            detected_days = detect_discipline_days(session, t["link"], t["start_date"], t["end_date"])
+            t["day_he"] = detected_days["he"]
+            t["day_hd"] = detected_days["hd"]
+            t["day_mx"] = detected_days["mx"]
+            
+            found_msg = []
+            if t["day_he"]: found_msg.append(f"Einzel: {t['day_he']}")
+            if t["day_hd"]: found_msg.append(f"Doppel: {t['day_hd']}")
+            if t["day_mx"]: found_msg.append(f"Mixed: {t['day_mx']}")
+            if found_msg:
+                yield f" -> Zeitplan erkannt: {', '.join(found_msg)}"
+            else:
+                yield " -> Keine eindeutigen Spieltage im Text ermittelt."
+            
+            known_tournaments[t_id] = t
+            analyzed_count += 1
+
+    if analyzed_count > 0:
+        yield f"Selbstheilung abgeschlossen. {analyzed_count} Turnier(e) nachträglich analysiert."
+
+    # Neue Turniere aus dem Suchlauf in die Datenbank integrieren
     new_tournaments = []
     for t in current_list:
         t_id = t["id"]
@@ -470,7 +518,7 @@ def check_for_updates_generator():
             new_tournaments.append(t)
             known_tournaments[t_id] = t
         else:
-            # Bestehendes Turnier -> Daten bewahren und ggf. fehlende Spieltage analysieren
+            # Sicherheits-Sync (Meldungen und Partner beibehalten)
             old_t = known_tournaments[t_id]
             is_registered = old_t.get('registered', False)
             reg_he = old_t.get('reg_he', False)
@@ -478,32 +526,9 @@ def check_for_updates_generator():
             reg_mx = old_t.get('reg_mx', False)
             partner_hd = old_t.get('partner_hd', '')
             partner_mx = old_t.get('partner_mx', '')
-            
             day_he = old_t.get('day_he', '')
             day_hd = old_t.get('day_hd', '')
             day_mx = old_t.get('day_mx', '')
-
-            # Falls Felder noch den alten Default-Wert "gesamt" haben, leeren
-            if day_he == "gesamt": day_he = ""
-            if day_hd == "gesamt": day_hd = ""
-            if day_mx == "gesamt": day_mx = ""
-
-            # Falls der Zeitplan noch komplett unbeschrieben ist, versuchen wir ihn nachträglich zu bestimmen (Migration)
-            if not day_he and not day_hd and not day_mx:
-                yield f"Analysiere Zeitplan für bestehendes Turnier: {t['title']}..."
-                detected_days = detect_discipline_days(session, t["link"], t["start_date"], t["end_date"])
-                day_he = detected_days["he"]
-                day_hd = detected_days["hd"]
-                day_mx = detected_days["mx"]
-                
-                found_msg = []
-                if day_he: found_msg.append(f"Einzel: {day_he}")
-                if day_hd: found_msg.append(f"Doppel: {day_hd}")
-                if day_mx: found_msg.append(f"Mixed: {day_mx}")
-                if found_msg:
-                    yield f" -> Zeitplan erkannt: {', '.join(found_msg)}"
-                else:
-                    yield " -> Keine eindeutigen Spieltage im Text ermittelt."
 
             known_tournaments[t_id] = t
             known_tournaments[t_id]['registered'] = is_registered
