@@ -45,7 +45,6 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         try:
             dt = datetime.datetime.strptime(start_date_str, "%d.%m.%Y").date()
             day_name = weekday_names[dt.weekday()]
-            print(f" -> {tournament_url}: Eintägiges Turnier am {day_name}. Automatische Zuweisung durchgeführt.")
             return {"he": day_name, "hd": day_name, "mx": day_name}
         except Exception:
             pass
@@ -56,14 +55,10 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
             "Accept-Language": "de-DE,de;q=0.9"
         }
-        
-        # Nutzen der übergebenen, erfolgreich verifizierten Session (Cloudflare-Bypass)
         r = session.get(tournament_url, headers=headers, timeout=10)
-        
         if r.status_code != 200:
-            print(f" -> Warnung: {tournament_url} lieferte HTTP-Statuscode {r.status_code}. (Evtl. von Cloudflare blockiert)")
             return days
-            
+        
         soup = BeautifulSoup(r.content, 'html.parser')
         
         # Haupttext extrahieren (Zeilenumbrüche erhalten!)
@@ -112,11 +107,6 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         found_hd = []
         found_mx = []
         
-        # Hilfsvariablen für Diagnose-Ausgaben
-        has_sa = "samstag" in text or "saturday" in text
-        has_so = "sonntag" in text or "sunday" in text
-        has_doppel = "doppel" in text or "double" in text
-        
         # --- ZUSTANDSBASIERTE STATE MACHINE ---
         current_day = None  # Speichert den aktuell aktiven Wochentag für nachfolgende Zeilen
         
@@ -125,7 +115,7 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             if len(c_lower) < 3:
                 continue
             
-            # Wochentage in dieser Zeile prüfen (Deutsch & Englisch)
+            # Wochentage prüfen (Deutsch & Englisch)
             is_sat = "samstag" in c_lower or "saturday" in c_lower or re.search(r'\bsa\b', c_lower) or re.search(r'\bsat\b', c_lower)
             is_sun = "sonntag" in c_lower or "sunday" in c_lower or re.search(r'\bso\b', c_lower) or re.search(r'\bsun\b', c_lower)
             is_fri = "freitag" in c_lower or "friday" in c_lower or re.search(r'\bfr\b', c_lower) or re.search(r'\bfri\b', c_lower)
@@ -174,18 +164,8 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         if found_mx and len(set(found_mx)) == 1:
             days["mx"] = found_mx[0]
             
-        # Logging der Heuristik-Ergebnisse im Terminal
-        if days["he"] or days["hd"] or days["mx"]:
-            print(f" -> Heuristik-Ergebnis für '{tournament_url}':")
-            if days["he"]: print(f"    * Herreneinzel: {days['he']}")
-            if days["hd"]: print(f"    * Herrendoppel: {days['hd']}")
-            if days["mx"]: print(f"    * Mixed: {days['mx']}")
-        else:
-            print(f" -> Heuristik-Ergebnis für '{tournament_url}': Keine eindeutigen Spieltage im Text ermittelt.")
-            print(f"    (Text-Check: 'Samstag' vorhanden={has_sa}, 'Sonntag' vorhanden={has_so}, 'Doppel' vorhanden={has_doppel})")
-            
     except Exception as e:
-        print(f"Fehler bei der Zeitplan-Heuristik für {tournament_url}: {e}")
+        print(f"Fehler bei der Zeitplan-Heuristik: {e}")
         
     return days
 
@@ -493,4 +473,11 @@ def check_for_updates_generator():
         json.dump(known_tournaments, f, ensure_ascii=False, indent=4)
 
     if new_tournaments:
-        yield f"Fer
+        yield f"Fertig! {len(new_tournaments)} neue(s) Turnier(e) gefunden."
+        send_push_notification(new_tournaments)
+    else:
+        yield "Fertig! Keine neuen Turniere erkannt."
+
+
+if __name__ == "__main__":
+    check_for_updates()
