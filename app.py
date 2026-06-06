@@ -313,18 +313,6 @@ if os.path.exists(DB_FILE):
                             st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
                             st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                             
-                            # --- ALLGEMEINEN ABLAUF AUF DER KARTE ANZEIGEN ---
-                            schedule_parts = []
-                            if item.get('day_he'):
-                                schedule_parts.append(f"Einzel ({item['day_he']})")
-                            if item.get('day_hd'):
-                                schedule_parts.append(f"Doppel ({item['day_hd']})")
-                            if item.get('day_mx'):
-                                schedule_parts.append(f"Mixed ({item['day_mx']})")
-                                
-                            if schedule_parts:
-                                st.markdown(f"📋 **Ablauf:** {', '.join(schedule_parts)}")
-                            
                             # Admin-Ansicht
                             if IS_ADMIN:
                                 st.write("---")
@@ -538,18 +526,6 @@ if os.path.exists(DB_FILE):
                             dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
                             st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
                             st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
-                            
-                            # --- ALLGEMEINEN ABLAUF AUF DER KARTE ANZEIGEN (past) ---
-                            schedule_parts = []
-                            if item.get('day_he'):
-                                schedule_parts.append(f"Einzel ({item['day_he']})")
-                            if item.get('day_hd'):
-                                schedule_parts.append(f"Doppel ({item['day_hd']})")
-                            if item.get('day_mx'):
-                                schedule_parts.append(f"Mixed ({item['day_mx']})")
-                                
-                            if schedule_parts:
-                                st.markdown(f"📋 **Ablauf:** {', '.join(schedule_parts)}")
                             
                             # Admin-Ansicht
                             if IS_ADMIN:
