@@ -95,7 +95,7 @@ only_registered = st.toggle("Nur gemeldete Turniere anzeigen", value=False)
 
 # --- HILFSFUNKTION FÜR DATUMBERECHNUNG ---
 def get_formatted_day(day_selection, start_date_obj):
-    """Berechnet basierend auf dem Turnier-Startdatum den exakten Kalendertag für Samstag/Sonntag."""
+    """Berechnet basierend auf dem Turnier-Startdatum den exakten Kalendertag für Samstag/Sonntag (mit führenden Nullen)."""
     if not day_selection or day_selection in ["-- Tag wählen --", "Keine Angabe", ""]:
         return ""
     if pd.isnull(start_date_obj):
@@ -109,8 +109,9 @@ def get_formatted_day(day_selection, start_date_obj):
         sat_dt = start_date_obj + datetime.timedelta(days=(5 - wd))
         sun_dt = start_date_obj + datetime.timedelta(days=(6 - wd))
         
-        sat_str = f"{sat_dt.day}.{sat_dt.month}."
-        sun_str = f"{sun_dt.day}.{sun_dt.month}."
+        # Formatierung mit führenden Nullen (z. B. 06.06. statt 6.6.)
+        sat_str = sat_dt.strftime("%d.%m.")
+        sun_str = sun_dt.strftime("%d.%m.")
         
         if day_selection == "Samstag":
             return f"Samstag, {sat_str}"
@@ -178,6 +179,7 @@ if os.path.exists(DB_FILE):
         df_upcoming = df[df['End_Date_Obj'] >= today].copy()
         df_upcoming = df_upcoming.sort_values(by='Start_Date_Obj', ascending=True)
 
+        # Split data chronologically for past
         df_past = df[df['End_Date_Obj'] < today].copy()
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
