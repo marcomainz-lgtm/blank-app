@@ -4,6 +4,7 @@ import re
 import requests
 from bs4 import BeautifulSoup
 import urllib.parse
+import datetime
 
 # Ihr stabiler ntfy-Push-Kanal
 NTFY_TOPIC = "my_badminton_tournaments_40723_v2" 
@@ -27,12 +28,28 @@ def is_youth_tournament(title, tag_parts):
     return False
 
 
-def detect_discipline_days(tournament_url):
+def detect_discipline_days(tournament_url, start_date_str, end_date_str):
     """
     Sucht auf der Turnierseite und deren relevanten Navigations-Unterseiten nach Informationen,
     welche Disziplin an welchem Tag (Samstag/Sonntag) stattfindet. Unterstützt Deutsch & Englisch.
     """
     days = {"he": "", "hd": "", "mx": ""}
+    weekday_names = {
+        0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
+        4: "Freitag", 5: "Samstag", 6: "Sonntag"
+    }
+
+    # --- REGEL 1: Eintägige Turniere automatisch zuweisen ---
+    if start_date_str and end_date_str and start_date_str == end_date_str:
+        try:
+            dt = datetime.datetime.strptime(start_date_str, "%d.%m.%Y").date()
+            day_name = weekday_names[dt.weekday()]
+            print(f" -> {tournament_url}: Eintägiges Turnier am {day_name}. Automatische Zuweisung durchgeführt.")
+            return {"he": day_name, "hd": day_name, "mx": day_name}
+        except Exception:
+            pass
+
+    # --- REGEL 2: Heuristische Suche auf Turnier.de ---
     try:
         session = requests.Session()
         # Sprach-Cookies setzen, damit wir die deutsche Version erzwingen und Cookie-Einwilligungen umgehen
@@ -49,10 +66,10 @@ def detect_discipline_days(tournament_url):
         
         soup = BeautifulSoup(r.content, 'html.parser')
         
-        # 1. Haupttext extrahieren (Zeilenumbrüche erhalten!)
+        # Haupttext extrahieren (Zeilenumbrüche erhalten!)
         text = soup.get_text(separator="\n").lower()
         
-        # 2. Navigation nach relevanten Unterseiten durchsuchen
+        # Navigation nach relevanten Unterseiten durchsuchen
         sub_links = []
         for a in soup.find_all('a', href=True):
             a_text = a.get_text().lower().strip()
@@ -63,7 +80,7 @@ def detect_discipline_days(tournament_url):
                 full_sub_link = urllib.parse.urljoin(tournament_url, a_href)
                 sub_links.append(full_sub_link)
         
-        # Bis zu 5 eindeutige Unterseiten scannen (PDFs ausklammern)
+        # Bis zu 5 interne Unterseiten scannen (PDFs ausklammern)
         sub_links = list(set(sub_links))[:5]
         for sub_link in sub_links:
             try:
@@ -77,7 +94,7 @@ def detect_discipline_days(tournament_url):
             except Exception:
                 pass
         
-        # 3. Text zeilenweise verarbeiten, um logische Einheiten nicht zu zerreißen
+        # Text zeilenweise verarbeiten, um logische Einheiten nicht zu zerreißen
         raw_lines = text.split("\n")
         clauses = []
         for line in raw_lines:
@@ -135,6 +152,13 @@ def detect_discipline_days(tournament_url):
             days["hd"] = found_hd[0]
         if found_mx and len(set(found_mx)) == 1:
             days["mx"] = found_mx[0]
+            
+        # Logging der Heuristik-Ergebnisse im Terminal
+        if days["he"] or days["hd"] or days["mx"]:
+            print(f" -> Heuristik-Ergebnis für '{tournament_url}':")
+            if days["he"]: print(f"    * Herreneinzel: {days['he']}")
+            if days["hd"]: print(f"    * Herrendoppel: {days['hd']}")
+            if days["mx"]: print(f"    * Mixed: {days['mx']}")
             
     except Exception as e:
         print(f"Fehler bei der Zeitplan-Heuristik für {tournament_url}: {e}")
@@ -367,7 +391,7 @@ def check_for_updates():
         if t_id not in known_tournaments:
             # 1. Neues Turnier gefunden -> Heuristische Zeitplananalyse durchführen!
             print(f"Neues Turnier gefunden: {t['title']}. Analysiere Zeitplan...")
-            detected_days = detect_discipline_days(t["link"])
+            detected_days = detect_discipline_days(t["link"], t["start_date"], t["end_date"])
             t["day_he"] = detected_days["he"]
             t["day_hd"] = detected_days["hd"]
             t["day_mx"] = detected_days["mx"]
@@ -396,7 +420,7 @@ def check_for_updates():
             # Falls der Zeitplan noch komplett unbeschrieben ist, versuchen wir ihn nachträglich zu bestimmen (Migration)
             if not day_he and not day_hd and not day_mx:
                 print(f"Analysiere Zeitplan für bestehendes Turnier: {t['title']}...")
-                detected_days = detect_discipline_days(t["link"])
+                detected_days = detect_discipline_days(t["link"], t["start_date"], t["end_date"])
                 day_he = detected_days["he"]
                 day_hd = detected_days["hd"]
                 day_mx = detected_days["mx"]
@@ -423,4 +447,4 @@ def check_for_updates():
 
 
 if __name__ == "__main__":
-    check_for_updates()
+    check_for_updates()git add . && git commit -m "Eintaegige Turniere und dynamische Wochentage implementiert" && git pull --rebase && git push && python tracker.py

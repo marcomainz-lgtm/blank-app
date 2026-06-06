@@ -93,34 +93,53 @@ if IS_ADMIN:
 only_registered = st.toggle("Nur gemeldete Turniere anzeigen", value=False)
 
 
-# --- HILFSFUNKTION FÜR DATUMBERECHNUNG ---
-def get_formatted_day(day_selection, start_date_obj):
-    """Berechnet basierend auf dem Turnier-Startdatum den exakten Kalendertag für Samstag/Sonntag (mit führenden Nullen)."""
+# --- DYNAMISCHE HILFSFUNKTIONEN FÜR DATUM UND WOCHENTAGE ---
+def get_tournament_day_options(start_date_obj, end_date_obj):
+    """Generiert eine dynamische Liste aller echten Turniertage (z. B. nur Samstag, wenn das Turnier eintägig ist)."""
+    weekday_names = {
+        0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
+        4: "Freitag", 5: "Samstag", 6: "Sonntag"
+    }
+    if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
+        return ["-- Tag wählen --"]
+    
+    day_options = ["-- Tag wählen --"]
+    current_date = start_date_obj
+    limit = 0
+    while current_date <= end_date_obj and limit < 10:
+        day_name = weekday_names[current_date.weekday()]
+        formatted_date = current_date.strftime("%d.%m.")
+        day_options.append(f"{day_name}, {formatted_date}")
+        current_date += datetime.timedelta(days=1)
+        limit += 1
+        
+    return day_options
+
+
+def get_formatted_day(day_selection, start_date_obj, end_date_obj):
+    """Findet basierend auf dem gespeicherten Wochentag (z. B. 'Samstag') das exakte Datum im Turnierzeitraum."""
     if not day_selection or day_selection in ["-- Tag wählen --", "Keine Angabe", ""]:
         return ""
-    if pd.isnull(start_date_obj):
+    if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
         return day_selection
     
+    weekday_names = {
+        0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
+        4: "Freitag", 5: "Samstag", 6: "Sonntag"
+    }
+    
     try:
-        # Finde heraus, welcher Wochentag das Startdatum ist (0=Montag, 5=Samstag, 6=Sonntag)
-        wd = start_date_obj.weekday()
-        
-        # Berechne den Abstand zu Samstag (5) und Sonntag (6) dieses Wochenendes
-        sat_dt = start_date_obj + datetime.timedelta(days=(5 - wd))
-        sun_dt = start_date_obj + datetime.timedelta(days=(6 - wd))
-        
-        # Formatierung mit führenden Nullen (z. B. 06.06. statt 6.6.)
-        sat_str = sat_dt.strftime("%d.%m.")
-        sun_str = sun_dt.strftime("%d.%m.")
-        
-        if day_selection == "Samstag":
-            return f"Samstag, {sat_str}"
-        elif day_selection == "Sonntag":
-            return f"Sonntag, {sun_str}"
-        elif day_selection == "Samstag & Sonntag":
-            return f"Samstag, {sat_str} & Sonntag, {sun_str}"
+        current_date = start_date_obj
+        limit = 0
+        while current_date <= end_date_obj and limit < 10:
+            day_name = weekday_names[current_date.weekday()]
+            if day_name == day_selection:
+                return f"{day_name}, {current_date.strftime('%d.%m.')}"
+            current_date += datetime.timedelta(days=1)
+            limit += 1
     except Exception:
         pass
+        
     return day_selection
 
 
@@ -228,11 +247,12 @@ if os.path.exists(DB_FILE):
                             if bool(item.get('registered', False)):
                                 parts = []
                                 start_date_obj = item['Start_Date_Obj']
+                                end_date_obj = item['End_Date_Obj']
                                 
                                 # Einzel
                                 if bool(item.get('reg_he', False)):
                                     day_val = item.get('day_he', '')
-                                    formatted_day = get_formatted_day(day_val, start_date_obj)
+                                    formatted_day = get_formatted_day(day_val, start_date_obj, end_date_obj)
                                     day_suffix = f" ({formatted_day})" if formatted_day else ""
                                     parts.append(f"Herreneinzel{day_suffix}")
                                 
@@ -249,7 +269,7 @@ if os.path.exists(DB_FILE):
                                         partner_str = f" mit {p_hd}"
                                         
                                     day_val = item.get('day_hd', '')
-                                    formatted_day = get_formatted_day(day_val, start_date_obj)
+                                    formatted_day = get_formatted_day(day_val, start_date_obj, end_date_obj)
                                     day_suffix = f" ({formatted_day})" if formatted_day else ""
                                     parts.append(f"Herrendoppel{partner_str}{day_suffix}")
                                 
@@ -266,7 +286,7 @@ if os.path.exists(DB_FILE):
                                         partner_str = f" mit {p_mx}"
                                         
                                     day_val = item.get('day_mx', '')
-                                    formatted_day = get_formatted_day(day_val, start_date_obj)
+                                    formatted_day = get_formatted_day(day_val, start_date_obj, end_date_obj)
                                     day_suffix = f" ({formatted_day})" if formatted_day else ""
                                     parts.append(f"Mixed{partner_str}{day_suffix}")
                                     
@@ -304,32 +324,26 @@ if os.path.exists(DB_FILE):
                                 st.write("---")
                                 col_he, col_hd, col_mx = st.columns(3)
                                 
-                                # Berechne Samstag und Sonntag Strings für die Backend-Dropdowns
+                                # Bestimme dynamisch die exakten Turniertage für dieses spezielle Turnier
                                 start_date_obj = item['Start_Date_Obj']
-                                sat_str, sun_str = "", ""
-                                if not pd.isnull(start_date_obj):
-                                    wd = start_date_obj.weekday()
-                                    sat_dt = start_date_obj + datetime.timedelta(days=(5 - wd))
-                                    sun_dt = start_date_obj + datetime.timedelta(days=(6 - wd))
-                                    sat_str = sat_dt.strftime("%d.%m.")
-                                    sun_str = sun_dt.strftime("%d.%m.")
-                                
-                                # Erstelle die Sprachoptionen inklusive Datum
-                                if sat_str and sun_str:
-                                    day_options = ["-- Tag wählen --", f"Samstag, {sat_str}", f"Sonntag, {sun_str}"]
-                                else:
-                                    day_options = ["-- Tag wählen --", "Samstag", "Sonntag"]
+                                end_date_obj = item['End_Date_Obj']
+                                day_options = get_tournament_day_options(start_date_obj, end_date_obj)
                                 
                                 with col_he:
                                     st.markdown("**Herreneinzel**")
                                     val_he = st.checkbox("Meldung Einzel", value=bool(item.get('reg_he', False)), key=f"he_{item['id']}")
                                     val_day_he_db = item.get('day_he', '')
                                     if val_he:
-                                        # Index bestimmen für vorausgewählten Wert
-                                        he_idx = 1 if val_day_he_db == "Samstag" else (2 if val_day_he_db == "Sonntag" else 0)
+                                        # Index für vorausgewählten Wert dynamisch suchen
+                                        he_idx = 0
+                                        if val_day_he_db:
+                                            for o_idx, opt in enumerate(day_options):
+                                                if opt.startswith(val_day_he_db):
+                                                    he_idx = o_idx
+                                                    break
                                         selected_label_he = st.selectbox("Spieltag Einzel", options=day_options, index=he_idx, key=f"day_he_{item['id']}")
-                                        # Zurück-Mappen auf standardisierte DB-Werte ("Samstag", "Sonntag" oder "")
-                                        val_day_he = "Samstag" if selected_label_he == day_options[1] else ("Sonntag" if selected_label_he == day_options[2] else "")
+                                        # Nur den reinen Wochentag (z.B. "Samstag") abspeichern
+                                        val_day_he = selected_label_he.split(",")[0].strip() if selected_label_he != "-- Tag wählen --" else ""
                                     else:
                                         val_day_he = ""
                                         
@@ -346,10 +360,15 @@ if os.path.exists(DB_FILE):
                                         if val_partner_hd == "-- Kein Partner --":
                                             val_partner_hd = ""
                                             
-                                        # Index bestimmen für vorausgewählten Wert
-                                        hd_idx = 1 if val_day_hd_db == "Samstag" else (2 if val_day_hd_db == "Sonntag" else 0)
+                                        # Index für vorausgewählten Wert dynamisch suchen
+                                        hd_idx = 0
+                                        if val_day_hd_db:
+                                            for o_idx, opt in enumerate(day_options):
+                                                if opt.startswith(val_day_hd_db):
+                                                    hd_idx = o_idx
+                                                    break
                                         selected_label_hd = st.selectbox("Spieltag Doppel", options=day_options, index=hd_idx, key=f"day_hd_{item['id']}")
-                                        val_day_hd = "Samstag" if selected_label_hd == day_options[1] else ("Sonntag" if selected_label_hd == day_options[2] else "")
+                                        val_day_hd = selected_label_hd.split(",")[0].strip() if selected_label_hd != "-- Tag wählen --" else ""
                                     else:
                                         val_partner_hd = ""
                                         val_day_hd = ""
@@ -367,10 +386,15 @@ if os.path.exists(DB_FILE):
                                         if val_partner_mx == "-- Kein Partner --":
                                             val_partner_mx = ""
                                             
-                                        # Index bestimmen für vorausgewählten Wert
-                                        mx_idx = 1 if val_day_mx_db == "Samstag" else (2 if val_day_mx_db == "Sonntag" else 0)
+                                        # Index für vorausgewählten Wert dynamisch suchen
+                                        mx_idx = 0
+                                        if val_day_mx_db:
+                                            for o_idx, opt in enumerate(day_options):
+                                                if opt.startswith(val_day_mx_db):
+                                                    mx_idx = o_idx
+                                                    break
                                         selected_label_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_idx, key=f"day_mx_{item['id']}")
-                                        val_day_mx = "Samstag" if selected_label_mx == day_options[1] else ("Sonntag" if selected_label_mx == day_options[2] else "")
+                                        val_day_mx = selected_label_mx.split(",")[0].strip() if selected_label_mx != "-- Tag wählen --" else ""
                                     else:
                                         val_partner_mx = ""
                                         val_day_mx = ""
@@ -446,11 +470,12 @@ if os.path.exists(DB_FILE):
                             if bool(item.get('registered', False)):
                                 parts = []
                                 start_date_obj = item['Start_Date_Obj']
+                                end_date_obj = item['End_Date_Obj']
                                 
                                 # Einzel
                                 if bool(item.get('reg_he', False)):
                                     day_val = item.get('day_he', '')
-                                    formatted_day = get_formatted_day(day_val, start_date_obj)
+                                    formatted_day = get_formatted_day(day_val, start_date_obj, end_date_obj)
                                     day_suffix = f" ({formatted_day})" if formatted_day else ""
                                     parts.append(f"Herreneinzel{day_suffix}")
                                 
@@ -467,7 +492,7 @@ if os.path.exists(DB_FILE):
                                         partner_str = f" mit {p_hd}"
                                         
                                     day_val = item.get('day_hd', '')
-                                    formatted_day = get_formatted_day(day_val, start_date_obj)
+                                    formatted_day = get_formatted_day(day_val, start_date_obj, end_date_obj)
                                     day_suffix = f" ({formatted_day})" if formatted_day else ""
                                     parts.append(f"Herrendoppel{partner_str}{day_suffix}")
                                         
@@ -484,7 +509,7 @@ if os.path.exists(DB_FILE):
                                         partner_str = f" mit {p_mx}"
                                         
                                     day_val = item.get('day_mx', '')
-                                    formatted_day = get_formatted_day(day_val, start_date_obj)
+                                    formatted_day = get_formatted_day(day_val, start_date_obj, end_date_obj)
                                     day_suffix = f" ({formatted_day})" if formatted_day else ""
                                     parts.append(f"Mixed{partner_str}{day_suffix}")
                                     
@@ -522,30 +547,24 @@ if os.path.exists(DB_FILE):
                                 st.write("---")
                                 col_he, col_hd, col_mx = st.columns(3)
                                 
-                                # Berechne Samstag und Sonntag Strings für die Backend-Dropdowns (past)
+                                # Bestimme dynamisch die exakten Turniertage für dieses spezielle Turnier (past)
                                 start_date_obj = item['Start_Date_Obj']
-                                sat_str, sun_str = "", ""
-                                if not pd.isnull(start_date_obj):
-                                    wd = start_date_obj.weekday()
-                                    sat_dt = start_date_obj + datetime.timedelta(days=(5 - wd))
-                                    sun_dt = start_date_obj + datetime.timedelta(days=(6 - wd))
-                                    sat_str = sat_dt.strftime("%d.%m.")
-                                    sun_str = sun_dt.strftime("%d.%m.")
-                                
-                                # Erstelle die Sprachoptionen inklusive Datum
-                                if sat_str and sun_str:
-                                    day_options = ["-- Tag wählen --", f"Samstag, {sat_str}", f"Sonntag, {sun_str}"]
-                                else:
-                                    day_options = ["-- Tag wählen --", "Samstag", "Sonntag"]
+                                end_date_obj = item['End_Date_Obj']
+                                day_options = get_tournament_day_options(start_date_obj, end_date_obj)
                                 
                                 with col_he:
                                     st.markdown("**Herreneinzel**")
                                     val_he = st.checkbox("Herreneinzel", value=bool(item.get('reg_he', False)), key=f"he_past_{item['id']}")
                                     val_day_he_db = item.get('day_he', '')
                                     if val_he:
-                                        he_idx = 1 if val_day_he_db == "Samstag" else (2 if val_day_he_db == "Sonntag" else 0)
+                                        he_idx = 0
+                                        if val_day_he_db:
+                                            for o_idx, opt in enumerate(day_options):
+                                                if opt.startswith(val_day_he_db):
+                                                    he_idx = o_idx
+                                                    break
                                         selected_label_he = st.selectbox("Spieltag Einzel", options=day_options, index=he_idx, key=f"day_he_past_{item['id']}")
-                                        val_day_he = "Samstag" if selected_label_he == day_options[1] else ("Sonntag" if selected_label_he == day_options[2] else "")
+                                        val_day_he = selected_label_he.split(",")[0].strip() if selected_label_he != "-- Tag wählen --" else ""
                                     else:
                                         val_day_he = ""
                                 
@@ -562,9 +581,14 @@ if os.path.exists(DB_FILE):
                                         if val_partner_hd == "-- Kein Partner --":
                                             val_partner_hd = ""
                                             
-                                        hd_idx = 1 if val_day_hd_db == "Samstag" else (2 if val_day_hd_db == "Sonntag" else 0)
+                                        hd_idx = 0
+                                        if val_day_hd_db:
+                                            for o_idx, opt in enumerate(day_options):
+                                                if opt.startswith(val_day_hd_db):
+                                                    hd_idx = o_idx
+                                                    break
                                         selected_label_hd = st.selectbox("Spieltag Doppel", options=day_options, index=hd_idx, key=f"day_hd_past_{item['id']}")
-                                        val_day_hd = "Samstag" if selected_label_hd == day_options[1] else ("Sonntag" if selected_label_hd == day_options[2] else "")
+                                        val_day_hd = selected_label_hd.split(",")[0].strip() if selected_label_hd != "-- Tag wählen --" else ""
                                     else:
                                         val_partner_hd = ""
                                         val_day_hd = ""
@@ -582,9 +606,14 @@ if os.path.exists(DB_FILE):
                                         if val_partner_mx == "-- Kein Partner --":
                                             val_partner_mx = ""
                                             
-                                        mx_idx = 1 if val_day_mx_db == "Samstag" else (2 if val_day_mx_db == "Sonntag" else 0)
+                                        mx_idx = 0
+                                        if val_day_mx_db:
+                                            for o_idx, opt in enumerate(day_options):
+                                                if opt.startswith(val_day_mx_db):
+                                                    mx_idx = o_idx
+                                                    break
                                         selected_label_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_idx, key=f"day_mx_past_{item['id']}")
-                                        val_day_mx = "Samstag" if selected_label_mx == day_options[1] else ("Sonntag" if selected_label_mx == day_options[2] else "")
+                                        val_day_mx = selected_label_mx.split(",")[0].strip() if selected_label_mx != "-- Tag wählen --" else ""
                                     else:
                                         val_partner_mx = ""
                                         val_day_mx = ""
