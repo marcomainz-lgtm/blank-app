@@ -101,7 +101,7 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
                     "Accept-Language": "de-DE,de;q=0.9",
                     "X-Requested-With": "XMLHttpRequest"
                 }
-                r_sub = session.get(sub_link, headers_ajax, timeout=5)
+                r_sub = session.get(sub_link, headers=headers_ajax, timeout=5)
                 
                 if "cookiewall" in r_sub.url:
                     print(f" -> Warnung: Unterseite {sub_link} wurde auf die Cookie-Wall umgeleitet.")
@@ -125,14 +125,14 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         has_hd_offered = False
         has_mx_offered = False
         
-        # HE / Einzel Keywords
-        if "einzel" in text or "single" in text or "he" in text.split() or "de" in text.split() or "ms" in text.split() or "ws" in text.split() or "he-" in text:
+        # HE / Einzel Keywords (mit RegEx-Wortgrenzen für maximale Präzision)
+        if "einzel" in text or "single" in text or re.search(r'\bhe\b', text) or re.search(r'\bde\b', text) or re.search(r'\bms\b', text) or re.search(r'\bws\b', text):
             has_he_offered = True
         # HD / Doppel Keywords
-        if "doppel" in text or "double" in text or "hd" in text.split() or "dd" in text.split() or "md" in text.split() or "wd" in text.split() or "hd-" in text:
+        if "doppel" in text or "double" in text or re.search(r'\bhd\b', text) or re.search(r'\bdd\b', text) or re.search(r'\bmd\b', text) or re.search(r'\bwd\b', text):
             has_hd_offered = True
         # MX / Mixed Keywords
-        if "mixed" in text or "gemischt" in text or "mx" in text.split() or "gd" in text.split() or "xd" in text.split() or "mx-" in text:
+        if "mixed" in text or "gemischt" in text or re.search(r'\bmx\b', text) or re.search(r'\bgd\b', text) or re.search(r'\bxd\b', text):
             has_mx_offered = True
 
         # --- DYNAMISCHE DATUMS-WOCHENTAGS-ZUORDNUNG ---
@@ -251,10 +251,10 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             has_day_directly = (is_sat or is_sun or is_fri)
             
             if has_day_directly or is_schedule_line:
-                # Disziplinen erkennen (Deutsch & Englisch)
-                is_he = ("einzel" in c_lower or "single" in c_lower or "he" in c_lower.split() or "de" in c_lower.split() or "ms" in c_lower.split() or "ws" in c_lower.split())
-                is_hd = ("doppel" in c_lower or "double" in c_lower or "hd" in c_lower.split() or "dd" in c_lower.split() or "md" in c_lower.split() or "wd" in c_lower.split())
-                is_mx = ("mixed" in c_lower or "gemischt" in c_lower or "mx" in c_lower.split() or "gd" in c_lower.split() or "xd" in c_lower.split())
+                # Disziplinen erkennen (Deutsch & Englisch mit robusten RegEx-Wortgrenzen statt fehleranfaelligem .split())
+                is_he = ("einzel" in c_lower or "single" in c_lower or re.search(r'\bhe\b', c_lower) or re.search(r'\bde\b', c_lower) or re.search(r'\bms\b', c_lower) or re.search(r'\bws\b', c_lower))
+                is_hd = ("doppel" in c_lower or "double" in c_lower or re.search(r'\bhd\b', c_lower) or re.search(r'\bdd\b', c_lower) or re.search(r'\bmd\b', c_lower) or re.search(r'\bwd\b', c_lower))
+                is_mx = ("mixed" in c_lower or "gemischt" in c_lower or re.search(r'\bmx\b', c_lower) or re.search(r'\bgd\b', c_lower) or re.search(r'\bxd\b', c_lower))
 
                 # Wenn die Zeile eine Disziplin nennt, ordne sie dem aktiven Tag zu
                 if is_he and not is_hd and not is_mx:
