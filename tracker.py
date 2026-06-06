@@ -95,7 +95,13 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
                 # Kurze Pause einlegen (Simuliert menschliches Surfen & umgeht Cloudflare-Sperren)
                 time.sleep(0.5)
                 
-                r_sub = session.get(sub_link, headers=headers, timeout=5)
+                # AJAX-Header senden, um ausschließlich den Inhalt der Lightbox (Ausschreibung) abzurufen
+                headers_ajax = {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                    "Accept-Language": "de-DE,de;q=0.9",
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+                r_sub = session.get(sub_link, headers=headers_ajax, timeout=5)
                 
                 if "cookiewall" in r_sub.url:
                     print(f" -> Warnung: Unterseite {sub_link} wurde auf die Cookie-Wall umgeleitet.")
