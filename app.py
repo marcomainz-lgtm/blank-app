@@ -167,11 +167,13 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
     return None
 
 
-def render_tournament_schedule(item, occupied_dates=None):
+def render_tournament_schedule(item, occupied_dates=None, vacation_dates=None):
     """Rendert die Wochentage des Turniers einzeln und hängt ggf. erkannte Disziplinen kompakt an.
-    Zeigt zudem persönliche, unaufdringliche Konflikt-Hinweise in weichem Bernstein-Gold direkt neben dem Tag an."""
+    Dampft belegte Tage visuell ein (Grauton/Fading) und zeigt die Details der Kollision oder Urlaub in natürlicher Sprache an."""
     if occupied_dates is None:
         occupied_dates = {}
+    if vacation_dates is None:
+        vacation_dates = set()
         
     weekday_names_german = {
         0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
@@ -212,10 +214,18 @@ def render_tournament_schedule(item, occupied_dates=None):
             if day_mx_val == w_name:
                 day_disciplines.append("Mixed")
                 
-            # Prüfe dezent auf Terminüberschneidungen (Kollisionen)
+            # Prüfe dezent auf Terminüberschneidungen (Kollisionen oder Urlaub)
+            is_conflicted = False
             conflict_text = ""
-            if not item.get('registered', False) and current_date in occupied_dates:
-                # Gruppiere nach Turnier, falls an diesem Tag mehrere Disziplinen bei demselben Turnier gespielt werden
+            
+            # Priorität 1: Urlaub an diesem Tag (weiches Blau)
+            if not item.get('registered', False) and not item.get('urlaub', False) and current_date in vacation_dates:
+                is_conflicted = True
+                conflict_text = f" <span style='color: #2563eb; font-style: italic; font-size: 0.95em; font-weight: normal;'> &ndash; An diesem Tag bin ich im Urlaub</span>"
+            
+            # Priorität 2: Kollision mit anderem Turnier (weiches Gold-Orange)
+            elif not item.get('registered', False) and current_date in occupied_dates:
+                is_conflicted = True
                 t_groups = {}
                 for conflict in occupied_dates[current_date]:
                     c_title = conflict["title"]
@@ -232,18 +242,19 @@ def render_tournament_schedule(item, occupied_dates=None):
                     else:
                         discs_str = discs_sorted[0]
                         
-                    # Personalisiertes Statusschema ("spiele ich")
                     sentence_parts.append(f"An diesem Tag spiele ich {discs_str} in {info['city']} ({other_title})")
                 
-                # Weiche, beruhigte Gold-Schriftfarbe (`#f59e0b`) ohne Emojis
                 conflict_text = f" <span style='color: #f59e0b; font-style: italic; font-size: 0.95em; font-weight: normal;'> &ndash; {'; '.join(sentence_parts)}</span>"
+                
+            # Style für die Zeile bestimmen (Unaufdringlicher Grauton und Transparenz bei Überschneidung)
+            line_style = "color: #9ca3af; opacity: 0.65;" if is_conflicted else "color: inherit;"
                 
             if day_disciplines:
                 disciplines_str = ", ".join(day_disciplines)
-                schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}{conflict_text}</div>"
+                schedule_html += f"<div style='margin-bottom: 2px; {line_style}'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}{conflict_text}</div>"
             else:
                 # Wochentag auch dann auflisten, wenn noch keine Disziplinen bekannt sind
-                schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}</strong>{conflict_text}</div>"
+                schedule_html += f"<div style='margin-bottom: 2px; {line_style}'>🗓️ <strong>{w_name}, {formatted_dt}</strong>{conflict_text}</div>"
                 
             current_date += datetime.timedelta(days=1)
             limit += 1
@@ -285,7 +296,8 @@ if os.path.exists(DB_FILE):
             'start_date': None,
             'end_date': None,
             'organizer': 'Unbekannt',
-            'description': ''
+            'description': '',
+            'urlaub': False
         }
         for col, default in fallback_cols.items():
             if col not in df.columns:
@@ -294,18 +306,31 @@ if os.path.exists(DB_FILE):
                 df[col] = df[col].fillna(default)
         
         # Datentypen für die Checkbox-Spalten erzwingen
-        for col in ['registered', 'reg_he', 'reg_hd', 'reg_mx']:
+        for col in ['registered', 'reg_he', 'reg_hd', 'reg_mx', 'urlaub']:
             df[col] = df[col].astype(bool)
 
         # Convert dates for chronological sorting
         df['Start_Date_Obj'] = pd.to_datetime(df['start_date'], format='%d.%m.%Y', errors='coerce').dt.date
         df['End_Date_Obj'] = pd.to_datetime(df['end_date'], format='%d.%m.%Y', errors='coerce').dt.date
 
+        # --- DYNAMISCHE ERMITTLUNG ALLER URLAUBS-TERMINE ---
+        vacation_dates = set()
+        df_vacation = df[df['urlaub'] == True].copy()
+        for idx, v_item in df_vacation.iterrows():
+            v_start = v_item['Start_Date_Obj']
+            v_end = v_item['End_Date_Obj']
+            if pd.isnull(v_start) or pd.isnull(v_end):
+                continue
+            curr_date = v_start
+            while curr_date <= v_end:
+                vacation_dates.add(curr_date)
+                curr_date += datetime.timedelta(days=1)
+
         # --- DYNAMISCHE ERMITTLUNG ALLER BELEGTEN SPIELTAGE (FÜR DETILLIERTE KONFLIKT-ANZEIGE) ---
         occupied_dates = {}
         
-        # Nur Turniere heranziehen, bei denen ich aktiv gemeldet bin
-        df_registered = df[df['registered'] == True].copy()
+        # Nur Turniere heranziehen, bei denen ich aktiv gemeldet bin (und keinen Urlaub habe)
+        df_registered = df[(df['registered'] == True) & (df['urlaub'] == False)].copy()
         for idx, r_item in df_registered.iterrows():
             r_start = r_item['Start_Date_Obj']
             r_end = r_item['End_Date_Obj']
@@ -319,13 +344,13 @@ if os.path.exists(DB_FILE):
             # Weisen Sie jeder Disziplin ihren exakten Tag in der Belegungsliste zu
             if r_item.get('reg_he') and r_item.get('day_he'):
                 dt = get_date_for_weekday(r_item['day_he'], r_start, r_end)
-                if dt: occupied_dates.setdefault(dt, []).append({"disc": "Einzel", "city": r_city, "title": r_title})
+                if dt: reg_dates.add(dt)
             if r_item.get('reg_hd') and r_item.get('day_hd'):
                 dt = get_date_for_weekday(r_item['day_hd'], r_start, r_end)
-                if dt: occupied_dates.setdefault(dt, []).append({"disc": "Doppel", "city": r_city, "title": r_title})
+                if dt: reg_dates.add(dt)
             if r_item.get('reg_mx') and r_item.get('day_mx'):
                 dt = get_date_for_weekday(r_item['day_mx'], r_start, r_end)
-                if dt: occupied_dates.setdefault(dt, []).append({"disc": "Mixed", "city": r_city, "title": r_title})
+                if dt: reg_dates.add(dt)
                 
             # Fallback: Falls gemeldet, aber noch keine Disziplintage gepflegt sind,
             # blockieren wir vorsorglich den gesamten Turnierzeitraum
@@ -402,8 +427,28 @@ if os.path.exists(DB_FILE):
                             start_date_obj = item['Start_Date_Obj']
                             end_date_obj = item['End_Date_Obj']
                             
-                            # Automatische Formatierung der Disziplinen und Partner-Details für das grüne Banner
-                            if bool(item.get('registered', False)):
+                            # 1. Blaues Banner für Urlaubs-Wochenenden (Hat höchste Priorität)
+                            if bool(item.get('urlaub', False)):
+                                st.markdown(
+                                    f"""
+                                    <div style="
+                                        background-color: #eff6ff;
+                                        border-left: 5px solid #3b82f6;
+                                        padding: 8px 12px;
+                                        border-radius: 6px;
+                                        margin-bottom: 12px;
+                                        color: #1e40af;
+                                        font-weight: bold;
+                                    ">
+                                        <span style="font-style: normal; margin-right: 6px;">🌴</span>
+                                        Für dieses Wochenende habe ich Urlaub eingetragen!
+                                    </div>
+                                    """,
+                                    unsafe_allow_html=True
+                                )
+                            
+                            # 2. Grünes Banner für Turniere, bei denen ich aktiv angemeldet bin
+                            elif bool(item.get('registered', False)):
                                 date_groups = {}
                                 unassigned_parts = []
                                 
@@ -503,8 +548,8 @@ if os.path.exists(DB_FILE):
                             dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
                             st.markdown(f"📍 **{item['city']}**{dist_str}")
                             
-                            # Rendere den einheitlichen Zeitplan mit integrierten dezenten Konflikt-Checks
-                            render_tournament_schedule(item, occupied_dates)
+                            # Rendere den einheitlichen Zeitplan mit integrierten dezenten Konflikt- und Urlaubs-Checks
+                            render_tournament_schedule(item, occupied_dates, vacation_dates)
                             
                             st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                             
@@ -556,10 +601,10 @@ if os.path.exists(DB_FILE):
                                     selected_label_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_idx, key=f"day_mx_{item['id']}")
                                     val_day_mx = selected_label_mx.split(",")[0].strip() if selected_label_mx != "-- Tag wählen --" else ""
 
-                                # Checkboxen für die persönliche Anmeldung (Für das grüne Banner)
+                                # Checkboxen für die persönliche Anmeldung & Status (Für das grüne/blaue Banner)
                                 st.write("")
-                                st.markdown("**Meine Anmeldung (Für das grüne Banner):**")
-                                col_he, col_hd, col_mx = st.columns(3)
+                                st.markdown("**Meine Anmeldung & Status:**")
+                                col_he, col_hd, col_mx, col_url = st.columns([1, 1, 1, 1])
                                 
                                 with col_he:
                                     val_he = st.checkbox("Meldung Einzel", value=bool(item.get('reg_he', False)), key=f"he_{item['id']}")
@@ -590,6 +635,9 @@ if os.path.exists(DB_FILE):
                                     else:
                                         val_partner_mx = ""
                                         
+                                with col_url:
+                                    val_urlaub = st.checkbox("Ich bin im Urlaub", value=bool(item.get('urlaub', False)), key=f"urlaub_{item['id']}")
+                                        
                                 is_registered = (val_he or val_hd or val_mx)
                                 
                                 has_changed = (
@@ -600,7 +648,8 @@ if os.path.exists(DB_FILE):
                                     val_partner_mx != item.get('partner_mx', '') or
                                     val_day_he != item.get('day_he', '') or
                                     val_day_hd != item.get('day_hd', '') or
-                                    val_day_mx != item.get('day_mx', '')
+                                    val_day_mx != item.get('day_mx', '') or
+                                    val_urlaub != bool(item.get('urlaub', False))
                                 )
                                 
                                 if has_changed:
@@ -613,6 +662,7 @@ if os.path.exists(DB_FILE):
                                     data[item['id']]['day_he'] = val_day_he
                                     data[item['id']]['day_hd'] = val_day_hd
                                     data[item['id']]['day_mx'] = val_day_mx
+                                    data[item['id']]['urlaub'] = val_urlaub
                                     
                                     with open(DB_FILE, "w", encoding="utf-8") as f:
                                         json.dump(data, f, ensure_ascii=False, indent=4)
@@ -762,7 +812,7 @@ if os.path.exists(DB_FILE):
                             st.markdown(f"📍 **{item['city']}**{dist_str}")
                             
                             # Rendere den einheitlichen Zeitplan (past)
-                            render_tournament_schedule(item, occupied_dates)
+                            render_tournament_schedule(item, occupied_dates, vacation_dates)
                             
                             st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                             
