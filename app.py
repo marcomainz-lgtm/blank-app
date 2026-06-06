@@ -168,6 +168,53 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
     return None
 
 
+def render_tournament_schedule(item):
+    """Rendert die Wochentage des Turniers einzeln und hängt ggf. erkannte Disziplinen kompakt an."""
+    weekday_names_german = {
+        0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
+        4: "Freitag", 5: "Samstag", 6: "Sonntag"
+    }
+    start_date_obj = item['Start_Date_Obj']
+    end_date_obj = item['End_Date_Obj']
+    
+    if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
+        # Fallback, falls kein gültiges Datum vorhanden ist
+        st.markdown(f"🗓️ **{item['start_date']}** bis **{item['end_date']}**")
+        return
+        
+    try:
+        schedule_html = ""
+        current_date = start_date_obj
+        limit = 0
+        while current_date <= end_date_obj and limit < 10:
+            w_name = weekday_names_german[current_date.weekday()]
+            formatted_dt = current_date.strftime("%d.%m.%Y")
+            
+            # Prüfe, ob für diesen Tag bereits Disziplinen erkannt wurden
+            day_disciplines = []
+            if item.get('day_he') == w_name:
+                day_disciplines.append("Einzel")
+            if item.get('day_hd') == w_name:
+                day_disciplines.append("Doppel")
+            if item.get('day_mx') == w_name:
+                day_disciplines.append("Mixed")
+                
+            if day_disciplines:
+                disciplines_str = ", ".join(day_disciplines)
+                schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>"
+            else:
+                # Wochentag auch dann auflisten, wenn noch keine Disziplinen bekannt sind (einheitliches Layout)
+                schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}</strong></div>"
+                
+            current_date += datetime.timedelta(days=1)
+            limit += 1
+            
+        st.markdown(f"<div style='line-height: 1.35; margin-bottom: 14px;'>{schedule_html}</div>", unsafe_allow_html=True)
+    except Exception:
+        # Fallback bei Fehlern
+        st.markdown(f"🗓️ **{item['start_date']}** bis **{item['end_date']}**")
+
+
 # Load and present database
 if os.path.exists(DB_FILE):
     try:
@@ -326,7 +373,7 @@ if os.path.exists(DB_FILE):
                                     else:
                                         unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
                                         
-                                # Baue die HTML-Zeilen chronologisch auf (Gruppiert nach Datum im neuen Format: Wochentag, Datum:)
+                                # Baue die HTML-Zeilen chronologisch auf (Gruppiert nach Datum im Format: Wochentag, Datum:)
                                 sorted_dates = sorted(date_groups.keys())
                                 weekday_names = {
                                     0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
@@ -372,38 +419,8 @@ if os.path.exists(DB_FILE):
                             dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
                             st.markdown(f"📍 **{item['city']}**{dist_str}")
                             
-                            # Gruppiere allgemeine Turnierdisziplinen nach Datum für die Karte
-                            general_date_groups = {}
-                            start_date_obj = item['Start_Date_Obj']
-                            end_date_obj = item['End_Date_Obj']
-                            
-                            if item.get('day_he'):
-                                dt_he = get_date_for_weekday(item['day_he'], start_date_obj, end_date_obj)
-                                if dt_he: general_date_groups.setdefault(dt_he, []).append("Einzel")
-                            if item.get('day_hd'):
-                                dt_hd = get_date_for_weekday(item['day_hd'], start_date_obj, end_date_obj)
-                                if dt_hd: general_date_groups.setdefault(dt_hd, []).append("Doppel")
-                            if item.get('day_mx'):
-                                dt_mx = get_date_for_weekday(item['day_mx'], start_date_obj, end_date_obj)
-                                if dt_mx: general_date_groups.setdefault(dt_mx, []).append("Mixed")
-                                
-                            weekday_names_german = {
-                                0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
-                                4: "Freitag", 5: "Samstag", 6: "Sonntag"
-                            }
-                            
-                            if general_date_groups:
-                                # Zeitplan chronologisch auflisten (eng beieinander in einem Block, mit gesundem Abstand nach unten)
-                                schedule_html = ""
-                                for dt in sorted(general_date_groups.keys()):
-                                    w_name = weekday_names_german[dt.weekday()]
-                                    formatted_dt = dt.strftime("%d.%m.%Y")
-                                    disciplines_str = ", ".join(general_date_groups[dt])
-                                    schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>"
-                                st.markdown(f"<div style='line-height: 1.35; margin-bottom: 14px;'>{schedule_html}</div>", unsafe_allow_html=True)
-                            else:
-                                # Fallback, falls kein detaillierter Zeitplan bekannt ist
-                                st.markdown(f"🗓️ **{item['start_date']}** bis **{item['end_date']}**")
+                            # Rendere den einheitlichen Zeitplan (Wochentag + Datum einzeln aufgelistet)
+                            render_tournament_schedule(item)
                             
                             st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                             
@@ -411,6 +428,8 @@ if os.path.exists(DB_FILE):
                             if IS_ADMIN:
                                 st.write("---")
                                 col_he, col_hd, col_mx = st.columns(3)
+                                start_date_obj = item['Start_Date_Obj']
+                                end_date_obj = item['End_Date_Obj']
                                 day_options = get_tournament_day_options(start_date_obj, end_date_obj)
                                 
                                 with col_he:
@@ -653,38 +672,8 @@ if os.path.exists(DB_FILE):
                             dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
                             st.markdown(f"📍 **{item['city']}**{dist_str}")
                             
-                            # Gruppiere allgemeine Turnierdisziplinen nach Datum für die Karte (past)
-                            general_date_groups = {}
-                            start_date_obj = item['Start_Date_Obj']
-                            end_date_obj = item['End_Date_Obj']
-                            
-                            if item.get('day_he'):
-                                dt_he = get_date_for_weekday(item['day_he'], start_date_obj, end_date_obj)
-                                if dt_he: general_date_groups.setdefault(dt_he, []).append("Einzel")
-                            if item.get('day_hd'):
-                                dt_hd = get_date_for_weekday(item['day_hd'], start_date_obj, end_date_obj)
-                                if dt_hd: general_date_groups.setdefault(dt_hd, []).append("Doppel")
-                            if item.get('day_mx'):
-                                dt_mx = get_date_for_weekday(item['day_mx'], start_date_obj, end_date_obj)
-                                if dt_mx: general_date_groups.setdefault(dt_mx, []).append("Mixed")
-                                
-                            weekday_names_german = {
-                                0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
-                                4: "Freitag", 5: "Samstag", 6: "Sonntag"
-                            }
-                            
-                            if general_date_groups:
-                                # Zeitplan chronologisch auflisten (eng beieinander in einem Block, mit gesundem Abstand nach unten)
-                                schedule_html = ""
-                                for dt in sorted(general_date_groups.keys()):
-                                    w_name = weekday_names_german[dt.weekday()]
-                                    formatted_dt = dt.strftime("%d.%m.%Y")
-                                    disciplines_str = ", ".join(general_date_groups[dt])
-                                    schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>"
-                                st.markdown(f"<div style='line-height: 1.35; margin-bottom: 14px;'>{schedule_html}</div>", unsafe_allow_html=True)
-                            else:
-                                # Fallback (past)
-                                st.markdown(f"🗓️ **{item['start_date']}** bis **{item['end_date']}**")
+                            # Rendere den einheitlichen Zeitplan (past)
+                            render_tournament_schedule(item)
                             
                             st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                             
