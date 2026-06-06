@@ -81,11 +81,12 @@ if os.path.exists(DB_FILE):
 
 st.caption(f"🕒 Letztes Update der Datenbank: {last_retrieved_str}")
 
-# Database update trigger
-if st.button("Datenbank aktualisieren"):
-    with st.spinner("Suche nach neuen Turnieren auf turnier.de..."):
-        check_for_updates()
-    st.toast("Datenbank erfolgreich aktualisiert!")
+# Database update trigger (nur für angemeldete Admins sichtbar)
+if IS_ADMIN:
+    if st.button("Datenbank aktualisieren"):
+        with st.spinner("Suche nach neuen Turnieren auf turnier.de..."):
+            check_for_updates()
+        st.toast("Datenbank erfolgreich aktualisiert!")
 
 # --- MELDUNGSFILTER (TOGGLE) ---
 only_registered = st.toggle("Nur gemeldete Turniere anzeigen", value=False)
@@ -464,4 +465,4 @@ if os.path.exists(DB_FILE):
     else:
         st.info("Der Suchlauf war erfolgreich, aber es wurden keine Turniere in Ihrem Umkreis gefunden.")
 else:
-    st.warning("Keine Turnier-Datenbank gefunden. Bitte klicken Sie oben auf 'Datenbank aktualisieren' für den ersten Suchlauf.")
+    st.warning("Keine Turnier-Datenbank gefunden. Bitte wenden Sie sich an den Administrator, um den ersten Suchlauf durchzuführen.")

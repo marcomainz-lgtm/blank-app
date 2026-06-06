@@ -5,28 +5,24 @@ import requests
 from bs4 import BeautifulSoup
 import urllib.parse
 
-# Wählen Sie einen eindeutigen Kanalnamen für Ihre Push-Benachrichtigungen
+# Ihr stabiler ntfy-Push-Kanal
 NTFY_TOPIC = "my_badminton_tournaments_40723_v2" 
-
 DB_FILE = "known_tournaments.json"
 
 def is_youth_tournament(title, tag_parts):
     """
-    Prüft, ob es sich um ein Jugendturnier handelt.
+    Filtert Jugendturniere basierend auf Altersklassen-Tags (U11-U19)
+    und typischen Nachwuchs-Schlüsselwörtern zuverlässig heraus.
     """
     u_pattern = re.compile(r'^u\d+$', re.IGNORECASE)
     for tag in tag_parts:
         if u_pattern.match(tag.strip()):
             return True
-            
     if re.search(r'\b[uU]\d{1,2}\b', title):
         return True
-        
     youth_keywords = ['junior', 'kids', 'küken', 'schüler', 'jugend', 'nachwuchs', 'mini-cup']
-    title_lower = title.lower()
-    if any(kw in title_lower for kw in youth_keywords):
+    if any(kw in title.lower() for kw in youth_keywords):
         return True
-        
     return False
 
 def scrape_tournaments():
@@ -45,7 +41,7 @@ def scrape_tournaments():
     tournaments = []
     seen_ids = set()
     page = 1
-    max_pages = 20
+    max_pages = 20  # Sicherheitsgrenze für Scraper
 
     while page <= max_pages:
         print(f"Scraping page {page}...")
@@ -175,14 +171,24 @@ def scrape_tournaments():
                     "distance": distance,
                     "start_date": start_date,
                     "end_date": end_date,
-                    "tags": tags
+                    "tags": tags,
+                    # Frisch gefundene Turniere mit sauberen Default-Datenfeldern initialisieren
+                    "registered": False,
+                    "reg_he": False,
+                    "reg_hd": False,
+                    "reg_mx": False,
+                    "partner_hd": "",
+                    "partner_mx": "",
+                    "day_he": "gesamt",
+                    "day_hd": "gesamt",
+                    "day_mx": "gesamt"
                 })
                 page_tournaments_count += 1
 
         print(f"Page {page} yielded {page_tournaments_count} tournament(s).")
         
         if page_tournaments_count == 0:
-            pass
+            break
             
         has_more = response.headers.get('HasMoreResults')
         if has_more and has_more.lower() == 'false':
@@ -251,7 +257,6 @@ def check_for_updates():
             partner_hd = known_tournaments[t_id].get('partner_hd', '')
             partner_mx = known_tournaments[t_id].get('partner_mx', '')
             
-            # Wochentags-Zuweisung schützen
             day_he = known_tournaments[t_id].get('day_he', 'gesamt')
             day_hd = known_tournaments[t_id].get('day_hd', 'gesamt')
             day_mx = known_tournaments[t_id].get('day_mx', 'gesamt')
