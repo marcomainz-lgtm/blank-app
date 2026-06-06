@@ -5,6 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 import urllib.parse
 import datetime
+import time  # Für die Pause zwischen den Anfragen
 
 # Ihr stabiler ntfy-Push-Kanal
 NTFY_TOPIC = "my_badminton_tournaments_40723_v2" 
@@ -52,18 +53,22 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
     for dom in ["dbv.turnier.de", ".turnier.de", "www.turnier.de"]:
         session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain=dom, path="/")
 
+    # --- REGEL 1: Eintägige Turniere automatisch zuweisen ---
+    if start_date_str and end_date_str and start_date_str == end_date_str:
+        try:
+            dt = datetime.datetime.strptime(start_date_str, "%d.%m.%Y").date()
+            day_name = weekday_names[dt.weekday()]
+            return {"he": day_name, "hd": day_name, "mx": day_name}
+        except Exception:
+            pass
+
+    # --- REGEL 2: Heuristische Suche auf Turnier.de ---
     try:
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
             "Accept-Language": "de-DE,de;q=0.9"
         }
         r = session.get(tournament_url, headers=headers, timeout=10)
-        
-        # Warnung ausgeben, falls umgeleitet auf Cookiewall
-        if "cookiewall" in r.url:
-            print(f" -> ACHTUNG: {tournament_url} wurde auf die Cookie-Wall umgeleitet! (Inhalt konnte nicht geladen werden)")
-            return days
-
         if r.status_code != 200:
             print(f" -> Fehler: {tournament_url} lieferte HTTP-Statuscode {r.status_code}. (Evtl. von Cloudflare blockiert)")
             return days
@@ -78,8 +83,8 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         for a in soup.find_all('a', href=True):
             a_text = a.get_text().lower().strip()
             a_href = a['href']
-            # Relevante Keywords für Zeitpläne, Bestimmungen, Disziplinen oder Klassen
-            keywords = ["bestimmungen", "ausschreibung", "zeitplan", "programm", "ablauf", "informationen", "info", "disziplinen", "klassen", "meldungen"]
+            # Relevante Keywords für Zeitpläne, Bestimmungen, Disziplinen, Klassen oder englische Äquivalente
+            keywords = ["bestimmungen", "ausschreibung", "zeitplan", "programm", "ablauf", "informationen", "info", "disziplinen", "klassen", "meldungen", "regulations", "rules"]
             if any(k in a_text for k in keywords) or any(k in a_href.lower() for k in keywords):
                 full_sub_link = urllib.parse.urljoin(tournament_url, a_href)
                 sub_links.append(full_sub_link)
@@ -90,13 +95,25 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             try:
                 if sub_link.endswith(".pdf"):
                     continue
+                
+                # Kurze Pause einlegen (Simuliert menschliches Surfen & umgeht Cloudflare-Sperren)
+                time.sleep(0.5)
+                
                 r_sub = session.get(sub_link, headers=headers, timeout=5)
+                
+                if "cookiewall" in r_sub.url:
+                    print(f" -> Warnung: Unterseite {sub_link} wurde auf die Cookie-Wall umgeleitet.")
+                    continue
+                    
                 if r_sub.status_code == 200:
                     soup_sub = BeautifulSoup(r_sub.content, 'html.parser')
                     text_sub = soup_sub.get_text(separator="\n").lower()
                     text += "\n" + text_sub
-            except Exception:
-                pass
+                    print(f" -> Unterseite erfolgreich gescannt: {sub_link}")
+                else:
+                    print(f" -> Warnung: Unterseite {sub_link} lieferte Statuscode {r_sub.status_code}")
+            except Exception as e:
+                print(f" -> Fehler beim Scannen der Unterseite {sub_link}: {e}")
         
         # --- PRÜFEN, WELCHE DISZIPLINEN ANGEBOTEN WERDEN ---
         has_he_offered = False
@@ -137,19 +154,6 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
                 limit_dt += 1
         except Exception:
             pass
-
-        # --- REGEL 1: Eintägige Turniere automatisch zuweisen ---
-        if start_date_str and end_date_str and start_date_str == end_date_str:
-            try:
-                dt = datetime.datetime.strptime(start_date_str, "%d.%m.%Y").date()
-                day_name = weekday_names[dt.weekday()]
-                return {
-                    "he": day_name if has_he_offered else "",
-                    "hd": day_name if has_hd_offered else "",
-                    "mx": day_name if has_mx_offered else ""
-                }
-            except Exception:
-                pass
 
         # Text zeilenweise verarbeiten, um logische Einheiten nicht zu zerreißen
         raw_lines = text.split("\n")
@@ -215,7 +219,7 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
                 active_day = current_day  # Vererbung des Status von oben
                 
             if not active_day:
-                continue  # Ohne bekannten Wochentag können wir nichts zuordnen
+                continue  # Ohne bekannten Wochentag können wir nichts zuordnung
                 
             # Disziplinen erkennen (Deutsch & Englisch)
             is_he = ("einzel" in c_lower or "single" in c_lower or "he" in c_lower.split() or "de" in c_lower.split() or "ms" in c_lower.split() or "ws" in c_lower.split())
@@ -411,190 +415,3 @@ def scrape_tournaments(s):
                     "partner_mx": "",
                     "day_he": "",
                     "day_hd": "",
-                    "day_mx": ""
-                })
-                page_tournaments_count += 1
-
-        print(f"Page {page} yielded {page_tournaments_count} tournament(s).")
-        
-        if page_tournaments_count == 0:
-            break
-            
-        has_more = response.headers.get('HasMoreResults')
-        if has_more and has_more.lower() == 'false':
-            print("Server indicated no further results are available.")
-            break
-
-        page += 1
-
-    print(f"Successfully scraped {len(tournaments)} tournament(s) in total across {page} page(s).")
-    return tournaments
-
-
-def send_push_notification(new_items):
-    if not new_items:
-        return
-
-    count = len(new_items)
-    
-    summary_lines = []
-    for idx, item in enumerate(new_items[:5]):
-        summary_lines.append(f"- {item['title']} in {item['city']} ({item['start_date']})")
-        
-    if count > 5:
-        summary_lines.append(f"... sowie {count - 5} weitere neue Turniere.")
-        
-    summary_lines.append("\nDashboard öffnen: https://turniere.streamlit.app")
-    message = "\n".join(summary_lines)
-    
-    try:
-        requests.post(
-            f"https://ntfy.sh/{NTFY_TOPIC}",
-            data=message.encode('utf-8'),
-            headers={
-                "Title": "Letztes Update der Datenbank",
-                "Priority": "high",
-                "Tags": "badminton,sports,exclamation"
-            }
-        )
-        print(f"Consolidated notification sent for {count} tournament(s).")
-    except Exception as e:
-        print(f"Error sending notification: {e}")
-
-
-def check_for_updates():
-    """Fallback-Funktion für Kompatibilität."""
-    for _ in check_for_updates_generator():
-        pass
-
-
-def check_for_updates_generator():
-    """Generator-Funktion für das Echtzeit-Web-Aktivitätsprotokoll."""
-    yield "Suche nach neuen Turnieren auf turnier.de..."
-    session = requests.Session()
-    
-    # --- DIESE ZEILEN MÜSSEN IMMER UND ALS ERSTES AUSGEFÜHRT WERDEN ---
-    # Setze ALWAYS die Cookies für Sprache (l=1031 für Deutsch) und Cookie-Consent (c=1)
-    # in allen möglichen Subdomains von turnier.de, um Cookiewall-Weiterleitungen sicher zu verhindern!
-    for dom in ["dbv.turnier.de", ".turnier.de", "www.turnier.de"]:
-        session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain=dom, path="/")
-    
-    headers_init = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
-    }
-    try:
-        session.get("https://dbv.turnier.de/find", headers=headers_init, timeout=10)
-        yield "Frische Session-Cookies erfolgreich geladen."
-    except Exception as e:
-        yield f"Warnung beim Laden der Session-Cookies: {e}."
-    
-    try:
-        current_list = scrape_tournaments(session)
-        yield f"Suche beendet. {len(current_list)} Turniere im Umkreis von 100km ermittelt."
-    except Exception as e:
-        yield f"Fehler beim Laden der Turnierliste: {e}"
-        return
-
-    known_tournaments = {}
-    if os.path.exists(DB_FILE):
-        try:
-            with open(DB_FILE, "r", encoding="utf-8") as f:
-                known_tournaments = json.load(f)
-        except Exception:
-            yield "Konnte bestehende Datenbank nicht lesen, initialisiere neu."
-
-    # --- SÄULE 2: DATENBANK-ZUERST-SELBSTHEILUNG ---
-    # Wir gehen die gesamte Datenbank durch und analysieren JEDES unbeschriebene Turnier,
-    # völlig unabhängig davon, was die Live-Suche (current_list) zurückgegeben hat!
-    analyzed_count = 0
-    for t_id, t in list(known_tournaments.items()):
-        day_he = t.get('day_he', '')
-        day_hd = t.get('day_hd', '')
-        day_mx = t.get('day_mx', '')
-
-        # Falls Felder noch den alten Default-Wert "gesamt" haben, leeren
-        if day_he == "gesamt": day_he = ""
-        if day_hd == "gesamt": day_hd = ""
-        if day_mx == "gesamt": day_mx = ""
-
-        # Wenn alle drei Felder leer sind, erzwingen wir die Detail-Zeitplananalyse!
-        if not day_he and not day_hd and not day_mx:
-            yield f"Analysiere Zeitplan für: {t['title']}..."
-            detected_days = detect_discipline_days(session, t["link"], t["start_date"], t["end_date"])
-            t["day_he"] = detected_days["he"]
-            t["day_hd"] = detected_days["hd"]
-            t["day_mx"] = detected_days["mx"]
-            
-            found_msg = []
-            if t["day_he"]: found_msg.append(f"Einzel: {t['day_he']}")
-            if t["day_hd"]: found_msg.append(f"Doppel: {t['day_hd']}")
-            if t["day_mx"]: found_msg.append(f"Mixed: {t['day_mx']}")
-            if found_msg:
-                yield f" -> Zeitplan erkannt: {', '.join(found_msg)}"
-            else:
-                yield " -> Keine eindeutigen Spieltage im Text ermittelt."
-            
-            known_tournaments[t_id] = t
-            analyzed_count += 1
-
-    if analyzed_count > 0:
-        yield f"Selbstheilung abgeschlossen. {analyzed_count} Turnier(e) nachträglich analysiert."
-
-    # Neue Turniere aus dem Suchlauf in die Datenbank integrieren
-    new_tournaments = []
-    for t in current_list:
-        t_id = t["id"]
-        if t_id not in known_tournaments:
-            yield f"Neues Turnier gefunden: {t['title']}."
-            detected_days = detect_discipline_days(session, t["link"], t["start_date"], t["end_date"])
-            t["day_he"] = detected_days["he"]
-            t["day_hd"] = detected_days["hd"]
-            t["day_mx"] = detected_days["mx"]
-            
-            found_msg = []
-            if t["day_he"]: found_msg.append(f"Einzel: {t['day_he']}")
-            if t["day_hd"]: found_msg.append(f"Doppel: {t['day_hd']}")
-            if t["day_mx"]: found_msg.append(f"Mixed: {t['day_mx']}")
-            if found_msg:
-                yield f" -> Zeitplan erkannt: {', '.join(found_msg)}"
-            else:
-                yield f" -> Keine eindeutigen Spieltage ermittelt."
-            
-            new_tournaments.append(t)
-            known_tournaments[t_id] = t
-        else:
-            # Sicherheits-Sync (Meldungen und Partner beibehalten)
-            old_t = known_tournaments[t_id]
-            is_registered = old_t.get('registered', False)
-            reg_he = old_t.get('reg_he', False)
-            reg_hd = old_t.get('reg_hd', False)
-            reg_mx = old_t.get('reg_mx', False)
-            partner_hd = old_t.get('partner_hd', '')
-            partner_mx = old_t.get('partner_mx', '')
-            day_he = old_t.get('day_he', '')
-            day_hd = old_t.get('day_hd', '')
-            day_mx = old_t.get('day_mx', '')
-
-            known_tournaments[t_id] = t
-            known_tournaments[t_id]['registered'] = is_registered
-            known_tournaments[t_id]['reg_he'] = reg_he
-            known_tournaments[t_id]['reg_hd'] = reg_hd
-            known_tournaments[t_id]['reg_mx'] = reg_mx
-            known_tournaments[t_id]['partner_hd'] = partner_hd
-            known_tournaments[t_id]['partner_mx'] = partner_mx
-            known_tournaments[t_id]['day_he'] = day_he
-            known_tournaments[t_id]['day_hd'] = day_hd
-            known_tournaments[t_id]['day_mx'] = day_mx
-
-    with open(DB_FILE, "w", encoding="utf-8") as f:
-        json.dump(known_tournaments, f, ensure_ascii=False, indent=4)
-
-    if new_tournaments:
-        yield f"Fertig! {len(new_tournaments)} neue(s) Turnier(e) gefunden."
-        send_push_notification(new_tournaments)
-    else:
-        yield "Fertig! Keine neuen Turniere erkannt."
-
-
-if __name__ == "__main__":
-    check_for_updates()
