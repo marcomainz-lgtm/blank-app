@@ -169,7 +169,7 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
 
 def render_tournament_schedule(item, occupied_dates=None):
     """Rendert die Wochentage des Turniers einzeln und hängt ggf. erkannte Disziplinen kompakt an.
-    Dampft belegte Tage visuell ein (Grauton/Fading), um Konflikte dezent darzustellen."""
+    Dampft belegte Tage visuell ein (Grauton/Fading) und zeigt die Details der Kollision in natürlicher Sprache an."""
     if occupied_dates is None:
         occupied_dates = {}
         
@@ -212,13 +212,32 @@ def render_tournament_schedule(item, occupied_dates=None):
             if day_mx_val == w_name:
                 day_disciplines.append("Mixed")
                 
-            # Prüfe dezent auf Terminüberschneidungen (Kollisionen)
+            # Prüfe dezent auf Terminüberschneidungen (Kollisionen) in natürlicher Sprache
             is_conflicted = False
             conflict_text = ""
             if not item.get('registered', False) and current_date in occupied_dates:
                 is_conflicted = True
-                other_title = occupied_dates[current_date]
-                conflict_text = f" <span style='font-style: italic; font-size: 0.95em;'> (belegt: '{other_title}')</span>"
+                
+                # Gruppiere nach Turnier, falls an diesem Tag mehrere Disziplinen bei demselben Turnier gespielt werden
+                t_groups = {}
+                for conflict in occupied_dates[current_date]:
+                    c_title = conflict["title"]
+                    c_city = conflict["city"]
+                    c_disc = conflict["disc"]
+                    t_groups.setdefault(c_title, {"city": c_city, "discs": []})
+                    t_groups[c_title]["discs"].append(c_disc)
+                
+                sentence_parts = []
+                for other_title, info in t_groups.items():
+                    discs_sorted = sorted(list(set(info["discs"])))
+                    if len(discs_sorted) > 1:
+                        discs_str = ", ".join(discs_sorted[:-1]) + f" & {discs_sorted[-1]}"
+                    else:
+                        discs_str = discs_sorted[0]
+                        
+                    sentence_parts.append(f"An diesem Tag spielst du {discs_str} in {info['city']} ({other_title})")
+                
+                conflict_text = f" <span style='font-style: italic; font-size: 0.95em;'> &ndash; {'; '.join(sentence_parts)}</span>"
                 
             # Style für die Zeile bestimmen (Unaufdringlicher Grauton und Transparenz bei Überschneidung)
             line_style = "color: #9ca3af; opacity: 0.65;" if is_conflicted else "color: inherit;"
@@ -286,7 +305,7 @@ if os.path.exists(DB_FILE):
         df['Start_Date_Obj'] = pd.to_datetime(df['start_date'], format='%d.%m.%Y', errors='coerce').dt.date
         df['End_Date_Obj'] = pd.to_datetime(df['end_date'], format='%d.%m.%Y', errors='coerce').dt.date
 
-        # --- DYNAMISCHE ERMITTLUNG ALLER BELEGTEN SPIELTAGE (FÜR KONFLIKT-WARNUNGEN) ---
+        # --- DYNAMISCHE ERMITTLUNG ALLER BELEGTEN SPIELTAGE (FÜR DETILLIERTE KONFLIKT-ANZEIGE) ---
         occupied_dates = {}
         
         # Nur Turniere heranziehen, bei denen ich aktiv gemeldet bin
@@ -295,33 +314,39 @@ if os.path.exists(DB_FILE):
             r_start = r_item['Start_Date_Obj']
             r_end = r_item['End_Date_Obj']
             r_title = r_item['title']
+            r_city = r_item['city']
             
             if pd.isnull(r_start) or pd.isnull(r_end):
                 continue
                 
             reg_dates = set()
-            # Nur die exakten Spieltage der Disziplinen blockieren, für die ich gemeldet bin!
+            # Weisen Sie jeder Disziplin ihren exakten Tag in der Belegungsliste zu
             if r_item.get('reg_he') and r_item.get('day_he'):
                 dt = get_date_for_weekday(r_item['day_he'], r_start, r_end)
-                if dt: reg_dates.add(dt)
+                if dt: occupied_dates.setdefault(dt, []).append({"disc": "Einzel", "city": r_city, "title": r_title})
             if r_item.get('reg_hd') and r_item.get('day_hd'):
                 dt = get_date_for_weekday(r_item['day_hd'], r_start, r_end)
-                if dt: reg_dates.add(dt)
+                if dt: occupied_dates.setdefault(dt, []).append({"disc": "Doppel", "city": r_city, "title": r_title})
             if r_item.get('reg_mx') and r_item.get('day_mx'):
                 dt = get_date_for_weekday(r_item['day_mx'], r_start, r_end)
-                if dt: reg_dates.add(dt)
+                if dt: occupied_dates.setdefault(dt, []).append({"disc": "Mixed", "city": r_city, "title": r_title})
                 
             # Fallback: Falls gemeldet, aber noch keine Disziplintage gepflegt sind,
             # blockieren wir vorsorglich den gesamten Turnierzeitraum
-            if not reg_dates:
+            has_any_day = (r_item.get('day_he') or r_item.get('day_hd') or r_item.get('day_mx'))
+            if not has_any_day:
+                active_discs = []
+                if r_item.get('reg_he'): active_discs.append("Einzel")
+                if r_item.get('reg_hd'): active_discs.append("Doppel")
+                if r_item.get('reg_mx'): active_discs.append("Mixed")
+                if not active_discs:
+                    active_discs = ["Turnier"]
+                
                 curr_date = r_start
                 while curr_date <= r_end:
-                    reg_dates.add(curr_date)
+                    for d_name in active_discs:
+                        occupied_dates.setdefault(curr_date, []).append({"disc": d_name, "city": r_city, "title": r_title})
                     curr_date += datetime.timedelta(days=1)
-                    
-            for dt in reg_dates:
-                if dt not in occupied_dates:
-                    occupied_dates[dt] = r_title
 
         # Aktuelles Datum in deutscher Zeitzone abrufen
         try:
@@ -436,7 +461,7 @@ if os.path.exists(DB_FILE):
                                     else:
                                         unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
                                         
-                                # Baue die HTML-Zeilen chronologisch auf (Gruppiert nach Datum)
+                                # Baue die HTML-Zeilen chronologisch auf (Gruppiert nach Datum im neuen Format: Wochentag, Datum:)
                                 sorted_dates = sorted(date_groups.keys())
                                 weekday_names = {
                                     0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
