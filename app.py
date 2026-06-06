@@ -142,6 +142,32 @@ def get_tournament_day_options(start_date_obj, end_date_obj):
     return day_options
 
 
+def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
+    """Findet das erste Datum im Turnierzeitraum, das dem ausgewählten Wochentag entspricht."""
+    if not day_selection or day_selection in ["-- Tag wählen --", "Keine Angabe", ""]:
+        return None
+    if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
+        return None
+    
+    weekday_names = {
+        0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
+        4: "Freitag", 5: "Samstag", 6: "Sonntag"
+    }
+    
+    try:
+        current_date = start_date_obj
+        limit = 0
+        while current_date <= end_date_obj and limit < 10:
+            day_name = weekday_names[current_date.weekday()]
+            if day_name == day_selection:
+                return current_date
+            current_date += datetime.timedelta(days=1)
+            limit += 1
+    except Exception:
+        pass
+    return None
+
+
 # Load and present database
 if os.path.exists(DB_FILE):
     try:
@@ -244,15 +270,23 @@ if os.path.exists(DB_FILE):
                         with col_info:
                             # Automatische Formatierung der Disziplinen und Partner-Details für das grüne Banner
                             if bool(item.get('registered', False)):
-                                parts = []
+                                start_date_obj = item['Start_Date_Obj']
+                                end_date_obj = item['End_Date_Obj']
                                 
-                                # Einzel
+                                date_groups = {}
+                                unassigned_parts = []
+                                
+                                # 1. Einzel
                                 if bool(item.get('reg_he', False)):
                                     day_val = item.get('day_he', '')
-                                    day_suffix = f" ({day_val})" if day_val else ""
-                                    parts.append(f"Herreneinzel{day_suffix}")
+                                    dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
+                                    text_part = "Herreneinzel"
+                                    if dt:
+                                        date_groups.setdefault(dt, []).append(text_part)
+                                    else:
+                                        unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
                                 
-                                # Doppel
+                                # 2. Doppel
                                 if bool(item.get('reg_hd', False)):
                                     p_hd = item.get('partner_hd', '').strip()
                                     if p_hd == "-- Kein Partner --":
@@ -265,8 +299,12 @@ if os.path.exists(DB_FILE):
                                         partner_str = f" mit {p_hd}"
                                         
                                     day_val = item.get('day_hd', '')
-                                    day_suffix = f" ({day_val})" if day_val else ""
-                                    parts.append(f"Herrendoppel{partner_str}{day_suffix}")
+                                    dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
+                                    text_part = f"Herrendoppel{partner_str}"
+                                    if dt:
+                                        date_groups.setdefault(dt, []).append(text_part)
+                                    else:
+                                        unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
                                 
                                 # Mixed
                                 if bool(item.get('reg_mx', False)):
@@ -281,14 +319,34 @@ if os.path.exists(DB_FILE):
                                         partner_str = f" mit {p_mx}"
                                         
                                     day_val = item.get('day_mx', '')
-                                    day_suffix = f" ({day_val})" if day_val else ""
-                                    parts.append(f"Mixed{partner_str}{day_suffix}")
+                                    dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
+                                    text_part = f"Mixed{partner_str}"
+                                    if dt:
+                                        date_groups.setdefault(dt, []).append(text_part)
+                                    else:
+                                        unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
+                                        
+                                # Baue die HTML-Zeilen chronologisch auf (Gruppiert nach Datum)
+                                sorted_dates = sorted(date_groups.keys())
+                                weekday_names = {
+                                    0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
+                                    4: "Freitag", 5: "Samstag", 6: "Sonntag"
+                                }
+                                
+                                html_lines = []
+                                for dt in sorted_dates:
+                                    w_name = weekday_names[dt.weekday()]
+                                    formatted_dt = dt.strftime("%d.%m.%Y")
+                                    disciplines_str = ", ".join(date_groups[dt])
+                                    html_lines.append(f"<div style='margin-top: 3px;'>🗓️ <strong>{formatted_dt} ({w_name}):</strong> {disciplines_str}</div>")
                                     
-                                details_text = ", ".join(parts)
+                                if unassigned_parts:
+                                    html_lines.append(f"<div style='margin-top: 3px;'>📋 <strong>Noch ohne Tag:</strong> {', '.join(unassigned_parts)}</div>")
+                                    
                                 details_html = ""
-                                if details_text:
-                                    details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>Disziplinen: {details_text}</div>"
-                                    
+                                if html_lines:
+                                    details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>{ ''.join(html_lines) }</div>"
+
                                 st.markdown(
                                     f"""
                                     <div style="
@@ -326,6 +384,7 @@ if os.path.exists(DB_FILE):
                                     val_he = st.checkbox("Meldung Einzel", value=bool(item.get('reg_he', False)), key=f"he_{item['id']}")
                                     val_day_he_db = item.get('day_he', '')
                                     if val_he:
+                                        # Index für vorausgewählten Wert dynamisch suchen
                                         he_idx = 0
                                         if val_day_he_db:
                                             for o_idx, opt in enumerate(day_options):
@@ -350,6 +409,7 @@ if os.path.exists(DB_FILE):
                                         if val_partner_hd == "-- Kein Partner --":
                                             val_partner_hd = ""
                                             
+                                        # Index für vorausgewählten Wert dynamisch suchen
                                         hd_idx = 0
                                         if val_day_hd_db:
                                             for o_idx, opt in enumerate(day_options):
@@ -375,6 +435,7 @@ if os.path.exists(DB_FILE):
                                         if val_partner_mx == "-- Kein Partner --":
                                             val_partner_mx = ""
                                             
+                                        # Index für vorausgewählten Wert dynamisch suchen
                                         mx_idx = 0
                                         if val_day_mx_db:
                                             for o_idx, opt in enumerate(day_options):
@@ -456,17 +517,23 @@ if os.path.exists(DB_FILE):
                         with col_info:
                             # Sanftes grünes Alert-Banner für vergangene Turniere mit denselben Verlinkungen
                             if bool(item.get('registered', False)):
-                                parts = []
                                 start_date_obj = item['Start_Date_Obj']
                                 end_date_obj = item['End_Date_Obj']
                                 
-                                # Einzel
+                                date_groups = {}
+                                unassigned_parts = []
+                                
+                                # 1. Einzel
                                 if bool(item.get('reg_he', False)):
                                     day_val = item.get('day_he', '')
-                                    day_suffix = f" ({day_val})" if day_val else ""
-                                    parts.append(f"Herreneinzel{day_suffix}")
+                                    dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
+                                    text_part = "Herreneinzel"
+                                    if dt:
+                                        date_groups.setdefault(dt, []).append(text_part)
+                                    else:
+                                        unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
                                 
-                                # Doppel
+                                # 2. Doppel
                                 if bool(item.get('reg_hd', False)):
                                     p_hd = item.get('partner_hd', '').strip()
                                     if p_hd == "-- Kein Partner --":
@@ -479,8 +546,12 @@ if os.path.exists(DB_FILE):
                                         partner_str = f" mit {p_hd}"
                                         
                                     day_val = item.get('day_hd', '')
-                                    day_suffix = f" ({day_val})" if day_val else ""
-                                    parts.append(f"Herrendoppel{partner_str}{day_suffix}")
+                                    dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
+                                    text_part = f"Herrendoppel{partner_str}"
+                                    if dt:
+                                        date_groups.setdefault(dt, []).append(text_part)
+                                    else:
+                                        unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
                                         
                                 # Mixed
                                 if bool(item.get('reg_mx', False)):
@@ -495,13 +566,33 @@ if os.path.exists(DB_FILE):
                                         partner_str = f" mit {p_mx}"
                                         
                                     day_val = item.get('day_mx', '')
-                                    day_suffix = f" ({day_val})" if day_val else ""
-                                    parts.append(f"Mixed{partner_str}{day_suffix}")
+                                    dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
+                                    text_part = f"Mixed{partner_str}"
+                                    if dt:
+                                        date_groups.setdefault(dt, []).append(text_part)
+                                    else:
+                                        unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
+                                        
+                                # Baue die HTML-Zeilen chronologisch auf (past)
+                                sorted_dates = sorted(date_groups.keys())
+                                weekday_names = {
+                                    0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
+                                    4: "Freitag", 5: "Samstag", 6: "Sonntag"
+                                }
+                                
+                                html_lines = []
+                                for dt in sorted_dates:
+                                    w_name = weekday_names[dt.weekday()]
+                                    formatted_dt = dt.strftime("%d.%m.%Y")
+                                    disciplines_str = ", ".join(date_groups[dt])
+                                    html_lines.append(f"<div style='margin-top: 3px;'>🗓️ <strong>{formatted_dt} ({w_name}):</strong> {disciplines_str}</div>")
                                     
-                                details_text = ", ".join(parts)
+                                if unassigned_parts:
+                                    html_lines.append(f"<div style='margin-top: 3px;'>📋 <strong>Noch ohne Tag:</strong> {', '.join(unassigned_parts)}</div>")
+                                    
                                 details_html = ""
-                                if details_text:
-                                    details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>Disziplinen: {details_text}</div>"
+                                if html_lines:
+                                    details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>{ ''.join(html_lines) }</div>"
 
                                 st.markdown(
                                     f"""
