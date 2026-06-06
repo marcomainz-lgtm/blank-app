@@ -393,12 +393,14 @@ if os.path.exists(DB_FILE):
                             }
                             
                             if general_date_groups:
-                                # Zeitplan chronologisch auflisten (ersetzt die bloße Datumsspanne)
+                                # Zeitplan chronologisch auflisten (eng beieinander in einem Block)
+                                schedule_html = ""
                                 for dt in sorted(general_date_groups.keys()):
                                     w_name = weekday_names_german[dt.weekday()]
                                     formatted_dt = dt.strftime("%d.%m.%Y")
                                     disciplines_str = ", ".join(general_date_groups[dt])
-                                    st.markdown(f"🗓️ **{formatted_dt} ({w_name}):** {disciplines_str}")
+                                    schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{formatted_dt} ({w_name}):</strong> {disciplines_str}</div>"
+                                st.markdown(f"<div style='line-height: 1.35; margin-bottom: 4px;'>{schedule_html}</div>", unsafe_allow_html=True)
                             else:
                                 # Fallback, falls kein detaillierter Zeitplan bekannt ist
                                 st.markdown(f"🗓️ **{item['start_date']}** bis **{item['end_date']}**")
@@ -424,7 +426,6 @@ if os.path.exists(DB_FILE):
                                                     he_idx = o_idx
                                                     break
                                         selected_label_he = st.selectbox("Spieltag Einzel", options=day_options, index=he_idx, key=f"day_he_{item['id']}")
-                                        # Nur den reinen Wochentag (z.B. "Samstag") abspeichern
                                         val_day_he = selected_label_he.split(",")[0].strip() if selected_label_he != "-- Tag wählen --" else ""
                                     else:
                                         val_day_he = ""
@@ -673,12 +674,14 @@ if os.path.exists(DB_FILE):
                             }
                             
                             if general_date_groups:
-                                # Zeitplan chronologisch auflisten (past)
+                                # Zeitplan chronologisch auflisten (eng beieinander in einem Block)
+                                schedule_html = ""
                                 for dt in sorted(general_date_groups.keys()):
                                     w_name = weekday_names_german[dt.weekday()]
                                     formatted_dt = dt.strftime("%d.%m.%Y")
                                     disciplines_str = ", ".join(general_date_groups[dt])
-                                    st.markdown(f"🗓️ **{formatted_dt} ({w_name}):** {disciplines_str}")
+                                    schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{formatted_dt} ({w_name}):</strong> {disciplines_str}</div>"
+                                st.markdown(f"<div style='line-height: 1.35; margin-bottom: 4px;'>{schedule_html}</div>", unsafe_allow_html=True)
                             else:
                                 # Fallback (past)
                                 st.markdown(f"🗓️ **{item['start_date']}** bis **{item['end_date']}**")
