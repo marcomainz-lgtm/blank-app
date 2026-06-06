@@ -4,7 +4,27 @@ import json
 import os
 import datetime
 from zoneinfo import ZoneInfo  # Für die deutsche Zeitzone
-from tracker import check_for_updates, DB_FILE
+
+# --- SICHERER IMPORT MIT AUTOMATISCHEM FALLBACK ---
+try:
+    from tracker import check_for_updates_generator, DB_FILE
+except ImportError:
+    try:
+        from tracker import DB_FILE
+    except ImportError:
+        DB_FILE = "known_tournaments.json"
+        
+    # Fallback-Generator, falls tracker.py auf dem Server noch alt/gecasht ist
+    def check_for_updates_generator():
+        yield "⚠️ Hinweis: tracker.py ist auf dem Server noch nicht synchronisiert."
+        yield "Führe Standard-Aktualisierung im Hintergrund aus..."
+        try:
+            from tracker import check_for_updates
+            check_for_updates()
+            yield "Standard-Aktualisierung erfolgreich beendet!"
+        except Exception as e:
+            yield f"Fehler bei der Aktualisierung: {e}"
+
 
 st.set_page_config(page_title="Badminton Turniere für Marco", layout="wide")
 
@@ -82,13 +102,12 @@ if os.path.exists(DB_FILE):
 
 st.caption(f"🕒 Letztes Update der Datenbank: {last_retrieved_str}")
 
-# Database update trigger (mit visuellem Aktivitätsprotokoll)
+# Database update trigger (mit robustem Aktivitätsprotokoll-Fallback)
 if IS_ADMIN:
     if st.button("Datenbank aktualisieren"):
         log_container = st.empty()
         logs = []
         with st.status("Verbindung zu turnier.de wird hergestellt...", expanded=True) as status:
-            from tracker import check_for_updates_generator
             for log_line in check_for_updates_generator():
                 logs.append(log_line)
                 log_container.code("\n".join(logs))
