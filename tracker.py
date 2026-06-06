@@ -447,4 +447,4 @@ def check_for_updates():
 
 
 if __name__ == "__main__":
-    check_for_updates()git add . && git commit -m "Eintaegige Turniere und dynamische Wochentage implementiert" && git pull --rebase && git push && python tracker.py
+    check_for_updates()

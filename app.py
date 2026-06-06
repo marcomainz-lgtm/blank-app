@@ -117,7 +117,7 @@ def get_tournament_day_options(start_date_obj, end_date_obj):
 
 
 def get_formatted_day(day_selection, start_date_obj, end_date_obj):
-    """Findet basierend auf dem gespeicherten Wochentag (z. B. 'Samstag') das exakte Datum im Turnierzeitraum."""
+    """Findet basierend auf dem gewählten Wochentag (z. B. 'Samstag') das exakte Datum im Turnierzeitraum."""
     if not day_selection or day_selection in ["-- Tag wählen --", "Keine Angabe", ""]:
         return ""
     if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
