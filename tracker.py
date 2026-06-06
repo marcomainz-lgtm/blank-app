@@ -30,15 +30,20 @@ def is_youth_tournament(title, tag_parts):
 def detect_discipline_days(tournament_url):
     """
     Sucht auf der Turnierseite und deren relevanten Navigations-Unterseiten nach Informationen,
-    welche Disziplin an welchem Tag (Samstag/Sonntag) stattfindet.
+    welche Disziplin an welchem Tag (Samstag/Sonntag) stattfindet. Unterstützt Deutsch & Englisch.
     """
     days = {"he": "", "hd": "", "mx": ""}
     try:
+        session = requests.Session()
+        # Sprach-Cookies setzen, damit wir die deutsche Version erzwingen und Cookie-Einwilligungen umgehen
+        session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain="dbv.turnier.de", path="/")
+        session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain=".turnier.de", path="/")
+        
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-            "Accept-Language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7"
+            "Accept-Language": "de-DE,de;q=0.9"
         }
-        r = requests.get(tournament_url, headers=headers, timeout=10)
+        r = session.get(tournament_url, headers=headers, timeout=10)
         if r.status_code != 200:
             return days
         
@@ -53,19 +58,19 @@ def detect_discipline_days(tournament_url):
         for a in soup.find_all('a', href=True):
             a_text = a.get_text().lower().strip()
             a_href = a['href']
-            # Relevante Keywords für Zeitpläne oder Bestimmungen
-            keywords = ["bestimmungen", "ausschreibung", "zeitplan", "programm", "ablauf", "informationen", "info"]
-            if any(k in a_text for k in keywords):
+            # Relevante Keywords für Zeitpläne, Bestimmungen, Disziplinen oder Klassen
+            keywords = ["bestimmungen", "ausschreibung", "zeitplan", "programm", "ablauf", "informationen", "info", "disziplinen", "klassen", "meldungen"]
+            if any(k in a_text for k in keywords) or any(k in a_href.lower() for k in keywords):
                 full_sub_link = urllib.parse.urljoin(tournament_url, a_href)
                 sub_links.append(full_sub_link)
         
-        # Bis zu 3 eindeutige Unterseiten scannen (PDFs ausklammern)
-        sub_links = list(set(sub_links))[:3]
+        # Bis zu 5 eindeutige Unterseiten scannen (PDFs ausklammern)
+        sub_links = list(set(sub_links))[:5]
         for sub_link in sub_links:
             try:
                 if sub_link.endswith(".pdf"):
                     continue
-                r_sub = requests.get(sub_link, headers=headers, timeout=5)
+                r_sub = session.get(sub_link, headers=headers, timeout=5)
                 if r_sub.status_code == 200:
                     soup_sub = BeautifulSoup(r_sub.content, 'html.parser')
                     text_sub = soup_sub.get_text(separator=" ").lower()
@@ -85,9 +90,9 @@ def detect_discipline_days(tournament_url):
             if len(c_lower) < 5:
                 continue
             
-            # Wochentage prüfen
-            is_sat = "samstag" in c_lower or re.search(r'\bsa\b', c_lower)
-            is_sun = "sonntag" in c_lower or re.search(r'\bso\b', c_lower)
+            # Wochentage prüfen (Deutsch & Englisch)
+            is_sat = "samstag" in c_lower or "saturday" in c_lower or re.search(r'\bsa\b', c_lower) or re.search(r'\bsat\b', c_lower)
+            is_sun = "sonntag" in c_lower or "sunday" in c_lower or re.search(r'\bso\b', c_lower) or re.search(r'\bsun\b', c_lower)
             
             if is_sat and not is_sun:
                 day_val = "Samstag"
@@ -96,16 +101,21 @@ def detect_discipline_days(tournament_url):
             else:
                 continue
                 
-            # Heuristik: Einzel (ohne "doppel" / "mixed" im selben Teilsatz)
-            if ("einzel" in c_lower or "he" in c_lower.split() or "de" in c_lower.split()) and "doppel" not in c_lower and "mixed" not in c_lower:
+            # Disziplinen erkennen (Deutsch & Englisch)
+            is_he = ("einzel" in c_lower or "single" in c_lower or "he" in c_lower.split() or "de" in c_lower.split() or "ms" in c_lower.split() or "ws" in c_lower.split())
+            is_hd = ("doppel" in c_lower or "double" in c_lower or "hd" in c_lower.split() or "dd" in c_lower.split() or "md" in c_lower.split() or "wd" in c_lower.split())
+            is_mx = ("mixed" in c_lower or "gemischt" in c_lower or "mx" in c_lower.split() or "gd" in c_lower.split() or "xd" in c_lower.split())
+
+            # Einzel (Herreneinzel / Dameneinzel)
+            if is_he and not is_hd and not is_mx:
                 found_he.append(day_val)
                 
-            # Heuristik: Doppel (ohne "einzel" / "mixed" im selben Teilsatz)
-            if ("doppel" in c_lower or "hd" in c_lower.split() or "dd" in c_lower.split()) and "einzel" not in c_lower and "mixed" not in c_lower:
+            # Doppel (Herrendoppel / Damendoppel)
+            if is_hd and not is_he and not is_mx:
                 found_hd.append(day_val)
                 
-            # Heuristik: Mixed
-            if "mixed" in c_lower or "gemischt" in c_lower or "mx" in c_lower.split() or "gd" in c_lower.split():
+            # Mixed
+            if is_mx:
                 found_mx.append(day_val)
         
         # Wenn eine Disziplin eindeutig an genau einem Tag gefunden wurde, eintragen
