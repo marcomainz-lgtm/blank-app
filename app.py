@@ -33,7 +33,6 @@ DEFAULT_LOGO = "https://content.tournamentsoftware.com/images/club/72FB92A4-34AF
 
 # Alphabetisch sortierte Spielerprofile für Herrendoppel
 PARTNERS_HD = {
-    "Dominik Gric": "https://dbv.turnier.de/player-profile/B6646621-C82C-4FEF-B7F1-42FC2A947DCD",
     "Jan Hammer": "https://dbv.turnier.de/player-profile/9070AF83-4EA3-40E0-B402-F41456147AB5",
     "Jesper Städtler": "https://dbv.turnier.de/player-profile/5CFDBFE1-E055-4479-B657-FD1CB6DEFF48",
     "Karl Olschewski": "https://dbv.turnier.de/player-profile/E2FB7DDF-AB7C-43EE-A78A-389874F1E440",
@@ -102,7 +101,7 @@ if os.path.exists(DB_FILE):
 
 st.caption(f"🕒 Letztes Update der Datenbank: {last_retrieved_str}")
 
-# Database update trigger (mit robustem Aktivitätsprotokoll-Fallback)
+# Database update trigger (mit robustem Aktivitätsprotokoll)
 if IS_ADMIN:
     if st.button("Datenbank aktualisieren"):
         log_container = st.empty()
@@ -170,7 +169,7 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
 
 def render_tournament_schedule(item, occupied_dates=None):
     """Rendert die Wochentage des Turniers einzeln und hängt ggf. erkannte Disziplinen kompakt an.
-    Zeigt zudem dezente Konflikt-Warnungen direkt neben dem betroffenen Tag an."""
+    Dampft belegte Tage visuell ein (Grauton/Fading), um Konflikte dezent darzustellen."""
     if occupied_dates is None:
         occupied_dates = {}
         
@@ -213,18 +212,23 @@ def render_tournament_schedule(item, occupied_dates=None):
             if day_mx_val == w_name:
                 day_disciplines.append("Mixed")
                 
-            # Prüfe dezent auf Terminüberschneidungen (Kollisionen), sofern wir nicht selbst gemeldet sind
+            # Prüfe dezent auf Terminüberschneidungen (Kollisionen)
+            is_conflicted = False
             conflict_text = ""
             if not item.get('registered', False) and current_date in occupied_dates:
+                is_conflicted = True
                 other_title = occupied_dates[current_date]
-                conflict_text = f" <span style='color: #ef4444; font-weight: bold;'>⚠️ (Kollision: '{other_title}')</span>"
+                conflict_text = f" <span style='font-style: italic; font-size: 0.95em;'> (belegt: '{other_title}')</span>"
+                
+            # Style für die Zeile bestimmen (Unaufdringlicher Grauton und Transparenz bei Überschneidung)
+            line_style = "color: #9ca3af; opacity: 0.65;" if is_conflicted else "color: inherit;"
                 
             if day_disciplines:
                 disciplines_str = ", ".join(day_disciplines)
-                schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}{conflict_text}</div>"
+                schedule_html += f"<div style='margin-bottom: 2px; {line_style}'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}{conflict_text}</div>"
             else:
                 # Wochentag auch dann auflisten, wenn noch keine Disziplinen bekannt sind
-                schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}</strong>{conflict_text}</div>"
+                schedule_html += f"<div style='margin-bottom: 2px; {line_style}'>🗓️ <strong>{w_name}, {formatted_dt}</strong>{conflict_text}</div>"
                 
             current_date += datetime.timedelta(days=1)
             limit += 1
@@ -496,6 +500,7 @@ if os.path.exists(DB_FILE):
                                 # Dropdowns zur Zuweisung des Zeitplans (Für alle sichtbar)
                                 st.markdown("**Allgemeiner Zeitplan (Für alle Kacheln sichtbar):**")
                                 col_day_he, col_day_hd, col_day_mx = st.columns(3)
+                                day_options = get_tournament_day_options(start_date_obj, end_date_obj)
                                 
                                 with col_day_he:
                                     val_day_he_db = item.get('day_he', '')
@@ -743,64 +748,32 @@ if os.path.exists(DB_FILE):
                             # Admin-Ansicht
                             if IS_ADMIN:
                                 st.write("---")
-                                
-                                # Collapsible für den Original-Ausschreibungstext direkt auf der Seite (past)
-                                desc_text = item.get('description', '').strip()
-                                if desc_text:
-                                    with st.expander("📝 Ausschreibungstext von turnier.de anzeigen", expanded=False):
-                                        st.write(desc_text)
-                                        
-                                # Dropdowns zur Zuweisung des Zeitplans (past)
-                                st.markdown("**Allgemeiner Zeitplan (Für alle Kacheln sichtbar):**")
-                                col_day_he, col_day_hd, col_day_mx = st.columns(3)
+                                col_he, col_hd, col_mx = st.columns(3)
                                 start_date_obj = item['Start_Date_Obj']
                                 end_date_obj = item['End_Date_Obj']
                                 day_options = get_tournament_day_options(start_date_obj, end_date_obj)
                                 
-                                with col_day_he:
-                                    val_day_he_db = item.get('day_he', '')
-                                    he_idx = 0
-                                    if val_day_he_db:
-                                        for o_idx, opt in enumerate(day_options):
-                                            if opt.startswith(val_day_he_db):
-                                                he_idx = o_idx
-                                                break
-                                    selected_label_he = st.selectbox("Spieltag Einzel", options=day_options, index=he_idx, key=f"day_he_past_{item['id']}")
-                                    val_day_he = selected_label_he.split(",")[0].strip() if selected_label_he != "-- Tag wählen --" else ""
-                                    
-                                with col_day_hd:
-                                    val_day_hd_db = item.get('day_hd', '')
-                                    hd_idx = 0
-                                    if val_day_hd_db:
-                                        for o_idx, opt in enumerate(day_options):
-                                            if opt.startswith(val_day_hd_db):
-                                                hd_idx = o_idx
-                                                break
-                                    selected_label_hd = st.selectbox("Spieltag Doppel", options=day_options, index=hd_idx, key=f"day_hd_past_{item['id']}")
-                                    val_day_hd = selected_label_hd.split(",")[0].strip() if selected_label_hd != "-- Tag wählen --" else ""
-                                    
-                                with col_day_mx:
-                                    val_day_mx_db = item.get('day_mx', '')
-                                    mx_idx = 0
-                                    if val_day_mx_db:
-                                        for o_idx, opt in enumerate(day_options):
-                                            if opt.startswith(val_day_mx_db):
-                                                mx_idx = o_idx
-                                                break
-                                    selected_label_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_idx, key=f"day_mx_past_{item['id']}")
-                                    val_day_mx = selected_label_mx.split(",")[0].strip() if selected_label_mx != "-- Tag wählen --" else ""
-
-                                # Checkboxen für die persönliche Anmeldung (past)
-                                st.write("")
-                                st.markdown("**Meine Anmeldung (Für das grüne Banner):**")
-                                col_he, col_hd, col_mx = st.columns(3)
-                                
                                 with col_he:
+                                    st.markdown("**Herreneinzel**")
                                     val_he = st.checkbox("Herreneinzel", value=bool(item.get('reg_he', False)), key=f"he_past_{item['id']}")
+                                    val_day_he_db = item.get('day_he', '')
+                                    if val_he:
+                                        he_idx = 0
+                                        if val_day_he_db:
+                                            for o_idx, opt in enumerate(day_options):
+                                                if opt.startswith(val_day_he_db):
+                                                    he_idx = o_idx
+                                                    break
+                                        selected_label_he = st.selectbox("Spieltag Einzel", options=day_options, index=he_idx, key=f"day_he_past_{item['id']}")
+                                        val_day_he = selected_label_he.split(",")[0].strip() if selected_label_he != "-- Tag wählen --" else ""
+                                    else:
+                                        val_day_he = ""
                                 
                                 with col_hd:
+                                    st.markdown("**Herrendoppel**")
                                     val_hd = st.checkbox("Herrendoppel", value=bool(item.get('reg_hd', False)), key=f"hd_past_{item['id']}")
                                     val_partner_hd = item.get('partner_hd', '')
+                                    val_day_hd_db = item.get('day_hd', '')
                                     
                                     if val_hd:
                                         hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
@@ -808,12 +781,24 @@ if os.path.exists(DB_FILE):
                                         val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_past_{item['id']}")
                                         if val_partner_hd == "-- Kein Partner --":
                                             val_partner_hd = ""
+                                            
+                                        hd_idx = 0
+                                        if val_day_hd_db:
+                                            for o_idx, opt in enumerate(day_options):
+                                                if opt.startswith(val_day_hd_db):
+                                                    hd_idx = o_idx
+                                                    break
+                                        selected_label_hd = st.selectbox("Spieltag Doppel", options=day_options, index=hd_idx, key=f"day_hd_past_{item['id']}")
+                                        val_day_hd = selected_label_hd.split(",")[0].strip() if selected_label_hd != "-- Tag wählen --" else ""
                                     else:
                                         val_partner_hd = ""
+                                        val_day_hd = ""
                                 
                                 with col_mx:
+                                    st.markdown("**Mixed**")
                                     val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_past_{item['id']}")
                                     val_partner_mx = item.get('partner_mx', '')
+                                    val_day_mx_db = item.get('day_mx', '')
                                     
                                     if val_mx:
                                         mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
@@ -821,8 +806,18 @@ if os.path.exists(DB_FILE):
                                         val_partner_mx = st.selectbox("Partner Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_past_{item['id']}")
                                         if val_partner_mx == "-- Kein Partner --":
                                             val_partner_mx = ""
+                                            
+                                        mx_idx = 0
+                                        if val_day_mx_db:
+                                            for o_idx, opt in enumerate(day_options):
+                                                if opt.startswith(val_day_mx_db):
+                                                    mx_idx = o_idx
+                                                    break
+                                        selected_label_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_idx, key=f"day_mx_past_{item['id']}")
+                                        val_day_mx = selected_label_mx.split(",")[0].strip() if selected_label_mx != "-- Tag wählen --" else ""
                                     else:
                                         val_partner_mx = ""
+                                        val_day_mx = ""
                                         
                                 is_registered = (val_he or val_hd or val_mx)
                                 
