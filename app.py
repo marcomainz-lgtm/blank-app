@@ -326,7 +326,7 @@ if os.path.exists(DB_FILE):
                                     else:
                                         unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
                                         
-                                # Baue die HTML-Zeilen chronologisch auf (Gruppiert nach Datum)
+                                # Baue die HTML-Zeilen chronologisch auf (Gruppiert nach Datum im neuen Format: Wochentag, Datum:)
                                 sorted_dates = sorted(date_groups.keys())
                                 weekday_names = {
                                     0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
@@ -338,7 +338,7 @@ if os.path.exists(DB_FILE):
                                     w_name = weekday_names[dt.weekday()]
                                     formatted_dt = dt.strftime("%d.%m.%Y")
                                     disciplines_str = ", ".join(date_groups[dt])
-                                    html_lines.append(f"<div style='margin-top: 3px;'>🗓️ <strong>{formatted_dt} ({w_name}):</strong> {disciplines_str}</div>")
+                                    html_lines.append(f"<div style='margin-top: 3px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>")
                                     
                                 if unassigned_parts:
                                     html_lines.append(f"<div style='margin-top: 3px;'>📋 <strong>Noch ohne Tag:</strong> {', '.join(unassigned_parts)}</div>")
@@ -399,7 +399,7 @@ if os.path.exists(DB_FILE):
                                     w_name = weekday_names_german[dt.weekday()]
                                     formatted_dt = dt.strftime("%d.%m.%Y")
                                     disciplines_str = ", ".join(general_date_groups[dt])
-                                    schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{formatted_dt} ({w_name}):</strong> {disciplines_str}</div>"
+                                    schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>"
                                 st.markdown(f"<div style='line-height: 1.35; margin-bottom: 14px;'>{schedule_html}</div>", unsafe_allow_html=True)
                             else:
                                 # Fallback, falls kein detaillierter Zeitplan bekannt ist
@@ -619,7 +619,7 @@ if os.path.exists(DB_FILE):
                                     w_name = weekday_names[dt.weekday()]
                                     formatted_dt = dt.strftime("%d.%m.%Y")
                                     disciplines_str = ", ".join(date_groups[dt])
-                                    html_lines.append(f"<div style='margin-top: 3px;'>🗓️ <strong>{formatted_dt} ({w_name}):</strong> {disciplines_str}</div>")
+                                    html_lines.append(f"<div style='margin-top: 3px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>")
                                     
                                 if unassigned_parts:
                                     html_lines.append(f"<div style='margin-top: 3px;'>📋 <strong>Noch ohne Tag:</strong> {', '.join(unassigned_parts)}</div>")
@@ -680,7 +680,7 @@ if os.path.exists(DB_FILE):
                                     w_name = weekday_names_german[dt.weekday()]
                                     formatted_dt = dt.strftime("%d.%m.%Y")
                                     disciplines_str = ", ".join(general_date_groups[dt])
-                                    schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{formatted_dt} ({w_name}):</strong> {disciplines_str}</div>"
+                                    schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>"
                                 st.markdown(f"<div style='line-height: 1.35; margin-bottom: 14px;'>{schedule_html}</div>", unsafe_allow_html=True)
                             else:
                                 # Fallback (past)
