@@ -101,7 +101,7 @@
         "partner_hd": "Matthias Knaupp",
         "partner_mx": "",
         "day_he": "",
-        "day_hd": "",
+        "day_hd": "Sonntag",
         "day_mx": ""
     },
     "75D238C8-453F-49FB-BAE5-A3BE6F1A653B": {
@@ -164,8 +164,8 @@
         "partner_hd": "",
         "partner_mx": "",
         "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_hd": "Samstag",
+        "day_mx": "Sonntag"
     },
     "64562E29-35EB-4C75-959D-D99B5A27434E": {
         "id": "64562E29-35EB-4C75-959D-D99B5A27434E",
@@ -184,7 +184,7 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
+        "day_he": "Freitag",
         "day_hd": "",
         "day_mx": ""
     },
@@ -311,8 +311,8 @@
         "partner_hd": "",
         "partner_mx": "",
         "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_hd": "Sonntag",
+        "day_mx": "Samstag"
     },
     "F57C385C-549E-4200-B4C6-C604EADBF725": {
         "id": "F57C385C-549E-4200-B4C6-C604EADBF725",
@@ -520,9 +520,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Sonntag",
+        "day_hd": "Samstag",
+        "day_mx": "Sonntag"
     },
     "1A4E195A-563D-4AB6-A0C4-7D1210469199": {
         "id": "1A4E195A-563D-4AB6-A0C4-7D1210469199",
@@ -816,7 +816,7 @@
         "partner_mx": "",
         "day_he": "",
         "day_hd": "",
-        "day_mx": ""
+        "day_mx": "Freitag"
     },
     "1EB702E0-4333-44F8-BBEB-FE5DE2E91269": {
         "id": "1EB702E0-4333-44F8-BBEB-FE5DE2E91269",
@@ -878,8 +878,8 @@
         "partner_hd": "",
         "partner_mx": "",
         "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_hd": "Sonntag",
+        "day_mx": "Samstag"
     },
     "EDA96B8A-03C1-4A13-B32C-5A114E80620F": {
         "id": "EDA96B8A-03C1-4A13-B32C-5A114E80620F",
@@ -961,9 +961,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Samstag",
+        "day_hd": "Sonntag",
+        "day_mx": "Samstag"
     },
     "17F3CC0D-11D2-43BB-94CF-A39B05AB39F3": {
         "id": "17F3CC0D-11D2-43BB-94CF-A39B05AB39F3",
@@ -1129,8 +1129,8 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
+        "day_he": "Sonntag",
+        "day_hd": "Sonntag",
         "day_mx": ""
     },
     "DF382178-D2C8-4264-90D9-BF5E7161655D": {
@@ -1152,7 +1152,7 @@
         "partner_mx": "",
         "day_he": "",
         "day_hd": "",
-        "day_mx": ""
+        "day_mx": "Sonntag"
     },
     "796669DD-930A-49E1-B3F8-947B031D9566": {
         "id": "796669DD-930A-49E1-B3F8-947B031D9566",
@@ -1214,7 +1214,7 @@
         "partner_hd": "",
         "partner_mx": "",
         "day_he": "",
-        "day_hd": "",
+        "day_hd": "Sonntag",
         "day_mx": ""
     },
     "B07C11FD-BC6F-40F7-BA5E-C80CB86BF9E3": {
@@ -1298,8 +1298,8 @@
         "partner_hd": "Pascal Ziehe",
         "partner_mx": "",
         "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_hd": "Sonntag",
+        "day_mx": "Samstag"
     },
     "447AA5D5-8D67-4423-9229-15232C9F3BB1": {
         "id": "447AA5D5-8D67-4423-9229-15232C9F3BB1",
@@ -1361,8 +1361,8 @@
         "partner_hd": "",
         "partner_mx": "",
         "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_hd": "Samstag",
+        "day_mx": "Samstag"
     },
     "210E0AA6-1EA5-4565-918A-4F01E25724F5": {
         "id": "210E0AA6-1EA5-4565-918A-4F01E25724F5",
@@ -1381,7 +1381,7 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
+        "day_he": "Sonntag",
         "day_hd": "",
         "day_mx": ""
     },
@@ -1402,7 +1402,7 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
+        "day_he": "Sonntag",
         "day_hd": "",
         "day_mx": ""
     },

@@ -239,18 +239,33 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             if not active_day:
                 continue  # Ohne bekannten Wochentag können wir nichts zuordnen
                 
-            # Disziplinen erkennen (Deutsch & Englisch)
-            is_he = ("einzel" in c_lower or "single" in c_lower or "he" in c_lower.split() or "de" in c_lower.split() or "ms" in c_lower.split() or "ws" in c_lower.split())
-            is_hd = ("doppel" in c_lower or "double" in c_lower or "hd" in c_lower.split() or "dd" in c_lower.split() or "md" in c_lower.split() or "wd" in c_lower.split())
-            is_mx = ("mixed" in c_lower or "gemischt" in c_lower or "mx" in c_lower.split() or "gd" in c_lower.split() or "xd" in c_lower.split())
+            # --- NEU: Zeitplan-Zeilen-Filter ---
+            # Wir ordnen die Disziplin nur zu, wenn die Zeile entweder den Wochentag direkt nennt,
+            # oder wenn sie wie eine Zeitplan-Zeile aussieht (Uhrzeiten, Zahlen etc. enthält).
+            # Das verhindert das fehlerhafte Vererben auf allgemeine Erklärungssätze!
+            is_schedule_line = (
+                "uhr" in c_lower or 
+                "ab" in c_lower or 
+                "start" in c_lower or 
+                "beginn" in c_lower or 
+                "meldeschluss" in c_lower or
+                any(char.isdigit() for char in c_lower)
+            )
+            has_day_directly = (is_sat or is_sun or is_fri)
+            
+            if has_day_directly or is_schedule_line:
+                # Disziplinen erkennen (Deutsch & Englisch)
+                is_he = ("einzel" in c_lower or "single" in c_lower or "he" in c_lower.split() or "de" in c_lower.split() or "ms" in c_lower.split() or "ws" in c_lower.split())
+                is_hd = ("doppel" in c_lower or "double" in c_lower or "hd" in c_lower.split() or "dd" in c_lower.split() or "md" in c_lower.split() or "wd" in c_lower.split())
+                is_mx = ("mixed" in c_lower or "gemischt" in c_lower or "mx" in c_lower.split() or "gd" in c_lower.split() or "xd" in c_lower.split())
 
-            # Wenn die Zeile eine Disziplin nennt, ordne sie dem aktiven Tag zu
-            if is_he and not is_hd and not is_mx:
-                found_he.append(active_day)
-            if is_hd and not is_he and not is_mx:
-                found_hd.append(active_day)
-            if is_mx:
-                found_mx.append(active_day)
+                # Wenn die Zeile eine Disziplin nennt, ordne sie dem aktiven Tag zu
+                if is_he and not is_hd and not is_mx:
+                    found_he.append(active_day)
+                if is_hd and not is_he and not is_mx:
+                    found_hd.append(active_day)
+                if is_mx:
+                    found_mx.append(active_day)
         
         # Wenn eine Disziplin eindeutig an genau einem Tag gefunden wurde, eintragen
         if found_he and len(set(found_he)) == 1:
