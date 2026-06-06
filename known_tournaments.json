@@ -772,9 +772,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Samstag",
+        "day_hd": "Sonntag",
+        "day_mx": "Samstag"
     },
     "F9AB9134-F61F-45AB-B429-87B60BE5C7F0": {
         "id": "F9AB9134-F61F-45AB-B429-87B60BE5C7F0",
@@ -1171,9 +1171,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Samstag",
+        "day_hd": "Samstag",
+        "day_mx": "Sonntag"
     },
     "0C890480-A9D7-41BA-B78D-07D0235142DE": {
         "id": "0C890480-A9D7-41BA-B78D-07D0235142DE",

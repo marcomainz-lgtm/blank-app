@@ -40,6 +40,14 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         4: "Freitag", 5: "Samstag", 6: "Sonntag"
     }
 
+    # --- OPTIMIERUNG: URLs bereinigen (Weiterleitungen verhindern) ---
+    if "id=" in tournament_url:
+        parsed = urllib.parse.urlparse(tournament_url)
+        params = urllib.parse.parse_qs(parsed.query)
+        t_id = params.get('id', [None])[0]
+        if t_id:
+            tournament_url = f"https://dbv.turnier.de/tournament/{t_id}"
+
     # --- REGEL 1: Eintägige Turniere automatisch zuweisen ---
     if start_date_str and end_date_str and start_date_str == end_date_str:
         try:
@@ -57,8 +65,9 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         }
         r = session.get(tournament_url, headers=headers, timeout=10)
         if r.status_code != 200:
+            print(f" -> Fehler: {tournament_url} lieferte HTTP-Statuscode {r.status_code}. (Evtl. von Cloudflare blockiert)")
             return days
-        
+            
         soup = BeautifulSoup(r.content, 'html.parser')
         
         # Haupttext extrahieren (Zeilenumbrüche erhalten!)
@@ -106,6 +115,11 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         found_he = []
         found_hd = []
         found_mx = []
+        
+        # Hilfsvariablen für Diagnose-Ausgaben
+        has_sa = "samstag" in text or "saturday" in text
+        has_so = "sonntag" in text or "sunday" in text
+        has_doppel = "doppel" in text or "double" in text
         
         # --- ZUSTANDSBASIERTE STATE MACHINE ---
         current_day = None  # Speichert den aktuell aktiven Wochentag für nachfolgende Zeilen
@@ -163,6 +177,16 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             days["hd"] = found_hd[0]
         if found_mx and len(set(found_mx)) == 1:
             days["mx"] = found_mx[0]
+            
+        # Logging der Heuristik-Ergebnisse im Terminal
+        if days["he"] or days["hd"] or days["mx"]:
+            print(f" -> Heuristik-Ergebnis für '{tournament_url}':")
+            if days["he"]: print(f"    * Herreneinzel: {days['he']}")
+            if days["hd"]: print(f"    * Herrendoppel: {days['hd']}")
+            if days["mx"]: print(f"    * Mixed: {days['mx']}")
+        else:
+            print(f" -> Heuristik-Ergebnis für '{tournament_url}': Keine eindeutigen Spieltage im Text ermittelt.")
+            print(f"    (Text-Check: 'Samstag' vorhanden={has_sa}, 'Sonntag' vorhanden={has_so}, 'Doppel' vorhanden={has_doppel})")
             
     except Exception as e:
         print(f"Fehler bei der Zeitplan-Heuristik: {e}")
