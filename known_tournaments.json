@@ -857,8 +857,8 @@
         "partner_hd": "",
         "partner_mx": "",
         "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_hd": "Samstag",
+        "day_mx": "Sonntag"
     },
     "85ACF949-B9E6-48B9-9880-C70819B6643A": {
         "id": "85ACF949-B9E6-48B9-9880-C70819B6643A",
@@ -919,9 +919,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "",
-        "day_hd": "",
-        "day_mx": ""
+        "day_he": "Samstag",
+        "day_hd": "Sonntag",
+        "day_mx": "Samstag"
     },
     "EAD8CD01-C11D-44F8-9DC2-E96BAA8C6077": {
         "id": "EAD8CD01-C11D-44F8-9DC2-E96BAA8C6077",
