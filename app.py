@@ -75,7 +75,6 @@ last_retrieved_str = "Unbekannt"
 if os.path.exists(DB_FILE):
     try:
         last_modified = os.path.getmtime(DB_FILE)
-        # Erzwingt die deutsche Zeitzone (Europe/Berlin)
         last_retrieved_dt = datetime.datetime.fromtimestamp(last_modified, tz=ZoneInfo("Europe/Berlin"))
         last_retrieved_str = last_retrieved_dt.strftime("%d.%m.%Y um %H:%M Uhr")
     except Exception:
@@ -113,6 +112,7 @@ if os.path.exists(DB_FILE):
             'reg_mx': False,
             'partner_hd': '',
             'partner_mx': '',
+            'participation_day': 'Keine Angabe',
             'logo_url': '',
             'city': 'Unbekannt',
             'distance': None,
@@ -223,6 +223,12 @@ if os.path.exists(DB_FILE):
                                 if details_text:
                                     details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>Disziplinen: {details_text}</div>"
                                     
+                                # Spieltage anzeigen, falls ausgewählt
+                                day_text = item.get('participation_day', 'Keine Angabe')
+                                day_html = ""
+                                if day_text and day_text != "Keine Angabe":
+                                    day_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 3px; color: #166534;'>📅 Spieltag: <strong>{day_text}</strong></div>"
+
                                 st.markdown(
                                     f"""
                                     <div style="
@@ -237,6 +243,7 @@ if os.path.exists(DB_FILE):
                                         <span style="font-style: normal; margin-right: 6px;">✅</span>
                                         Ich bin für dieses Turnier gemeldet!
                                         {details_html}
+                                        {day_html}
                                     </div>
                                     """,
                                     unsafe_allow_html=True
@@ -285,12 +292,22 @@ if os.path.exists(DB_FILE):
                                         
                                 is_registered = (val_he or val_hd or val_mx)
                                 
+                                # Spieltage auswählen
+                                val_day = item.get('participation_day', 'Keine Angabe')
+                                day_options = ["Keine Angabe", "Samstag", "Sonntag", "Samstag & Sonntag"]
+                                if is_registered:
+                                    default_idx_day = day_options.index(val_day) if val_day in day_options else 0
+                                    val_day = st.selectbox("An welchen Tagen spielst du?", options=day_options, index=default_idx_day, key=f"day_{item['id']}")
+                                else:
+                                    val_day = "Keine Angabe"
+
                                 has_changed = (
                                     val_he != bool(item.get('reg_he', False)) or
                                     val_hd != bool(item.get('reg_hd', False)) or
                                     val_mx != bool(item.get('reg_mx', False)) or
                                     val_partner_hd != item.get('partner_hd', '') or
-                                    val_partner_mx != item.get('partner_mx', '')
+                                    val_partner_mx != item.get('partner_mx', '') or
+                                    val_day != item.get('participation_day', 'Keine Angabe')
                                 )
                                 
                                 if has_changed:
@@ -300,6 +317,7 @@ if os.path.exists(DB_FILE):
                                     data[item['id']]['reg_mx'] = val_mx
                                     data[item['id']]['partner_hd'] = val_partner_hd
                                     data[item['id']]['partner_mx'] = val_partner_mx
+                                    data[item['id']]['participation_day'] = val_day
                                     
                                     with open(DB_FILE, "w", encoding="utf-8") as f:
                                         json.dump(data, f, ensure_ascii=False, indent=4)
@@ -378,6 +396,12 @@ if os.path.exists(DB_FILE):
                                 if details_text:
                                     details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>Disziplinen: {details_text}</div>"
 
+                                # Vergangene Spieltage anzeigen
+                                day_text = item.get('participation_day', 'Keine Angabe')
+                                day_html = ""
+                                if day_text and day_text != "Keine Angabe":
+                                    day_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 3px; color: #166534;'>📅 Spieltag: <strong>{day_text}</strong></div>"
+
                                 st.markdown(
                                     f"""
                                     <div style="
@@ -392,6 +416,7 @@ if os.path.exists(DB_FILE):
                                         <span style="color: #86efac; font-style: normal; margin-right: 5px;">✅</span>
                                         Teilgenommen
                                         {details_html}
+                                        {day_html}
                                     </div>
                                     """,
                                     unsafe_allow_html=True
@@ -440,12 +465,22 @@ if os.path.exists(DB_FILE):
                                         
                                 is_registered = (val_he or val_hd or val_mx)
                                 
+                                # Spieltage auswählen für vergangene Turniere
+                                val_day = item.get('participation_day', 'Keine Angabe')
+                                day_options = ["Keine Angabe", "Samstag", "Sonntag", "Samstag & Sonntag"]
+                                if is_registered:
+                                    default_idx_day = day_options.index(val_day) if val_day in day_options else 0
+                                    val_day = st.selectbox("An welchen Tagen hast du gespielt?", options=day_options, index=default_idx_day, key=f"day_past_{item['id']}")
+                                else:
+                                    val_day = "Keine Angabe"
+
                                 has_changed = (
                                     val_he != bool(item.get('reg_he', False)) or
                                     val_hd != bool(item.get('reg_hd', False)) or
                                     val_mx != bool(item.get('reg_mx', False)) or
                                     val_partner_hd != item.get('partner_hd', '') or
-                                    val_partner_mx != item.get('partner_mx', '')
+                                    val_partner_mx != item.get('partner_mx', '') or
+                                    val_day != item.get('participation_day', 'Keine Angabe')
                                 )
                                 
                                 if has_changed:
@@ -455,6 +490,7 @@ if os.path.exists(DB_FILE):
                                     data[item['id']]['reg_mx'] = val_mx
                                     data[item['id']]['partner_hd'] = val_partner_hd
                                     data[item['id']]['partner_mx'] = val_partner_mx
+                                    data[item['id']]['participation_day'] = val_day
                                     
                                     with open(DB_FILE, "w", encoding="utf-8") as f:
                                         json.dump(data, f, ensure_ascii=False, indent=4)
