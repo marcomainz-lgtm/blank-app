@@ -104,7 +104,7 @@ if os.path.exists(DB_FILE):
         # Build DataFrame
         df = pd.DataFrame(data.values())
         
-        # Fallbacks for older databases
+        # Fallbacks für ältere oder neue Datenbank-Spalten
         fallback_cols = {
             'registered': False,
             'reg_he': False,
@@ -112,6 +112,9 @@ if os.path.exists(DB_FILE):
             'reg_mx': False,
             'partner_hd': '',
             'partner_mx': '',
+            'day_he': '',
+            'day_hd': '',
+            'day_mx': '',
             'participation_day': 'Keine Angabe',
             'logo_url': '',
             'city': 'Unbekannt',
@@ -191,44 +194,47 @@ if os.path.exists(DB_FILE):
                             # Automatische Formatierung der Disziplinen und Partner-Details für das grüne Banner
                             if bool(item.get('registered', False)):
                                 parts = []
-                                if bool(item.get('reg_he', False)):
-                                    parts.append("Herreneinzel")
                                 
+                                # Einzel
+                                if bool(item.get('reg_he', False)):
+                                    day_suffix = f" ({item['day_he']})" if item.get('day_he', '') else ""
+                                    parts.append(f"Herreneinzel{day_suffix}")
+                                
+                                # Doppel
                                 if bool(item.get('reg_hd', False)):
                                     p_hd = item.get('partner_hd', '').strip()
                                     if p_hd == "-- Kein Partner --":
                                         p_hd = ""
                                     
+                                    partner_str = ""
                                     if p_hd in PARTNERS_HD:
-                                        parts.append(f"Herrendoppel mit <a href='{PARTNERS_HD[p_hd]}' target='_blank' style='color: #15803d; text-decoration: underline; font-weight: bold;'>{p_hd}</a>")
+                                        partner_str = f" mit <a href='{PARTNERS_HD[p_hd]}' target='_blank' style='color: #15803d; text-decoration: underline; font-weight: bold;'>{p_hd}</a>"
                                     elif p_hd:
-                                        parts.append(f"Herrendoppel mit {p_hd}")
-                                    else:
-                                        parts.append("Herrendoppel")
+                                        partner_str = f" mit {p_hd}"
+                                        
+                                    day_suffix = f" ({item['day_hd']})" if item.get('day_hd', '') else ""
+                                    parts.append(f"Herrendoppel{partner_str}{day_suffix}")
                                 
+                                # Mixed
                                 if bool(item.get('reg_mx', False)):
                                     p_mx = item.get('partner_mx', '').strip()
                                     if p_mx == "-- Kein Partner --":
                                         p_mx = ""
                                         
+                                    partner_str = ""
                                     if p_mx in PARTNERS_MX:
-                                        parts.append(f"Mixed mit <a href='{PARTNERS_MX[p_mx]}' target='_blank' style='color: #15803d; text-decoration: underline; font-weight: bold;'>{p_mx}</a>")
+                                        partner_str = f" mit <a href='{PARTNERS_MX[p_mx]}' target='_blank' style='color: #15803d; text-decoration: underline; font-weight: bold;'>{p_mx}</a>"
                                     elif p_mx:
-                                        parts.append(f"Mixed mit {p_mx}")
-                                    else:
-                                        parts.append("Mixed")
+                                        partner_str = f" mit {p_mx}"
+                                        
+                                    day_suffix = f" ({item['day_mx']})" if item.get('day_mx', '') else ""
+                                    parts.append(f"Mixed{partner_str}{day_suffix}")
                                     
                                 details_text = ", ".join(parts)
                                 details_html = ""
                                 if details_text:
                                     details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>Disziplinen: {details_text}</div>"
                                     
-                                # Spieltage anzeigen, falls ausgewählt
-                                day_text = item.get('participation_day', 'Keine Angabe')
-                                day_html = ""
-                                if day_text and day_text != "Keine Angabe":
-                                    day_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 3px; color: #166534;'>📅 Spieltag: <strong>{day_text}</strong></div>"
-
                                 st.markdown(
                                     f"""
                                     <div style="
@@ -243,7 +249,6 @@ if os.path.exists(DB_FILE):
                                         <span style="font-style: normal; margin-right: 6px;">✅</span>
                                         Ich bin für dieses Turnier gemeldet!
                                         {details_html}
-                                        {day_html}
                                     </div>
                                     """,
                                     unsafe_allow_html=True
@@ -258,56 +263,75 @@ if os.path.exists(DB_FILE):
                             if IS_ADMIN:
                                 st.write("---")
                                 col_he, col_hd, col_mx = st.columns(3)
+                                
+                                # Konfiguration der Spieltag-Optionen
+                                day_options = ["-- Tag wählen --", "Samstag", "Sonntag", "Samstag & Sonntag"]
+                                
                                 with col_he:
-                                    val_he = st.checkbox("Herreneinzel", value=bool(item.get('reg_he', False)), key=f"he_{item['id']}")
+                                    st.markdown("**Herreneinzel**")
+                                    val_he = st.checkbox("Meldung Einzel", value=bool(item.get('reg_he', False)), key=f"he_{item['id']}")
+                                    val_day_he = item.get('day_he', '')
+                                    if val_he:
+                                        he_day_idx = day_options.index(val_day_he) if val_day_he in day_options else 0
+                                        val_day_he = st.selectbox("Spieltag Einzel", options=day_options, index=he_day_idx, key=f"day_he_{item['id']}")
+                                        if val_day_he == "-- Tag wählen --":
+                                            val_day_he = ""
+                                    else:
+                                        val_day_he = ""
+                                        
                                 with col_hd:
-                                    val_hd = st.checkbox("Herrendoppel", value=bool(item.get('reg_hd', False)), key=f"hd_{item['id']}")
-                                with col_mx:
-                                    val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_{item['id']}")
-                                
-                                p_col1, p_col2 = st.columns(2)
-                                val_partner_hd = item.get('partner_hd', '')
-                                val_partner_mx = item.get('partner_mx', '')
-                                
-                                hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
-                                mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
-                                
-                                with p_col1:
+                                    st.markdown("**Herrendoppel**")
+                                    val_hd = st.checkbox("Meldung Doppel", value=bool(item.get('reg_hd', False)), key=f"hd_{item['id']}")
+                                    val_partner_hd = item.get('partner_hd', '')
+                                    val_day_hd = item.get('day_hd', '')
+                                    
                                     if val_hd:
+                                        hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
                                         default_idx_hd = hd_options.index(val_partner_hd) if val_partner_hd in hd_options else 0
                                         val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_{item['id']}")
                                         if val_partner_hd == "-- Kein Partner --":
                                             val_partner_hd = ""
+                                            
+                                        hd_day_idx = day_options.index(val_day_hd) if val_day_hd in day_options else 0
+                                        val_day_hd = st.selectbox("Spieltag Doppel", options=day_options, index=hd_day_idx, key=f"day_hd_{item['id']}")
+                                        if val_day_hd == "-- Tag wählen --":
+                                            val_day_hd = ""
                                     else:
                                         val_partner_hd = ""
+                                        val_day_hd = ""
                                         
-                                with p_col2:
+                                with col_mx:
+                                    st.markdown("**Mixed**")
+                                    val_mx = st.checkbox("Meldung Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_{item['id']}")
+                                    val_partner_mx = item.get('partner_mx', '')
+                                    val_day_mx = item.get('day_mx', '')
+                                    
                                     if val_mx:
+                                        mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
                                         default_idx_mx = mx_options.index(val_partner_mx) if val_partner_mx in mx_options else 0
                                         val_partner_mx = st.selectbox("Partner Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_{item['id']}")
                                         if val_partner_mx == "-- Kein Partner --":
                                             val_partner_mx = ""
+                                            
+                                        mx_day_idx = day_options.index(val_day_mx) if val_day_mx in day_options else 0
+                                        val_day_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_day_idx, key=f"day_mx_{item['id']}")
+                                        if val_day_mx == "-- Tag wählen --":
+                                            val_day_mx = ""
                                     else:
                                         val_partner_mx = ""
+                                        val_day_mx = ""
                                         
                                 is_registered = (val_he or val_hd or val_mx)
                                 
-                                # Spieltage auswählen
-                                val_day = item.get('participation_day', 'Keine Angabe')
-                                day_options = ["Keine Angabe", "Samstag", "Sonntag", "Samstag & Sonntag"]
-                                if is_registered:
-                                    default_idx_day = day_options.index(val_day) if val_day in day_options else 0
-                                    val_day = st.selectbox("An welchen Tagen spielst du?", options=day_options, index=default_idx_day, key=f"day_{item['id']}")
-                                else:
-                                    val_day = "Keine Angabe"
-
                                 has_changed = (
                                     val_he != bool(item.get('reg_he', False)) or
                                     val_hd != bool(item.get('reg_hd', False)) or
                                     val_mx != bool(item.get('reg_mx', False)) or
                                     val_partner_hd != item.get('partner_hd', '') or
                                     val_partner_mx != item.get('partner_mx', '') or
-                                    val_day != item.get('participation_day', 'Keine Angabe')
+                                    val_day_he != item.get('day_he', '') or
+                                    val_day_hd != item.get('day_hd', '') or
+                                    val_day_mx != item.get('day_mx', '')
                                 )
                                 
                                 if has_changed:
@@ -317,7 +341,9 @@ if os.path.exists(DB_FILE):
                                     data[item['id']]['reg_mx'] = val_mx
                                     data[item['id']]['partner_hd'] = val_partner_hd
                                     data[item['id']]['partner_mx'] = val_partner_mx
-                                    data[item['id']]['participation_day'] = val_day
+                                    data[item['id']]['day_he'] = val_day_he
+                                    data[item['id']]['day_hd'] = val_day_hd
+                                    data[item['id']]['day_mx'] = val_day_mx
                                     
                                     with open(DB_FILE, "w", encoding="utf-8") as f:
                                         json.dump(data, f, ensure_ascii=False, indent=4)
@@ -365,42 +391,46 @@ if os.path.exists(DB_FILE):
                             # Sanftes grünes Alert-Banner für vergangene Turniere mit denselben Verlinkungen
                             if bool(item.get('registered', False)):
                                 parts = []
+                                
+                                # Einzel
                                 if bool(item.get('reg_he', False)):
-                                    parts.append("Herreneinzel")
+                                    day_suffix = f" ({item['day_he']})" if item.get('day_he', '') else ""
+                                    parts.append(f"Herreneinzel{day_suffix}")
+                                
+                                # Doppel
                                 if bool(item.get('reg_hd', False)):
                                     p_hd = item.get('partner_hd', '').strip()
                                     if p_hd == "-- Kein Partner --":
                                         p_hd = ""
                                         
+                                    partner_str = ""
                                     if p_hd in PARTNERS_HD:
-                                        parts.append(f"Herrendoppel mit <a href='{PARTNERS_HD[p_hd]}' target='_blank' style='color: #166534; text-decoration: underline; font-weight: bold;'>{p_hd}</a>")
+                                        partner_str = f" mit <a href='{PARTNERS_HD[p_hd]}' target='_blank' style='color: #166534; text-decoration: underline; font-weight: bold;'>{p_hd}</a>"
                                     elif p_hd:
-                                        parts.append(f"Herrendoppel mit {p_hd}")
-                                    else:
-                                        parts.append("Herrendoppel")
+                                        partner_str = f" mit {p_hd}"
                                         
+                                    day_suffix = f" ({item['day_hd']})" if item.get('day_hd', '') else ""
+                                    parts.append(f"Herrendoppel{partner_str}{day_suffix}")
+                                        
+                                # Mixed
                                 if bool(item.get('reg_mx', False)):
                                     p_mx = item.get('partner_mx', '').strip()
                                     if p_mx == "-- Kein Partner --":
                                         p_mx = ""
                                         
+                                    partner_str = ""
                                     if p_mx in PARTNERS_MX:
-                                        parts.append(f"Mixed mit <a href='{PARTNERS_MX[p_mx]}' target='_blank' style='color: #166534; text-decoration: underline; font-weight: bold;'>{p_mx}</a>")
+                                        partner_str = f" mit <a href='{PARTNERS_MX[p_mx]}' target='_blank' style='color: #166534; text-decoration: underline; font-weight: bold;'>{p_mx}</a>"
                                     elif p_mx:
-                                        parts.append(f"Mixed mit {p_mx}")
-                                    else:
-                                        parts.append("Mixed")
+                                        partner_str = f" mit {p_mx}"
+                                        
+                                    day_suffix = f" ({item['day_mx']})" if item.get('day_mx', '') else ""
+                                    parts.append(f"Mixed{partner_str}{day_suffix}")
                                     
                                 details_text = ", ".join(parts)
                                 details_html = ""
                                 if details_text:
                                     details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>Disziplinen: {details_text}</div>"
-
-                                # Vergangene Spieltage anzeigen
-                                day_text = item.get('participation_day', 'Keine Angabe')
-                                day_html = ""
-                                if day_text and day_text != "Keine Angabe":
-                                    day_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 3px; color: #166534;'>📅 Spieltag: <strong>{day_text}</strong></div>"
 
                                 st.markdown(
                                     f"""
@@ -416,7 +446,6 @@ if os.path.exists(DB_FILE):
                                         <span style="color: #86efac; font-style: normal; margin-right: 5px;">✅</span>
                                         Teilgenommen
                                         {details_html}
-                                        {day_html}
                                     </div>
                                     """,
                                     unsafe_allow_html=True
@@ -431,56 +460,75 @@ if os.path.exists(DB_FILE):
                             if IS_ADMIN:
                                 st.write("---")
                                 col_he, col_hd, col_mx = st.columns(3)
+                                
+                                # Konfiguration der Spieltag-Optionen
+                                day_options = ["-- Tag wählen --", "Samstag", "Sonntag", "Samstag & Sonntag"]
+                                
                                 with col_he:
+                                    st.markdown("**Herreneinzel**")
                                     val_he = st.checkbox("Herreneinzel", value=bool(item.get('reg_he', False)), key=f"he_past_{item['id']}")
+                                    val_day_he = item.get('day_he', '')
+                                    if val_he:
+                                        he_day_idx = day_options.index(val_day_he) if val_day_he in day_options else 0
+                                        val_day_he = st.selectbox("Spieltag Einzel", options=day_options, index=he_day_idx, key=f"day_he_past_{item['id']}")
+                                        if val_day_he == "-- Tag wählen --":
+                                            val_day_he = ""
+                                    else:
+                                        val_day_he = ""
+                                
                                 with col_hd:
+                                    st.markdown("**Herrendoppel**")
                                     val_hd = st.checkbox("Herrendoppel", value=bool(item.get('reg_hd', False)), key=f"hd_past_{item['id']}")
-                                with col_mx:
-                                    val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_past_{item['id']}")
-                                
-                                p_col1, p_col2 = st.columns(2)
-                                val_partner_hd = item.get('partner_hd', '')
-                                val_partner_mx = item.get('partner_mx', '')
-                                
-                                hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
-                                mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
-                                
-                                with p_col1:
+                                    val_partner_hd = item.get('partner_hd', '')
+                                    val_day_hd = item.get('day_hd', '')
+                                    
                                     if val_hd:
+                                        hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
                                         default_idx_hd = hd_options.index(val_partner_hd) if val_partner_hd in hd_options else 0
                                         val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_past_{item['id']}")
                                         if val_partner_hd == "-- Kein Partner --":
                                             val_partner_hd = ""
+                                            
+                                        hd_day_idx = day_options.index(val_day_hd) if val_day_hd in day_options else 0
+                                        val_day_hd = st.selectbox("Spieltag Doppel", options=day_options, index=hd_day_idx, key=f"day_hd_past_{item['id']}")
+                                        if val_day_hd == "-- Tag wählen --":
+                                            val_day_hd = ""
                                     else:
                                         val_partner_hd = ""
-                                        
-                                with p_col2:
+                                        val_day_hd = ""
+                                
+                                with col_mx:
+                                    st.markdown("**Mixed**")
+                                    val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_past_{item['id']}")
+                                    val_partner_mx = item.get('partner_mx', '')
+                                    val_day_mx = item.get('day_mx', '')
+                                    
                                     if val_mx:
+                                        mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
                                         default_idx_mx = mx_options.index(val_partner_mx) if val_partner_mx in mx_options else 0
                                         val_partner_mx = st.selectbox("Partner Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_past_{item['id']}")
                                         if val_partner_mx == "-- Kein Partner --":
                                             val_partner_mx = ""
+                                            
+                                        mx_day_idx = day_options.index(val_day_mx) if val_day_mx in day_options else 0
+                                        val_day_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_day_idx, key=f"day_mx_past_{item['id']}")
+                                        if val_day_mx == "-- Tag wählen --":
+                                            val_day_mx = ""
                                     else:
                                         val_partner_mx = ""
+                                        val_day_mx = ""
                                         
                                 is_registered = (val_he or val_hd or val_mx)
                                 
-                                # Spieltage auswählen für vergangene Turniere
-                                val_day = item.get('participation_day', 'Keine Angabe')
-                                day_options = ["Keine Angabe", "Samstag", "Sonntag", "Samstag & Sonntag"]
-                                if is_registered:
-                                    default_idx_day = day_options.index(val_day) if val_day in day_options else 0
-                                    val_day = st.selectbox("An welchen Tagen hast du gespielt?", options=day_options, index=default_idx_day, key=f"day_past_{item['id']}")
-                                else:
-                                    val_day = "Keine Angabe"
-
                                 has_changed = (
                                     val_he != bool(item.get('reg_he', False)) or
                                     val_hd != bool(item.get('reg_hd', False)) or
                                     val_mx != bool(item.get('reg_mx', False)) or
                                     val_partner_hd != item.get('partner_hd', '') or
                                     val_partner_mx != item.get('partner_mx', '') or
-                                    val_day != item.get('participation_day', 'Keine Angabe')
+                                    val_day_he != item.get('day_he', '') or
+                                    val_day_hd != item.get('day_hd', '') or
+                                    val_day_mx != item.get('day_mx', '')
                                 )
                                 
                                 if has_changed:
@@ -490,7 +538,9 @@ if os.path.exists(DB_FILE):
                                     data[item['id']]['reg_mx'] = val_mx
                                     data[item['id']]['partner_hd'] = val_partner_hd
                                     data[item['id']]['partner_mx'] = val_partner_mx
-                                    data[item['id']]['participation_day'] = val_day
+                                    data[item['id']]['day_he'] = val_day_he
+                                    data[item['id']]['day_hd'] = val_day_hd
+                                    data[item['id']]['day_mx'] = val_day_mx
                                     
                                     with open(DB_FILE, "w", encoding="utf-8") as f:
                                         json.dump(data, f, ensure_ascii=False, indent=4)
