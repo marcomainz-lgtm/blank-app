@@ -9,6 +9,7 @@ import urllib.parse
 NTFY_TOPIC = "my_badminton_tournaments_40723_v2" 
 DB_FILE = "known_tournaments.json"
 
+
 def is_youth_tournament(title, tag_parts):
     """
     Filtert Jugendturniere basierend auf Altersklassen-Tags (U11-U19)
@@ -24,6 +25,102 @@ def is_youth_tournament(title, tag_parts):
     if any(kw in title.lower() for kw in youth_keywords):
         return True
     return False
+
+
+def detect_discipline_days(tournament_url):
+    """
+    Sucht auf der Turnierseite und deren relevanten Navigations-Unterseiten nach Informationen,
+    welche Disziplin an welchem Tag (Samstag/Sonntag) stattfindet.
+    """
+    days = {"he": "", "hd": "", "mx": ""}
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+            "Accept-Language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7"
+        }
+        r = requests.get(tournament_url, headers=headers, timeout=10)
+        if r.status_code != 200:
+            return days
+        
+        soup = BeautifulSoup(r.content, 'html.parser')
+        
+        # 1. Haupttext extrahieren und säubern
+        text = soup.get_text(separator=" ").lower()
+        text_clean = re.sub(r'\s+', ' ', text)
+        
+        # 2. Navigation nach relevanten Unterseiten durchsuchen
+        sub_links = []
+        for a in soup.find_all('a', href=True):
+            a_text = a.get_text().lower().strip()
+            a_href = a['href']
+            # Relevante Keywords für Zeitpläne oder Bestimmungen
+            keywords = ["bestimmungen", "ausschreibung", "zeitplan", "programm", "ablauf", "informationen", "info"]
+            if any(k in a_text for k in keywords):
+                full_sub_link = urllib.parse.urljoin(tournament_url, a_href)
+                sub_links.append(full_sub_link)
+        
+        # Bis zu 3 eindeutige Unterseiten scannen (PDFs ausklammern)
+        sub_links = list(set(sub_links))[:3]
+        for sub_link in sub_links:
+            try:
+                if sub_link.endswith(".pdf"):
+                    continue
+                r_sub = requests.get(sub_link, headers=headers, timeout=5)
+                if r_sub.status_code == 200:
+                    soup_sub = BeautifulSoup(r_sub.content, 'html.parser')
+                    text_sub = soup_sub.get_text(separator=" ").lower()
+                    text_clean += " " + re.sub(r'\s+', ' ', text_sub)
+            except Exception:
+                pass
+        
+        # 3. Text in Sinneinheiten/Sätze zerlegen
+        clauses = re.split(r'[,.:!?\n|•–-]', text_clean)
+        
+        found_he = []
+        found_hd = []
+        found_mx = []
+        
+        for c in clauses:
+            c_lower = c.strip()
+            if len(c_lower) < 5:
+                continue
+            
+            # Wochentage prüfen
+            is_sat = "samstag" in c_lower or re.search(r'\bsa\b', c_lower)
+            is_sun = "sonntag" in c_lower or re.search(r'\bso\b', c_lower)
+            
+            if is_sat and not is_sun:
+                day_val = "Samstag"
+            elif is_sun and not is_sat:
+                day_val = "Sonntag"
+            else:
+                continue
+                
+            # Heuristik: Einzel (ohne "doppel" / "mixed" im selben Teilsatz)
+            if ("einzel" in c_lower or "he" in c_lower.split() or "de" in c_lower.split()) and "doppel" not in c_lower and "mixed" not in c_lower:
+                found_he.append(day_val)
+                
+            # Heuristik: Doppel (ohne "einzel" / "mixed" im selben Teilsatz)
+            if ("doppel" in c_lower or "hd" in c_lower.split() or "dd" in c_lower.split()) and "einzel" not in c_lower and "mixed" not in c_lower:
+                found_hd.append(day_val)
+                
+            # Heuristik: Mixed
+            if "mixed" in c_lower or "gemischt" in c_lower or "mx" in c_lower.split() or "gd" in c_lower.split():
+                found_mx.append(day_val)
+        
+        # Wenn eine Disziplin eindeutig an genau einem Tag gefunden wurde, eintragen
+        if found_he and len(set(found_he)) == 1:
+            days["he"] = found_he[0]
+        if found_hd and len(set(found_hd)) == 1:
+            days["hd"] = found_hd[0]
+        if found_mx and len(set(found_mx)) == 1:
+            days["mx"] = found_mx[0]
+            
+    except Exception as e:
+        print(f"Fehler bei der Zeitplan-Heuristik für {tournament_url}: {e}")
+        
+    return days
+
 
 def scrape_tournaments():
     url = "https://dbv.turnier.de/find/tournament/DoSearch"
@@ -179,9 +276,9 @@ def scrape_tournaments():
                     "reg_mx": False,
                     "partner_hd": "",
                     "partner_mx": "",
-                    "day_he": "gesamt",
-                    "day_hd": "gesamt",
-                    "day_mx": "gesamt"
+                    "day_he": "",
+                    "day_hd": "",
+                    "day_mx": ""
                 })
                 page_tournaments_count += 1
 
@@ -199,6 +296,7 @@ def scrape_tournaments():
 
     print(f"Successfully scraped {len(tournaments)} tournament(s) in total across {page} page(s).")
     return tournaments
+
 
 def send_push_notification(new_items):
     if not new_items:
@@ -230,6 +328,7 @@ def send_push_notification(new_items):
     except Exception as e:
         print(f"Error sending notification: {e}")
 
+
 def check_for_updates():
     print("Checking for tournament updates...")
     current_list = scrape_tournaments()
@@ -246,20 +345,41 @@ def check_for_updates():
     for t in current_list:
         t_id = t["id"]
         if t_id not in known_tournaments:
+            # 1. Neues Turnier gefunden -> Heuristische Zeitplananalyse durchführen!
+            print(f"Neues Turnier gefunden: {t['title']}. Analysiere Zeitplan...")
+            detected_days = detect_discipline_days(t["link"])
+            t["day_he"] = detected_days["he"]
+            t["day_hd"] = detected_days["hd"]
+            t["day_mx"] = detected_days["mx"]
+            
             new_tournaments.append(t)
             known_tournaments[t_id] = t
         else:
-            # Wichtig: Den bereits gesetzten "Gemeldet"-Status sowie neue Einzelfelder dauerhaft beibehalten!
-            is_registered = known_tournaments[t_id].get('registered', False)
-            reg_he = known_tournaments[t_id].get('reg_he', False)
-            reg_hd = known_tournaments[t_id].get('reg_hd', False)
-            reg_mx = known_tournaments[t_id].get('reg_mx', False)
-            partner_hd = known_tournaments[t_id].get('partner_hd', '')
-            partner_mx = known_tournaments[t_id].get('partner_mx', '')
+            # 2. Bestehendes Turnier -> Daten bewahren und ggf. fehlende Spieltage analysieren
+            old_t = known_tournaments[t_id]
+            is_registered = old_t.get('registered', False)
+            reg_he = old_t.get('reg_he', False)
+            reg_hd = old_t.get('reg_hd', False)
+            reg_mx = old_t.get('reg_mx', False)
+            partner_hd = old_t.get('partner_hd', '')
+            partner_mx = old_t.get('partner_mx', '')
             
-            day_he = known_tournaments[t_id].get('day_he', 'gesamt')
-            day_hd = known_tournaments[t_id].get('day_hd', 'gesamt')
-            day_mx = known_tournaments[t_id].get('day_mx', 'gesamt')
+            day_he = old_t.get('day_he', '')
+            day_hd = old_t.get('day_hd', '')
+            day_mx = old_t.get('day_mx', '')
+
+            # Falls Felder noch den alten Default-Wert "gesamt" haben, leeren
+            if day_he == "gesamt": day_he = ""
+            if day_hd == "gesamt": day_hd = ""
+            if day_mx == "gesamt": day_mx = ""
+
+            # Falls der Zeitplan noch komplett unbeschrieben ist, versuchen wir ihn nachträglich zu bestimmen (Migration)
+            if not day_he and not day_hd and not day_mx:
+                print(f"Analysiere Zeitplan für bestehendes Turnier: {t['title']}...")
+                detected_days = detect_discipline_days(t["link"])
+                day_he = detected_days["he"]
+                day_hd = detected_days["hd"]
+                day_mx = detected_days["mx"]
 
             known_tournaments[t_id] = t
             known_tournaments[t_id]['registered'] = is_registered
@@ -280,6 +400,7 @@ def check_for_updates():
         send_push_notification(new_tournaments)
     else:
         print("No new tournaments detected.")
+
 
 if __name__ == "__main__":
     check_for_updates()
