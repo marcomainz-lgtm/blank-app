@@ -52,16 +52,6 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
     for dom in ["dbv.turnier.de", ".turnier.de", "www.turnier.de"]:
         session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain=dom, path="/")
 
-    # --- REGEL 1: Eintägige Turniere automatisch zuweisen ---
-    if start_date_str and end_date_str and start_date_str == end_date_str:
-        try:
-            dt = datetime.datetime.strptime(start_date_str, "%d.%m.%Y").date()
-            day_name = weekday_names[dt.weekday()]
-            return {"he": day_name, "hd": day_name, "mx": day_name}
-        except Exception:
-            pass
-
-    # --- REGEL 2: Heuristische Suche auf Turnier.de ---
     try:
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
@@ -123,6 +113,44 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         if "mixed" in text or "gemischt" in text or "mx" in text.split() or "gd" in text.split() or "xd" in text.split() or "mx-" in text:
             has_mx_offered = True
 
+        # --- DYNAMISCHE DATUMS-WOCHENTAGS-ZUORDNUNG ---
+        date_to_weekday = {}
+        try:
+            start_dt = datetime.datetime.strptime(start_date_str, "%d.%m.%Y").date()
+            end_dt = datetime.datetime.strptime(end_date_str, "%d.%m.%Y").date()
+            
+            curr_date = start_dt
+            limit_dt = 0
+            while curr_date <= end_dt and limit_dt < 10:
+                w_day = weekday_names[curr_date.weekday()]
+                
+                f_long = curr_date.strftime("%d.%m.%Y")  # z. B. "20.06.2026"
+                f_short = curr_date.strftime("%d.%m.%y")  # z. B. "20.06.26"
+                f_tiny = curr_date.strftime("%d.%m.")  # z. B. "20.06."
+                
+                date_to_weekday[f_long] = w_day
+                date_to_weekday[f_short] = w_day
+                if f_tiny not in date_to_weekday:
+                    date_to_weekday[f_tiny] = w_day
+                    
+                curr_date += datetime.timedelta(days=1)
+                limit_dt += 1
+        except Exception:
+            pass
+
+        # --- REGEL 1: Eintägige Turniere automatisch zuweisen ---
+        if start_date_str and end_date_str and start_date_str == end_date_str:
+            try:
+                dt = datetime.datetime.strptime(start_date_str, "%d.%m.%Y").date()
+                day_name = weekday_names[dt.weekday()]
+                return {
+                    "he": day_name if has_he_offered else "",
+                    "hd": day_name if has_hd_offered else "",
+                    "mx": day_name if has_mx_offered else ""
+                }
+            except Exception:
+                pass
+
         # Text zeilenweise verarbeiten, um logische Einheiten nicht zu zerreißen
         raw_lines = text.split("\n")
         clauses = []
@@ -158,6 +186,13 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             is_sat = "samstag" in c_lower or "saturday" in c_lower or re.search(r'\bsa\b', c_lower) or re.search(r'\bsat\b', c_lower)
             is_sun = "sonntag" in c_lower or "sunday" in c_lower or re.search(r'\bso\b', c_lower) or re.search(r'\bsun\b', c_lower)
             is_fri = "freitag" in c_lower or "friday" in c_lower or re.search(r'\bfr\b', c_lower) or re.search(r'\bfri\b', c_lower)
+            
+            # ZUSÄTZLICH: Prüfe, ob eines unserer berechneten Datumsformate in der Zeile steht!
+            for date_str, w_day in date_to_weekday.items():
+                if date_str in c_lower:
+                    if w_day == "Samstag": is_sat = True
+                    elif w_day == "Sonntag": is_sun = True
+                    elif w_day == "Freitag": is_fri = True
             
             # Wenn ein eindeutiger Wochentag in dieser Zeile steht, aktualisieren wir den aktuellen Status
             if is_sat and not is_sun and not is_fri:
