@@ -53,22 +53,18 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
     for dom in ["dbv.turnier.de", ".turnier.de", "www.turnier.de"]:
         session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain=dom, path="/")
 
-    # --- REGEL 1: Eintägige Turniere automatisch zuweisen ---
-    if start_date_str and end_date_str and start_date_str == end_date_str:
-        try:
-            dt = datetime.datetime.strptime(start_date_str, "%d.%m.%Y").date()
-            day_name = weekday_names[dt.weekday()]
-            return {"he": day_name, "hd": day_name, "mx": day_name}
-        except Exception:
-            pass
-
-    # --- REGEL 2: Heuristische Suche auf Turnier.de ---
     try:
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
             "Accept-Language": "de-DE,de;q=0.9"
         }
         r = session.get(tournament_url, headers=headers, timeout=10)
+        
+        # Warnung ausgeben, falls umgeleitet auf Cookiewall
+        if "cookiewall" in r.url:
+            print(f" -> ACHTUNG: {tournament_url} wurde auf die Cookie-Wall umgeleitet! (Inhalt konnte nicht geladen werden)")
+            return days
+
         if r.status_code != 200:
             print(f" -> Fehler: {tournament_url} lieferte HTTP-Statuscode {r.status_code}. (Evtl. von Cloudflare blockiert)")
             return days
@@ -83,7 +79,7 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         for a in soup.find_all('a', href=True):
             a_text = a.get_text().lower().strip()
             a_href = a['href']
-            # Relevante Keywords für Zeitpläne, Bestimmungen, Disziplinen, Klassen oder englische Äquivalente
+            # Relevante Keywords für Zeitpläne, Bestimmungen, Disziplinen oder Klassen
             keywords = ["bestimmungen", "ausschreibung", "zeitplan", "programm", "ablauf", "informationen", "info", "disziplinen", "klassen", "meldungen", "regulations", "rules"]
             if any(k in a_text for k in keywords) or any(k in a_href.lower() for k in keywords):
                 full_sub_link = urllib.parse.urljoin(tournament_url, a_href)
@@ -108,8 +104,11 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
                 if r_sub.status_code == 200:
                     soup_sub = BeautifulSoup(r_sub.content, 'html.parser')
                     text_sub = soup_sub.get_text(separator="\n").lower()
+                    text_clean_sub = re.sub(r'\s+', ' ', text_sub).strip()
+                    
                     text += "\n" + text_sub
                     print(f" -> Unterseite erfolgreich gescannt: {sub_link}")
+                    print(f"    [Text-Vorschau]: {text_clean_sub[:140]}...")
                 else:
                     print(f" -> Warnung: Unterseite {sub_link} lieferte Statuscode {r_sub.status_code}")
             except Exception as e:
@@ -154,6 +153,19 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
                 limit_dt += 1
         except Exception:
             pass
+
+        # --- REGEL 1: Eintägige Turniere automatisch zuweisen ---
+        if start_date_str and end_date_str and start_date_str == end_date_str:
+            try:
+                dt = datetime.datetime.strptime(start_date_str, "%d.%m.%Y").date()
+                day_name = weekday_names[dt.weekday()]
+                return {
+                    "he": day_name if has_he_offered else "",
+                    "hd": day_name if has_hd_offered else "",
+                    "mx": day_name if has_mx_offered else ""
+                }
+            except Exception:
+                pass
 
         # Text zeilenweise verarbeiten, um logische Einheiten nicht zu zerreißen
         raw_lines = text.split("\n")
@@ -219,7 +231,7 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
                 active_day = current_day  # Vererbung des Status von oben
                 
             if not active_day:
-                continue  # Ohne bekannten Wochentag können wir nichts zuordnung
+                continue  # Ohne bekannten Wochentag können wir nichts zuordnen
                 
             # Disziplinen erkennen (Deutsch & Englisch)
             is_he = ("einzel" in c_lower or "single" in c_lower or "he" in c_lower.split() or "de" in c_lower.split() or "ms" in c_lower.split() or "ws" in c_lower.split())
@@ -544,7 +556,7 @@ def check_for_updates_generator():
     if analyzed_count > 0:
         yield f"Selbstheilung abgeschlossen. {analyzed_count} Turnier(e) nachträglich analysiert."
 
-    # Neue Turniere aus dem Suchlauf in die Datenbank integrar
+    # Neue Turniere aus dem Suchlauf in die Datenbank integrieren
     new_tournaments = []
     for t in current_list:
         t_id = t["id"]
