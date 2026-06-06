@@ -544,8 +544,8 @@ if os.path.exists(DB_FILE):
                                         color: #1e40af;
                                         font-weight: bold;
                                     ">
-                                        <span style="font-style: normal; margin-right: 6px;">🌴</span>
-                                        Für dieses Wochenende habe ich Urlaub eingetragen!{note_suffix}
+                                        <span style="font-style: normal; margin-right: 6px;">🏖️</span>
+                                        Urlaub{note_suffix}
                                     </div>
                                     """,
                                     unsafe_allow_html=True
