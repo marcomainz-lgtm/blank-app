@@ -371,12 +371,60 @@ if os.path.exists(DB_FILE):
                             st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
                             st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                             
+                            # --- ALLGEMEINEN ABLAUF AUF DER KARTE ANZEIGEN (GRUPPIERT NACH DATUM) ---
+                            all_date_groups = {}
+                            all_unassigned = []
+                            start_date_obj = item['Start_Date_Obj']
+                            end_date_obj = item['End_Date_Obj']
+                            
+                            # Einzel
+                            day_val_he = item.get('day_he', '')
+                            dt_he = get_date_for_weekday(day_val_he, start_date_obj, end_date_obj)
+                            if dt_he:
+                                all_date_groups.setdefault(dt_he, []).append("Einzel")
+                            elif day_val_he:
+                                all_unassigned.append(f"Einzel ({day_val_he})")
+                                
+                            # Doppel
+                            day_val_hd = item.get('day_hd', '')
+                            dt_hd = get_date_for_weekday(day_val_hd, start_date_obj, end_date_obj)
+                            if dt_hd:
+                                all_date_groups.setdefault(dt_hd, []).append("Doppel")
+                            elif day_val_hd:
+                                all_unassigned.append(f"Doppel ({day_val_hd})")
+                                
+                            # Mixed
+                            day_val_mx = item.get('day_mx', '')
+                            dt_mx = get_date_for_weekday(day_val_mx, start_date_obj, end_date_obj)
+                            if dt_mx:
+                                all_date_groups.setdefault(dt_mx, []).append("Mixed")
+                            elif day_val_mx:
+                                all_unassigned.append(f"Mixed ({day_val_mx})")
+                                
+                            # Formatierung des allgemeinen Zeitplans
+                            sorted_all_dates = sorted(all_date_groups.keys())
+                            weekday_names = {
+                                0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
+                                4: "Freitag", 5: "Samstag", 6: "Sonntag"
+                            }
+                            
+                            all_html_lines = []
+                            for dt in sorted_all_dates:
+                                w_name = weekday_names[dt.weekday()]
+                                formatted_dt = dt.strftime("%d.%m.%Y")
+                                disciplines_str = ", ".join(all_date_groups[dt])
+                                all_html_lines.append(f"<div style='margin-top: 2px;'>📋 <strong>{formatted_dt} ({w_name}):</strong> {disciplines_str}</div>")
+                                
+                            if all_unassigned:
+                                all_html_lines.append(f"<div style='margin-top: 2px;'>📋 <strong>Unzugeordnet:</strong> {', '.join(all_unassigned)}</div>")
+                                
+                            if all_html_lines:
+                                st.markdown(f"<div style='font-size: 0.9em; margin-top: 5px; color: #4b5563;'>{''.join(all_html_lines)}</div>", unsafe_allow_html=True)
+                            
                             # Admin-Ansicht
                             if IS_ADMIN:
                                 st.write("---")
                                 col_he, col_hd, col_mx = st.columns(3)
-                                start_date_obj = item['Start_Date_Obj']
-                                end_date_obj = item['End_Date_Obj']
                                 day_options = get_tournament_day_options(start_date_obj, end_date_obj)
                                 
                                 with col_he:
@@ -615,119 +663,4 @@ if os.path.exists(DB_FILE):
 
                             st.markdown(f"### {item['title']} *(Beendet)*")
                             dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
-                            st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
-                            st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
-                            
-                            # Admin-Ansicht
-                            if IS_ADMIN:
-                                st.write("---")
-                                col_he, col_hd, col_mx = st.columns(3)
-                                start_date_obj = item['Start_Date_Obj']
-                                end_date_obj = item['End_Date_Obj']
-                                day_options = get_tournament_day_options(start_date_obj, end_date_obj)
-                                
-                                with col_he:
-                                    st.markdown("**Herreneinzel**")
-                                    val_he = st.checkbox("Herreneinzel", value=bool(item.get('reg_he', False)), key=f"he_past_{item['id']}")
-                                    val_day_he_db = item.get('day_he', '')
-                                    if val_he:
-                                        he_idx = 0
-                                        if val_day_he_db:
-                                            for o_idx, opt in enumerate(day_options):
-                                                if opt.startswith(val_day_he_db):
-                                                    he_idx = o_idx
-                                                    break
-                                        selected_label_he = st.selectbox("Spieltag Einzel", options=day_options, index=he_idx, key=f"day_he_past_{item['id']}")
-                                        val_day_he = selected_label_he.split(",")[0].strip() if selected_label_he != "-- Tag wählen --" else ""
-                                    else:
-                                        val_day_he = ""
-                                
-                                with col_hd:
-                                    st.markdown("**Herrendoppel**")
-                                    val_hd = st.checkbox("Herrendoppel", value=bool(item.get('reg_hd', False)), key=f"hd_past_{item['id']}")
-                                    val_partner_hd = item.get('partner_hd', '')
-                                    val_day_hd_db = item.get('day_hd', '')
-                                    
-                                    if val_hd:
-                                        hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
-                                        default_idx_hd = hd_options.index(val_partner_hd) if val_partner_hd in hd_options else 0
-                                        val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_past_{item['id']}")
-                                        if val_partner_hd == "-- Kein Partner --":
-                                            val_partner_hd = ""
-                                            
-                                        hd_idx = 0
-                                        if val_day_hd_db:
-                                            for o_idx, opt in enumerate(day_options):
-                                                if opt.startswith(val_day_hd_db):
-                                                    hd_idx = o_idx
-                                                    break
-                                        selected_label_hd = st.selectbox("Spieltag Doppel", options=day_options, index=hd_idx, key=f"day_hd_past_{item['id']}")
-                                        val_day_hd = selected_label_hd.split(",")[0].strip() if selected_label_hd != "-- Tag wählen --" else ""
-                                    else:
-                                        val_partner_hd = ""
-                                        val_day_hd = ""
-                                
-                                with col_mx:
-                                    st.markdown("**Mixed**")
-                                    val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_past_{item['id']}")
-                                    val_partner_mx = item.get('partner_mx', '')
-                                    val_day_mx_db = item.get('day_mx', '')
-                                    
-                                    if val_mx:
-                                        mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
-                                        default_idx_mx = mx_options.index(val_partner_mx) if val_partner_mx in mx_options else 0
-                                        val_partner_mx = st.selectbox("Partner Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_past_{item['id']}")
-                                        if val_partner_mx == "-- Kein Partner --":
-                                            val_partner_mx = ""
-                                            
-                                        mx_idx = 0
-                                        if val_day_mx_db:
-                                            for o_idx, opt in enumerate(day_options):
-                                                if opt.startswith(val_day_mx_db):
-                                                    mx_idx = o_idx
-                                                    break
-                                        selected_label_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_idx, key=f"day_mx_past_{item['id']}")
-                                        val_day_mx = selected_label_mx.split(",")[0].strip() if selected_label_mx != "-- Tag wählen --" else ""
-                                    else:
-                                        val_partner_mx = ""
-                                        val_day_mx = ""
-                                        
-                                is_registered = (val_he or val_hd or val_mx)
-                                
-                                has_changed = (
-                                    val_he != bool(item.get('reg_he', False)) or
-                                    val_hd != bool(item.get('reg_hd', False)) or
-                                    val_mx != bool(item.get('reg_mx', False)) or
-                                    val_partner_hd != item.get('partner_hd', '') or
-                                    val_partner_mx != item.get('partner_mx', '') or
-                                    val_day_he != item.get('day_he', '') or
-                                    val_day_hd != item.get('day_hd', '') or
-                                    val_day_mx != item.get('day_mx', '')
-                                )
-                                
-                                if has_changed:
-                                    data[item['id']]['registered'] = is_registered
-                                    data[item['id']]['reg_he'] = val_he
-                                    data[item['id']]['reg_hd'] = val_hd
-                                    data[item['id']]['reg_mx'] = val_mx
-                                    data[item['id']]['partner_hd'] = val_partner_hd
-                                    data[item['id']]['partner_mx'] = val_partner_mx
-                                    data[item['id']]['day_he'] = val_day_he
-                                    data[item['id']]['day_hd'] = val_day_hd
-                                    data[item['id']]['day_mx'] = val_day_mx
-                                    
-                                    with open(DB_FILE, "w", encoding="utf-8") as f:
-                                        json.dump(data, f, ensure_ascii=False, indent=4)
-                                    st.rerun()
-                            
-                        with col_link:
-                            st.write("")
-                            st.write("")
-                            st.link_button("Turnierseite", item['link'], use_container_width=True)
-            else:
-                st.write("Keine vergangenen Turniere gefunden.")
-
-    else:
-        st.info("Der Suchlauf war erfolgreich, aber es wurden keine Turniere in Ihrem Umkreis gefunden.")
-else:
-    st.warning("Keine Turnier-Datenbank gefunden. Bitte wenden Sie sich an den Administrator, um den ersten Suchlauf durchzuführen.")
+                            st.ma
