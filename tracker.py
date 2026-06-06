@@ -48,12 +48,32 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         if t_id:
             tournament_url = f"https://dbv.turnier.de/tournament/{t_id}"
 
+    # Zur absoluten Sicherheit stellen wir sicher, dass die Consent-Cookies auch bei Weiterleitungen vorhanden sind
+    for dom in ["dbv.turnier.de", ".turnier.de", "www.turnier.de"]:
+        session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain=dom, path="/")
+
+    # --- REGEL 1: Eintägige Turniere automatisch zuweisen ---
+    if start_date_str and end_date_str and start_date_str == end_date_str:
+        try:
+            dt = datetime.datetime.strptime(start_date_str, "%d.%m.%Y").date()
+            day_name = weekday_names[dt.weekday()]
+            return {"he": day_name, "hd": day_name, "mx": day_name}
+        except Exception:
+            pass
+
+    # --- REGEL 2: Heuristische Suche auf Turnier.de ---
     try:
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
             "Accept-Language": "de-DE,de;q=0.9"
         }
         r = session.get(tournament_url, headers=headers, timeout=10)
+        
+        # Warnung ausgeben, falls umgeleitet auf Cookiewall
+        if "cookiewall" in r.url:
+            print(f" -> ACHTUNG: {tournament_url} wurde auf die Cookie-Wall umgeleitet! (Inhalt konnte nicht geladen werden)")
+            return days
+
         if r.status_code != 200:
             print(f" -> Fehler: {tournament_url} lieferte HTTP-Statuscode {r.status_code}. (Evtl. von Cloudflare blockiert)")
             return days
@@ -102,19 +122,6 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         # MX / Mixed Keywords
         if "mixed" in text or "gemischt" in text or "mx" in text.split() or "gd" in text.split() or "xd" in text.split() or "mx-" in text:
             has_mx_offered = True
-
-        # --- REGEL 1: Eintägige Turniere automatisch zuweisen ---
-        if start_date_str and end_date_str and start_date_str == end_date_str:
-            try:
-                dt = datetime.datetime.strptime(start_date_str, "%d.%m.%Y").date()
-                day_name = weekday_names[dt.weekday()]
-                return {
-                    "he": day_name if has_he_offered else "",
-                    "hd": day_name if has_hd_offered else "",
-                    "mx": day_name if has_mx_offered else ""
-                }
-            except Exception:
-                pass
 
         # Text zeilenweise verarbeiten, um logische Einheiten nicht zu zerreißen
         raw_lines = text.split("\n")
@@ -431,7 +438,12 @@ def check_for_updates_generator():
     yield "Suche nach neuen Turnieren auf turnier.de..."
     session = requests.Session()
     
-    # 1. Startseite aufrufen, um automatisch frische Session-Cookies zu erhalten!
+    # --- DIESE ZEILEN MÜSSEN IMMER UND ALS ERSTES AUSGEFÜHRT WERDEN ---
+    # Setze ALWAYS die Cookies für Sprache (l=1031 für Deutsch) und Cookie-Consent (c=1)
+    # in allen möglichen Subdomains von turnier.de, um Cookiewall-Weiterleitungen sicher zu verhindern!
+    for dom in ["dbv.turnier.de", ".turnier.de", "www.turnier.de"]:
+        session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain=dom, path="/")
+    
     headers_init = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
     }
@@ -439,9 +451,7 @@ def check_for_updates_generator():
         session.get("https://dbv.turnier.de/find", headers=headers_init, timeout=10)
         yield "Frische Session-Cookies erfolgreich geladen."
     except Exception as e:
-        yield f"Warnung beim Laden der Session-Cookies: {e}. Verwende Fallback."
-        session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain="dbv.turnier.de", path="/")
-        session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain=".turnier.de", path="/")
+        yield f"Warnung beim Laden der Session-Cookies: {e}."
     
     try:
         current_list = scrape_tournaments(session)
