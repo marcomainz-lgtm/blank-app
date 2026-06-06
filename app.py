@@ -3,6 +3,7 @@ import pandas as pd
 import json
 import os
 import datetime
+from zoneinfo import ZoneInfo  # Für die deutsche Zeitzone
 from tracker import check_for_updates, DB_FILE
 
 st.set_page_config(page_title="Badminton Turniere für Marco", layout="wide")
@@ -69,19 +70,20 @@ IS_ADMIN = st.session_state['logged_in']
 st.title("🏸 Badminton Turniere für Marco")
 st.write("Auf dieser Seite findet ihr alle Seniorenturniere 2026, die im Umkreis von 100 Kilometern um Hilden (40723) stattfinden.")
 
-# Retrieve DB modification timestamp
+# Retrieve DB modification timestamp (konvertiert in deutsche Uhrzeit)
 last_retrieved_str = "Unbekannt"
 if os.path.exists(DB_FILE):
     try:
         last_modified = os.path.getmtime(DB_FILE)
-        last_retrieved_dt = datetime.datetime.fromtimestamp(last_modified)
+        # Erzwingt die deutsche Zeitzone (Europe/Berlin)
+        last_retrieved_dt = datetime.datetime.fromtimestamp(last_modified, tz=ZoneInfo("Europe/Berlin"))
         last_retrieved_str = last_retrieved_dt.strftime("%d.%m.%Y um %H:%M Uhr")
     except Exception:
         pass
 
 st.caption(f"🕒 Letztes Update der Datenbank: {last_retrieved_str}")
 
-# Database update trigger (nur für angemeldete Admins sichtbar)
+# Database update trigger
 if IS_ADMIN:
     if st.button("Datenbank aktualisieren"):
         with st.spinner("Suche nach neuen Turnieren auf turnier.de..."):
@@ -132,8 +134,11 @@ if os.path.exists(DB_FILE):
         df['Start_Date_Obj'] = pd.to_datetime(df['start_date'], format='%d.%m.%Y', errors='coerce').dt.date
         df['End_Date_Obj'] = pd.to_datetime(df['end_date'], format='%d.%m.%Y', errors='coerce').dt.date
 
-        # Retrieve current date (dynamic)
-        today = datetime.date.today()
+        # Aktuelles Datum in deutscher Zeitzone abrufen
+        try:
+            today = datetime.datetime.now(ZoneInfo("Europe/Berlin")).date()
+        except Exception:
+            today = datetime.date.today()
 
         # Split data chronologically
         df_upcoming = df[df['End_Date_Obj'] >= today].copy()
