@@ -142,33 +142,6 @@ def get_tournament_day_options(start_date_obj, end_date_obj):
     return day_options
 
 
-def get_formatted_day(day_selection, start_date_obj, end_date_obj):
-    """Findet basierend auf dem gewählten Wochentag (z. B. 'Samstag') das exakte Datum im Turnierzeitraum."""
-    if not day_selection or day_selection in ["-- Tag wählen --", "Keine Angabe", ""]:
-        return ""
-    if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
-        return day_selection
-    
-    weekday_names = {
-        0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
-        4: "Freitag", 5: "Samstag", 6: "Sonntag"
-    }
-    
-    try:
-        current_date = start_date_obj
-        limit = 0
-        while current_date <= end_date_obj and limit < 10:
-            day_name = weekday_names[current_date.weekday()]
-            if day_name == day_selection:
-                return f"{day_name}, {current_date.strftime('%d.%m.')}"
-            current_date += datetime.timedelta(days=1)
-            limit += 1
-    except Exception:
-        pass
-        
-    return day_selection
-
-
 # Load and present database
 if os.path.exists(DB_FILE):
     try:
@@ -272,14 +245,11 @@ if os.path.exists(DB_FILE):
                             # Automatische Formatierung der Disziplinen und Partner-Details für das grüne Banner
                             if bool(item.get('registered', False)):
                                 parts = []
-                                start_date_obj = item['Start_Date_Obj']
-                                end_date_obj = item['End_Date_Obj']
                                 
                                 # Einzel
                                 if bool(item.get('reg_he', False)):
                                     day_val = item.get('day_he', '')
-                                    formatted_day = get_formatted_day(day_val, start_date_obj, end_date_obj)
-                                    day_suffix = f" ({formatted_day})" if formatted_day else ""
+                                    day_suffix = f" ({day_val})" if day_val else ""
                                     parts.append(f"Herreneinzel{day_suffix}")
                                 
                                 # Doppel
@@ -295,8 +265,7 @@ if os.path.exists(DB_FILE):
                                         partner_str = f" mit {p_hd}"
                                         
                                     day_val = item.get('day_hd', '')
-                                    formatted_day = get_formatted_day(day_val, start_date_obj, end_date_obj)
-                                    day_suffix = f" ({formatted_day})" if formatted_day else ""
+                                    day_suffix = f" ({day_val})" if day_val else ""
                                     parts.append(f"Herrendoppel{partner_str}{day_suffix}")
                                 
                                 # Mixed
@@ -312,8 +281,7 @@ if os.path.exists(DB_FILE):
                                         partner_str = f" mit {p_mx}"
                                         
                                     day_val = item.get('day_mx', '')
-                                    formatted_day = get_formatted_day(day_val, start_date_obj, end_date_obj)
-                                    day_suffix = f" ({formatted_day})" if formatted_day else ""
+                                    day_suffix = f" ({day_val})" if day_val else ""
                                     parts.append(f"Mixed{partner_str}{day_suffix}")
                                     
                                 details_text = ", ".join(parts)
@@ -347,18 +315,12 @@ if os.path.exists(DB_FILE):
                             
                             # --- ALLGEMEINEN ABLAUF AUF DER KARTE ANZEIGEN ---
                             schedule_parts = []
-                            start_date_obj = item['Start_Date_Obj']
-                            end_date_obj = item['End_Date_Obj']
-                            
                             if item.get('day_he'):
-                                f_day = get_formatted_day(item['day_he'], start_date_obj, end_date_obj)
-                                schedule_parts.append(f"Einzel ({f_day})")
+                                schedule_parts.append(f"Einzel ({item['day_he']})")
                             if item.get('day_hd'):
-                                f_day = get_formatted_day(item['day_hd'], start_date_obj, end_date_obj)
-                                schedule_parts.append(f"Doppel ({f_day})")
+                                schedule_parts.append(f"Doppel ({item['day_hd']})")
                             if item.get('day_mx'):
-                                f_day = get_formatted_day(item['day_mx'], start_date_obj, end_date_obj)
-                                schedule_parts.append(f"Mixed ({f_day})")
+                                schedule_parts.append(f"Mixed ({item['day_mx']})")
                                 
                             if schedule_parts:
                                 st.markdown(f"📋 **Ablauf:** {', '.join(schedule_parts)}")
@@ -367,6 +329,8 @@ if os.path.exists(DB_FILE):
                             if IS_ADMIN:
                                 st.write("---")
                                 col_he, col_hd, col_mx = st.columns(3)
+                                start_date_obj = item['Start_Date_Obj']
+                                end_date_obj = item['End_Date_Obj']
                                 day_options = get_tournament_day_options(start_date_obj, end_date_obj)
                                 
                                 with col_he:
@@ -511,8 +475,7 @@ if os.path.exists(DB_FILE):
                                 # Einzel
                                 if bool(item.get('reg_he', False)):
                                     day_val = item.get('day_he', '')
-                                    formatted_day = get_formatted_day(day_val, start_date_obj, end_date_obj)
-                                    day_suffix = f" ({formatted_day})" if formatted_day else ""
+                                    day_suffix = f" ({day_val})" if day_val else ""
                                     parts.append(f"Herreneinzel{day_suffix}")
                                 
                                 # Doppel
@@ -528,8 +491,7 @@ if os.path.exists(DB_FILE):
                                         partner_str = f" mit {p_hd}"
                                         
                                     day_val = item.get('day_hd', '')
-                                    formatted_day = get_formatted_day(day_val, start_date_obj, end_date_obj)
-                                    day_suffix = f" ({formatted_day})" if formatted_day else ""
+                                    day_suffix = f" ({day_val})" if day_val else ""
                                     parts.append(f"Herrendoppel{partner_str}{day_suffix}")
                                         
                                 # Mixed
@@ -545,8 +507,7 @@ if os.path.exists(DB_FILE):
                                         partner_str = f" mit {p_mx}"
                                         
                                     day_val = item.get('day_mx', '')
-                                    formatted_day = get_formatted_day(day_val, start_date_obj, end_date_obj)
-                                    day_suffix = f" ({formatted_day})" if formatted_day else ""
+                                    day_suffix = f" ({day_val})" if day_val else ""
                                     parts.append(f"Mixed{partner_str}{day_suffix}")
                                     
                                 details_text = ", ".join(parts)
@@ -580,18 +541,12 @@ if os.path.exists(DB_FILE):
                             
                             # --- ALLGEMEINEN ABLAUF AUF DER KARTE ANZEIGEN (past) ---
                             schedule_parts = []
-                            start_date_obj = item['Start_Date_Obj']
-                            end_date_obj = item['End_Date_Obj']
-                            
                             if item.get('day_he'):
-                                f_day = get_formatted_day(item['day_he'], start_date_obj, end_date_obj)
-                                schedule_parts.append(f"Einzel ({f_day})")
+                                schedule_parts.append(f"Einzel ({item['day_he']})")
                             if item.get('day_hd'):
-                                f_day = get_formatted_day(item['day_hd'], start_date_obj, end_date_obj)
-                                schedule_parts.append(f"Doppel ({f_day})")
+                                schedule_parts.append(f"Doppel ({item['day_hd']})")
                             if item.get('day_mx'):
-                                f_day = get_formatted_day(item['day_mx'], start_date_obj, end_date_obj)
-                                schedule_parts.append(f"Mixed ({f_day})")
+                                schedule_parts.append(f"Mixed ({item['day_mx']})")
                                 
                             if schedule_parts:
                                 st.markdown(f"📋 **Ablauf:** {', '.join(schedule_parts)}")
@@ -600,6 +555,8 @@ if os.path.exists(DB_FILE):
                             if IS_ADMIN:
                                 st.write("---")
                                 col_he, col_hd, col_mx = st.columns(3)
+                                start_date_obj = item['Start_Date_Obj']
+                                end_date_obj = item['End_Date_Obj']
                                 day_options = get_tournament_day_options(start_date_obj, end_date_obj)
                                 
                                 with col_he:
