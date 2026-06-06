@@ -82,12 +82,19 @@ if os.path.exists(DB_FILE):
 
 st.caption(f"🕒 Letztes Update der Datenbank: {last_retrieved_str}")
 
-# Database update trigger
+# Database update trigger (mit visuellem Aktivitätsprotokoll)
 if IS_ADMIN:
     if st.button("Datenbank aktualisieren"):
-        with st.spinner("Suche nach neuen Turnieren auf turnier.de..."):
-            check_for_updates()
+        log_container = st.empty()
+        logs = []
+        with st.status("Verbindung zu turnier.de wird hergestellt...", expanded=True) as status:
+            from tracker import check_for_updates_generator
+            for log_line in check_for_updates_generator():
+                logs.append(log_line)
+                log_container.code("\n".join(logs))
+            status.update(label="Datenbank erfolgreich aktualisiert!", state="complete", expanded=False)
         st.toast("Datenbank erfolgreich aktualisiert!")
+        st.rerun()
 
 # --- MELDUNGSFILTER (TOGGLE) ---
 only_registered = st.toggle("Nur gemeldete Turniere anzeigen", value=False)
