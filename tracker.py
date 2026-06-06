@@ -101,7 +101,7 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
                     "Accept-Language": "de-DE,de;q=0.9",
                     "X-Requested-With": "XMLHttpRequest"
                 }
-                r_sub = session.get(sub_link, headers=headers_ajax, timeout=5)
+                r_sub = session.get(sub_link, headers_ajax, timeout=5)
                 
                 if "cookiewall" in r_sub.url:
                     print(f" -> Warnung: Unterseite {sub_link} wurde auf die Cookie-Wall umgeleitet.")
@@ -204,7 +204,7 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             if len(c_lower) < 3:
                 continue
             
-            # Wochentage prüfen (Nur noch die echten, vollen Wörter zulassen, um Sprach-Icons wie FR und Bindeworte wie "so" auszuschließen!)
+            # Wochentage prüfen (Deutsch & Englisch)
             is_sat = "samstag" in c_lower or "saturday" in c_lower
             is_sun = "sonntag" in c_lower or "sunday" in c_lower
             is_fri = "freitag" in c_lower or "friday" in c_lower
@@ -551,8 +551,9 @@ def check_for_updates_generator():
         if day_hd == "gesamt": day_hd = ""
         if day_mx == "gesamt": day_mx = ""
 
-        # Wenn alle drei Felder leer sind, erzwingen wir die Detail-Zeitplananalyse!
-        if not day_he and not day_hd and not day_mx:
+        # Wenn mindestens eine Disziplin noch leer ist, analysieren wir diesen Eintrag,
+        # um eventuelle unvollständige Spieldaten automatisch zu ergänzen!
+        if not day_he or not day_hd or not day_mx:
             yield f"Analysiere Zeitplan für: {t['title']}..."
             detected_days = detect_discipline_days(session, t["link"], t["start_date"], t["end_date"])
             t["day_he"] = detected_days["he"]
