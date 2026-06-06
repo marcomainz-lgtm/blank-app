@@ -169,7 +169,7 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
 
 def render_tournament_schedule(item, occupied_dates=None):
     """Rendert die Wochentage des Turniers einzeln und hängt ggf. erkannte Disziplinen kompakt an.
-    Dampft belegte Tage visuell ein (Grauton/Fading) und zeigt die Details der Kollision in natürlicher Sprache an."""
+    Zeigt zudem dezente Konflikt-Warnungen in weichem Orange-Gelb mit einer Pinnnadel (📌) direkt neben dem Tag an."""
     if occupied_dates is None:
         occupied_dates = {}
         
@@ -212,12 +212,9 @@ def render_tournament_schedule(item, occupied_dates=None):
             if day_mx_val == w_name:
                 day_disciplines.append("Mixed")
                 
-            # Prüfe dezent auf Terminüberschneidungen (Kollisionen) in natürlicher Sprache
-            is_conflicted = False
+            # Prüfe dezent auf Terminüberschneidungen (Kollisionen)
             conflict_text = ""
             if not item.get('registered', False) and current_date in occupied_dates:
-                is_conflicted = True
-                
                 # Gruppiere nach Turnier, falls an diesem Tag mehrere Disziplinen bei demselben Turnier gespielt werden
                 t_groups = {}
                 for conflict in occupied_dates[current_date]:
@@ -237,17 +234,15 @@ def render_tournament_schedule(item, occupied_dates=None):
                         
                     sentence_parts.append(f"An diesem Tag spielst du {discs_str} in {info['city']} ({other_title})")
                 
-                conflict_text = f" <span style='font-style: italic; font-size: 0.95em;'> &ndash; {'; '.join(sentence_parts)}</span>"
-                
-            # Style für die Zeile bestimmen (Unaufdringlicher Grauton und Transparenz bei Überschneidung)
-            line_style = "color: #9ca3af; opacity: 0.65;" if is_conflicted else "color: inherit;"
+                # Soft orange-yellow style for the conflict text using `#d97706` (Amber-600) with a pushpin emoji `📌`
+                conflict_text = f" <span style='color: #d97706; font-style: italic; font-size: 0.95em; font-weight: normal;'> &ndash; 📌 {'; '.join(sentence_parts)}</span>"
                 
             if day_disciplines:
                 disciplines_str = ", ".join(day_disciplines)
-                schedule_html += f"<div style='margin-bottom: 2px; {line_style}'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}{conflict_text}</div>"
+                schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}{conflict_text}</div>"
             else:
                 # Wochentag auch dann auflisten, wenn noch keine Disziplinen bekannt sind
-                schedule_html += f"<div style='margin-bottom: 2px; {line_style}'>🗓️ <strong>{w_name}, {formatted_dt}</strong>{conflict_text}</div>"
+                schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}</strong>{conflict_text}</div>"
                 
             current_date += datetime.timedelta(days=1)
             limit += 1
@@ -461,7 +456,7 @@ if os.path.exists(DB_FILE):
                                     else:
                                         unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
                                         
-                                # Baue die HTML-Zeilen chronologisch auf (Gruppiert nach Datum im neuen Format: Wochentag, Datum:)
+                                # Baue die HTML-Zeilen chronologisch auf (Gruppiert nach Datum)
                                 sorted_dates = sorted(date_groups.keys())
                                 weekday_names = {
                                     0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
