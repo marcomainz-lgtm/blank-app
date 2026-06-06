@@ -345,14 +345,28 @@ if os.path.exists(DB_FILE):
                             st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
                             st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                             
+                            # --- ALLGEMEINEN ABLAUF AUF DER KARTE ANZEIGEN ---
+                            schedule_parts = []
+                            start_date_obj = item['Start_Date_Obj']
+                            end_date_obj = item['End_Date_Obj']
+                            
+                            if item.get('day_he'):
+                                f_day = get_formatted_day(item['day_he'], start_date_obj, end_date_obj)
+                                schedule_parts.append(f"Einzel ({f_day})")
+                            if item.get('day_hd'):
+                                f_day = get_formatted_day(item['day_hd'], start_date_obj, end_date_obj)
+                                schedule_parts.append(f"Doppel ({f_day})")
+                            if item.get('day_mx'):
+                                f_day = get_formatted_day(item['day_mx'], start_date_obj, end_date_obj)
+                                schedule_parts.append(f"Mixed ({f_day})")
+                                
+                            if schedule_parts:
+                                st.markdown(f"📋 **Ablauf:** {', '.join(schedule_parts)}")
+                            
                             # Admin-Ansicht
                             if IS_ADMIN:
                                 st.write("---")
                                 col_he, col_hd, col_mx = st.columns(3)
-                                
-                                # Bestimme dynamisch die exakten Turniertage für dieses spezielle Turnier
-                                start_date_obj = item['Start_Date_Obj']
-                                end_date_obj = item['End_Date_Obj']
                                 day_options = get_tournament_day_options(start_date_obj, end_date_obj)
                                 
                                 with col_he:
@@ -360,7 +374,6 @@ if os.path.exists(DB_FILE):
                                     val_he = st.checkbox("Meldung Einzel", value=bool(item.get('reg_he', False)), key=f"he_{item['id']}")
                                     val_day_he_db = item.get('day_he', '')
                                     if val_he:
-                                        # Index für vorausgewählten Wert dynamisch suchen
                                         he_idx = 0
                                         if val_day_he_db:
                                             for o_idx, opt in enumerate(day_options):
@@ -368,7 +381,6 @@ if os.path.exists(DB_FILE):
                                                     he_idx = o_idx
                                                     break
                                         selected_label_he = st.selectbox("Spieltag Einzel", options=day_options, index=he_idx, key=f"day_he_{item['id']}")
-                                        # Nur den reinen Wochentag (z.B. "Samstag") abspeichern
                                         val_day_he = selected_label_he.split(",")[0].strip() if selected_label_he != "-- Tag wählen --" else ""
                                     else:
                                         val_day_he = ""
@@ -386,7 +398,6 @@ if os.path.exists(DB_FILE):
                                         if val_partner_hd == "-- Kein Partner --":
                                             val_partner_hd = ""
                                             
-                                        # Index für vorausgewählten Wert dynamisch suchen
                                         hd_idx = 0
                                         if val_day_hd_db:
                                             for o_idx, opt in enumerate(day_options):
@@ -412,7 +423,6 @@ if os.path.exists(DB_FILE):
                                         if val_partner_mx == "-- Kein Partner --":
                                             val_partner_mx = ""
                                             
-                                        # Index für vorausgewählten Wert dynamisch suchen
                                         mx_idx = 0
                                         if val_day_mx_db:
                                             for o_idx, opt in enumerate(day_options):
@@ -568,14 +578,28 @@ if os.path.exists(DB_FILE):
                             st.markdown(f"📍 **{item['city']}**{dist_str} &nbsp;|&nbsp; 🗓️ **{item['start_date']}** bis **{item['end_date']}**")
                             st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                             
+                            # --- ALLGEMEINEN ABLAUF AUF DER KARTE ANZEIGEN (past) ---
+                            schedule_parts = []
+                            start_date_obj = item['Start_Date_Obj']
+                            end_date_obj = item['End_Date_Obj']
+                            
+                            if item.get('day_he'):
+                                f_day = get_formatted_day(item['day_he'], start_date_obj, end_date_obj)
+                                schedule_parts.append(f"Einzel ({f_day})")
+                            if item.get('day_hd'):
+                                f_day = get_formatted_day(item['day_hd'], start_date_obj, end_date_obj)
+                                schedule_parts.append(f"Doppel ({f_day})")
+                            if item.get('day_mx'):
+                                f_day = get_formatted_day(item['day_mx'], start_date_obj, end_date_obj)
+                                schedule_parts.append(f"Mixed ({f_day})")
+                                
+                            if schedule_parts:
+                                st.markdown(f"📋 **Ablauf:** {', '.join(schedule_parts)}")
+                            
                             # Admin-Ansicht
                             if IS_ADMIN:
                                 st.write("---")
                                 col_he, col_hd, col_mx = st.columns(3)
-                                
-                                # Bestimme dynamisch die exakten Turniertage für dieses spezielle Turnier (past)
-                                start_date_obj = item['Start_Date_Obj']
-                                end_date_obj = item['End_Date_Obj']
                                 day_options = get_tournament_day_options(start_date_obj, end_date_obj)
                                 
                                 with col_he:
