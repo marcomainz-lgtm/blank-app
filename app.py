@@ -393,14 +393,14 @@ if os.path.exists(DB_FILE):
                             }
                             
                             if general_date_groups:
-                                # Zeitplan chronologisch auflisten (eng beieinander in einem Block)
+                                # Zeitplan chronologisch auflisten (eng beieinander in einem Block, mit gesundem Abstand nach unten)
                                 schedule_html = ""
                                 for dt in sorted(general_date_groups.keys()):
                                     w_name = weekday_names_german[dt.weekday()]
                                     formatted_dt = dt.strftime("%d.%m.%Y")
                                     disciplines_str = ", ".join(general_date_groups[dt])
                                     schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{formatted_dt} ({w_name}):</strong> {disciplines_str}</div>"
-                                st.markdown(f"<div style='line-height: 1.35; margin-bottom: 4px;'>{schedule_html}</div>", unsafe_allow_html=True)
+                                st.markdown(f"<div style='line-height: 1.35; margin-bottom: 14px;'>{schedule_html}</div>", unsafe_allow_html=True)
                             else:
                                 # Fallback, falls kein detaillierter Zeitplan bekannt ist
                                 st.markdown(f"🗓️ **{item['start_date']}** bis **{item['end_date']}**")
@@ -674,14 +674,14 @@ if os.path.exists(DB_FILE):
                             }
                             
                             if general_date_groups:
-                                # Zeitplan chronologisch auflisten (eng beieinander in einem Block)
+                                # Zeitplan chronologisch auflisten (eng beieinander in einem Block, mit gesundem Abstand nach unten)
                                 schedule_html = ""
                                 for dt in sorted(general_date_groups.keys()):
                                     w_name = weekday_names_german[dt.weekday()]
                                     formatted_dt = dt.strftime("%d.%m.%Y")
                                     disciplines_str = ", ".join(general_date_groups[dt])
                                     schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{formatted_dt} ({w_name}):</strong> {disciplines_str}</div>"
-                                st.markdown(f"<div style='line-height: 1.35; margin-bottom: 4px;'>{schedule_html}</div>", unsafe_allow_html=True)
+                                st.markdown(f"<div style='line-height: 1.35; margin-bottom: 14px;'>{schedule_html}</div>", unsafe_allow_html=True)
                             else:
                                 # Fallback (past)
                                 st.markdown(f"🗓️ **{item['start_date']}** bis **{item['end_date']}**")
