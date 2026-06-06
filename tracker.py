@@ -101,7 +101,7 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
                     "Accept-Language": "de-DE,de;q=0.9",
                     "X-Requested-With": "XMLHttpRequest"
                 }
-                r_sub = session.get(sub_link, headers=headers_ajax, timeout=5)
+                r_sub = session.get(sub_link, headers_ajax, timeout=5)
                 
                 if "cookiewall" in r_sub.url:
                     print(f" -> Warnung: Unterseite {sub_link} wurde auf die Cookie-Wall umgeleitet.")
@@ -180,8 +180,8 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             line_clean = re.sub(r'\s+', ' ', line).strip()
             if not line_clean:
                 continue
-            # Trenne nach typischen Abgrenzungen (aber NICHT nach Komma oder Punkt!)
-            sub_parts = re.split(r'[|•;–-]', line_clean)
+            # Trenne nach typischen Abgrenzungen (und nun auch wieder am Komma!)
+            sub_parts = re.split(r'[,|•;–-]', line_clean)
             for part in sub_parts:
                 part_clean = part.strip()
                 if part_clean:
@@ -204,10 +204,10 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             if len(c_lower) < 3:
                 continue
             
-            # Wochentage prüfen (Deutsch & Englisch)
-            is_sat = "samstag" in c_lower or "saturday" in c_lower or re.search(r'\bsa\b', c_lower) or re.search(r'\bsat\b', c_lower)
-            is_sun = "sonntag" in c_lower or "sunday" in c_lower or re.search(r'\bso\b', c_lower) or re.search(r'\bsun\b', c_lower)
-            is_fri = "freitag" in c_lower or "friday" in c_lower or re.search(r'\bfr\b', c_lower) or re.search(r'\bfri\b', c_lower)
+            # Wochentage prüfen (Nur noch die echten, vollen Wörter zulassen, um Sprach-Icons wie FR und Bindeworte wie "so" auszuschließen!)
+            is_sat = "samstag" in c_lower or "saturday" in c_lower
+            is_sun = "sonntag" in c_lower or "sunday" in c_lower
+            is_fri = "freitag" in c_lower or "friday" in c_lower
             
             # ZUSÄTZLICH: Prüfe, ob eines unserer berechneten Datumsformate in der Zeile steht!
             for date_str, w_day in date_to_weekday.items():
@@ -239,10 +239,7 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             if not active_day:
                 continue  # Ohne bekannten Wochentag können wir nichts zuordnen
                 
-            # --- NEU: Zeitplan-Zeilen-Filter ---
-            # Wir ordnen die Disziplin nur zu, wenn die Zeile entweder den Wochentag direkt nennt,
-            # oder wenn sie wie eine Zeitplan-Zeile aussieht (Uhrzeiten, Zahlen etc. enthält).
-            # Das verhindert das fehlerhafte Vererben auf allgemeine Erklärungssätze!
+            # --- Zeitplan-Zeilen-Filter ---
             is_schedule_line = (
                 "uhr" in c_lower or 
                 "ab" in c_lower or 
