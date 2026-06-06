@@ -30,9 +30,9 @@ def is_youth_tournament(title, tag_parts):
 
 def detect_discipline_days(session, tournament_url, start_date_str, end_date_str):
     """
-    Sucht auf der Turnierseite und deren relevanten Navigations-Unterseiten nach Informationen,
-    welche Disziplin an welchem Tag (Samstag/Sonntag) stattfindet.
-    Nutzt eine State Machine, um auch Gliederungen/Listen verlässlich zuzuordnen.
+    Sucht auf der Turnierseite und deren relevanten Navigations-Unterseiten (wie Bestimmungen)
+    nach Informationen, welche Disziplin an welchem Tag (Samstag/Sonntag) stattfindet.
+    Ermittelt vorher, welche Disziplinen überhaupt angeboten werden.
     """
     days = {"he": "", "hd": "", "mx": ""}
     weekday_names = {
@@ -48,16 +48,6 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         if t_id:
             tournament_url = f"https://dbv.turnier.de/tournament/{t_id}"
 
-    # --- REGEL 1: Eintägige Turniere automatisch zuweisen ---
-    if start_date_str and end_date_str and start_date_str == end_date_str:
-        try:
-            dt = datetime.datetime.strptime(start_date_str, "%d.%m.%Y").date()
-            day_name = weekday_names[dt.weekday()]
-            return {"he": day_name, "hd": day_name, "mx": day_name}
-        except Exception:
-            pass
-
-    # --- REGEL 2: Heuristische Suche auf Turnier.de ---
     try:
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
@@ -98,6 +88,34 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             except Exception:
                 pass
         
+        # --- PRÜFEN, WELCHE DISZIPLINEN ANGEBOTEN WERDEN ---
+        has_he_offered = False
+        has_hd_offered = False
+        has_mx_offered = False
+        
+        # HE / Einzel Keywords
+        if "einzel" in text or "single" in text or "he" in text.split() or "de" in text.split() or "ms" in text.split() or "ws" in text.split() or "he-" in text:
+            has_he_offered = True
+        # HD / Doppel Keywords
+        if "doppel" in text or "double" in text or "hd" in text.split() or "dd" in text.split() or "md" in text.split() or "wd" in text.split() or "hd-" in text:
+            has_hd_offered = True
+        # MX / Mixed Keywords
+        if "mixed" in text or "gemischt" in text or "mx" in text.split() or "gd" in text.split() or "xd" in text.split() or "mx-" in text:
+            has_mx_offered = True
+
+        # --- REGEL 1: Eintägige Turniere automatisch zuweisen ---
+        if start_date_str and end_date_str and start_date_str == end_date_str:
+            try:
+                dt = datetime.datetime.strptime(start_date_str, "%d.%m.%Y").date()
+                day_name = weekday_names[dt.weekday()]
+                return {
+                    "he": day_name if has_he_offered else "",
+                    "hd": day_name if has_hd_offered else "",
+                    "mx": day_name if has_mx_offered else ""
+                }
+            except Exception:
+                pass
+
         # Text zeilenweise verarbeiten, um logische Einheiten nicht zu zerreißen
         raw_lines = text.split("\n")
         clauses = []
@@ -177,6 +195,11 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             days["hd"] = found_hd[0]
         if found_mx and len(set(found_mx)) == 1:
             days["mx"] = found_mx[0]
+            
+        # Falls Disziplinen gar nicht angeboten werden, Zuweisung leeren
+        if not has_he_offered: days["he"] = ""
+        if not has_hd_offered: days["hd"] = ""
+        if not has_mx_offered: days["mx"] = ""
             
         # Logging der Heuristik-Ergebnisse im Terminal
         if days["he"] or days["hd"] or days["mx"]:
