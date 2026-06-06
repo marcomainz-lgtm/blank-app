@@ -44,7 +44,6 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         try:
             dt = datetime.datetime.strptime(start_date_str, "%d.%m.%Y").date()
             day_name = weekday_names[dt.weekday()]
-            print(f" -> {tournament_url}: Eintägiges Turnier am {day_name}. Automatische Zuweisung durchgeführt.")
             return {"he": day_name, "hd": day_name, "mx": day_name}
         except Exception:
             pass
@@ -55,14 +54,10 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
             "Accept-Language": "de-DE,de;q=0.9"
         }
-        
-        # Nutzen der übergebenen, erfolgreich verifizierten Session (Cloudflare-Bypass)
         r = session.get(tournament_url, headers=headers, timeout=10)
-        
         if r.status_code != 200:
-            print(f" -> Warnung: {tournament_url} lieferte HTTP-Statuscode {r.status_code}. (Evtl. von Cloudflare blockiert)")
             return days
-            
+        
         soup = BeautifulSoup(r.content, 'html.parser')
         
         # Haupttext extrahieren (Zeilenumbrüche erhalten!)
@@ -73,7 +68,6 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         for a in soup.find_all('a', href=True):
             a_text = a.get_text().lower().strip()
             a_href = a['href']
-            # Relevante Keywords für Zeitpläne, Bestimmungen, Disziplinen oder Klassen
             keywords = ["bestimmungen", "ausschreibung", "zeitplan", "programm", "ablauf", "informationen", "info", "disziplinen", "klassen", "meldungen"]
             if any(k in a_text for k in keywords) or any(k in a_href.lower() for k in keywords):
                 full_sub_link = urllib.parse.urljoin(tournament_url, a_href)
@@ -100,7 +94,6 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             line_clean = re.sub(r'\s+', ' ', line).strip()
             if not line_clean:
                 continue
-            # Trenne nach typischen Abgrenzungen (aber NICHT nach Komma oder Punkt!)
             sub_parts = re.split(r'[|•;–-]', line_clean)
             for part in sub_parts:
                 part_clean = part.strip()
@@ -110,11 +103,6 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         found_he = []
         found_hd = []
         found_mx = []
-        
-        # Hilfsvariablen für Diagnose-Ausgaben
-        has_sa = "samstag" in text or "saturday" in text
-        has_so = "sonntag" in text or "sunday" in text
-        has_doppel = "doppel" in text or "double" in text
         
         for c in clauses:
             c_lower = c.strip()
@@ -156,16 +144,6 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             days["hd"] = found_hd[0]
         if found_mx and len(set(found_mx)) == 1:
             days["mx"] = found_mx[0]
-            
-        # Logging der Heuristik-Ergebnisse im Terminal
-        if days["he"] or days["hd"] or days["mx"]:
-            print(f" -> Heuristik-Ergebnis für '{tournament_url}':")
-            if days["he"]: print(f"    * Herreneinzel: {days['he']}")
-            if days["hd"]: print(f"    * Herrendoppel: {days['hd']}")
-            if days["mx"]: print(f"    * Mixed: {days['mx']}")
-        else:
-            print(f" -> Heuristik-Ergebnis für '{tournament_url}': Keine eindeutigen Spieltage im Text ermittelt.")
-            print(f"    (Text-Check: 'Samstag' vorhanden={has_sa}, 'Sonntag' vorhanden={has_so}, 'Doppel' vorhanden={has_doppel})")
             
     except Exception as e:
         print(f"Fehler bei der Zeitplan-Heuristik für {tournament_url}: {e}")
@@ -377,36 +355,56 @@ def send_push_notification(new_items):
 
 
 def check_for_updates():
-    print("Checking for tournament updates...")
+    """Fallback-Funktion für Kompatibilität."""
+    for _ in check_for_updates_generator():
+        pass
+
+
+def check_for_updates_generator():
+    """Generator-Funktion für das Echtzeit-Web-Aktivitätsprotokoll."""
+    yield "Suche nach neuen Turnieren auf turnier.de..."
     session = requests.Session()
     session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain="dbv.turnier.de", path="/")
     session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain=".turnier.de", path="/")
     
-    current_list = scrape_tournaments(session)
-    
+    try:
+        current_list = scrape_tournaments(session)
+        yield f"Suche beendet. {len(current_list)} Turniere im Umkreis von 100km ermittelt."
+    except Exception as e:
+        yield f"Fehler beim Laden der Turnierliste: {e}"
+        return
+
     known_tournaments = {}
     if os.path.exists(DB_FILE):
         try:
             with open(DB_FILE, "r", encoding="utf-8") as f:
                 known_tournaments = json.load(f)
         except Exception:
-            print("Could not read database. Re-initializing.")
+            yield "Konnte bestehende Datenbank nicht lesen, initialisiere neu."
 
     new_tournaments = []
     for t in current_list:
         t_id = t["id"]
         if t_id not in known_tournaments:
-            # 1. Neues Turnier gefunden -> Heuristische Zeitplananalyse durchführen!
-            print(f"Neues Turnier gefunden: {t['title']}. Analysiere Zeitplan...")
+            yield f"Neues Turnier gefunden: {t['title']}."
             detected_days = detect_discipline_days(session, t["link"], t["start_date"], t["end_date"])
             t["day_he"] = detected_days["he"]
             t["day_hd"] = detected_days["hd"]
             t["day_mx"] = detected_days["mx"]
             
+            found_msg = []
+            if t["day_he"]: found_msg.append(f"Einzel: {t['day_he']}")
+            if t["day_hd"]: found_msg.append(f"Doppel: {t['day_hd']}")
+            if t["day_mx"]: found_msg.append(f"Mixed: {t['day_mx']}")
+            if found_msg:
+                yield f" -> Zeitplan erkannt: {', '.join(found_msg)}"
+            else:
+                yield f" -> Keine eindeutigen Spieltage ermittelt."
+            
             new_tournaments.append(t)
             known_tournaments[t_id] = t
         else:
-            # 2. Bestehendes Turnier -> Daten bewahren und ggf. fehlende Spieltage analysieren
+            # Bestehendes Turnier -> Daten bewahren und ggf. fehlende Spieltage analysieren
             old_t = known_tournaments[t_id]
             is_registered = old_t.get('registered', False)
             reg_he = old_t.get('reg_he', False)
@@ -426,11 +424,20 @@ def check_for_updates():
 
             # Falls der Zeitplan noch komplett unbeschrieben ist, versuchen wir ihn nachträglich zu bestimmen (Migration)
             if not day_he and not day_hd and not day_mx:
-                print(f"Analysiere Zeitplan für bestehendes Turnier: {t['title']}...")
+                yield f"Analysiere Zeitplan für bestehendes Turnier: {t['title']}..."
                 detected_days = detect_discipline_days(session, t["link"], t["start_date"], t["end_date"])
                 day_he = detected_days["he"]
                 day_hd = detected_days["hd"]
                 day_mx = detected_days["mx"]
+                
+                found_msg = []
+                if day_he: found_msg.append(f"Einzel: {day_he}")
+                if day_hd: found_msg.append(f"Doppel: {day_hd}")
+                if day_mx: found_msg.append(f"Mixed: {day_mx}")
+                if found_msg:
+                    yield f" -> Zeitplan erkannt: {', '.join(found_msg)}"
+                else:
+                    yield " -> Keine eindeutigen Spieltage im Text ermittelt."
 
             known_tournaments[t_id] = t
             known_tournaments[t_id]['registered'] = is_registered
@@ -447,10 +454,10 @@ def check_for_updates():
         json.dump(known_tournaments, f, ensure_ascii=False, indent=4)
 
     if new_tournaments:
-        print(f"Found {len(new_tournaments)} new tournament(s)!")
+        yield f"Fertig! {len(new_tournaments)} neue(s) Turnier(e) gefunden."
         send_push_notification(new_tournaments)
     else:
-        print("No new tournaments detected.")
+        yield "Fertig! Keine neuen Turniere erkannt."
 
 
 if __name__ == "__main__":
