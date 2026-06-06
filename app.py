@@ -169,7 +169,7 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
 
 def render_tournament_schedule(item, occupied_dates=None):
     """Rendert die Wochentage des Turniers einzeln und hängt ggf. erkannte Disziplinen kompakt an.
-    Zeigt zudem dezente Konflikt-Warnungen in weichem Orange-Gelb mit einer Pinnnadel (📌) direkt neben dem Tag an."""
+    Zeigt zudem persönliche, unaufdringliche Konflikt-Hinweise in weichem Bernstein-Gold direkt neben dem Tag an."""
     if occupied_dates is None:
         occupied_dates = {}
         
@@ -232,10 +232,11 @@ def render_tournament_schedule(item, occupied_dates=None):
                     else:
                         discs_str = discs_sorted[0]
                         
-                    sentence_parts.append(f"An diesem Tag spielst du {discs_str} in {info['city']} ({other_title})")
+                    # Personalisiertes Statusschema ("spiele ich")
+                    sentence_parts.append(f"An diesem Tag spiele ich {discs_str} in {info['city']} ({other_title})")
                 
-                # Soft orange-yellow style for the conflict text using `#d97706` (Amber-600) with a pushpin emoji `📌`
-                conflict_text = f" <span style='color: #d97706; font-style: italic; font-size: 0.95em; font-weight: normal;'> &ndash; 📌 {'; '.join(sentence_parts)}</span>"
+                # Weiche, beruhigte Gold-Schriftfarbe (`#f59e0b`) ohne Emojis
+                conflict_text = f" <span style='color: #f59e0b; font-style: italic; font-size: 0.95em; font-weight: normal;'> &ndash; {'; '.join(sentence_parts)}</span>"
                 
             if day_disciplines:
                 disciplines_str = ", ".join(day_disciplines)
