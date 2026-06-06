@@ -16,9 +16,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "DCA37636-EF2F-416D-A9A6-E8357497F473": {
         "id": "DCA37636-EF2F-416D-A9A6-E8357497F473",
@@ -37,9 +37,9 @@
         "reg_mx": false,
         "partner_hd": "Pascal Ziehe",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "Samstag",
+        "day_hd": "",
+        "day_mx": ""
     },
     "D8ED7946-02D1-41EA-99B7-70DFA2EC0D21": {
         "id": "D8ED7946-02D1-41EA-99B7-70DFA2EC0D21",
@@ -58,9 +58,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "4781C512-A24C-473B-9F41-7953F1DDC1EE": {
         "id": "4781C512-A24C-473B-9F41-7953F1DDC1EE",
@@ -79,9 +79,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "EA7EE6FD-BF4A-48D1-8C65-25162F9D0FBC": {
         "id": "EA7EE6FD-BF4A-48D1-8C65-25162F9D0FBC",
@@ -100,9 +100,9 @@
         "reg_mx": false,
         "partner_hd": "Matthias Knaupp",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "75D238C8-453F-49FB-BAE5-A3BE6F1A653B": {
         "id": "75D238C8-453F-49FB-BAE5-A3BE6F1A653B",
@@ -121,9 +121,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "75EF49B1-4911-4694-9907-D71B3F5AB5AB": {
         "id": "75EF49B1-4911-4694-9907-D71B3F5AB5AB",
@@ -142,9 +142,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "DF97BB7A-B89B-4090-BB2F-39D1CDE06D22": {
         "id": "DF97BB7A-B89B-4090-BB2F-39D1CDE06D22",
@@ -163,9 +163,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "64562E29-35EB-4C75-959D-D99B5A27434E": {
         "id": "64562E29-35EB-4C75-959D-D99B5A27434E",
@@ -184,9 +184,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "D32B0813-0D00-4EEC-8BBE-62464396BF96": {
         "id": "D32B0813-0D00-4EEC-8BBE-62464396BF96",
@@ -205,9 +205,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "259B2CF9-DA3D-4DC9-87EF-5CA27F68B845": {
         "id": "259B2CF9-DA3D-4DC9-87EF-5CA27F68B845",
@@ -226,9 +226,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "BA13203F-F173-4488-8F5D-EADFA010BE42": {
         "id": "BA13203F-F173-4488-8F5D-EADFA010BE42",
@@ -247,9 +247,9 @@
         "reg_mx": false,
         "partner_hd": "Pascal Ziehe",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "Samstag",
+        "day_mx": "Sonntag"
     },
     "4BED8BF5-E46B-4319-8DC9-1BC523500381": {
         "id": "4BED8BF5-E46B-4319-8DC9-1BC523500381",
@@ -268,9 +268,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": "Sonntag"
     },
     "212A9956-E2C8-4CC9-AF39-98FAB76DDACB": {
         "id": "212A9956-E2C8-4CC9-AF39-98FAB76DDACB",
@@ -289,9 +289,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "C3803DF0-F48B-4DD0-BAC5-AB8360720BC9": {
         "id": "C3803DF0-F48B-4DD0-BAC5-AB8360720BC9",
@@ -310,9 +310,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "F57C385C-549E-4200-B4C6-C604EADBF725": {
         "id": "F57C385C-549E-4200-B4C6-C604EADBF725",
@@ -331,9 +331,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "E6767D9F-CC4A-47FA-9F5E-BB0B84C27E68": {
         "id": "E6767D9F-CC4A-47FA-9F5E-BB0B84C27E68",
@@ -352,9 +352,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "Sonntag",
+        "day_hd": "",
+        "day_mx": ""
     },
     "6ABDA092-980B-4971-A8EE-A26F353CA266": {
         "id": "6ABDA092-980B-4971-A8EE-A26F353CA266",
@@ -373,9 +373,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "A0060FD9-89CE-4858-9B21-6CC97412349F": {
         "id": "A0060FD9-89CE-4858-9B21-6CC97412349F",
@@ -394,9 +394,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "86D7FDB2-B539-4BF9-BFD4-B30404E130EC": {
         "id": "86D7FDB2-B539-4BF9-BFD4-B30404E130EC",
@@ -415,9 +415,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "F84E05F4-9B6D-491B-9D3A-6604441A1DEE": {
         "id": "F84E05F4-9B6D-491B-9D3A-6604441A1DEE",
@@ -436,9 +436,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "50FADCC0-76A8-4EFC-80AB-961931F34326": {
         "id": "50FADCC0-76A8-4EFC-80AB-961931F34326",
@@ -457,9 +457,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "6166EC4D-8578-4344-B165-62F2EADF8152": {
         "id": "6166EC4D-8578-4344-B165-62F2EADF8152",
@@ -478,9 +478,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": "Samstag"
     },
     "42CFFA6F-160F-4767-9575-3C27D1FA7B76": {
         "id": "42CFFA6F-160F-4767-9575-3C27D1FA7B76",
@@ -499,9 +499,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "D790C3D8-3251-426C-961C-331500733BF8": {
         "id": "D790C3D8-3251-426C-961C-331500733BF8",
@@ -520,9 +520,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "1A4E195A-563D-4AB6-A0C4-7D1210469199": {
         "id": "1A4E195A-563D-4AB6-A0C4-7D1210469199",
@@ -541,9 +541,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "60DBACD0-B79B-4975-B89F-22A5A87DA6F5": {
         "id": "60DBACD0-B79B-4975-B89F-22A5A87DA6F5",
@@ -562,9 +562,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": "Sonntag"
     },
     "5F408B0E-2E59-4CFE-914A-63299ADA83E6": {
         "id": "5F408B0E-2E59-4CFE-914A-63299ADA83E6",
@@ -583,9 +583,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "Sonntag",
+        "day_mx": ""
     },
     "62DDD234-38C7-4626-8FDF-23C121736B0A": {
         "id": "62DDD234-38C7-4626-8FDF-23C121736B0A",
@@ -604,9 +604,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "8977BF44-74A7-4CD5-A12D-FB985B69B737": {
         "id": "8977BF44-74A7-4CD5-A12D-FB985B69B737",
@@ -625,9 +625,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "583AD20E-DA9A-4BC1-A969-2AE2B6358F8F": {
         "id": "583AD20E-DA9A-4BC1-A969-2AE2B6358F8F",
@@ -646,9 +646,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "68CF0C34-7AE4-4D6E-8147-4D3F364C5647": {
         "id": "68CF0C34-7AE4-4D6E-8147-4D3F364C5647",
@@ -667,9 +667,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "79C3519E-885F-46A8-B80D-6B3E8BC5E9E8": {
         "id": "79C3519E-885F-46A8-B80D-6B3E8BC5E9E8",
@@ -688,9 +688,9 @@
         "reg_mx": true,
         "partner_hd": "",
         "partner_mx": "Vanessa Joppien",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "CE570623-91C9-47FC-BBD6-28C5E0678C4C": {
         "id": "CE570623-91C9-47FC-BBD6-28C5E0678C4C",
@@ -709,9 +709,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "CDEAADCA-573D-47D0-90E1-128E22BB0C74": {
         "id": "CDEAADCA-573D-47D0-90E1-128E22BB0C74",
@@ -730,9 +730,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "8D5B9B7C-654C-4D52-9781-F8F7C3507D0F": {
         "id": "8D5B9B7C-654C-4D52-9781-F8F7C3507D0F",
@@ -751,9 +751,9 @@
         "reg_mx": false,
         "partner_hd": "Pascal Ziehe",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "Samstag",
+        "day_mx": "Sonntag"
     },
     "31DB667A-17AF-43BB-A394-99D3618998FF": {
         "id": "31DB667A-17AF-43BB-A394-99D3618998FF",
@@ -772,9 +772,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "F9AB9134-F61F-45AB-B429-87B60BE5C7F0": {
         "id": "F9AB9134-F61F-45AB-B429-87B60BE5C7F0",
@@ -793,9 +793,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "CAAA9C7F-5D4C-4E2D-B201-C6A2B7787957": {
         "id": "CAAA9C7F-5D4C-4E2D-B201-C6A2B7787957",
@@ -814,9 +814,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "Sonntag",
+        "day_mx": "Samstag"
     },
     "1EB702E0-4333-44F8-BBEB-FE5DE2E91269": {
         "id": "1EB702E0-4333-44F8-BBEB-FE5DE2E91269",
@@ -835,9 +835,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "548A20FB-AD19-4BD9-9934-FD10485B4726": {
         "id": "548A20FB-AD19-4BD9-9934-FD10485B4726",
@@ -856,9 +856,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "85ACF949-B9E6-48B9-9880-C70819B6643A": {
         "id": "85ACF949-B9E6-48B9-9880-C70819B6643A",
@@ -870,16 +870,16 @@
         "distance": 54,
         "start_date": "13.06.2026",
         "end_date": "14.06.2026",
-        "tags": "bis, Open, A, B, C, D, Online-Meldung, 10s",
+        "tags": "bis, Open, A, B, C, D, Online-Meldung, 6s",
         "registered": false,
         "reg_he": false,
         "reg_hd": false,
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "EDA96B8A-03C1-4A13-B32C-5A114E80620F": {
         "id": "EDA96B8A-03C1-4A13-B32C-5A114E80620F",
@@ -898,9 +898,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "2767089D-5299-4C52-8054-08EEFA1AC64A": {
         "id": "2767089D-5299-4C52-8054-08EEFA1AC64A",
@@ -919,9 +919,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "EAD8CD01-C11D-44F8-9DC2-E96BAA8C6077": {
         "id": "EAD8CD01-C11D-44F8-9DC2-E96BAA8C6077",
@@ -940,9 +940,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "Sonntag",
+        "day_mx": "Samstag"
     },
     "D3767008-D028-4C33-87B7-3C1D4094EAB3": {
         "id": "D3767008-D028-4C33-87B7-3C1D4094EAB3",
@@ -961,9 +961,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "17F3CC0D-11D2-43BB-94CF-A39B05AB39F3": {
         "id": "17F3CC0D-11D2-43BB-94CF-A39B05AB39F3",
@@ -982,9 +982,9 @@
         "reg_mx": true,
         "partner_hd": "",
         "partner_mx": "Vanessa Joppien",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "C36D1EF2-545A-4EF7-8E33-D996C03E3DC9": {
         "id": "C36D1EF2-545A-4EF7-8E33-D996C03E3DC9",
@@ -1003,9 +1003,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "3ED0B9E1-4070-4F00-A649-67186A50ED42": {
         "id": "3ED0B9E1-4070-4F00-A649-67186A50ED42",
@@ -1024,9 +1024,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "Sonntag",
+        "day_mx": ""
     },
     "A161D583-B6CF-42AE-973B-DA5E4094C7A8": {
         "id": "A161D583-B6CF-42AE-973B-DA5E4094C7A8",
@@ -1045,9 +1045,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "F3DC5DEA-7D16-4094-A343-B0A629CFAD16": {
         "id": "F3DC5DEA-7D16-4094-A343-B0A629CFAD16",
@@ -1066,9 +1066,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "E5B571B7-D0EF-4135-8981-B04D15020A05": {
         "id": "E5B571B7-D0EF-4135-8981-B04D15020A05",
@@ -1087,9 +1087,9 @@
         "reg_mx": false,
         "partner_hd": "Pascal Ziehe",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "Sonntag",
+        "day_hd": "",
+        "day_mx": ""
     },
     "80F754F8-8959-41E2-95A2-8FF77C475BE7": {
         "id": "80F754F8-8959-41E2-95A2-8FF77C475BE7",
@@ -1108,9 +1108,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "7614C010-6069-4585-8D66-8CF0C927AFD1": {
         "id": "7614C010-6069-4585-8D66-8CF0C927AFD1",
@@ -1129,9 +1129,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "DF382178-D2C8-4264-90D9-BF5E7161655D": {
         "id": "DF382178-D2C8-4264-90D9-BF5E7161655D",
@@ -1150,9 +1150,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "796669DD-930A-49E1-B3F8-947B031D9566": {
         "id": "796669DD-930A-49E1-B3F8-947B031D9566",
@@ -1171,9 +1171,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "0C890480-A9D7-41BA-B78D-07D0235142DE": {
         "id": "0C890480-A9D7-41BA-B78D-07D0235142DE",
@@ -1192,9 +1192,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "8BB0053B-C11B-4303-B3B7-1B209A75E780": {
         "id": "8BB0053B-C11B-4303-B3B7-1B209A75E780",
@@ -1213,9 +1213,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "B07C11FD-BC6F-40F7-BA5E-C80CB86BF9E3": {
         "id": "B07C11FD-BC6F-40F7-BA5E-C80CB86BF9E3",
@@ -1234,9 +1234,9 @@
         "reg_mx": false,
         "partner_hd": "Pascal Ziehe",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "CC05C621-19E9-41BE-8307-AA4E72540AEB": {
         "id": "CC05C621-19E9-41BE-8307-AA4E72540AEB",
@@ -1255,9 +1255,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "8E3FAD55-196A-41FE-A78F-48B19E6500E1": {
         "id": "8E3FAD55-196A-41FE-A78F-48B19E6500E1",
@@ -1276,9 +1276,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "A9FDAF6A-386E-4AA8-B55B-A6E0E3E67D1A": {
         "id": "A9FDAF6A-386E-4AA8-B55B-A6E0E3E67D1A",
@@ -1297,9 +1297,9 @@
         "reg_mx": false,
         "partner_hd": "Pascal Ziehe",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "447AA5D5-8D67-4423-9229-15232C9F3BB1": {
         "id": "447AA5D5-8D67-4423-9229-15232C9F3BB1",
@@ -1318,9 +1318,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "Samstag",
+        "day_hd": "Sonntag",
+        "day_mx": "Samstag"
     },
     "2B528EA9-FC81-4E0C-8C35-9787D4D0557E": {
         "id": "2B528EA9-FC81-4E0C-8C35-9787D4D0557E",
@@ -1339,9 +1339,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "E99B1C7A-79D2-431F-82DD-E030A4AAF230": {
         "id": "E99B1C7A-79D2-431F-82DD-E030A4AAF230",
@@ -1360,9 +1360,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "210E0AA6-1EA5-4565-918A-4F01E25724F5": {
         "id": "210E0AA6-1EA5-4565-918A-4F01E25724F5",
@@ -1381,9 +1381,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "3535C816-94C6-4718-9CE2-83EF822F845D": {
         "id": "3535C816-94C6-4718-9CE2-83EF822F845D",
@@ -1402,9 +1402,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "126BBC05-EDC2-452E-8FD8-08AF575A8E7A": {
         "id": "126BBC05-EDC2-452E-8FD8-08AF575A8E7A",
@@ -1423,9 +1423,9 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     },
     "C21886EB-729B-4612-9C5F-F4083F4880C3": {
         "id": "C21886EB-729B-4612-9C5F-F4083F4880C3",
@@ -1444,8 +1444,8 @@
         "reg_mx": false,
         "partner_hd": "",
         "partner_mx": "",
-        "day_he": "gesamt",
-        "day_hd": "gesamt",
-        "day_mx": "gesamt"
+        "day_he": "",
+        "day_hd": "",
+        "day_mx": ""
     }
 }

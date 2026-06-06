@@ -49,9 +49,8 @@ def detect_discipline_days(tournament_url):
         
         soup = BeautifulSoup(r.content, 'html.parser')
         
-        # 1. Haupttext extrahieren und säubern
-        text = soup.get_text(separator=" ").lower()
-        text_clean = re.sub(r'\s+', ' ', text)
+        # 1. Haupttext extrahieren (Zeilenumbrüche erhalten!)
+        text = soup.get_text(separator="\n").lower()
         
         # 2. Navigation nach relevanten Unterseiten durchsuchen
         sub_links = []
@@ -73,13 +72,24 @@ def detect_discipline_days(tournament_url):
                 r_sub = session.get(sub_link, headers=headers, timeout=5)
                 if r_sub.status_code == 200:
                     soup_sub = BeautifulSoup(r_sub.content, 'html.parser')
-                    text_sub = soup_sub.get_text(separator=" ").lower()
-                    text_clean += " " + re.sub(r'\s+', ' ', text_sub)
+                    text_sub = soup_sub.get_text(separator="\n").lower()
+                    text += "\n" + text_sub
             except Exception:
                 pass
         
-        # 3. Text in Sinneinheiten/Sätze zerlegen
-        clauses = re.split(r'[,.:!?\n|•–-]', text_clean)
+        # 3. Text zeilenweise verarbeiten, um logische Einheiten nicht zu zerreißen
+        raw_lines = text.split("\n")
+        clauses = []
+        for line in raw_lines:
+            line_clean = re.sub(r'\s+', ' ', line).strip()
+            if not line_clean:
+                continue
+            # Trenne nach typischen Abgrenzungen (aber NICHT nach Komma oder Punkt!)
+            sub_parts = re.split(r'[|•;–-]', line_clean)
+            for part in sub_parts:
+                part_clean = part.strip()
+                if part_clean:
+                    clauses.append(part_clean)
         
         found_he = []
         found_hd = []
