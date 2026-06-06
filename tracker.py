@@ -31,7 +31,8 @@ def is_youth_tournament(title, tag_parts):
 def detect_discipline_days(session, tournament_url, start_date_str, end_date_str):
     """
     Sucht auf der Turnierseite und deren relevanten Navigations-Unterseiten nach Informationen,
-    welche Disziplin an welchem Tag (Samstag/Sonntag) stattfindet. Unterstützt Deutsch & Englisch.
+    welche Disziplin an welchem Tag (Samstag/Sonntag) stattfindet.
+    Nutzt eine State Machine, um auch Gliederungen/Listen verlässlich zuzuordnen.
     """
     days = {"he": "", "hd": "", "mx": ""}
     weekday_names = {
@@ -44,6 +45,7 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         try:
             dt = datetime.datetime.strptime(start_date_str, "%d.%m.%Y").date()
             day_name = weekday_names[dt.weekday()]
+            print(f" -> {tournament_url}: Eintägiges Turnier am {day_name}. Automatische Zuweisung durchgeführt.")
             return {"he": day_name, "hd": day_name, "mx": day_name}
         except Exception:
             pass
@@ -54,10 +56,14 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
             "Accept-Language": "de-DE,de;q=0.9"
         }
-        r = session.get(tournament_url, headers=headers, timeout=10)
-        if r.status_code != 200:
-            return days
         
+        # Nutzen der übergebenen, erfolgreich verifizierten Session (Cloudflare-Bypass)
+        r = session.get(tournament_url, headers=headers, timeout=10)
+        
+        if r.status_code != 200:
+            print(f" -> Warnung: {tournament_url} lieferte HTTP-Statuscode {r.status_code}. (Evtl. von Cloudflare blockiert)")
+            return days
+            
         soup = BeautifulSoup(r.content, 'html.parser')
         
         # Haupttext extrahieren (Zeilenumbrüche erhalten!)
@@ -68,6 +74,7 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         for a in soup.find_all('a', href=True):
             a_text = a.get_text().lower().strip()
             a_href = a['href']
+            # Relevante Keywords für Zeitpläne, Bestimmungen, Disziplinen oder Klassen
             keywords = ["bestimmungen", "ausschreibung", "zeitplan", "programm", "ablauf", "informationen", "info", "disziplinen", "klassen", "meldungen"]
             if any(k in a_text for k in keywords) or any(k in a_href.lower() for k in keywords):
                 full_sub_link = urllib.parse.urljoin(tournament_url, a_href)
@@ -94,6 +101,7 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             line_clean = re.sub(r'\s+', ' ', line).strip()
             if not line_clean:
                 continue
+            # Trenne nach typischen Abgrenzungen (aber NICHT nach Komma oder Punkt!)
             sub_parts = re.split(r'[|•;–-]', line_clean)
             for part in sub_parts:
                 part_clean = part.strip()
@@ -104,38 +112,59 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
         found_hd = []
         found_mx = []
         
+        # Hilfsvariablen für Diagnose-Ausgaben
+        has_sa = "samstag" in text or "saturday" in text
+        has_so = "sonntag" in text or "sunday" in text
+        has_doppel = "doppel" in text or "double" in text
+        
+        # --- ZUSTANDSBASIERTE STATE MACHINE ---
+        current_day = None  # Speichert den aktuell aktiven Wochentag für nachfolgende Zeilen
+        
         for c in clauses:
             c_lower = c.strip()
-            if len(c_lower) < 5:
+            if len(c_lower) < 3:
                 continue
             
-            # Wochentage prüfen (Deutsch & Englisch)
+            # Wochentage in dieser Zeile prüfen (Deutsch & Englisch)
             is_sat = "samstag" in c_lower or "saturday" in c_lower or re.search(r'\bsa\b', c_lower) or re.search(r'\bsat\b', c_lower)
             is_sun = "sonntag" in c_lower or "sunday" in c_lower or re.search(r'\bso\b', c_lower) or re.search(r'\bsun\b', c_lower)
+            is_fri = "freitag" in c_lower or "friday" in c_lower or re.search(r'\bfr\b', c_lower) or re.search(r'\bfri\b', c_lower)
             
-            if is_sat and not is_sun:
-                day_val = "Samstag"
-            elif is_sun and not is_sat:
-                day_val = "Sonntag"
+            # Wenn ein eindeutiger Wochentag in dieser Zeile steht, aktualisieren wir den aktuellen Status
+            if is_sat and not is_sun and not is_fri:
+                current_day = "Samstag"
+            elif is_sun and not is_sat and not is_fri:
+                current_day = "Sonntag"
+            elif is_fri and not is_sat and not is_sun:
+                current_day = "Freitag"
+                
+            # Welcher Tag gilt für diese Zeile? 
+            # Entweder der direkt in dieser Zeile gefundene, oder der Wochentag der vorherigen Zeilen (Status)!
+            active_day = None
+            if is_sat and not is_sun and not is_fri:
+                active_day = "Samstag"
+            elif is_sun and not is_sat and not is_fri:
+                active_day = "Sonntag"
+            elif is_fri and not is_sat and not is_sun:
+                active_day = "Freitag"
             else:
-                continue
+                active_day = current_day  # Vererbung des Status von oben
+                
+            if not active_day:
+                continue  # Ohne bekannten Wochentag können wir nichts zuordnen
                 
             # Disziplinen erkennen (Deutsch & Englisch)
             is_he = ("einzel" in c_lower or "single" in c_lower or "he" in c_lower.split() or "de" in c_lower.split() or "ms" in c_lower.split() or "ws" in c_lower.split())
             is_hd = ("doppel" in c_lower or "double" in c_lower or "hd" in c_lower.split() or "dd" in c_lower.split() or "md" in c_lower.split() or "wd" in c_lower.split())
             is_mx = ("mixed" in c_lower or "gemischt" in c_lower or "mx" in c_lower.split() or "gd" in c_lower.split() or "xd" in c_lower.split())
 
-            # Einzel (Herreneinzel / Dameneinzel)
+            # Wenn die Zeile eine Disziplin nennt, ordne sie dem aktiven Tag zu
             if is_he and not is_hd and not is_mx:
-                found_he.append(day_val)
-                
-            # Doppel (Herrendoppel / Damendoppel)
+                found_he.append(active_day)
             if is_hd and not is_he and not is_mx:
-                found_hd.append(day_val)
-                
-            # Mixed
+                found_hd.append(active_day)
             if is_mx:
-                found_mx.append(day_val)
+                found_mx.append(active_day)
         
         # Wenn eine Disziplin eindeutig an genau einem Tag gefunden wurde, eintragen
         if found_he and len(set(found_he)) == 1:
@@ -144,6 +173,16 @@ def detect_discipline_days(session, tournament_url, start_date_str, end_date_str
             days["hd"] = found_hd[0]
         if found_mx and len(set(found_mx)) == 1:
             days["mx"] = found_mx[0]
+            
+        # Logging der Heuristik-Ergebnisse im Terminal
+        if days["he"] or days["hd"] or days["mx"]:
+            print(f" -> Heuristik-Ergebnis für '{tournament_url}':")
+            if days["he"]: print(f"    * Herreneinzel: {days['he']}")
+            if days["hd"]: print(f"    * Herrendoppel: {days['hd']}")
+            if days["mx"]: print(f"    * Mixed: {days['mx']}")
+        else:
+            print(f" -> Heuristik-Ergebnis für '{tournament_url}': Keine eindeutigen Spieltage im Text ermittelt.")
+            print(f"    (Text-Check: 'Samstag' vorhanden={has_sa}, 'Sonntag' vorhanden={has_so}, 'Doppel' vorhanden={has_doppel})")
             
     except Exception as e:
         print(f"Fehler bei der Zeitplan-Heuristik für {tournament_url}: {e}")
@@ -454,11 +493,4 @@ def check_for_updates_generator():
         json.dump(known_tournaments, f, ensure_ascii=False, indent=4)
 
     if new_tournaments:
-        yield f"Fertig! {len(new_tournaments)} neue(s) Turnier(e) gefunden."
-        send_push_notification(new_tournaments)
-    else:
-        yield "Fertig! Keine neuen Turniere erkannt."
-
-
-if __name__ == "__main__":
-    check_for_updates()
+        yield f"Fer
