@@ -1,3 +1,5 @@
+# --- START OF FILE App_V3.py ---
+
 import streamlit as st
 import pandas as pd
 import json
@@ -83,7 +85,7 @@ PARTNERS_MX = {
     "Vanessa Joppien": "https://dbv.turnier.de/player-profile/76DA93E6-43E2-45CE-B28F-FDA12433FDBA"
 }
 
-# Custom CSS zur Steuerung der Benutzeroberfläche und der ausklappbaren Tags
+# Custom CSS zur Steuerung der Benutzeroberfläche und der neuen Kacheln
 st.markdown(
     """
     <style>
@@ -96,16 +98,16 @@ st.markdown(
     .status-tag-static, details.status-tag {
         display: inline-block;
         background-color: #f8fafc;
-        border-radius: 4px;
+        border-radius: 6px;
         margin-bottom: 12px;
-        font-size: 0.9em;
+        font-size: 0.85em;
         line-height: 1.4;
         user-select: none;
     }
     
     /* Statisches Tag */
     .status-tag-static {
-        padding: 6px 12px;
+        padding: 5px 10px;
         font-weight: bold;
     }
     
@@ -121,7 +123,7 @@ st.markdown(
         list-style: none;
         font-weight: bold;
         outline: none;
-        padding: 6px 12px;
+        padding: 5px 10px;
         display: flex;
         align-items: center;
     }
@@ -144,8 +146,117 @@ st.markdown(
     /* Inhalt des ausgeklappten Tags */
     details.status-tag .status-content {
         font-size: 0.95em;
-        padding: 0 12px 10px 12px;
+        padding: 0 10px 8px 10px;
         cursor: default;
+    }
+
+    /* --- V3 GRAPHICAL CARD STYLING --- */
+    .card-inner-container {
+        font-family: 'Inter', -apple-system, sans-serif;
+    }
+    
+    /* Titelzeile & Dynamic Emblem */
+    .title-emblem-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+    .emblem-wrapper {
+        flex-shrink: 0;
+    }
+    .emblem-svg {
+        width: 36px;
+        height: 36px;
+        display: block;
+    }
+    .title-wrapper {
+        flex-grow: 1;
+    }
+    .tournament-card-title {
+        font-size: 1.2rem !important;
+        font-weight: 700 !important;
+        color: #0f172a;
+        margin: 0 !important;
+        line-height: 1.3;
+    }
+    
+    /* Pill Badges */
+    .meta-badges-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+    .meta-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 9999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .loc-badge { background-color: #f1f5f9; color: #334155; }
+    .dist-badge { background-color: #fef3c7; color: #b45309; }
+    .org-badge { background-color: #ecfeff; color: #0891b2; }
+    
+    /* Sub-Boxes / Discipline Grid */
+    .discipline-container {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+    .discipline-card {
+        flex: 1;
+        min-width: 130px;
+        background-color: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        padding: 10px;
+        text-align: center;
+        transition: all 0.2s ease-in-out;
+    }
+    .discipline-card:hover {
+        border-color: #94a3b8;
+        background-color: #f1f5f9;
+        transform: translateY(-1px);
+    }
+    .discipline-card.active-registered {
+        border: 1.5px solid #22c55e;
+        background-color: #f0fdf4;
+    }
+    .discipline-icon {
+        font-size: 1.15rem;
+        margin-bottom: 2px;
+    }
+    .discipline-title {
+        font-weight: 700;
+        font-size: 0.8rem;
+        color: #1e293b;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .discipline-day {
+        font-size: 0.75rem;
+        color: #64748b;
+        font-weight: 600;
+        margin: 2px 0 4px 0;
+    }
+    .discipline-status {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+    .discipline-status a {
+        color: #15803d;
+        text-decoration: underline;
+        font-weight: 600;
+    }
+    .discipline-status.registered {
+        color: #15803d;
+        font-weight: bold;
     }
     </style>
     """,
@@ -252,7 +363,7 @@ if IS_ADMIN:
 
 # --- DYNAMISCHE HILFSFUNKTIONEN FÜR DATUM UND WOCHENTAGE ---
 def get_tournament_day_options(start_date_obj, end_date_obj):
-    """Generiert eine dynamische Liste aller echten Turniertage (z. B. nur Samstag, wenn das Turnier eintägig ist)."""
+    """Generiert eine dynamische Liste aller echten Turniertage."""
     weekday_names = {
         0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
         4: "Freitag", 5: "Samstag", 6: "Sonntag"
@@ -306,7 +417,6 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
 def can_still_register(item, vacation_dates, occupied_dates):
     """Prüft, ob ein Turnier noch offen für Anmeldungen ist.
     Gleicht bei bereits gepflegten Spieltagen nur noch diese spezifischen Spieltage ab."""
-    # 1. Wenn man bereits gemeldet ist, kann man sich nicht 'noch anmelden'
     if item.get('registered', False):
         return False
         
@@ -315,7 +425,6 @@ def can_still_register(item, vacation_dates, occupied_dates):
     if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
         return True
         
-    # Ermittle alle Tage, an denen tatsächlich etwas stattfindet
     day_he_val = item.get('day_he', '')
     day_hd_val = item.get('day_hd', '')
     day_mx_val = item.get('day_mx', '')
@@ -327,7 +436,6 @@ def can_still_register(item, vacation_dates, occupied_dates):
     has_any_assignments = bool(day_he_val or day_hd_val or day_mx_val)
     
     if has_any_assignments:
-        # Wenn Spieltage gepflegt sind, prüfen wir NUR diese spezifischen Spieltage!
         active_dates = set()
         if day_he_val:
             dt = get_date_for_weekday(day_he_val, start_date_obj, end_date_obj)
@@ -339,14 +447,12 @@ def can_still_register(item, vacation_dates, occupied_dates):
             dt = get_date_for_weekday(day_mx_val, start_date_obj, end_date_obj)
             if dt: active_dates.add(dt)
             
-        # Wenn wir aktive Tage gefunden haben, muss mindestens einer davon frei sein
         if active_dates:
             for dt in active_dates:
                 if dt not in vacation_dates and dt not in occupied_dates:
                     return True
             return False
             
-    # Fallback (falls noch gar keine Spieltage zugewiesen sind): Gesamten Zeitraum prüfen
     curr_date = start_date_obj
     while curr_date <= end_date_obj:
         if curr_date not in vacation_dates and curr_date not in occupied_dates:
@@ -376,69 +482,121 @@ def format_discipline_with_partner(disc_type, partner_name, partners_dict, text_
             return f"{disc_type} mit {p_name}"
 
 
-def render_tournament_schedule(item):
-    """Rendert die Wochentage des Turniers einzeln und hängt ggf. erkannte Disziplinen kompakt an.
-    Blendet Wochentage ohne Zuweisungen bei mehrtägigen Turnieren automatisch aus."""
-    weekday_names_german = {
-        0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
-        4: "Freitag", 5: "Samstag", 6: "Sonntag"
-    }
-    start_date_obj = item['Start_Date_Obj']
-    end_date_obj = item['End_Date_Obj']
+# --- V3 GRAPHICAL RENDERING ENGINE ---
+def render_styled_tournament_card(item):
+    """Erzeugt eine visuell ansprechende Kachel mit dynamic SVGs, Pill-Badges und Sub-Boxes für Disziplinen."""
+    city = item.get('city', 'Unbekannt')
+    title = item.get('title', 'Turnier')
+    dist = item.get('distance')
+    dist_str = f"{dist} km" if dist is not None else "Keine Angabe"
+    org_str = item.get('organizer', 'Unbekannt')
     
-    if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
-        st.markdown(f"🗓️ **{item['start_date']}** bis **{item['end_date']}**")
-        return
+    # Dynamic SVG Icons (Outline style)
+    is_cologne = any(kw in city.lower() or kw in title.lower() for kw in ["köln", "cologne"])
+    if is_cologne:
+        # Kölner Dom Outline
+        emblem_svg = """
+        <svg viewBox="0 0 100 100" class="emblem-svg">
+          <path d="M25,85 L25,40 L35,15 L45,40 L45,85 M55,85 L55,40 L65,15 L75,40 L75,85 M45,48 L55,48" stroke="#4f46e5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M15,85 L85,85 M30,85 L30,72 C30,68 40,68 40,72 L40,85 M60,85 L60,72 C60,68 70,68 70,72 L70,85" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" fill="none"/>
+        </svg>
+        """
+    else:
+        # Shuttlecock Outline
+        emblem_svg = """
+        <svg viewBox="0 0 100 100" class="emblem-svg">
+          <path d="M40,75 C40,83 60,83 60,75 L57,62 L43,62 Z" stroke="#0ea5e9" stroke-width="2.5" fill="#f0f9ff" stroke-linejoin="round"/>
+          <path d="M30,22 L43,62 M40,20 L47,62 M50,18 L50,62 M60,20 L53,62 M70,22 L57,62" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
+          <path d="M30,22 C40,25 60,25 70,22" stroke="#0ea5e9" stroke-width="2" fill="none"/>
+          <path d="M34,40 C42,42 58,42 66,40" stroke="#0ea5e9" stroke-width="1.5" fill="none"/>
+        </svg>
+        """
+
+    # Erstelle die Wochentag-Werte für die Cards
+    day_he = item.get('day_he', '')
+    day_hd = item.get('day_hd', '')
+    day_mx = item.get('day_mx', '')
+    
+    if not day_he: day_he = "Nicht festgelegt"
+    if not day_hd: day_hd = "Nicht festgelegt"
+    if not day_mx: day_mx = "Nicht festgelegt"
+
+    # Status & Registrierungen
+    reg_he = bool(item.get('reg_he', False))
+    reg_hd = bool(item.get('reg_hd', False))
+    reg_mx = bool(item.get('reg_mx', False))
+
+    partner_hd = item.get('partner_hd', '').strip()
+    partner_mx = item.get('partner_mx', '').strip()
+
+    # Sub-Boxen für Disziplinen
+    # Einzel
+    he_class = "active-registered" if reg_he else ""
+    he_status_text = "Gemeldet" if reg_he else "Nicht gemeldet"
+    
+    # Doppel
+    hd_class = "active-registered" if reg_hd else ""
+    if reg_hd:
+        if partner_hd and partner_hd in PARTNERS_HD:
+            hd_status_text = f"Mit <a href='{PARTNERS_HD[partner_hd]}' target='_blank'>{partner_hd}</a>"
+        elif partner_hd:
+            hd_status_text = f"Mit {partner_hd}"
+        else:
+            hd_status_text = "Ohne Partner"
+    else:
+        hd_status_text = "Nicht gemeldet"
+
+    # Mixed
+    mx_class = "active-registered" if reg_mx else ""
+    if reg_mx:
+        if partner_mx and partner_mx in PARTNERS_MX:
+            mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{partner_mx}</a>"
+        elif partner_mx:
+            mx_status_text = f"Mit {partner_mx}"
+        else:
+            mx_status_text = "Ohne Partnerin"
+    else:
+        mx_status_text = "Nicht gemeldet"
+
+    # HTML Output generieren
+    html_out = f"""
+    <div class="card-inner-container">
+        <div class="title-emblem-row">
+            <div class="emblem-wrapper">{emblem_svg}</div>
+            <div class="title-wrapper">
+                <h3 class="tournament-card-title">{title}</h3>
+            </div>
+        </div>
         
-    try:
-        schedule_html = ""
-        current_date = start_date_obj
-        limit = 0
+        <div class="meta-badges-container">
+            <span class="meta-badge loc-badge">📍 {city}</span>
+            <span class="meta-badge dist-badge">🚗 {dist_str}</span>
+            <span class="meta-badge org-badge">🛡️ {org_str}</span>
+        </div>
         
-        # Prüfen, ob für dieses Turnier überhaupt schon Spieltage zugewiesen wurden
-        day_he_val = item.get('day_he', '')
-        day_hd_val = item.get('day_hd', '')
-        day_mx_val = item.get('day_mx', '')
-        
-        if pd.isnull(day_he_val): day_he_val = ""
-        if pd.isnull(day_hd_val): day_hd_val = ""
-        if pd.isnull(day_mx_val): day_mx_val = ""
-        
-        has_any_assignments = bool(day_he_val or day_hd_val or day_mx_val)
-        
-        while current_date <= end_date_obj and limit < 20:
-            w_name = weekday_names_german[current_date.weekday()]
-            formatted_dt = current_date.strftime("%d.%m.%Y")
-            formatted_dt_short = current_date.strftime("%d.%m.")
-            current_day_str = f"{w_name}, {formatted_dt_short}"
-            
-            day_disciplines = []
-            
-            # Einzel (Muster: "Samstag, 27.06." ODER Abwärtskompatibilität: "Samstag")
-            if ("," in day_he_val and day_he_val == current_day_str) or ("," not in day_he_val and day_he_val == w_name):
-                day_disciplines.append("Einzel")
-            # Doppel
-            if ("," in day_hd_val and day_hd_val == current_day_str) or ("," not in day_hd_val and day_hd_val == w_name):
-                day_disciplines.append("Doppel")
-            # Mixed
-            if ("," in day_mx_val and day_mx_val == current_day_str) or ("," not in day_mx_val and day_mx_val == w_name):
-                day_disciplines.append("Mixed")
-                
-            # Zeige den Tag an, wenn er geplante Disziplinen hat ODER das Turnier noch gar keine Zuweisungen besitzt
-            if day_disciplines or not has_any_assignments:
-                if day_disciplines:
-                    disciplines_str = ", ".join(day_disciplines)
-                    schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>"
-                else:
-                    schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}</strong></div>"
-                
-            current_date += datetime.timedelta(days=1)
-            limit += 1
-            
-        st.markdown(f"<div style='line-height: 1.35; margin-bottom: 14px;'>{schedule_html}</div>", unsafe_allow_html=True)
-    except Exception as e:
-        st.exception(e)
-        st.markdown(f"🗓️ **{item['start_date']}** bis **{item['end_date']}**")
+        <div class="discipline-container">
+            <div class="discipline-card {he_class}">
+                <div class="discipline-icon">👤</div>
+                <div class="discipline-title">Einzel</div>
+                <div class="discipline-day">{day_he}</div>
+                <div class="discipline-status {'registered' if reg_he else ''}">{he_status_text}</div>
+            </div>
+            <div class="discipline-card {hd_class}">
+                <div class="discipline-icon">👥</div>
+                <div class="discipline-title">Doppel</div>
+                <div class="discipline-day">{day_hd}</div>
+                <div class="discipline-status {'registered' if reg_hd else ''}">{hd_status_text}</div>
+            </div>
+            <div class="discipline-card {mx_class}">
+                <div class="discipline-icon">👫</div>
+                <div class="discipline-title">Mixed</div>
+                <div class="discipline-day">{day_mx}</div>
+                <div class="discipline-status {'registered' if reg_mx else ''}">{mx_status_text}</div>
+            </div>
+        </div>
+    </div>
+    """
+    st.markdown(html_out, unsafe_allow_html=True)
 
 
 # Load and present database
@@ -487,13 +645,13 @@ if os.path.exists(DB_FILE):
         df['Start_Date_Obj'] = pd.to_datetime(df['start_date'], format='%d.%m.%Y', errors='coerce').dt.date
         df['End_Date_Obj'] = pd.to_datetime(df['end_date'], format='%d.%m.%Y', errors='coerce').dt.date
 
-        # --- EXCLUDE FILTER FÜR AUSGEBLENDETE TURNIERE (NACHHALTIG IN DB, ABER IM FRONTEND VERSTECKT) ---
+        # --- EXCLUDE FILTER FÜR AUSGEBLENDETE TURNIERE ---
         EXCLUDED_KEYWORDS = ["2. DBV-RLT O19 2026", "TEST"]
         df = df[~df['title'].str.contains('|'.join(EXCLUDED_KEYWORDS), case=False, na=False)]
 
         # --- DYNAMISCHE ERMITTLUNG ALLER ZENTRALEN URLAUBS-TERMINE ---
         vacation_dates = set()
-        vacation_notes = {}  # Abbildung: Datum -> Urlaubsbezeichnung
+        vacation_notes = {}
         
         vacations_data = load_vacations()
         for v in vacations_data.values():
@@ -515,7 +673,6 @@ if os.path.exists(DB_FILE):
         # --- DYNAMISCHE ERMITTLUNG ALLER BELEGTEN SPIELTAGE ---
         occupied_dates = {}
         
-        # Nur Turniere heranziehen, bei denen ich aktiv gemeldet bin
         df_registered = df[df['registered'] == True].copy()
         for idx, r_item in df_registered.iterrows():
             r_start = r_item['Start_Date_Obj']
@@ -526,7 +683,6 @@ if os.path.exists(DB_FILE):
             if pd.isnull(r_start) or pd.isnull(r_end):
                 continue
                 
-            # Weisen Sie jeder Disziplin ihren exakten Tag in der Belegungsliste zu
             if r_item.get('reg_he') and r_item.get('day_he'):
                 dt = get_date_for_weekday(r_item['day_he'], r_start, r_end)
                 if dt: 
@@ -559,7 +715,6 @@ if os.path.exists(DB_FILE):
                         "partner": p_mx
                     })
                     
-            # Fallback: Falls gemeldet, aber noch keine Disziplintage gepflegt sind
             has_any_day = (r_item.get('day_he') or r_item.get('day_hd') or r_item.get('day_mx'))
             if not has_any_day:
                 active_discs = []
@@ -606,17 +761,13 @@ if os.path.exists(DB_FILE):
         st.write("")
         st.markdown("### Filter")
         
-        # Vertikal untereinander gerendert mit präzisem neuen Wording
         only_registered = st.toggle("Turniere, an denen ich angemeldet bin", value=False)
         only_available = st.toggle("Turniere, an denen ich mich noch anmelden kann", value=False)
 
-        # Filter logisch und additiv anwenden (Union-Logik, wenn beide aktiv sind)
         if only_registered or only_available:
             def row_passes_filter(row):
                 is_reg = bool(row.get('registered', False))
                 is_avail = can_still_register(row, vacation_dates, occupied_dates)
-                
-                # Wenn beide aktiv sind: Zeige Turniere, die angemeldet ODER noch anmeldebar sind
                 if only_registered and only_available:
                     return is_reg or is_avail
                 elif only_registered:
@@ -629,14 +780,12 @@ if os.path.exists(DB_FILE):
             df_past = df_past[df_past.apply(row_passes_filter, axis=1)]
 
 
-        # Deutsche Monatsnamen-Mapping
         month_names = {
             1: "Januar", 2: "Februar", 3: "März", 4: "April",
             5: "Mai", 6: "Juni", 7: "Juli", 8: "August",
             9: "September", 10: "Oktober", 11: "November", 12: "Dezember"
         }
 
-        # Korrektur der echten Wochentag-Werte für datetime.weekday() (0=Montag, 6=Sonntag)
         weekday_names_real = {
             0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
             4: "Freitag", 5: "Samstag", 6: "Sonntag"
@@ -674,7 +823,7 @@ if os.path.exists(DB_FILE):
                             start_date_obj = item['Start_Date_Obj']
                             end_date_obj = item['End_Date_Obj']
                             
-                            # Prüfe dynamisch auf Urlaub an diesem Wochenende
+                            # Prüfe auf Urlaub
                             tournament_has_vacation = False
                             if not pd.isnull(start_date_obj) and not pd.isnull(end_date_obj):
                                 curr_date = start_date_obj
@@ -686,7 +835,7 @@ if os.path.exists(DB_FILE):
                                     curr_date += datetime.timedelta(days=1)
                                     limit_dt += 1
                                     
-                            # Prüfe dynamisch auf Konflikte mit anderen Turnieren
+                            # Prüfe auf Konflikte mit anderen Turnieren
                             tournament_conflicts = []
                             if not pd.isnull(start_date_obj) and not pd.isnull(end_date_obj):
                                 curr_date = start_date_obj
@@ -694,7 +843,6 @@ if os.path.exists(DB_FILE):
                                 while curr_date <= end_date_obj and limit_dt < 10:
                                     if curr_date in occupied_dates:
                                         for conflict in occupied_dates[curr_date]:
-                                            # Nur anzeigen, wenn es sich um ein anderes Turnier handelt
                                             if conflict["title"] != item["title"]:
                                                 tournament_conflicts.append({
                                                     "date": curr_date,
@@ -752,9 +900,7 @@ if os.path.exists(DB_FILE):
                                     else:
                                         unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
                                         
-                                # Baue die HTML-Zeilen chronologisch auf (Gruppiert nach Datum)
                                 sorted_dates = sorted(date_groups.keys())
-                                
                                 html_lines = []
                                 for dt in sorted_dates:
                                     w_name = weekday_names_real[dt.weekday()]
@@ -791,21 +937,18 @@ if os.path.exists(DB_FILE):
                                         unsafe_allow_html=True
                                     )
                                 
-                            # 3. Paralleltermin (Ausklappbarer kompakter Tag)
+                            # 3. Paralleltermin
                             elif tournament_conflicts:
                                 html_lines = []
                                 for conflict in tournament_conflicts:
                                     w_name = weekday_names_real[conflict["date"].weekday()]
                                     formatted_dt = conflict["date"].strftime("%d.%m.%Y")
-                                    
-                                    # Formatiert die konfliktierende Disziplin mit den Partner-Fallback-Regeln
                                     formatted_disc = format_discipline_with_partner(
                                         conflict["disc"], 
                                         conflict["partner"], 
                                         PARTNERS_HD if conflict["disc"] == "Herrendoppel" else PARTNERS_MX, 
                                         "#475569"
                                     )
-                                    
                                     html_lines.append(f"<div style='margin-top: 2px;'>• <strong>{w_name}, {formatted_dt}:</strong> {formatted_disc} in {conflict['city']} ({conflict['title']})</div>")
                                     
                                 details_html = "".join(html_lines)
@@ -821,28 +964,19 @@ if os.path.exists(DB_FILE):
                                     unsafe_allow_html=True
                                 )
 
-                            st.markdown(f"### {item['title']}")
-                            
-                            # --- ORT & STRUKTURIERTE ZEITPLANZEILEN AUF DER KARTE ---
-                            dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
-                            st.markdown(f"📍 **{item['city']}**{dist_str}")
-                            
-                            # Rendere den einheitlichen, sauberen Zeitplan
-                            render_tournament_schedule(item)
-                            
-                            st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
+                            # RENDERE DIE MODERNE KACHEL FÜR DAS TURNIER (UPCOMING)
+                            render_styled_tournament_card(item)
                             
                             # Admin-Ansicht
                             if IS_ADMIN:
                                 st.write("---")
                                 
-                                # Collapsible für den Original-Ausschreibungstext direkt auf der Seite
+                                # Collapsible für den Original-Ausschreibungstext
                                 desc_text = item.get('description', '').strip()
                                 if desc_text:
                                     with st.expander("📝 Ausschreibungstext von turnier.de anzeigen", expanded=False):
                                         st.write(desc_text)
                                 
-                                # day_options für anstehende Turniere sauber initialisieren (Behebt NameError)
                                 start_date_obj = item['Start_Date_Obj']
                                 end_date_obj = item['End_Date_Obj']
                                 day_options = get_tournament_day_options(start_date_obj, end_date_obj)
@@ -884,7 +1018,7 @@ if os.path.exists(DB_FILE):
                                     selected_label_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_idx, key=f"day_mx_{item['id']}")
                                     val_day_mx = selected_label_mx if selected_label_mx != "-- Tag wählen --" else ""
 
-                                # Checkboxen für die persönliche Anmeldung (Für das grüne Banner)
+                                # Checkboxen für die persönliche Anmeldung
                                 st.write("")
                                 st.markdown("**Meine Anmeldung (Für das grüne Banner):**")
                                 col_he, col_hd, col_mx = st.columns(3)
@@ -993,7 +1127,6 @@ if os.path.exists(DB_FILE):
                                 date_groups = {}
                                 unassigned_parts = []
                                 
-                                # 1. Einzel
                                 if bool(item.get('reg_he', False)):
                                     day_val = item.get('day_he', '')
                                     dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
@@ -1003,7 +1136,6 @@ if os.path.exists(DB_FILE):
                                     else:
                                         unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
                                 
-                                # 2. Doppel
                                 if bool(item.get('reg_hd', False)):
                                     text_part = format_discipline_with_partner("Herrendoppel", item.get('partner_hd', ''), PARTNERS_HD, "#166534")
                                     day_val = item.get('day_hd', '')
@@ -1013,7 +1145,6 @@ if os.path.exists(DB_FILE):
                                     else:
                                         unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
                                         
-                                # Mixed
                                 if bool(item.get('reg_mx', False)):
                                     text_part = format_discipline_with_partner("Mixed", item.get('partner_mx', ''), PARTNERS_MX, "#166534")
                                     day_val = item.get('day_mx', '')
@@ -1023,9 +1154,7 @@ if os.path.exists(DB_FILE):
                                     else:
                                         unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
                                         
-                                # Baue die HTML-Zeilen chronologisch auf (past)
                                 sorted_dates = sorted(date_groups.keys())
-                                
                                 html_lines = []
                                 for dt in sorted_dates:
                                     w_name = weekday_names_real[dt.weekday()]
@@ -1062,16 +1191,8 @@ if os.path.exists(DB_FILE):
                                         unsafe_allow_html=True
                                     )
 
-                            st.markdown(f"### {item['title']} *(Beendet)*")
-                            
-                            # --- ORT & STRUKTURIERTE ZEITPLANZEILEN AUF DER KARTE (past) ---
-                            dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
-                            st.markdown(f"📍 **{item['city']}**{dist_str}")
-                            
-                            # Rendere den einheitlichen Zeitplan (past)
-                            render_tournament_schedule(item)
-                            
-                            st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
+                            # RENDERE DIE MODERNE KACHEL FÜR DAS TURNIER (PAST)
+                            render_styled_tournament_card(item)
                             
                             # Admin-Ansicht
                             if IS_ADMIN:
@@ -1185,3 +1306,5 @@ if os.path.exists(DB_FILE):
         st.info("Der Suchlauf war erfolgreich, aber es wurden keine Turniere in Ihrem Umkreis gefunden.")
 else:
     st.warning("Keine Turnier-Datenbank gefunden. Bitte wenden Sie sich an den Administrator, um den ersten Suchlauf durchzuführen.")
+
+# --- END OF FILE App_V3.py ---
