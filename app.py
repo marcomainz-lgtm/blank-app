@@ -341,6 +341,27 @@ st.markdown(
         font-weight: bold;
     }
 
+    /* Urlaub Kachel-Ersatz (Full-Width / Seitenbreite) */
+    .vacation-full-card {
+        background-color: #eff6ff !important;
+        border: 2px solid #3b82f6 !important;
+        border-radius: 8px;
+        padding: 24px;
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    .vacation-emoji {
+        font-size: 2.5rem;
+        margin-bottom: 6px;
+    }
+    .vacation-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #1e40af;
+        letter-spacing: 1px;
+    }
+
     /* SMARTPHONE RESPONSIVE CAROUSEL SLIDER - EXTREM KOMPAKT */
     @media (max-width: 768px) {
         .discipline-container {
@@ -1056,11 +1077,6 @@ if os.path.exists(DB_FILE):
             1: "Januar", 2: "Februar", 3: "März", 4: "April",
             5: "Mai", 6: "Juni", 7: "Juli", 8: "August",
             9: "September", 10: "Oktober", 11: "November", 12: "Dezember"
-        }
-
-        weekday_names_real = {
-            0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
-            4: "Freitag", 5: "Samstag", 6: "Sonntag"
         }
 
         # --- A. UPCOMING TOURNAMENTS ---
