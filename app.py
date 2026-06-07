@@ -5,7 +5,17 @@ import pandas as pd
 import json
 import os
 import datetime
+import re
 from zoneinfo import ZoneInfo  # Für die deutsche Zeitzone
+
+# --- HILFSFUNKTION FÜR SAUBERES HTML-RENDERING ---
+def clean_html(html_str):
+    """Entfernt Zeilenumbrüche und überschüssige Einrückungen, damit der
+
+    Markdown-Parser von Streamlit das HTML nicht fälschlicherweise als Codeblock anzeigt.
+    """
+    return re.sub(r'\s+', ' ', html_str).strip()
+
 
 # --- HILFSFUNKTIONEN FÜR DIE URLAUBS-DATENBANK ---
 VACATION_FILE = "vacations.json"
@@ -558,6 +568,38 @@ def render_styled_tournament_card(item):
     else:
         mx_status_text = "Nicht gemeldet"
 
+    # Sub-Boxen & Badges als separate Fragmente
+    badges_html = f"""
+    <div class="meta-badges-container">
+        <span class="meta-badge loc-badge">📍 {city}</span>
+        <span class="meta-badge dist-badge">🚗 {dist_str}</span>
+        <span class="meta-badge org-badge">🛡️ {org_str}</span>
+    </div>
+    """
+    
+    disciplines_html = f"""
+    <div class="discipline-container">
+        <div class="discipline-card {he_class}">
+            <div class="discipline-icon">👤</div>
+            <div class="discipline-title">Einzel</div>
+            <div class="discipline-day">{day_he}</div>
+            <div class="discipline-status {'registered' if reg_he else ''}">{he_status_text}</div>
+        </div>
+        <div class="discipline-card {hd_class}">
+            <div class="discipline-icon">👥</div>
+            <div class="discipline-title">Doppel</div>
+            <div class="discipline-day">{day_hd}</div>
+            <div class="discipline-status {'registered' if reg_hd else ''}">{hd_status_text}</div>
+        </div>
+        <div class="discipline-card {mx_class}">
+            <div class="discipline-icon">👫</div>
+            <div class="discipline-title">Mixed</div>
+            <div class="discipline-day">{day_mx}</div>
+            <div class="discipline-status {'registered' if reg_mx else ''}">{mx_status_text}</div>
+        </div>
+    </div>
+    """
+
     # HTML Output generieren
     html_out = f"""
     <div class="card-inner-container">
@@ -567,36 +609,11 @@ def render_styled_tournament_card(item):
                 <h3 class="tournament-card-title">{title}</h3>
             </div>
         </div>
-        
-        <div class="meta-badges-container">
-            <span class="meta-badge loc-badge">📍 {city}</span>
-            <span class="meta-badge dist-badge">🚗 {dist_str}</span>
-            <span class="meta-badge org-badge">🛡️ {org_str}</span>
-        </div>
-        
-        <div class="discipline-container">
-            <div class="discipline-card {he_class}">
-                <div class="discipline-icon">👤</div>
-                <div class="discipline-title">Einzel</div>
-                <div class="discipline-day">{day_he}</div>
-                <div class="discipline-status {'registered' if reg_he else ''}">{he_status_text}</div>
-            </div>
-            <div class="discipline-card {hd_class}">
-                <div class="discipline-icon">👥</div>
-                <div class="discipline-title">Doppel</div>
-                <div class="discipline-day">{day_hd}</div>
-                <div class="discipline-status {'registered' if reg_hd else ''}">{hd_status_text}</div>
-            </div>
-            <div class="discipline-card {mx_class}">
-                <div class="discipline-icon">👫</div>
-                <div class="discipline-title">Mixed</div>
-                <div class="discipline-day">{day_mx}</div>
-                <div class="discipline-status {'registered' if reg_mx else ''}">{mx_status_text}</div>
-            </div>
-        </div>
+        {badges_html}
+        {disciplines_html}
     </div>
     """
-    st.markdown(html_out, unsafe_allow_html=True)
+    st.markdown(clean_html(html_out), unsafe_allow_html=True)
 
 
 # Load and present database
@@ -856,14 +873,12 @@ if os.path.exists(DB_FILE):
                             
                             # 1. Urlaub (Dezenter kompakter statischer Tag)
                             if tournament_has_vacation:
-                                st.markdown(
-                                    """
-                                    <div class="status-tag-static" style="border-left: 3px solid #3b82f6; color: #1e40af;">
-                                        <span style="margin-right: 6px;">🏖️</span>Urlaub
-                                    </div>
-                                    """,
-                                    unsafe_allow_html=True
-                                )
+                                tag_html = """
+                                <div class="status-tag-static" style="border-left: 3px solid #3b82f6; color: #1e40af;">
+                                    <span style="margin-right: 6px;">🏖️</span>Urlaub
+                                </div>
+                                """
+                                st.markdown(clean_html(tag_html), unsafe_allow_html=True)
                             
                             # 2. Gemeldet (Ausklappbarer kompakter Tag)
                             elif bool(item.get('registered', False)):
@@ -916,26 +931,22 @@ if os.path.exists(DB_FILE):
                                     details_html = f"<div style='font-weight: normal; font-size: 0.95em; margin-top: 4px; color: #166534;'>{ ''.join(html_lines) }</div>"
 
                                 if details_html:
-                                    st.markdown(
-                                        f"""
-                                        <details class="status-tag" style="border-left: 3px solid #22c55e; color: #15803d;">
-                                            <summary><span style="margin-right: 6px;">✅</span>Gemeldet</summary>
-                                            <div class="status-content" style="color: #166534;">
-                                                {details_html}
-                                            </div>
-                                        </details>
-                                        """,
-                                        unsafe_allow_html=True
-                                    )
-                                else:
-                                    st.markdown(
-                                        """
-                                        <div class="status-tag-static" style="border-left: 3px solid #22c55e; color: #15803d;">
-                                            <span style="margin-right: 6px;">✅</span>Gemeldet
+                                    tag_html = f"""
+                                    <details class="status-tag" style="border-left: 3px solid #22c55e; color: #15803d;">
+                                        <summary><span style="margin-right: 6px;">✅</span>Gemeldet</summary>
+                                        <div class="status-content" style="color: #166534;">
+                                            {details_html}
                                         </div>
-                                        """,
-                                        unsafe_allow_html=True
-                                    )
+                                    </details>
+                                    """
+                                    st.markdown(clean_html(tag_html), unsafe_allow_html=True)
+                                else:
+                                    tag_html = """
+                                    <div class="status-tag-static" style="border-left: 3px solid #22c55e; color: #15803d;">
+                                        <span style="margin-right: 6px;">✅</span>Gemeldet
+                                    </div>
+                                    """
+                                    st.markdown(clean_html(tag_html), unsafe_allow_html=True)
                                 
                             # 3. Paralleltermin
                             elif tournament_conflicts:
@@ -952,17 +963,15 @@ if os.path.exists(DB_FILE):
                                     html_lines.append(f"<div style='margin-top: 2px;'>• <strong>{w_name}, {formatted_dt}:</strong> {formatted_disc} in {conflict['city']} ({conflict['title']})</div>")
                                     
                                 details_html = "".join(html_lines)
-                                st.markdown(
-                                    f"""
-                                    <details class="status-tag" style="border-left: 3px solid #cbd5e1; color: #475569;">
-                                        <summary><span style="margin-right: 6px;">ℹ</span>Paralleltermin</summary>
-                                        <div class="status-content" style="color: #475569;">
-                                            {details_html}
-                                        </div>
-                                    </details>
-                                    """,
-                                    unsafe_allow_html=True
-                                )
+                                tag_html = f"""
+                                <details class="status-tag" style="border-left: 3px solid #cbd5e1; color: #475569;">
+                                    <summary><span style="margin-right: 6px;">ℹ</span>Paralleltermin</summary>
+                                    <div class="status-content" style="color: #475569;">
+                                        {details_html}
+                                    </div>
+                                </details>
+                                """
+                                st.markdown(clean_html(tag_html), unsafe_allow_html=True)
 
                             # RENDERE DIE MODERNE KACHEL FÜR DAS TURNIER (UPCOMING)
                             render_styled_tournament_card(item)
@@ -1170,26 +1179,22 @@ if os.path.exists(DB_FILE):
                                     details_html = f"<div style='font-weight: normal; font-size: 0.95em; margin-top: 4px; color: #166534;'>{ ''.join(html_lines) }</div>"
 
                                 if details_html:
-                                    st.markdown(
-                                        f"""
-                                        <details class="status-tag" style="border-left: 3px solid #86efac; color: #166534;">
-                                            <summary><span style="color: #86efac; font-style: normal; margin-right: 5px;">✅</span>Teilgenommen</summary>
-                                            <div class="status-content" style="color: #166534;">
-                                                {details_html}
-                                            </div>
-                                        </details>
-                                        """,
-                                        unsafe_allow_html=True
-                                    )
-                                else:
-                                    st.markdown(
-                                        """
-                                        <div class="status-tag-static" style="border-left: 3px solid #86efac; color: #166534;">
-                                            <span style="color: #86efac; font-style: normal; margin-right: 5px;">✅</span>Teilgenommen
+                                    tag_html = f"""
+                                    <details class="status-tag" style="border-left: 3px solid #86efac; color: #166534;">
+                                        <summary><span style="color: #86efac; font-style: normal; margin-right: 5px;">✅</span>Teilgenommen</summary>
+                                        <div class="status-content" style="color: #166534;">
+                                            {details_html}
                                         </div>
-                                        """,
-                                        unsafe_allow_html=True
-                                    )
+                                    </details>
+                                    """
+                                    st.markdown(clean_html(tag_html), unsafe_allow_html=True)
+                                else:
+                                    tag_html = """
+                                    <div class="status-tag-static" style="border-left: 3px solid #86efac; color: #166534;">
+                                        <span style="color: #86efac; font-style: normal; margin-right: 5px;">✅</span>Teilgenommen
+                                    </div>
+                                    """
+                                    st.markdown(clean_html(tag_html), unsafe_allow_html=True)
 
                             # RENDERE DIE MODERNE KACHEL FÜR DAS TURNIER (PAST)
                             render_styled_tournament_card(item)
