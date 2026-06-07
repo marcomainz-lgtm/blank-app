@@ -245,12 +245,8 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
     return None
 
 
-def render_tournament_schedule(item, occupied_dates=None):
-    """Rendert die Wochentage des Turniers einzeln und hängt ggf. erkannte Disziplinen kompakt an.
-    Dampft belegte Tage visuell ein und zeigt die Details der Kollisionen in natürlicher Sprache an."""
-    if occupied_dates is None:
-        occupied_dates = {}
-        
+def render_tournament_schedule(item):
+    """Rendert die Wochentage des Turniers einzeln und hängt ggf. erkannte Disziplinen kompakt an."""
     weekday_names_german = {
         0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
         4: "Freitag", 5: "Samstag", 6: "Sonntag"
@@ -259,7 +255,6 @@ def render_tournament_schedule(item, occupied_dates=None):
     end_date_obj = item['End_Date_Obj']
     
     if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
-        # Fallback, falls kein gültiges Datum vorhanden ist
         st.markdown(f"🗓️ **{item['start_date']}** bis **{item['end_date']}**")
         return
         
@@ -271,14 +266,12 @@ def render_tournament_schedule(item, occupied_dates=None):
             w_name = weekday_names_german[current_date.weekday()]
             formatted_dt = current_date.strftime("%d.%m.%Y")
             
-            # Prüfe, ob für diesen Tag bereits Disziplinen erkannt wurden
             day_disciplines = []
             
             day_he_val = item.get('day_he', '')
             day_hd_val = item.get('day_hd', '')
             day_mx_val = item.get('day_mx', '')
             
-            # Führende NaN-Werte aus der Pandas-Konvertierung sauber abfangen
             if pd.isnull(day_he_val): day_he_val = ""
             if pd.isnull(day_hd_val): day_hd_val = ""
             if pd.isnull(day_mx_val): day_mx_val = ""
@@ -290,49 +283,17 @@ def render_tournament_schedule(item, occupied_dates=None):
             if day_mx_val == w_name:
                 day_disciplines.append("Mixed")
                 
-            # Prüfe dezent auf Terminüberschneidungen (Kollision mit anderem Turnier)
-            is_conflicted = False
-            conflict_text = ""
-            
-            # Kollision mit anderem Turnier (Weiches Gold-Orange)
-            if not item.get('registered', False) and current_date in occupied_dates:
-                is_conflicted = True
-                t_groups = {}
-                for conflict in occupied_dates[current_date]:
-                    c_title = conflict["title"]
-                    c_city = conflict["city"]
-                    c_disc = conflict["disc"]
-                    t_groups.setdefault(c_title, {"city": c_city, "discs": []})
-                    t_groups[c_title]["discs"].append(c_disc)
-                
-                sentence_parts = []
-                for other_title, info in t_groups.items():
-                    discs_sorted = sorted(list(set(info["discs"])))
-                    if len(discs_sorted) > 1:
-                        discs_str = ", ".join(discs_sorted[:-1]) + f" & {discs_sorted[-1]}"
-                    else:
-                        discs_str = discs_sorted[0]
-                        
-                    sentence_parts.append(f"An diesem Tag spiele ich {discs_str} in {info['city']} ({other_title})")
-                
-                conflict_text = f" <span style='color: #f59e0b; font-style: italic; font-size: 0.95em; font-weight: normal;'> &ndash; {'; '.join(sentence_parts)}</span>"
-                
-            # Style für die Zeile bestimmen (Unaufdringlicher Grauton und Transparenz bei Überschneidung)
-            line_style = "color: #9ca3af; opacity: 0.65;" if is_conflicted else "color: inherit;"
-                
             if day_disciplines:
                 disciplines_str = ", ".join(day_disciplines)
-                schedule_html += f"<div style='margin-bottom: 2px; {line_style}'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}{conflict_text}</div>"
+                schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>"
             else:
-                # Wochentag auch dann auflisten, wenn noch keine Disziplinen bekannt sind
-                schedule_html += f"<div style='margin-bottom: 2px; {line_style}'>🗓️ <strong>{w_name}, {formatted_dt}</strong>{conflict_text}</div>"
+                schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}</strong></div>"
                 
             current_date += datetime.timedelta(days=1)
             limit += 1
             
         st.markdown(f"<div style='line-height: 1.35; margin-bottom: 14px;'>{schedule_html}</div>", unsafe_allow_html=True)
     except Exception as e:
-        # Falls doch ein Fehler auftritt, zeigen wir ihn an, um ihn sofort debuggen zu können!
         st.exception(e)
         st.markdown(f"🗓️ **{item['start_date']}** bis **{item['end_date']}**")
 
@@ -404,7 +365,7 @@ if os.path.exists(DB_FILE):
             except Exception:
                 pass
 
-        # --- DYNAMISCHE ERMITTLUNG ALLER BELEGTEN SPIELTAGE (FÜR DETILLIERTE KONFLIKT-ANZEIGE) ---
+        # --- DYNAMISCHE ERMITTLUNG ALLER BELEGTEN SPIELTAGE ---
         occupied_dates = {}
         
         # Nur Turniere heranziehen, bei denen ich aktiv gemeldet bin
@@ -418,33 +379,65 @@ if os.path.exists(DB_FILE):
             if pd.isnull(r_start) or pd.isnull(r_end):
                 continue
                 
-            reg_dates = set()
             # Weisen Sie jeder Disziplin ihren exakten Tag in der Belegungsliste zu
             if r_item.get('reg_he') and r_item.get('day_he'):
                 dt = get_date_for_weekday(r_item['day_he'], r_start, r_end)
-                if dt: reg_dates.add(dt)
+                if dt: 
+                    occupied_dates.setdefault(dt, []).append({
+                        "disc": "Herreneinzel",
+                        "city": r_city,
+                        "title": r_title,
+                        "partner": ""
+                    })
             if r_item.get('reg_hd') and r_item.get('day_hd'):
                 dt = get_date_for_weekday(r_item['day_hd'], r_start, r_end)
-                if dt: reg_dates.add(dt)
+                if dt:
+                    p_hd = r_item.get('partner_hd', '').strip()
+                    if p_hd == "-- Kein Partner --": p_hd = ""
+                    occupied_dates.setdefault(dt, []).append({
+                        "disc": "Herrendoppel",
+                        "city": r_city,
+                        "title": r_title,
+                        "partner": p_hd
+                    })
             if r_item.get('reg_mx') and r_item.get('day_mx'):
                 dt = get_date_for_weekday(r_item['day_mx'], r_start, r_end)
-                if dt: reg_dates.add(dt)
-                
-            # Fallback: Falls gemeldet, aber noch keine Disziplintage gepflegt sind,
-            # blockieren wir vorsorglich den gesamten Turnierzeitraum
+                if dt:
+                    p_mx = r_item.get('partner_mx', '').strip()
+                    if p_mx == "-- Kein Partner --": p_mx = ""
+                    occupied_dates.setdefault(dt, []).append({
+                        "disc": "Mixed",
+                        "city": r_city,
+                        "title": r_title,
+                        "partner": p_mx
+                    })
+                    
+            # Fallback: Falls gemeldet, aber noch keine Disziplintage gepflegt sind
             has_any_day = (r_item.get('day_he') or r_item.get('day_hd') or r_item.get('day_mx'))
             if not has_any_day:
                 active_discs = []
-                if r_item.get('reg_he'): active_discs.append("Einzel")
-                if r_item.get('reg_hd'): active_discs.append("Doppel")
-                if r_item.get('reg_mx'): active_discs.append("Mixed")
+                if r_item.get('reg_he'): 
+                    active_discs.append({"name": "Herreneinzel", "partner": ""})
+                if r_item.get('reg_hd'): 
+                    p_hd = r_item.get('partner_hd', '').strip()
+                    if p_hd == "-- Kein Partner --": p_hd = ""
+                    active_discs.append({"name": "Herrendoppel", "partner": p_hd})
+                if r_item.get('reg_mx'): 
+                    p_mx = r_item.get('partner_mx', '').strip()
+                    if p_mx == "-- Kein Partner --": p_mx = ""
+                    active_discs.append({"name": "Mixed", "partner": p_mx})
                 if not active_discs:
-                    active_discs = ["Turnier"]
+                    active_discs = [{"name": "Turnier", "partner": ""}]
                 
                 curr_date = r_start
                 while curr_date <= r_end:
-                    for d_name in active_discs:
-                        occupied_dates.setdefault(curr_date, []).append({"disc": d_name, "city": r_city, "title": r_title})
+                    for disc_info in active_discs:
+                        occupied_dates.setdefault(curr_date, []).append({
+                            "disc": disc_info["name"], 
+                            "city": r_city, 
+                            "title": r_title,
+                            "partner": disc_info["partner"]
+                        })
                     curr_date += datetime.timedelta(days=1)
 
         # Aktuelles Datum in deutscher Zeitzone abrufen
@@ -471,6 +464,16 @@ if os.path.exists(DB_FILE):
             1: "Januar", 2: "Februar", 3: "März", 4: "April",
             5: "Mai", 6: "Juni", 7: "Juli", 8: "August",
             9: "September", 10: "Oktober", 11: "November", 12: "Dezember"
+        }
+
+        weekday_names_german = {
+            0: "Samstag", 1: "Sonntag", 2: "Montag", 3: "Dienstag", 
+            4: "Mittwoch", 5: "Donnerstag", 6: "Freitag"
+        }
+        # Korrektur der echten Wochentag-Werte für datetime.weekday() (0=Montag, 6=Sonntag)
+        weekday_names_real = {
+            0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
+            4: "Freitag", 5: "Samstag", 6: "Sonntag"
         }
 
         # --- A. UPCOMING TOURNAMENTS ---
@@ -505,7 +508,7 @@ if os.path.exists(DB_FILE):
                             start_date_obj = item['Start_Date_Obj']
                             end_date_obj = item['End_Date_Obj']
                             
-                            # Prüfe dynamisch, ob dieses Turnier in einen meiner Urlaubszeiträume fällt
+                            # Prüfe dynamisch auf Urlaub an diesem Wochenende
                             tournament_has_vacation = False
                             if not pd.isnull(start_date_obj) and not pd.isnull(end_date_obj):
                                 curr_date = start_date_obj
@@ -516,12 +519,47 @@ if os.path.exists(DB_FILE):
                                         break
                                     curr_date += datetime.timedelta(days=1)
                                     limit_dt += 1
+                                    
+                            # Prüfe dynamisch auf Konflikte mit anderen Turnieren
+                            tournament_conflicts = []
+                            if not pd.isnull(start_date_obj) and not pd.isnull(end_date_obj):
+                                curr_date = start_date_obj
+                                limit_dt = 0
+                                while curr_date <= end_date_obj and limit_dt < 10:
+                                    if curr_date in occupied_dates:
+                                        for conflict in occupied_dates[curr_date]:
+                                            # Nur anzeigen, wenn es sich um ein anderes Turnier handelt
+                                            if conflict["title"] != item["title"]:
+                                                tournament_conflicts.append({
+                                                    "date": curr_date,
+                                                    "disc": conflict["disc"],
+                                                    "city": conflict["city"],
+                                                    "title": conflict["title"],
+                                                    "partner": conflict["partner"]
+                                                })
+                                    curr_date += datetime.timedelta(days=1)
+                                    limit_dt += 1
                             
-                            # 1. Einfache Urlaubs-Anzeige (Hat höchste Priorität)
+                            # 1. Blaues Banner für Urlaub (Höchste Priorität)
                             if tournament_has_vacation:
-                                st.markdown("<div style='color: #2563eb; font-weight: bold; font-size: 1.15em; margin-bottom: 6px;'>🏖️ Urlaub</div>", unsafe_allow_html=True)
+                                st.markdown(
+                                    """
+                                    <div style="
+                                        background-color: #eff6ff;
+                                        border-left: 5px solid #3b82f6;
+                                        padding: 8px 12px;
+                                        border-radius: 6px;
+                                        margin-bottom: 12px;
+                                        color: #1e40af;
+                                        font-weight: bold;
+                                    ">
+                                        <span style="margin-right: 6px;">🏖️</span>Urlaub
+                                    </div>
+                                    """,
+                                    unsafe_allow_html=True
+                                )
                             
-                            # 2. Grünes Banner für Turniere, bei denen ich aktiv angemeldet bin (Nur wenn kein Urlaub)
+                            # 2. Grünes Banner für Turniere, bei denen ich aktiv angemeldet bin
                             elif bool(item.get('registered', False)):
                                 date_groups = {}
                                 unassigned_parts = []
@@ -578,14 +616,10 @@ if os.path.exists(DB_FILE):
                                         
                                 # Baue die HTML-Zeilen chronologisch auf (Gruppiert nach Datum)
                                 sorted_dates = sorted(date_groups.keys())
-                                weekday_names = {
-                                    0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
-                                    4: "Freitag", 5: "Samstag", 6: "Sonntag"
-                                }
                                 
                                 html_lines = []
                                 for dt in sorted_dates:
-                                    w_name = weekday_names[dt.weekday()]
+                                    w_name = weekday_names_real[dt.weekday()]
                                     formatted_dt = dt.strftime("%d.%m.%Y")
                                     disciplines_str = ", ".join(date_groups[dt])
                                     html_lines.append(f"<div style='margin-top: 3px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>")
@@ -615,6 +649,46 @@ if os.path.exists(DB_FILE):
                                     """,
                                     unsafe_allow_html=True
                                 )
+                                
+                            # 3. Gelb-Orangenes Banner für Terminkonflikte (Nur wenn für das aktuelle Turnier nicht gemeldet)
+                            elif tournament_conflicts:
+                                html_lines = []
+                                for conflict in tournament_conflicts:
+                                    w_name = weekday_names_real[conflict["date"].weekday()]
+                                    formatted_dt = conflict["date"].strftime("%d.%m.%Y")
+                                    
+                                    p_name = conflict['partner']
+                                    partner_str = ""
+                                    if p_name:
+                                        if p_name in PARTNERS_HD:
+                                            partner_str = f" mit <a href='{PARTNERS_HD[p_name]}' target='_blank' style='color: #b45309; text-decoration: underline; font-weight: bold;'>{p_name}</a>"
+                                        elif p_name in PARTNERS_MX:
+                                            partner_str = f" mit <a href='{PARTNERS_MX[p_name]}' target='_blank' style='color: #b45309; text-decoration: underline; font-weight: bold;'>{p_name}</a>"
+                                        else:
+                                            partner_str = f" mit {p_name}"
+                                            
+                                    html_lines.append(f"<div style='margin-top: 3px;'>🗓️ {w_name}, {formatted_dt}: {conflict['disc']}{partner_str} in {conflict['city']} ({conflict['title']})</div>")
+                                    
+                                details_html = "".join(html_lines)
+                                st.markdown(
+                                    f"""
+                                    <div style="
+                                        background-color: #fffbeb;
+                                        border-left: 5px solid #f59e0b;
+                                        padding: 8px 12px;
+                                        border-radius: 6px;
+                                        margin-bottom: 12px;
+                                        color: #b45309;
+                                        font-weight: bold;
+                                    ">
+                                        <span style="margin-right: 6px;">⚠️</span>Terminkonflikt
+                                        <div style="font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #b45309;">
+                                            {details_html}
+                                        </div>
+                                    </div>
+                                    """,
+                                    unsafe_allow_html=True
+                                )
 
                             st.markdown(f"### {item['title']}")
                             
@@ -622,8 +696,8 @@ if os.path.exists(DB_FILE):
                             dist_str = f" ({item['distance']} km)" if item['distance'] is not None else ""
                             st.markdown(f"📍 **{item['city']}**{dist_str}")
                             
-                            # Rendere den einheitlichen Zeitplan mit integrierten dezenten Konflikt-Checks
-                            render_tournament_schedule(item, occupied_dates)
+                            # Rendere den einheitlichen, sauberen Zeitplan
+                            render_tournament_schedule(item)
                             
                             st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                             
@@ -640,9 +714,6 @@ if os.path.exists(DB_FILE):
                                 # Dropdowns zur Zuweisung des Zeitplans (Für alle sichtbar)
                                 st.markdown("**Allgemeiner Zeitplan (Für alle Kacheln sichtbar):**")
                                 col_day_he, col_day_hd, col_day_mx = st.columns(3)
-                                start_date_obj = item['Start_Date_Obj']
-                                end_date_obj = item['End_Date_Obj']
-                                day_options = get_tournament_day_options(start_date_obj, end_date_obj)
                                 
                                 with col_day_he:
                                     val_day_he_db = item.get('day_he', '')
@@ -838,14 +909,10 @@ if os.path.exists(DB_FILE):
                                         
                                 # Baue die HTML-Zeilen chronologisch auf (past)
                                 sorted_dates = sorted(date_groups.keys())
-                                weekday_names = {
-                                    0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
-                                    4: "Freitag", 5: "Samstag", 6: "Sonntag"
-                                }
                                 
                                 html_lines = []
                                 for dt in sorted_dates:
-                                    w_name = weekday_names[dt.weekday()]
+                                    w_name = weekday_names_real[dt.weekday()]
                                     formatted_dt = dt.strftime("%d.%m.%Y")
                                     disciplines_str = ", ".join(date_groups[dt])
                                     html_lines.append(f"<div style='margin-top: 3px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>")
@@ -883,7 +950,7 @@ if os.path.exists(DB_FILE):
                             st.markdown(f"📍 **{item['city']}**{dist_str}")
                             
                             # Rendere den einheitlichen Zeitplan (past)
-                            render_tournament_schedule(item, occupied_dates)
+                            render_tournament_schedule(item)
                             
                             st.markdown(f"🏢 *Ausrichter: {item['organizer']}*")
                             
