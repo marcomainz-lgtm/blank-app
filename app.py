@@ -719,7 +719,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                 he_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
                 he_status_class = "conflict"
                 he_class = "has-conflict"
-    
+        
     # -- Doppel --
     hd_class = "active-registered" if reg_hd else ""
     hd_status_class = "registered" if reg_hd else ""
@@ -901,8 +901,8 @@ if os.path.exists(DB_FILE):
         vacations_data = load_vacations()
         for v in vacations_data.values():
             try:
-                v_start_dt = datetime.strptime(v['start_date'], "%d.%m.%Y").date()
-                v_end_dt = datetime.strptime(v['end_date'], "%d.%m.%Y").date()
+                v_start_dt = datetime.datetime.strptime(v['start_date'], "%d.%m.%Y").date()
+                v_end_dt = datetime.datetime.strptime(v['end_date'], "%d.%m.%Y").date()
                 
                 curr_date = v_start_dt
                 limit_dt = 0
@@ -912,7 +912,7 @@ if os.path.exists(DB_FILE):
                         vacation_notes[curr_date] = v['note']
                     curr_date += datetime.timedelta(days=1)
                     limit_dt += 1
-            except Exception:
+            except Exception as e:
                 pass
 
         # --- DYNAMISCHE ERMITTLUNG ALLER BELEGTEN SPIELTAGE ---
