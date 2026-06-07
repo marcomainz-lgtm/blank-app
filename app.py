@@ -245,6 +245,26 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
     return None
 
 
+def format_discipline_with_partner(disc_type, partner_name, partners_dict, text_color="#15803d"):
+    """Formatiert eine Disziplin und fügt dynamisch Partner-Links oder die Information 'noch ohne Partner' hinzu."""
+    p_name = partner_name.strip() if partner_name else ""
+    if p_name == "-- Kein Partner --":
+        p_name = ""
+        
+    if not p_name:
+        if disc_type in ["Herrendoppel", "Doppel"]:
+            return "Herrendoppel noch ohne Partner"
+        elif disc_type == "Mixed":
+            return "Mixed noch ohne Partnerin"
+        else:
+            return disc_type
+    else:
+        if p_name in partners_dict:
+            return f"{disc_type} mit <a href='{partners_dict[p_name]}' target='_blank' style='color: {text_color}; text-decoration: underline; font-weight: bold;'>{p_name}</a>"
+        else:
+            return f"{disc_type} mit {p_name}"
+
+
 def render_tournament_schedule(item):
     """Rendert die Wochentage des Turniers einzeln und hängt ggf. erkannte Disziplinen kompakt an."""
     weekday_names_german = {
@@ -466,10 +486,6 @@ if os.path.exists(DB_FILE):
             9: "September", 10: "Oktober", 11: "November", 12: "Dezember"
         }
 
-        weekday_names_german = {
-            0: "Samstag", 1: "Sonntag", 2: "Montag", 3: "Dienstag", 
-            4: "Mittwoch", 5: "Donnerstag", 6: "Freitag"
-        }
         # Korrektur der echten Wochentag-Werte für datetime.weekday() (0=Montag, 6=Sonntag)
         weekday_names_real = {
             0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
@@ -540,17 +556,18 @@ if os.path.exists(DB_FILE):
                                     curr_date += datetime.timedelta(days=1)
                                     limit_dt += 1
                             
-                            # 1. Blaues Banner für Urlaub (Höchste Priorität)
+                            # 1. Urlaub (Dezentes blaues Banner)
                             if tournament_has_vacation:
                                 st.markdown(
                                     """
                                     <div style="
-                                        background-color: #eff6ff;
-                                        border-left: 5px solid #3b82f6;
-                                        padding: 8px 12px;
-                                        border-radius: 6px;
-                                        margin-bottom: 12px;
+                                        background-color: #f8fafc;
+                                        border-left: 3px solid #3b82f6;
+                                        padding: 6px 10px;
+                                        border-radius: 4px;
+                                        margin-bottom: 8px;
                                         color: #1e40af;
+                                        font-size: 0.95em;
                                         font-weight: bold;
                                     ">
                                         <span style="margin-right: 6px;">🏖️</span>Urlaub
@@ -559,7 +576,7 @@ if os.path.exists(DB_FILE):
                                     unsafe_allow_html=True
                                 )
                             
-                            # 2. Grünes Banner für Turniere, bei denen ich aktiv angemeldet bin
+                            # 2. Gemeldet (Dezentes grünes Banner)
                             elif bool(item.get('registered', False)):
                                 date_groups = {}
                                 unassigned_parts = []
@@ -576,19 +593,9 @@ if os.path.exists(DB_FILE):
                                 
                                 # Doppel
                                 if bool(item.get('reg_hd', False)):
-                                    p_hd = item.get('partner_hd', '').strip()
-                                    if p_hd == "-- Kein Partner --":
-                                        p_hd = ""
-                                    
-                                    partner_str = ""
-                                    if p_hd in PARTNERS_HD:
-                                        partner_str = f" mit <a href='{PARTNERS_HD[p_hd]}' target='_blank' style='color: #15803d; text-decoration: underline; font-weight: bold;'>{p_hd}</a>"
-                                    elif p_hd:
-                                        partner_str = f" mit {p_hd}"
-                                        
+                                    text_part = format_discipline_with_partner("Herrendoppel", item.get('partner_hd', ''), PARTNERS_HD, "#166534")
                                     day_val = item.get('day_hd', '')
                                     dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
-                                    text_part = f"Herrendoppel{partner_str}"
                                     if dt:
                                         date_groups.setdefault(dt, []).append(text_part)
                                     else:
@@ -596,19 +603,9 @@ if os.path.exists(DB_FILE):
                                 
                                 # Mixed
                                 if bool(item.get('reg_mx', False)):
-                                    p_mx = item.get('partner_mx', '').strip()
-                                    if p_mx == "-- Kein Partner --":
-                                        p_mx = ""
-                                        
-                                    partner_str = ""
-                                    if p_mx in PARTNERS_MX:
-                                        partner_str = f" mit <a href='{PARTNERS_MX[p_mx]}' target='_blank' style='color: #15803d; text-decoration: underline; font-weight: bold;'>{p_mx}</a>"
-                                    elif p_mx:
-                                        partner_str = f" mit {p_mx}"
-                                        
+                                    text_part = format_discipline_with_partner("Mixed", item.get('partner_mx', ''), PARTNERS_MX, "#166534")
                                     day_val = item.get('day_mx', '')
                                     dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
-                                    text_part = f"Mixed{partner_str}"
                                     if dt:
                                         date_groups.setdefault(dt, []).append(text_part)
                                     else:
@@ -629,60 +626,59 @@ if os.path.exists(DB_FILE):
                                     
                                 details_html = ""
                                 if html_lines:
-                                    details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>{ ''.join(html_lines) }</div>"
+                                    details_html = f"<div style='font-weight: normal; font-size: 0.95em; margin-top: 4px; color: #166534;'>{ ''.join(html_lines) }</div>"
 
                                 st.markdown(
                                     f"""
                                     <div style="
-                                        background-color: #f0fdf4;
-                                        border-left: 5px solid #22c55e;
-                                        padding: 8px 12px;
-                                        border-radius: 6px;
-                                        margin-bottom: 12px;
+                                        background-color: #f8fafc;
+                                        border-left: 3px solid #22c55e;
+                                        padding: 6px 10px;
+                                        border-radius: 4px;
+                                        margin-bottom: 8px;
                                         color: #15803d;
+                                        font-size: 0.95em;
                                         font-weight: bold;
                                     ">
-                                        <span style="font-style: normal; margin-right: 6px;">✅</span>
-                                        Ich bin für dieses Turnier gemeldet!
+                                        <span style="font-style: normal; margin-right: 6px;">✅</span>Ich bin für dieses Turnier gemeldet!
                                         {details_html}
                                     </div>
                                     """,
                                     unsafe_allow_html=True
                                 )
                                 
-                            # 3. Gelb-Orangenes Banner für Terminkonflikte (Nur wenn für das aktuelle Turnier nicht gemeldet)
+                            # 3. Paralleltermin (Dezentes graues Banner - informativ und unaufdringlich)
                             elif tournament_conflicts:
                                 html_lines = []
                                 for conflict in tournament_conflicts:
                                     w_name = weekday_names_real[conflict["date"].weekday()]
                                     formatted_dt = conflict["date"].strftime("%d.%m.%Y")
                                     
-                                    p_name = conflict['partner']
-                                    partner_str = ""
-                                    if p_name:
-                                        if p_name in PARTNERS_HD:
-                                            partner_str = f" mit <a href='{PARTNERS_HD[p_name]}' target='_blank' style='color: #b45309; text-decoration: underline; font-weight: bold;'>{p_name}</a>"
-                                        elif p_name in PARTNERS_MX:
-                                            partner_str = f" mit <a href='{PARTNERS_MX[p_name]}' target='_blank' style='color: #b45309; text-decoration: underline; font-weight: bold;'>{p_name}</a>"
-                                        else:
-                                            partner_str = f" mit {p_name}"
-                                            
-                                    html_lines.append(f"<div style='margin-top: 3px;'>🗓️ {w_name}, {formatted_dt}: {conflict['disc']}{partner_str} in {conflict['city']} ({conflict['title']})</div>")
+                                    # Formatiert die konfliktierende Disziplin mit den neuen Partner-Fallback-Regeln
+                                    formatted_disc = format_discipline_with_partner(
+                                        conflict["disc"], 
+                                        conflict["partner"], 
+                                        PARTNERS_HD if conflict["disc"] == "Herrendoppel" else PARTNERS_MX, 
+                                        "#475569"
+                                    )
+                                    
+                                    html_lines.append(f"<div style='margin-top: 3px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {formatted_disc} in {conflict['city']} ({conflict['title']})</div>")
                                     
                                 details_html = "".join(html_lines)
                                 st.markdown(
                                     f"""
                                     <div style="
-                                        background-color: #fffbeb;
-                                        border-left: 5px solid #f59e0b;
-                                        padding: 8px 12px;
-                                        border-radius: 6px;
-                                        margin-bottom: 12px;
-                                        color: #b45309;
+                                        background-color: #f8fafc;
+                                        border-left: 3px solid #94a3b8;
+                                        padding: 6px 10px;
+                                        border-radius: 4px;
+                                        margin-bottom: 8px;
+                                        color: #475569;
+                                        font-size: 0.95em;
                                         font-weight: bold;
                                     ">
-                                        <span style="margin-right: 6px;">⚠️</span>Terminkonflikt
-                                        <div style="font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #b45309;">
+                                        <span style="margin-right: 6px;">🗓️</span>Paralleltermin
+                                        <div style="font-weight: normal; font-size: 0.95em; margin-top: 4px; color: #475569;">
                                             {details_html}
                                         </div>
                                     </div>
@@ -714,6 +710,9 @@ if os.path.exists(DB_FILE):
                                 # Dropdowns zur Zuweisung des Zeitplans (Für alle sichtbar)
                                 st.markdown("**Allgemeiner Zeitplan (Für alle Kacheln sichtbar):**")
                                 col_day_he, col_day_hd, col_day_mx = st.columns(3)
+                                start_date_obj = item['Start_Date_Obj']
+                                end_date_obj = item['End_Date_Obj']
+                                day_options = get_tournament_day_options(start_date_obj, end_date_obj)
                                 
                                 with col_day_he:
                                     val_day_he_db = item.get('day_he', '')
@@ -869,19 +868,9 @@ if os.path.exists(DB_FILE):
                                 
                                 # 2. Doppel
                                 if bool(item.get('reg_hd', False)):
-                                    p_hd = item.get('partner_hd', '').strip()
-                                    if p_hd == "-- Kein Partner --":
-                                        p_hd = ""
-                                        
-                                    partner_str = ""
-                                    if p_hd in PARTNERS_HD:
-                                        partner_str = f" mit <a href='{PARTNERS_HD[p_hd]}' target='_blank' style='color: #166534; text-decoration: underline; font-weight: bold;'>{p_hd}</a>"
-                                    elif p_hd:
-                                        partner_str = f" mit {p_hd}"
-                                        
+                                    text_part = format_discipline_with_partner("Herrendoppel", item.get('partner_hd', ''), PARTNERS_HD, "#166534")
                                     day_val = item.get('day_hd', '')
                                     dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
-                                    text_part = f"Herrendoppel{partner_str}"
                                     if dt:
                                         date_groups.setdefault(dt, []).append(text_part)
                                     else:
@@ -889,19 +878,9 @@ if os.path.exists(DB_FILE):
                                         
                                 # Mixed
                                 if bool(item.get('reg_mx', False)):
-                                    p_mx = item.get('partner_mx', '').strip()
-                                    if p_mx == "-- Kein Partner --":
-                                        p_mx = ""
-                                        
-                                    partner_str = ""
-                                    if p_mx in PARTNERS_MX:
-                                        partner_str = f" mit <a href='{PARTNERS_MX[p_mx]}' target='_blank' style='color: #166534; text-decoration: underline; font-weight: bold;'>{p_mx}</a>"
-                                    elif p_mx:
-                                        partner_str = f" mit {p_mx}"
-                                        
+                                    text_part = format_discipline_with_partner("Mixed", item.get('partner_mx', ''), PARTNERS_MX, "#166534")
                                     day_val = item.get('day_mx', '')
                                     dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
-                                    text_part = f"Mixed{partner_str}"
                                     if dt:
                                         date_groups.setdefault(dt, []).append(text_part)
                                     else:
@@ -922,21 +901,21 @@ if os.path.exists(DB_FILE):
                                     
                                 details_html = ""
                                 if html_lines:
-                                    details_html = f"<div style='font-weight: normal; font-size: 0.9em; margin-top: 5px; color: #166534;'>{ ''.join(html_lines) }</div>"
+                                    details_html = f"<div style='font-weight: normal; font-size: 0.95em; margin-top: 4px; color: #166534;'>{ ''.join(html_lines) }</div>"
 
                                 st.markdown(
                                     f"""
                                     <div style="
-                                        background-color: #f4fbf7;
-                                        border-left: 5px solid #86efac;
+                                        background-color: #f8fafc;
+                                        border-left: 3px solid #86efac;
                                         padding: 6px 10px;
-                                        border-radius: 6px;
-                                        margin-bottom: 12px;
+                                        border-radius: 4px;
+                                        margin-bottom: 8px;
                                         color: #166534;
+                                        font-size: 0.95em;
                                         font-weight: bold;
                                     ">
-                                        <span style="color: #86efac; font-style: normal; margin-right: 5px;">✅</span>
-                                        Teilgenommen
+                                        <span style="color: #86efac; font-style: normal; margin-right: 5px;">✅</span>Teilgenommen
                                         {details_html}
                                     </div>
                                     """,
