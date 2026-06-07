@@ -288,7 +288,7 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
     try:
         current_date = start_date_obj
         limit = 0
-        while current_date <= end_date_obj && limit < 10:
+        while current_date <= end_date_obj and limit < 10:
             day_name = weekday_names[current_date.weekday()]
             if day_name == day_selection:
                 return current_date
@@ -447,8 +447,8 @@ if os.path.exists(DB_FILE):
         vac_data = load_vacations()
         for v in vac_data.values():
             try:
-                v_start_dt = datetime.strptime(v['start_date'], "%d.%m.%Y").date()
-                v_end_dt = datetime.strptime(v['end_date'], "%d.%m.%Y").date()
+                v_start_dt = datetime.datetime.strptime(v['start_date'], "%d.%m.%Y").date()
+                v_end_dt = datetime.datetime.strptime(v['end_date'], "%d.%m.%Y").date()
                 
                 curr_date = v_start_dt
                 limit_dt = 0
