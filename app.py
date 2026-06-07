@@ -342,7 +342,8 @@ def format_discipline_with_partner(disc_type, partner_name, partners_dict, text_
 
 
 def render_tournament_schedule(item):
-    """Rendert die Wochentage des Turniers einzeln und hängt ggf. erkannte Disziplinen kompakt an."""
+    """Rendert die Wochentage des Turniers einzeln und hängt ggf. erkannte Disziplinen kompakt an.
+    Blendet Wochentage ohne Zuweisungen bei mehrtägigen Turnieren automatisch aus."""
     weekday_names_german = {
         0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
         4: "Freitag", 5: "Samstag", 6: "Sonntag"
@@ -358,19 +359,23 @@ def render_tournament_schedule(item):
         schedule_html = ""
         current_date = start_date_obj
         limit = 0
-        while current_date <= end_date_obj and limit < 10:
+        
+        # Prüfen, ob für dieses Turnier überhaupt schon Spieltage zugewiesen wurden
+        day_he_val = item.get('day_he', '')
+        day_hd_val = item.get('day_hd', '')
+        day_mx_val = item.get('day_mx', '')
+        
+        if pd.isnull(day_he_val): day_he_val = ""
+        if pd.isnull(day_hd_val): day_hd_val = ""
+        if pd.isnull(day_mx_val): day_mx_val = ""
+        
+        has_any_assignments = bool(day_he_val or day_hd_val or day_mx_val)
+        
+        while current_date <= end_date_obj and limit < 20:
             w_name = weekday_names_german[current_date.weekday()]
             formatted_dt = current_date.strftime("%d.%m.%Y")
             
             day_disciplines = []
-            
-            day_he_val = item.get('day_he', '')
-            day_hd_val = item.get('day_hd', '')
-            day_mx_val = item.get('day_mx', '')
-            
-            if pd.isnull(day_he_val): day_he_val = ""
-            if pd.isnull(day_hd_val): day_hd_val = ""
-            if pd.isnull(day_mx_val): day_mx_val = ""
             
             if day_he_val == w_name:
                 day_disciplines.append("Einzel")
@@ -379,11 +384,13 @@ def render_tournament_schedule(item):
             if day_mx_val == w_name:
                 day_disciplines.append("Mixed")
                 
-            if day_disciplines:
-                disciplines_str = ", ".join(day_disciplines)
-                schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>"
-            else:
-                schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}</strong></div>"
+            # Zeige den Tag an, wenn er geplante Disziplinen hat ODER das Turnier noch gar keine Zuweisungen besitzt
+            if day_disciplines or not has_any_assignments:
+                if day_disciplines:
+                    disciplines_str = ", ".join(day_disciplines)
+                    schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>"
+                else:
+                    schedule_html += f"<div style='margin-bottom: 2px;'>🗓️ <strong>{w_name}, {formatted_dt}</strong></div>"
                 
             current_date += datetime.timedelta(days=1)
             limit += 1
@@ -439,6 +446,10 @@ if os.path.exists(DB_FILE):
         # Convert dates for chronological sorting
         df['Start_Date_Obj'] = pd.to_datetime(df['start_date'], format='%d.%m.%Y', errors='coerce').dt.date
         df['End_Date_Obj'] = pd.to_datetime(df['end_date'], format='%d.%m.%Y', errors='coerce').dt.date
+
+        # --- EXCLUDE FILTER FÜR AUSGEBLENDETE TURNIERE (NACHHALTIG IN DB, ABER IM FRONTEND VERSTECKT) ---
+        EXCLUDED_KEYWORDS = ["2. DBV-RLT O19 2026", "TEST"]
+        df = df[~df['title'].str.contains('|'.join(EXCLUDED_KEYWORDS), case=False, na=False)]
 
         # --- DYNAMISCHE ERMITTLUNG ALLER ZENTRALEN URLAUBS-TERMINE ---
         vacation_dates = set()
