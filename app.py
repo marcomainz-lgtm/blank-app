@@ -209,6 +209,7 @@ st.markdown(
         border: 2.5px solid #16a34a !important;
         background-color: #dcfce7 !important;
         box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25) !important;
+        opacity: 1 !important;
     }
     .discipline-card.active-registered .discipline-title {
         color: #14532d !important;
@@ -224,6 +225,42 @@ st.markdown(
     .discipline-card.active-registered .discipline-status a {
         color: #166534 !important;
         text-decoration: underline;
+    }
+
+    /* DEAKTIVIERTER / BLOCKIERTENLOOK BEI PARALLELTERMIN (grau) */
+    .discipline-card.has-conflict {
+        border: 1.5px solid #94a3b8 !important;
+        background-color: #f1f5f9 !important;
+        opacity: 0.75;
+    }
+    .discipline-card.has-conflict .discipline-title {
+        color: #475569 !important;
+    }
+    .discipline-card.has-conflict .discipline-day {
+        background-color: #cbd5e1 !important;
+        color: #475569 !important;
+    }
+    .discipline-card.has-conflict .discipline-status {
+        color: #475569 !important;
+        font-weight: 600;
+    }
+
+    /* KRITISCHER TERMINKONFLIKT BEI DOPPEL-MELDUNG (rot) */
+    .discipline-card.has-double-booking {
+        border: 2.5px solid #ef4444 !important;
+        background-color: #fef2f2 !important;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15) !important;
+    }
+    .discipline-card.has-double-booking .discipline-title {
+        color: #991b1b !important;
+    }
+    .discipline-card.has-double-booking .discipline-day {
+        background-color: #fee2e2 !important;
+        color: #991b1b !important;
+    }
+    .discipline-card.has-double-booking .discipline-status {
+        color: #dc2626 !important;
+        font-weight: bold;
     }
 
     .discipline-icon {
@@ -269,18 +306,6 @@ st.markdown(
     .discipline-status.registered {
         color: #15803d;
         font-weight: bold;
-    }
-    
-    /* GRAUER Paralleltermin-Status aus V2 */
-    .discipline-status.conflict {
-        color: #64748b !important;
-        font-weight: 600;
-    }
-    
-    /* ROTER Terminkonflikt-Status bei Doppel-Meldung */
-    .discipline-status.double-booking {
-        color: #dc2626 !important;
-        font-weight: 700;
     }
 
     /* Urlaub Kachel-Ersatz */
@@ -413,30 +438,30 @@ if IS_ADMIN:
 
 # --- DYNAMISCHE HILFSFUNKTIONEN FÜR DATUM UND WOCHENTAGE ---
 def get_tournament_day_options(start_date_obj, end_date_obj):
-    """Generiert eine dynamische Liste aller echten Turniertage."""
+    """Generiert eine dynamische Liste aller echten Turniertage plus der Option 'Disziplin findet nicht statt'."""
     weekday_names = {
         0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
         4: "Freitag", 5: "Samstag", 6: "Sonntag"
     }
+    options = ["-- Tag wählen --", "Disziplin findet nicht statt"]
     if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
-        return ["-- Tag wählen --"]
+        return options
     
-    day_options = ["-- Tag wählen --"]
     current_date = start_date_obj
     limit = 0
     while current_date <= end_date_obj and limit < 20:
         day_name = weekday_names[current_date.weekday()]
         formatted_date = current_date.strftime("%d.%m.")
-        day_options.append(f"{day_name}, {formatted_date}")
+        options.append(f"{day_name}, {formatted_date}")
         current_date += datetime.timedelta(days=1)
         limit += 1
         
-    return day_options
+    return options
 
 
 def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
     """Findet das erste Datum im Turnierzeitraum, das dem ausgewählten Wochentag entspricht."""
-    if not day_selection or day_selection in ["-- Tag wählen --", "Keine Angabe", ""]:
+    if not day_selection or day_selection in ["-- Tag wählen --", "Keine Angabe", "Disziplin findet nicht statt", ""]:
         return None
     if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
         return None
@@ -487,13 +512,13 @@ def can_still_register(item, vacation_dates, occupied_dates):
     
     if has_any_assignments:
         active_dates = set()
-        if day_he_val:
+        if day_he_val and day_he_val != "Disziplin findet nicht statt":
             dt = get_date_for_weekday(day_he_val, start_date_obj, end_date_obj)
             if dt: active_dates.add(dt)
-        if day_hd_val:
+        if day_hd_val and day_hd_val != "Disziplin findet nicht statt":
             dt = get_date_for_weekday(day_hd_val, start_date_obj, end_date_obj)
             if dt: active_dates.add(dt)
-        if day_mx_val:
+        if day_mx_val and day_mx_val != "Disziplin findet nicht statt":
             dt = get_date_for_weekday(day_mx_val, start_date_obj, end_date_obj)
             if dt: active_dates.add(dt)
             
@@ -605,6 +630,25 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     </div>
     """
 
+    # Helper zur Formatierung des Kachel-Datum-Badges (erster Platz in Kachel)
+    def format_day_badge(day_val, s_obj, e_obj):
+        if not day_val or day_val == "-- Tag wählen --" or day_val == "TBA":
+            return "TBA"
+        if day_val == "Disziplin findet nicht statt":
+            return "Gestrichen"
+        
+        # Versuche ein präzises Datum zu ermitteln
+        dt = get_date_for_weekday(day_val, s_obj, e_obj)
+        if dt:
+            weekday_names = {
+                0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
+                4: "Freitag", 5: "Samstag", 6: "Sonntag"
+            }
+            w_name = weekday_names[dt.weekday()]
+            return f"{w_name}, {dt.strftime('%d.%m.')}"
+        
+        return day_val
+
     # 4. Kachel-Verhalten bei Urlaub: Keine Disziplinboxen, sondern ein großes Urlaubs-Banner!
     if tournament_has_vacation:
         disciplines_html = f"""
@@ -615,15 +659,15 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         </div>
         """
     else:
-        # Backend-Abwahl prüfen (Findet die Disziplin überhaupt statt?)
-        has_he = bool(item.get('has_he', True))
-        has_hd = bool(item.get('has_hd', True))
-        has_mx = bool(item.get('has_mx', True))
+        # Backend-Abwahl direkt über das Zeitplan-Dropdown steuern
+        has_he = (day_he != "Disziplin findet nicht statt")
+        has_hd = (day_hd != "Disziplin findet nicht statt")
+        has_mx = (day_mx != "Disziplin findet nicht statt")
 
         # Bestimme den anzuzeigenden Text für den Spieltag (TBA als Default)
-        display_day_he = day_he if (day_he and day_he != "-- Tag wählen --") else "TBA"
-        display_day_hd = day_hd if (day_hd and day_hd != "-- Tag wählen --") else "TBA"
-        display_day_mx = day_mx if (day_mx and day_mx != "-- Tag wählen --") else "TBA"
+        display_day_he = format_day_badge(day_he, start_date_obj, end_date_obj)
+        display_day_hd = format_day_badge(day_hd, start_date_obj, end_date_obj)
+        display_day_mx = format_day_badge(day_mx, start_date_obj, end_date_obj)
 
         day_class_he = "tba-day" if display_day_he == "TBA" else ""
         day_class_hd = "tba-day" if display_day_hd == "TBA" else ""
@@ -644,9 +688,11 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                 if reg_he:
                     he_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
                     he_status_class = "double-booking"
+                    he_class = "has-double-booking"
                 else:
                     he_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
                     he_status_class = "conflict"
+                    he_class = "has-conflict"
         
         # -- Doppel --
         hd_class = "active-registered" if reg_hd else ""
@@ -670,9 +716,11 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                 if reg_hd:
                     hd_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
                     hd_status_class = "double-booking"
+                    hd_class = "has-double-booking"
                 else:
                     hd_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
                     hd_status_class = "conflict"
+                    hd_class = "has-conflict"
 
         # -- Mixed --
         mx_class = "active-registered" if reg_mx else ""
@@ -696,9 +744,11 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                 if reg_mx:
                     mx_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
                     mx_status_class = "double-booking"
+                    mx_class = "has-double-booking"
                 else:
                     mx_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
                     mx_status_class = "conflict"
+                    mx_class = "has-conflict"
 
         # Nur Kacheln rendern, die im Backend erlaubt sind (Datum steht an erster Stelle!)
         he_card = f"""
@@ -775,9 +825,6 @@ if os.path.exists(DB_FILE):
             'day_he': '',
             'day_hd': '',
             'day_mx': '',
-            'has_he': True,   # Ob Einzel im Turnier existiert
-            'has_hd': True,   # Ob Doppel im Turnier existiert
-            'has_mx': True,   # Ob Mixed im Turnier existiert
             'participation_day': 'Keine Angabe',
             'logo_url': '',
             'city': 'Unbekannt',
@@ -794,7 +841,7 @@ if os.path.exists(DB_FILE):
                 df[col] = df[col].fillna(default)
         
         # Datentypen für die Checkbox-Spalten erzwingen
-        for col in ['registered', 'reg_he', 'reg_hd', 'reg_mx', 'has_he', 'has_hd', 'has_mx']:
+        for col in ['registered', 'reg_he', 'reg_hd', 'reg_mx']:
             df[col] = df[col].astype(bool)
 
         # Convert dates for chronological sorting
@@ -996,17 +1043,7 @@ if os.path.exists(DB_FILE):
                                 end_date_obj = item['End_Date_Obj']
                                 day_options = get_tournament_day_options(start_date_obj, end_date_obj)
 
-                                # Disziplinen aktivieren/deaktivieren (Soll die Disziplin ganz gestrichen werden?)
-                                st.markdown("**Disziplinen aktivieren/deaktivieren (Nicht angebotene komplett streichen):**")
-                                col_has_he, col_has_hd, col_has_mx = st.columns(3)
-                                with col_has_he:
-                                    val_has_he = st.checkbox("Einzel findet statt", value=bool(item.get('has_he', True)), key=f"has_he_{item['id']}")
-                                with col_has_hd:
-                                    val_has_hd = st.checkbox("Doppel findet statt", value=bool(item.get('has_hd', True)), key=f"has_hd_{item['id']}")
-                                with col_has_mx:
-                                    val_has_mx = st.checkbox("Mixed findet statt", value=bool(item.get('has_mx', True)), key=f"has_mx_{item['id']}")
-
-                                # Dropdowns zur Zuweisung des Zeitplans (Für alle sichtbar)
+                                # Dropdowns zur Zuweisung des Zeitplans (Disziplin findet nicht statt direkt im Dropdown!)
                                 st.markdown("**Allgemeiner Zeitplan (Für alle Kacheln sichtbar):**")
                                 col_day_he, col_day_hd, col_day_mx = st.columns(3)
                                 
@@ -1087,10 +1124,7 @@ if os.path.exists(DB_FILE):
                                     val_partner_mx != item.get('partner_mx', '') or
                                     val_day_he != item.get('day_he', '') or
                                     val_day_hd != item.get('day_hd', '') or
-                                    val_day_mx != item.get('day_mx', '') or
-                                    val_has_he != bool(item.get('has_he', True)) or
-                                    val_has_hd != bool(item.get('has_hd', True)) or
-                                    val_has_mx != bool(item.get('has_mx', True))
+                                    val_day_mx != item.get('day_mx', '')
                                 )
                                 
                                 if has_changed:
@@ -1103,9 +1137,6 @@ if os.path.exists(DB_FILE):
                                     data[item['id']]['day_he'] = val_day_he
                                     data[item['id']]['day_hd'] = val_day_hd
                                     data[item['id']]['day_mx'] = val_day_mx
-                                    data[item['id']]['has_he'] = val_has_he
-                                    data[item['id']]['has_hd'] = val_has_hd
-                                    data[item['id']]['has_mx'] = val_has_mx
                                     
                                     with open(DB_FILE, "w", encoding="utf-8") as f:
                                         json.dump(data, f, ensure_ascii=False, indent=4)
@@ -1164,17 +1195,6 @@ if os.path.exists(DB_FILE):
                                 end_date_obj = item['End_Date_Obj']
                                 day_options = get_tournament_day_options(start_date_obj, end_date_obj)
                                 
-                                # Disziplinen aktivieren/deaktivieren (Soll die Disziplin ganz gestrichen werden?)
-                                st.markdown("**Disziplinen aktivieren/deaktivieren (Nicht angebotene komplett streichen):**")
-                                col_has_he, col_has_hd, col_has_mx = st.columns(3)
-                                with col_has_he:
-                                    val_has_he = st.checkbox("Einzel findet statt", value=bool(item.get('has_he', True)), key=f"has_he_past_{item['id']}")
-                                with col_has_hd:
-                                    val_has_hd = st.checkbox("Doppel findet statt", value=bool(item.get('has_hd', True)), key=f"has_hd_past_{item['id']}")
-                                with col_has_mx:
-                                    val_has_mx = st.checkbox("Mixed findet statt", value=bool(item.get('has_mx', True)), key=f"has_mx_past_{item['id']}")
-
-                                st.write("")
                                 col_past_he, col_past_hd, col_past_mx = st.columns(3)
 
                                 with col_past_he:
@@ -1253,10 +1273,7 @@ if os.path.exists(DB_FILE):
                                     val_partner_mx != item.get('partner_mx', '') or
                                     val_day_he != item.get('day_he', '') or
                                     val_day_hd != item.get('day_hd', '') or
-                                    val_day_mx != item.get('day_mx', '') or
-                                    val_has_he != bool(item.get('has_he', True)) or
-                                    val_has_hd != bool(item.get('has_hd', True)) or
-                                    val_has_mx != bool(item.get('has_mx', True))
+                                    val_day_mx != item.get('day_mx', '')
                                 )
                                 
                                 if has_changed:
@@ -1269,23 +1286,6 @@ if os.path.exists(DB_FILE):
                                     data[item['id']]['day_he'] = val_day_he
                                     data[item['id']]['day_hd'] = val_day_hd
                                     data[item['id']]['day_mx'] = val_day_mx
-                                    data[item['id']]['has_he'] = val_has_he
-                                    data[item['id']]['has_hd'] = val_has_hd
-                                    data[item['id']]['has_mx'] = val_has_mx
                                     
                                     with open(DB_FILE, "w", encoding="utf-8") as f:
                                         json.dump(data, f, ensure_ascii=False, indent=4)
-                                    st.rerun()
-                            
-                        with col_link:
-                            st.write("")
-                            st.write("")
-                            st.link_button("Turnierseite", item['link'], use_container_width=True)
-            else:
-                st.info("Keine vergangenen Turniere gefunden.")
-    else:
-        st.info("Der Suchlauf war erfolgreich, aber es wurden keine Turniere in Ihrem Umkreis gefunden.")
-else:
-    st.warning("Keine Turnier-Datenbank gefunden. Bitte wenden Sie sich an den Administrator, um den ersten Suchlauf durchzuführen.")
-
-# --- END OF FILE App_V3.py ---
