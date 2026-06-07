@@ -305,7 +305,7 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
 
 def can_still_register(item, vacation_dates, occupied_dates):
     """Prüft, ob ein Turnier noch offen für Anmeldungen ist.
-    Das ist der Fall, wenn man für das Turnier noch nicht gemeldet ist UND mindestens ein Tag im Turnierzeitraum komplett frei ist."""
+    Gleicht bei bereits gepflegten Spieltagen nur noch diese spezifischen Spieltage ab."""
     # 1. Wenn man bereits gemeldet ist, kann man sich nicht 'noch anmelden'
     if item.get('registered', False):
         return False
@@ -315,7 +315,38 @@ def can_still_register(item, vacation_dates, occupied_dates):
     if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
         return True
         
-    # 2. Prüfen, ob mindestens ein Turniertag komplett unberührt (kein Urlaub, kein anderes Turnier) ist
+    # Ermittle alle Tage, an denen tatsächlich etwas stattfindet
+    day_he_val = item.get('day_he', '')
+    day_hd_val = item.get('day_hd', '')
+    day_mx_val = item.get('day_mx', '')
+    
+    if pd.isnull(day_he_val): day_he_val = ""
+    if pd.isnull(day_hd_val): day_hd_val = ""
+    if pd.isnull(day_mx_val): day_mx_val = ""
+    
+    has_any_assignments = bool(day_he_val or day_hd_val or day_mx_val)
+    
+    if has_any_assignments:
+        # Wenn Spieltage gepflegt sind, prüfen wir NUR diese spezifischen Spieltage!
+        active_dates = set()
+        if day_he_val:
+            dt = get_date_for_weekday(day_he_val, start_date_obj, end_date_obj)
+            if dt: active_dates.add(dt)
+        if day_hd_val:
+            dt = get_date_for_weekday(day_hd_val, start_date_obj, end_date_obj)
+            if dt: active_dates.add(dt)
+        if day_mx_val:
+            dt = get_date_for_weekday(day_mx_val, start_date_obj, end_date_obj)
+            if dt: active_dates.add(dt)
+            
+        # Wenn wir aktive Tage gefunden haben, muss mindestens einer davon frei sein
+        if active_dates:
+            for dt in active_dates:
+                if dt not in vacation_dates and dt not in occupied_dates:
+                    return True
+            return False
+            
+    # Fallback (falls noch gar keine Spieltage zugewiesen sind): Gesamten Zeitraum prüfen
     curr_date = start_date_obj
     while curr_date <= end_date_obj:
         if curr_date not in vacation_dates and curr_date not in occupied_dates:
@@ -781,7 +812,7 @@ if os.path.exists(DB_FILE):
                                 st.markdown(
                                     f"""
                                     <details class="status-tag" style="border-left: 3px solid #cbd5e1; color: #475569;">
-                                        <summary><span style="margin-right: 6px;">ℹ️</span>Paralleltermin</summary>
+                                        <summary><span style="margin-right: 6px;">ℹ</span>Paralleltermin</summary>
                                         <div class="status-content" style="color: #475569;">
                                             {details_html}
                                         </div>
