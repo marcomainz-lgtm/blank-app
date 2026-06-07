@@ -556,18 +556,19 @@ if os.path.exists(DB_FILE):
                                     curr_date += datetime.timedelta(days=1)
                                     limit_dt += 1
                             
-                            # 1. Urlaub (Dezentes blaues Banner)
+                            # 1. Urlaub (Dezenter kompakter Tag)
                             if tournament_has_vacation:
                                 st.markdown(
                                     """
                                     <div style="
+                                        display: inline-block;
                                         background-color: #f8fafc;
                                         border-left: 3px solid #3b82f6;
-                                        padding: 6px 10px;
+                                        padding: 6px 12px;
                                         border-radius: 4px;
-                                        margin-bottom: 8px;
+                                        margin-bottom: 12px;
                                         color: #1e40af;
-                                        font-size: 0.95em;
+                                        font-size: 0.9em;
                                         font-weight: bold;
                                     ">
                                         <span style="margin-right: 6px;">🏖️</span>Urlaub
@@ -576,7 +577,7 @@ if os.path.exists(DB_FILE):
                                     unsafe_allow_html=True
                                 )
                             
-                            # 2. Gemeldet (Dezentes grünes Banner)
+                            # 2. Gemeldet (Dezenter kompakter Tag)
                             elif bool(item.get('registered', False)):
                                 date_groups = {}
                                 unassigned_parts = []
@@ -619,10 +620,10 @@ if os.path.exists(DB_FILE):
                                     w_name = weekday_names_real[dt.weekday()]
                                     formatted_dt = dt.strftime("%d.%m.%Y")
                                     disciplines_str = ", ".join(date_groups[dt])
-                                    html_lines.append(f"<div style='margin-top: 3px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>")
+                                    html_lines.append(f"<div style='margin-top: 2px;'>• <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>")
                                     
                                 if unassigned_parts:
-                                    html_lines.append(f"<div style='margin-top: 3px;'>📋 <strong>Noch ohne Tag:</strong> {', '.join(unassigned_parts)}</div>")
+                                    html_lines.append(f"<div style='margin-top: 2px;'>📋 <strong>Noch ohne Tag:</strong> {', '.join(unassigned_parts)}</div>")
                                     
                                 details_html = ""
                                 if html_lines:
@@ -631,30 +632,33 @@ if os.path.exists(DB_FILE):
                                 st.markdown(
                                     f"""
                                     <div style="
+                                        display: inline-block;
                                         background-color: #f8fafc;
                                         border-left: 3px solid #22c55e;
-                                        padding: 6px 10px;
+                                        padding: 6px 12px;
                                         border-radius: 4px;
-                                        margin-bottom: 8px;
+                                        margin-bottom: 12px;
                                         color: #15803d;
-                                        font-size: 0.95em;
-                                        font-weight: bold;
+                                        font-size: 0.9em;
+                                        line-height: 1.4;
                                     ">
-                                        <span style="font-style: normal; margin-right: 6px;">✅</span>Ich bin für dieses Turnier gemeldet!
+                                        <div style="font-weight: bold; margin-bottom: 3px;">
+                                            <span style="margin-right: 6px;">✅</span>Gemeldet
+                                        </div>
                                         {details_html}
                                     </div>
                                     """,
                                     unsafe_allow_html=True
                                 )
                                 
-                            # 3. Paralleltermin (Dezentes graues Banner - informativ und unaufdringlich)
+                            # 3. Paralleltermin (Sehr kompakter, unaufdringlicher grauer Tag)
                             elif tournament_conflicts:
                                 html_lines = []
                                 for conflict in tournament_conflicts:
                                     w_name = weekday_names_real[conflict["date"].weekday()]
                                     formatted_dt = conflict["date"].strftime("%d.%m.%Y")
                                     
-                                    # Formatiert die konfliktierende Disziplin mit den neuen Partner-Fallback-Regeln
+                                    # Formatiert die konfliktierende Disziplin mit den Partner-Fallback-Regeln
                                     formatted_disc = format_discipline_with_partner(
                                         conflict["disc"], 
                                         conflict["partner"], 
@@ -662,23 +666,26 @@ if os.path.exists(DB_FILE):
                                         "#475569"
                                     )
                                     
-                                    html_lines.append(f"<div style='margin-top: 3px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {formatted_disc} in {conflict['city']} ({conflict['title']})</div>")
+                                    html_lines.append(f"<div style='margin-top: 2px;'>• <strong>{w_name}, {formatted_dt}:</strong> {formatted_disc} in {conflict['city']} ({conflict['title']})</div>")
                                     
                                 details_html = "".join(html_lines)
                                 st.markdown(
                                     f"""
                                     <div style="
+                                        display: inline-block;
                                         background-color: #f8fafc;
-                                        border-left: 3px solid #94a3b8;
-                                        padding: 6px 10px;
+                                        border-left: 3px solid #cbd5e1;
+                                        padding: 6px 12px;
                                         border-radius: 4px;
-                                        margin-bottom: 8px;
+                                        margin-bottom: 12px;
                                         color: #475569;
-                                        font-size: 0.95em;
-                                        font-weight: bold;
+                                        font-size: 0.9em;
+                                        line-height: 1.4;
                                     ">
-                                        <span style="margin-right: 6px;">🗓️</span>Paralleltermin
-                                        <div style="font-weight: normal; font-size: 0.95em; margin-top: 4px; color: #475569;">
+                                        <div style="font-weight: bold; margin-bottom: 3px;">
+                                            <span style="margin-right: 6px;">ℹ️</span>Paralleltermin
+                                        </div>
+                                        <div style="font-size: 0.95em; color: #475569;">
                                             {details_html}
                                         </div>
                                     </div>
@@ -710,9 +717,6 @@ if os.path.exists(DB_FILE):
                                 # Dropdowns zur Zuweisung des Zeitplans (Für alle sichtbar)
                                 st.markdown("**Allgemeiner Zeitplan (Für alle Kacheln sichtbar):**")
                                 col_day_he, col_day_hd, col_day_mx = st.columns(3)
-                                start_date_obj = item['Start_Date_Obj']
-                                end_date_obj = item['End_Date_Obj']
-                                day_options = get_tournament_day_options(start_date_obj, end_date_obj)
                                 
                                 with col_day_he:
                                     val_day_he_db = item.get('day_he', '')
@@ -894,10 +898,10 @@ if os.path.exists(DB_FILE):
                                     w_name = weekday_names_real[dt.weekday()]
                                     formatted_dt = dt.strftime("%d.%m.%Y")
                                     disciplines_str = ", ".join(date_groups[dt])
-                                    html_lines.append(f"<div style='margin-top: 3px;'>🗓️ <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>")
+                                    html_lines.append(f"<div style='margin-top: 2px;'>• <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>")
                                     
                                 if unassigned_parts:
-                                    html_lines.append(f"<div style='margin-top: 3px;'>📋 <strong>Noch ohne Tag:</strong> {', '.join(unassigned_parts)}</div>")
+                                    html_lines.append(f"<div style='margin-top: 2px;'>📋 <strong>Noch ohne Tag:</strong> {', '.join(unassigned_parts)}</div>")
                                     
                                 details_html = ""
                                 if html_lines:
@@ -906,16 +910,20 @@ if os.path.exists(DB_FILE):
                                 st.markdown(
                                     f"""
                                     <div style="
+                                        display: inline-block;
                                         background-color: #f8fafc;
                                         border-left: 3px solid #86efac;
-                                        padding: 6px 10px;
+                                        padding: 6px 12px;
                                         border-radius: 4px;
-                                        margin-bottom: 8px;
+                                        margin-bottom: 12px;
                                         color: #166534;
-                                        font-size: 0.95em;
+                                        font-size: 0.9em;
                                         font-weight: bold;
+                                        line-height: 1.4;
                                     ">
-                                        <span style="color: #86efac; font-style: normal; margin-right: 5px;">✅</span>Teilgenommen
+                                        <div style="font-weight: bold; margin-bottom: 3px;">
+                                            <span style="color: #86efac; font-style: normal; margin-right: 5px;">✅</span>Teilgenommen
+                                        </div>
                                         {details_html}
                                     </div>
                                     """,
