@@ -165,32 +165,6 @@ st.markdown(
         font-family: 'Inter', -apple-system, sans-serif;
     }
     
-    /* Titelzeile & Dynamic Emblem */
-    .title-emblem-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 8px;
-    }
-    .emblem-wrapper {
-        flex-shrink: 0;
-    }
-    .emblem-svg {
-        width: 36px;
-        height: 36px;
-        display: block;
-    }
-    .title-wrapper {
-        flex-grow: 1;
-    }
-    .tournament-card-title {
-        font-size: 1.2rem !important;
-        font-weight: 700 !important;
-        color: #0f172a;
-        margin: 0 !important;
-        line-height: 1.3;
-    }
-    
     /* Pill Badges */
     .meta-badges-container {
         display: flex;
@@ -210,6 +184,7 @@ st.markdown(
     .loc-badge { background-color: #f1f5f9; color: #334155; }
     .dist-badge { background-color: #fef3c7; color: #b45309; }
     .org-badge { background-color: #ecfeff; color: #0891b2; }
+    .date-badge { background-color: #f5f3ff; color: #6d28d9; }
     
     /* Sub-Boxes / Discipline Grid */
     .discipline-container {
@@ -221,7 +196,7 @@ st.markdown(
     }
     .discipline-card {
         flex: 1;
-        min-width: 130px;
+        min-width: 140px;
         background-color: #f8fafc;
         border: 1px dashed #cbd5e1;
         border-radius: 8px;
@@ -234,10 +209,28 @@ st.markdown(
         background-color: #f1f5f9;
         transform: translateY(-1px);
     }
+    
+    /* STARKES GRÜN bei Anmeldung mit Kontrast-Optimierung */
     .discipline-card.active-registered {
-        border: 1.5px solid #22c55e;
-        background-color: #f0fdf4;
+        border: 2.5px solid #16a34a !important;
+        background-color: #dcfce7 !important;
+        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2) !important;
     }
+    .discipline-card.active-registered .discipline-title {
+        color: #14532d !important;
+    }
+    .discipline-card.active-registered .discipline-day {
+        color: #15803d !important;
+    }
+    .discipline-card.active-registered .discipline-status {
+        color: #166534 !important;
+        font-weight: bold;
+    }
+    .discipline-card.active-registered .discipline-status a {
+        color: #166534 !important;
+        text-decoration: underline;
+    }
+
     .discipline-icon {
         font-size: 1.15rem;
         margin-bottom: 2px;
@@ -267,6 +260,12 @@ st.markdown(
     .discipline-status.registered {
         color: #15803d;
         font-weight: bold;
+    }
+    
+    /* Globaler Belegungs-Status (Warnung) */
+    .discipline-status.conflict {
+        color: #ca8a04 !important;
+        font-weight: 600;
     }
     </style>
     """,
@@ -493,43 +492,41 @@ def format_discipline_with_partner(disc_type, partner_name, partners_dict, text_
 
 
 # --- V3 GRAPHICAL RENDERING ENGINE ---
-def render_styled_tournament_card(item):
+def render_styled_tournament_card(item, occupied_dates):
     """Erzeugt eine visuell ansprechende Kachel mit dynamic SVGs, Pill-Badges und Sub-Boxes für Disziplinen."""
     city = item.get('city', 'Unbekannt')
     title = item.get('title', 'Turnier')
     dist = item.get('distance')
     dist_str = f"{dist} km" if dist is not None else "Keine Angabe"
-    org_str = item.get('organizer', 'Unbekannt')
     
-    # Dynamic SVG Icons (Outline style)
-    is_cologne = any(kw in city.lower() or kw in title.lower() for kw in ["köln", "cologne"])
-    if is_cologne:
-        # Kölner Dom Outline
-        emblem_svg = """
-        <svg viewBox="0 0 100 100" class="emblem-svg">
-          <path d="M25,85 L25,40 L35,15 L45,40 L45,85 M55,85 L55,40 L65,15 L75,40 L75,85 M45,48 L55,48" stroke="#4f46e5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <path d="M15,85 L85,85 M30,85 L30,72 C30,68 40,68 40,72 L40,85 M60,85 L60,72 C60,68 70,68 70,72 L70,85" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" fill="none"/>
-        </svg>
-        """
+    # 1. Gastgeber-Zusatz "NRW - " filtern
+    org_str = item.get('organizer', 'Unbekannt')
+    if org_str.startswith("NRW - "):
+        org_str = org_str[len("NRW - "):].strip()
+    
+    # 2. Datumsbereich berechnen
+    start_str = item.get('start_date')
+    end_str = item.get('end_date')
+    if start_str and end_str:
+        if start_str == end_str:
+            date_range_str = start_str
+        else:
+            try:
+                s_parts = start_str.split('.')
+                e_parts = end_str.split('.')
+                if len(s_parts) == 3 and len(e_parts) == 3 and s_parts[2] == e_parts[2]:
+                    date_range_str = f"{s_parts[0]}.{s_parts[1]}. - {e_parts[0]}.{e_parts[1]}.{e_parts[2]}"
+                else:
+                    date_range_str = f"{start_str} - {end_str}"
+            except Exception:
+                date_range_str = f"{start_str} - {end_str}"
     else:
-        # Shuttlecock Outline
-        emblem_svg = """
-        <svg viewBox="0 0 100 100" class="emblem-svg">
-          <path d="M40,75 C40,83 60,83 60,75 L57,62 L43,62 Z" stroke="#0ea5e9" stroke-width="2.5" fill="#f0f9ff" stroke-linejoin="round"/>
-          <path d="M30,22 L43,62 M40,20 L47,62 M50,18 L50,62 M60,20 L53,62 M70,22 L57,62" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
-          <path d="M30,22 C40,25 60,25 70,22" stroke="#0ea5e9" stroke-width="2" fill="none"/>
-          <path d="M34,40 C42,42 58,42 66,40" stroke="#0ea5e9" stroke-width="1.5" fill="none"/>
-        </svg>
-        """
+        date_range_str = "Datum unbekannt"
 
     # Erstelle die Wochentag-Werte für die Cards
     day_he = item.get('day_he', '')
     day_hd = item.get('day_hd', '')
     day_mx = item.get('day_mx', '')
-    
-    if not day_he: day_he = "Nicht festgelegt"
-    if not day_hd: day_hd = "Nicht festgelegt"
-    if not day_mx: day_mx = "Nicht festgelegt"
 
     # Status & Registrierungen
     reg_he = bool(item.get('reg_he', False))
@@ -539,13 +536,32 @@ def render_styled_tournament_card(item):
     partner_hd = item.get('partner_hd', '').strip()
     partner_mx = item.get('partner_mx', '').strip()
 
-    # Sub-Boxen für Disziplinen
-    # Einzel
+    start_date_obj = item['Start_Date_Obj']
+    end_date_obj = item['End_Date_Obj']
+
+    # 3. Kachelfilter: Nur anzeigen wenn Tag gesetzt ist ODER angemeldet ist
+    show_he = (bool(day_he) and day_he != "Nicht festgelegt" and day_he != "-- Tag wählen --") or reg_he
+    show_hd = (bool(day_hd) and day_hd != "Nicht festgelegt" and day_hd != "-- Tag wählen --") or reg_hd
+    show_mx = (bool(day_mx) and day_mx != "Nicht festgelegt" and day_mx != "-- Tag wählen --") or reg_mx
+
+    # Sub-Boxen für Disziplinen mit globaler Belegungsprüfung
+    # -- Einzel --
     he_class = "active-registered" if reg_he else ""
+    he_status_class = "registered" if reg_he else ""
     he_status_text = "Gemeldet" if reg_he else "Nicht gemeldet"
+    if not reg_he and show_he:
+        dt_he = get_date_for_weekday(day_he, start_date_obj, end_date_obj)
+        if dt_he and dt_he in occupied_dates:
+            for conflict in occupied_dates[dt_he]:
+                if conflict["title"] != title:
+                    p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
+                    he_status_text = f"⚠️ Belegt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    he_status_class = "conflict"
+                    break
     
-    # Doppel
+    # -- Doppel --
     hd_class = "active-registered" if reg_hd else ""
+    hd_status_class = "registered" if reg_hd else ""
     if reg_hd:
         if partner_hd and partner_hd in PARTNERS_HD:
             hd_status_text = f"Mit <a href='{PARTNERS_HD[partner_hd]}' target='_blank'>{partner_hd}</a>"
@@ -555,9 +571,19 @@ def render_styled_tournament_card(item):
             hd_status_text = "Ohne Partner"
     else:
         hd_status_text = "Nicht gemeldet"
+        if show_hd:
+            dt_hd = get_date_for_weekday(day_hd, start_date_obj, end_date_obj)
+            if dt_hd and dt_hd in occupied_dates:
+                for conflict in occupied_dates[dt_hd]:
+                    if conflict["title"] != title:
+                        p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
+                        hd_status_text = f"⚠️ Belegt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                        hd_status_class = "conflict"
+                        break
 
-    # Mixed
+    # -- Mixed --
     mx_class = "active-registered" if reg_mx else ""
+    mx_status_class = "registered" if reg_mx else ""
     if reg_mx:
         if partner_mx and partner_mx in PARTNERS_MX:
             mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{partner_mx}</a>"
@@ -567,6 +593,15 @@ def render_styled_tournament_card(item):
             mx_status_text = "Ohne Partnerin"
     else:
         mx_status_text = "Nicht gemeldet"
+        if show_mx:
+            dt_mx = get_date_for_weekday(day_mx, start_date_obj, end_date_obj)
+            if dt_mx and dt_mx in occupied_dates:
+                for conflict in occupied_dates[dt_mx]:
+                    if conflict["title"] != title:
+                        p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
+                        mx_status_text = f"⚠️ Belegt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                        mx_status_class = "conflict"
+                        break
 
     # Sub-Boxen & Badges als separate Fragmente
     badges_html = f"""
@@ -574,41 +609,49 @@ def render_styled_tournament_card(item):
         <span class="meta-badge loc-badge">📍 {city}</span>
         <span class="meta-badge dist-badge">🚗 {dist_str}</span>
         <span class="meta-badge org-badge">🛡️ {org_str}</span>
+        <span class="meta-badge date-badge">📅 {date_range_str}</span>
     </div>
     """
     
+    # Nur Kacheln rendern, die eingeblendet werden sollen
+    he_card = f"""
+    <div class="discipline-card {he_class}">
+        <div class="discipline-icon">👤</div>
+        <div class="discipline-title">Einzel</div>
+        <div class="discipline-day">{day_he}</div>
+        <div class="discipline-status {he_status_class}">{he_status_text}</div>
+    </div>
+    """ if show_he else ""
+
+    hd_card = f"""
+    <div class="discipline-card {hd_class}">
+        <div class="discipline-icon">👥</div>
+        <div class="discipline-title">Doppel</div>
+        <div class="discipline-day">{day_hd}</div>
+        <div class="discipline-status {hd_status_class}">{hd_status_text}</div>
+    </div>
+    """ if show_hd else ""
+
+    mx_card = f"""
+    <div class="discipline-card {mx_class}">
+        <div class="discipline-icon">👥</div>
+        <div class="discipline-title">Mixed</div>
+        <div class="discipline-day">{day_mx}</div>
+        <div class="discipline-status {mx_status_class}">{mx_status_text}</div>
+    </div>
+    """ if show_mx else ""
+
     disciplines_html = f"""
     <div class="discipline-container">
-        <div class="discipline-card {he_class}">
-            <div class="discipline-icon">👤</div>
-            <div class="discipline-title">Einzel</div>
-            <div class="discipline-day">{day_he}</div>
-            <div class="discipline-status {'registered' if reg_he else ''}">{he_status_text}</div>
-        </div>
-        <div class="discipline-card {hd_class}">
-            <div class="discipline-icon">👥</div>
-            <div class="discipline-title">Doppel</div>
-            <div class="discipline-day">{day_hd}</div>
-            <div class="discipline-status {'registered' if reg_hd else ''}">{hd_status_text}</div>
-        </div>
-        <div class="discipline-card {mx_class}">
-            <div class="discipline-icon">👫</div>
-            <div class="discipline-title">Mixed</div>
-            <div class="discipline-day">{day_mx}</div>
-            <div class="discipline-status {'registered' if reg_mx else ''}">{mx_status_text}</div>
-        </div>
+        {he_card}
+        {hd_card}
+        {mx_card}
     </div>
-    """
+    """ if (show_he or show_hd or show_mx) else ""
 
     # HTML Output generieren
     html_out = f"""
     <div class="card-inner-container">
-        <div class="title-emblem-row">
-            <div class="emblem-wrapper">{emblem_svg}</div>
-            <div class="title-wrapper">
-                <h3 class="tournament-card-title">{title}</h3>
-            </div>
-        </div>
         {badges_html}
         {disciplines_html}
     </div>
@@ -973,8 +1016,11 @@ if os.path.exists(DB_FILE):
                                 """
                                 st.markdown(clean_html(tag_html), unsafe_allow_html=True)
 
-                            # RENDERE DIE MODERNE KACHEL FÜR DAS TURNIER (UPCOMING)
-                            render_styled_tournament_card(item)
+                            # NATIVE ÜBERSCHRIFT MIT 🏸-EMOJI WIE GEWÜNSCHT (ZURÜCKGEWANDELT)
+                            st.markdown(f"### 🏸 {item['title']}")
+
+                            # RENDERE DIE SPEZIELLE TURNIERKACHEL (DYNAMISCH)
+                            render_styled_tournament_card(item, occupied_dates)
                             
                             # Admin-Ansicht
                             if IS_ADMIN:
@@ -1196,8 +1242,11 @@ if os.path.exists(DB_FILE):
                                     """
                                     st.markdown(clean_html(tag_html), unsafe_allow_html=True)
 
-                            # RENDERE DIE MODERNE KACHEL FÜR DAS TURNIER (PAST)
-                            render_styled_tournament_card(item)
+                            # NATIVE ÜBERSCHRIFT BEENDET (ZURÜCKGEWANDELT)
+                            st.markdown(f"### 🏸 {item['title']} *(Beendet)*")
+
+                            # RENDERE DIE SPEZIELLE TURNIERKACHEL (DYNAMISCH)
+                            render_styled_tournament_card(item, occupied_dates)
                             
                             # Admin-Ansicht
                             if IS_ADMIN:

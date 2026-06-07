@@ -1,3 +1,5 @@
+# --- START OF FILE tracker.py ---
+
 import os
 import json
 import re
@@ -203,7 +205,7 @@ def scrape_tournaments(s):
                     "start_date": start_date,
                     "end_date": end_date,
                     "tags": tags,
-                    # Frisch gefundene Turniere mit sauberen Default-Datenfeldern initialisieren
+                    # Keine automatischen Disziplintage vorausfüllen - wir belassen diese leer
                     "registered": False,
                     "reg_he": False,
                     "reg_hd": False,
@@ -317,7 +319,7 @@ def check_for_updates_generator():
             new_tournaments.append(t)
             known_tournaments[t_id] = t
         else:
-            # Sicherheits-Sync (Meldungen, Spieltage und Partner beibehalten)
+            # Sicherheits-Sync (Meldungen, Spieltage und Partner werden sicher beibehalten)
             old_t = known_tournaments[t_id]
             is_registered = old_t.get('registered', False)
             reg_he = old_t.get('reg_he', False)
@@ -359,3 +361,5 @@ def check_for_updates_generator():
 
 if __name__ == "__main__":
     check_for_updates()
+
+# --- END OF FILE tracker.py ---
