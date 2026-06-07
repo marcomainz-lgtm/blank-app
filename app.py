@@ -527,71 +527,60 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
 
 
 def can_still_register(item, vacation_dates, occupied_dates):
-    """Prüft, ob ein Turnier noch offen für Anmeldungen ist.
-    Gleicht bei bereits gepflegten Spieltagen nur noch diese spezifischen Spieltage ab."""
-    if item.get('registered', False):
-        return False
-        
+    """Prüft, ob ein Turnier noch offen für Anmeldungen in mindestens einer angebotenen
+
+    Disziplin ist, für die der Nutzer noch nicht gemeldet ist und an deren Spieltag er Zeit hat.
+    """
     start_date_obj = item['Start_Date_Obj']
     end_date_obj = item['End_Date_Obj']
     if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
         return True
-        
-    day_he_val = item.get('day_he', '')
-    day_hd_val = item.get('day_hd', '')
-    day_mx_val = item.get('day_mx', '')
-    
-    if pd.isnull(day_he_val): day_he_val = ""
-    if pd.isnull(day_hd_val): day_hd_val = ""
-    if pd.isnull(day_mx_val): day_mx_val = ""
-    
-    has_any_assignments = bool(day_he_val or day_hd_val or day_mx_val)
-    
-    if has_any_assignments:
-        active_dates = set()
-        if day_he_val and day_he_val != "Disziplin findet nicht statt":
-            dt = get_date_for_weekday(day_he_val, start_date_obj, end_date_obj)
-            if dt: active_dates.add(dt)
-        if day_hd_val and day_hd_val != "Disziplin findet nicht statt":
-            dt = get_date_for_weekday(day_hd_val, start_date_obj, end_date_obj)
-            if dt: active_dates.add(dt)
-        if day_mx_val and day_mx_val != "Disziplin findet nicht statt":
-            dt = get_date_for_weekday(day_mx_val, start_date_obj, end_date_obj)
-            if dt: active_dates.add(dt)
+
+    # Wir prüfen alle drei Disziplinen
+    disciplines = [
+        ('he', item.get('day_he', ''), bool(item.get('reg_he', False))),
+        ('hd', item.get('day_hd', ''), bool(item.get('reg_hd', False))),
+        ('mx', item.get('day_mx', ''), bool(item.get('reg_mx', False))),
+    ]
+
+    for key, day_val, is_reg in disciplines:
+        # 1. Wenn die Disziplin gar nicht stattfindet, überspringen
+        if day_val == "Disziplin findet nicht statt":
+            continue
             
-        if active_dates:
-            for dt in active_dates:
-                if dt not in vacation_dates and dt not in occupied_dates:
-                    return True
-            return False
+        # 2. Wenn wir für diese Disziplin bereits gemeldet sind, ist diese spezifische Disziplin nicht mehr "offen"
+        if is_reg:
+            continue
             
-    curr_date = start_date_obj
-    while curr_date <= end_date_obj:
-        if curr_date not in vacation_dates and curr_date not in occupied_dates:
+        # 3. Wenn noch kein Wochentag festgelegt ist (TBA), gehen wir davon aus, dass eine Anmeldung theoretisch möglich ist
+        if not day_val or day_val in ["-- Tag wählen --", "TBA", "Keine Angabe"]:
             return True
-        curr_date += datetime.timedelta(days=1)
-        
+            
+        # 4. Wenn ein Spieltag feststeht, muss dieser Tag frei von Urlaub und anderen Turnieren sein
+        dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
+        if dt:
+            # Ist an diesem Tag Urlaub?
+            if dt in vacation_dates:
+                continue
+                
+            # Sind wir an diesem Tag bereits bei einem ANDEREN Turnier gemeldet?
+            has_other_tournament_conflict = False
+            if dt in occupied_dates:
+                for conflict in occupied_dates[dt]:
+                    if conflict["title"] != item["title"]:
+                        has_other_tournament_conflict = True
+                        break
+            
+            if has_other_tournament_conflict:
+                continue
+                
+            # Wenn der Tag frei ist (kein Urlaub, kein anderes Turnier), können wir uns hier anmelden!
+            return True
+        else:
+            # Fallback falls Datumsermittlung scheitert, aber Tag existiert
+            return True
+
     return False
-
-
-def format_discipline_with_partner(disc_type, partner_name, partners_dict, text_color="#15803d"):
-    """Formatiert eine Disziplin und fügt dynamisch Partner-Links oder die Information 'noch ohne Partner' hinzu."""
-    p_name = partner_name.strip() if partner_name else ""
-    if p_name == "-- Kein Partner --":
-        p_name = ""
-        
-    if not p_name:
-        if disc_type in ["Herrendoppel", "Doppel"]:
-            return "Herrendoppel noch ohne Partner"
-        elif disc_type == "Mixed":
-            return "Mixed noch ohne Partnerin"
-        else:
-            return disc_type
-    else:
-        if p_name in partners_dict:
-            return f"{disc_type} mit <a href='{partners_dict[p_name]}' target='_blank' style='color: {text_color}; text-decoration: underline; font-weight: bold;'>{p_name}</a>"
-        else:
-            return f"{disc_type} mit {p_name}"
 
 
 # --- V3 GRAPHICAL RENDERING ENGINE ---
@@ -719,7 +708,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                 he_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
                 he_status_class = "conflict"
                 he_class = "has-conflict"
-        
+    
     # -- Doppel --
     hd_class = "active-registered" if reg_hd else ""
     hd_status_class = "registered" if reg_hd else ""
