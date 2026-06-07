@@ -791,6 +791,11 @@ if os.path.exists(DB_FILE):
                                     with st.expander("📝 Ausschreibungstext von turnier.de anzeigen", expanded=False):
                                         st.write(desc_text)
                                 
+                                # day_options für anstehende Turniere sauber initialisieren (Behebt NameError)
+                                start_date_obj = item['Start_Date_Obj']
+                                end_date_obj = item['End_Date_Obj']
+                                day_options = get_tournament_day_options(start_date_obj, end_date_obj)
+
                                 # Dropdowns zur Zuweisung des Zeitplans (Für alle sichtbar)
                                 st.markdown("**Allgemeiner Zeitplan (Für alle Kacheln sichtbar):**")
                                 col_day_he, col_day_hd, col_day_mx = st.columns(3)
