@@ -249,9 +249,6 @@ if IS_ADMIN:
         st.toast("Datenbank erfolgreich aktualisiert!")
         st.rerun()
 
-# --- MELDUNGSFILTER (TOGGLE) ---
-only_registered = st.toggle("Nur gemeldete Turniere anzeigen", value=False)
-
 
 # --- DYNAMISCHE HILFSFUNKTIONEN FÜR DATUM UND WOCHENTAGE ---
 def get_tournament_day_options(start_date_obj, end_date_obj):
@@ -300,6 +297,43 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
     except Exception:
         pass
     return None
+
+
+def is_tournament_blocked(item, vacation_dates, occupied_dates):
+    """Prüft, ob ein Turnier durch Urlaub blockiert ist oder an ALLEN Tagen durch andere Turniere belegt ist."""
+    start_date_obj = item['Start_Date_Obj']
+    end_date_obj = item['End_Date_Obj']
+    if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
+        return False
+        
+    # 1. Überlappung mit Urlaub prüfen
+    curr_date = start_date_obj
+    while curr_date <= end_date_obj:
+        if curr_date in vacation_dates:
+            return True
+        curr_date += datetime.timedelta(days=1)
+        
+    # 2. Überprüfen, ob alle Turniertage vollständig belegt sind (durch andere Turniere)
+    curr_date = start_date_obj
+    total_days = 0
+    occupied_days = 0
+    while curr_date <= end_date_obj:
+        total_days += 1
+        if curr_date in occupied_dates:
+            # Prüfen, ob eine Belegung für ein ANDERES Turnier vorliegt
+            has_other_conflict = False
+            for conflict in occupied_dates[curr_date]:
+                if conflict["title"] != item["title"]:
+                    has_other_conflict = True
+                    break
+            if has_other_conflict:
+                occupied_days += 1
+        curr_date += datetime.timedelta(days=1)
+        
+    if total_days > 0 and occupied_days == total_days:
+        return True
+        
+    return False
 
 
 def format_discipline_with_partner(disc_type, partner_name, partners_dict, text_color="#15803d"):
@@ -531,10 +565,25 @@ if os.path.exists(DB_FILE):
         df_past = df[df['End_Date_Obj'] < today].copy()
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
-        # Filter anwenden, wenn der Toggle aktiv ist
+
+        # --- MELDUNGS- UND VERFÜGBARKEITSFILTER ---
+        st.write("")
+        st.markdown("### 🔍 Filter")
+        col_filter1, col_filter2 = st.columns(2)
+        with col_filter1:
+            only_registered = st.toggle("🎯 Nur Turniere anzeigen, bei denen ich gemeldet bin", value=False)
+        with col_filter2:
+            only_available = st.toggle("🟢 Nur verfügbare Turniere anzeigen (ohne Urlaubs- oder Terminkonflikte)", value=False)
+
+        # Filter auf Datensätze anwenden
         if only_registered:
             df_upcoming = df_upcoming[df_upcoming['registered'] == True]
             df_past = df_past[df_past['registered'] == True]
+
+        if only_available:
+            df_upcoming = df_upcoming[df_upcoming.apply(lambda row: not is_tournament_blocked(row, vacation_dates, occupied_dates), axis=1)]
+            df_past = df_past[df_past.apply(lambda row: not is_tournament_blocked(row, vacation_dates, occupied_dates), axis=1)]
+
 
         # Deutsche Monatsnamen-Mapping
         month_names = {
