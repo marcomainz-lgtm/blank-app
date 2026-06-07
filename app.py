@@ -362,28 +362,31 @@ st.markdown(
         letter-spacing: 1px;
     }
 
-    /* SMARTPHONE RESPONSIVE CAROUSEL SLIDER - HALBIERTE GRÖSSE */
+    /* SMARTPHONE RESPONSIVE CAROUSEL SLIDER - EXTREM KOMPAKT */
     @media (max-width: 768px) {
+        .discipline-container {
+            gap: 8px !important;
+        }
         .discipline-card {
-            flex: 0 0 45% !important; /* Breite halbiert */
-            min-width: 120px !important;
-            min-height: 110px !important; /* Höhe halbiert */
-            padding: 8px !important;
+            flex: 0 0 29% !important; /* Auf 29% verengt für maximale Übersicht */
+            min-width: 85px !important;
+            min-height: 100px !important;
+            padding: 6px 4px !important;
         }
         .discipline-icon {
-            font-size: 0.95rem !important;
+            font-size: 0.85rem !important;
         }
         .discipline-title {
-            font-size: 0.725rem !important;
+            font-size: 0.65rem !important;
         }
         .discipline-day {
-            font-size: 0.65rem !important;
-            padding: 1px 4px !important;
-            margin-bottom: 4px !important;
+            font-size: 0.6rem !important;
+            padding: 1px 3px !important;
+            margin-bottom: 2px !important;
         }
         .discipline-status {
-            font-size: 0.625rem !important;
-            line-height: 1.2 !important;
+            font-size: 0.55rem !important;
+            line-height: 1.1 !important;
         }
     }
     </style>
