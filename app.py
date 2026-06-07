@@ -197,7 +197,7 @@ st.markdown(
     }
 
     .discipline-card {
-        flex: 0 0 calc(33.333% - 8px);
+        flex: 0 1 calc(33.333% - 8px);
         scroll-snap-align: start;
         min-width: 140px;
         background-color: #f8fafc;
@@ -362,11 +362,28 @@ st.markdown(
         letter-spacing: 1px;
     }
 
-    /* SMARTPHONE RESPONSIVE CAROUSEL SLIDER (max. 3 Kacheln) */
+    /* SMARTPHONE RESPONSIVE CAROUSEL SLIDER - HALBIERTE GRÖSSE */
     @media (max-width: 768px) {
         .discipline-card {
-            flex: 0 0 82% !important; /* Nimmt 82% Platz ein, 18% lugen für die nächste Kachel hervor */
-            min-width: 250px !important;
+            flex: 0 0 45% !important; /* Breite halbiert */
+            min-width: 120px !important;
+            min-height: 110px !important; /* Höhe halbiert */
+            padding: 8px !important;
+        }
+        .discipline-icon {
+            font-size: 0.95rem !important;
+        }
+        .discipline-title {
+            font-size: 0.725rem !important;
+        }
+        .discipline-day {
+            font-size: 0.65rem !important;
+            padding: 1px 4px !important;
+            margin-bottom: 4px !important;
+        }
+        .discipline-status {
+            font-size: 0.625rem !important;
+            line-height: 1.2 !important;
         }
     }
     </style>
