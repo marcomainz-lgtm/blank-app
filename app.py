@@ -308,16 +308,17 @@ st.markdown(
         letter-spacing: 0.3px;
     }
     
-    /* Datum an erster Stelle (Badge) */
+    /* Datum an erster Stelle (Badge) - ZEILENUMBRUCH ERZWUNGEN */
     .discipline-day {
         font-size: 0.75rem;
         color: #475569;
         font-weight: 700;
         margin-bottom: 6px;
         background-color: #e2e8f0;
-        padding: 2px 6px;
+        padding: 4px 8px;
         border-radius: 4px;
         display: inline-block;
+        line-height: 1.25;
     }
     
     /* Neutraler TBA-Style für unklare Spieltage */
@@ -360,8 +361,9 @@ st.markdown(
         }
         .discipline-day {
             font-size: 0.6rem !important;
-            padding: 1px 3px !important;
+            padding: 2px 4px !important;
             margin-bottom: 2px !important;
+            line-height: 1.15 !important;
         }
         .discipline-status {
             font-size: 0.55rem !important;
@@ -645,7 +647,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     has_hd = (day_hd != "Disziplin findet nicht statt")
     has_mx = (day_mx != "Disziplin findet nicht statt")
 
-    # Helper zur Formatierung des Kachel-Datum-Badges (erster Platz in Kachel)
+    # Helper zur Formatierung des Kachel-Datum-Badges (erster Platz in Kachel mit Zeilenumbruch!)
     def format_day_badge(day_val, s_obj, e_obj):
         if not day_val or day_val == "-- Tag wählen --" or day_val == "TBA":
             return "TBA"
@@ -660,7 +662,13 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                 4: "Freitag", 5: "Samstag", 6: "Sonntag"
             }
             w_name = weekday_names[dt.weekday()]
-            return f"{w_name}, {dt.strftime('%d.%m.')}"
+            # Zeilenumbruch anstelle des Kommas für einheitliche Kachelhöhen
+            return f"{w_name}<br>{dt.strftime('%d.%m.')}"
+        
+        # Fallback für manuelle Altdaten aus der Datenbank
+        if isinstance(day_val, str) and "," in day_val:
+            parts = day_val.split(",")
+            return f"{parts[0].strip()}<br>{parts[1].strip()}"
         
         return day_val
 
@@ -893,8 +901,8 @@ if os.path.exists(DB_FILE):
         vacations_data = load_vacations()
         for v in vacations_data.values():
             try:
-                v_start_dt = datetime.datetime.strptime(v['start_date'], "%d.%m.%Y").date()
-                v_end_dt = datetime.datetime.strptime(v['end_date'], "%d.%m.%Y").date()
+                v_start_dt = datetime.strptime(v['start_date'], "%d.%m.%Y").date()
+                v_end_dt = datetime.strptime(v['end_date'], "%d.%m.%Y").date()
                 
                 curr_date = v_start_dt
                 limit_dt = 0
