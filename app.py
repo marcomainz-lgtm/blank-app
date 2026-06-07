@@ -488,7 +488,7 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
     try:
         current_date = start_date_obj
         limit = 0
-        while current_date <= end_date_obj && limit < 20:
+        while current_date <= end_date_obj and limit < 20:
             day_name = weekday_names[current_date.weekday()]
             formatted_dt_short = current_date.strftime("%d.%m.")
             current_day_str = f"{day_name}, {formatted_dt_short}"
