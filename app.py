@@ -83,12 +83,69 @@ PARTNERS_MX = {
     "Vanessa Joppien": "https://dbv.turnier.de/player-profile/76DA93E6-43E2-45CE-B28F-FDA12433FDBA"
 }
 
-# Custom CSS to hide the password visibility button (the eye icon)
+# Custom CSS zur Steuerung der Benutzeroberfläche und der ausklappbaren Tags
 st.markdown(
     """
     <style>
+    /* Passwort-Sichtbarkeits-Icon verbergen */
     button[data-testid="stTextInput-VisibilityButton"] {
         display: none !important;
+    }
+    
+    /* Gemeinsame Basis für Static- und Collapsible-Tags */
+    .status-tag-static, details.status-tag {
+        display: inline-block;
+        background-color: #f8fafc;
+        border-radius: 4px;
+        margin-bottom: 12px;
+        font-size: 0.9em;
+        line-height: 1.4;
+        user-select: none;
+    }
+    
+    /* Statisches Tag */
+    .status-tag-static {
+        padding: 6px 12px;
+        font-weight: bold;
+    }
+    
+    /* Ausklappbares Tag */
+    details.status-tag {
+        cursor: pointer;
+        transition: background-color 0.15s ease-in-out;
+    }
+    details.status-tag:hover {
+        background-color: #f1f5f9;
+    }
+    details.status-tag summary {
+        list-style: none;
+        font-weight: bold;
+        outline: none;
+        padding: 6px 12px;
+        display: flex;
+        align-items: center;
+    }
+    details.status-tag summary::-webkit-details-marker {
+        display: none;
+    }
+    
+    /* Pfeil-Indikator */
+    details.status-tag summary::after {
+        content: "▾";
+        font-size: 0.85em;
+        opacity: 0.6;
+        margin-left: 6px;
+        display: inline-block;
+    }
+    details.status-tag[open] summary::after {
+        content: "▴";
+    }
+    
+    /* Inhalt des ausgeklappten Tags */
+    details.status-tag .status-content {
+        font-size: 0.95em;
+        padding: 0 12px 10px 12px;
+        cursor: default;
     }
     </style>
     """,
@@ -556,28 +613,18 @@ if os.path.exists(DB_FILE):
                                     curr_date += datetime.timedelta(days=1)
                                     limit_dt += 1
                             
-                            # 1. Urlaub (Dezenter kompakter Tag)
+                            # 1. Urlaub (Dezenter kompakter statischer Tag)
                             if tournament_has_vacation:
                                 st.markdown(
                                     """
-                                    <div style="
-                                        display: inline-block;
-                                        background-color: #f8fafc;
-                                        border-left: 3px solid #3b82f6;
-                                        padding: 6px 12px;
-                                        border-radius: 4px;
-                                        margin-bottom: 12px;
-                                        color: #1e40af;
-                                        font-size: 0.9em;
-                                        font-weight: bold;
-                                    ">
+                                    <div class="status-tag-static" style="border-left: 3px solid #3b82f6; color: #1e40af;">
                                         <span style="margin-right: 6px;">🏖️</span>Urlaub
                                     </div>
                                     """,
                                     unsafe_allow_html=True
                                 )
                             
-                            # 2. Gemeldet (Dezenter kompakter Tag)
+                            # 2. Gemeldet (Ausklappbarer kompakter Tag)
                             elif bool(item.get('registered', False)):
                                 date_groups = {}
                                 unassigned_parts = []
@@ -629,29 +676,29 @@ if os.path.exists(DB_FILE):
                                 if html_lines:
                                     details_html = f"<div style='font-weight: normal; font-size: 0.95em; margin-top: 4px; color: #166534;'>{ ''.join(html_lines) }</div>"
 
-                                st.markdown(
-                                    f"""
-                                    <div style="
-                                        display: inline-block;
-                                        background-color: #f8fafc;
-                                        border-left: 3px solid #22c55e;
-                                        padding: 6px 12px;
-                                        border-radius: 4px;
-                                        margin-bottom: 12px;
-                                        color: #15803d;
-                                        font-size: 0.9em;
-                                        line-height: 1.4;
-                                    ">
-                                        <div style="font-weight: bold; margin-bottom: 3px;">
+                                if details_html:
+                                    st.markdown(
+                                        f"""
+                                        <details class="status-tag" style="border-left: 3px solid #22c55e; color: #15803d;">
+                                            <summary><span style="margin-right: 6px;">✅</span>Gemeldet</summary>
+                                            <div class="status-content" style="color: #166534;">
+                                                {details_html}
+                                            </div>
+                                        </details>
+                                        """,
+                                        unsafe_allow_html=True
+                                    )
+                                else:
+                                    st.markdown(
+                                        """
+                                        <div class="status-tag-static" style="border-left: 3px solid #22c55e; color: #15803d;">
                                             <span style="margin-right: 6px;">✅</span>Gemeldet
                                         </div>
-                                        {details_html}
-                                    </div>
-                                    """,
-                                    unsafe_allow_html=True
-                                )
+                                        """,
+                                        unsafe_allow_html=True
+                                    )
                                 
-                            # 3. Paralleltermin (Sehr kompakter, unaufdringlicher grauer Tag)
+                            # 3. Paralleltermin (Ausklappbarer kompakter Tag)
                             elif tournament_conflicts:
                                 html_lines = []
                                 for conflict in tournament_conflicts:
@@ -671,24 +718,12 @@ if os.path.exists(DB_FILE):
                                 details_html = "".join(html_lines)
                                 st.markdown(
                                     f"""
-                                    <div style="
-                                        display: inline-block;
-                                        background-color: #f8fafc;
-                                        border-left: 3px solid #cbd5e1;
-                                        padding: 6px 12px;
-                                        border-radius: 4px;
-                                        margin-bottom: 12px;
-                                        color: #475569;
-                                        font-size: 0.9em;
-                                        line-height: 1.4;
-                                    ">
-                                        <div style="font-weight: bold; margin-bottom: 3px;">
-                                            <span style="margin-right: 6px;">ℹ️</span>Paralleltermin
-                                        </div>
-                                        <div style="font-size: 0.95em; color: #475569;">
+                                    <details class="status-tag" style="border-left: 3px solid #cbd5e1; color: #475569;">
+                                        <summary><span style="margin-right: 6px;">ℹ️</span>Paralleltermin</summary>
+                                        <div class="status-content" style="color: #475569;">
                                             {details_html}
                                         </div>
-                                    </div>
+                                    </details>
                                     """,
                                     unsafe_allow_html=True
                                 )
@@ -907,28 +942,27 @@ if os.path.exists(DB_FILE):
                                 if html_lines:
                                     details_html = f"<div style='font-weight: normal; font-size: 0.95em; margin-top: 4px; color: #166534;'>{ ''.join(html_lines) }</div>"
 
-                                st.markdown(
-                                    f"""
-                                    <div style="
-                                        display: inline-block;
-                                        background-color: #f8fafc;
-                                        border-left: 3px solid #86efac;
-                                        padding: 6px 12px;
-                                        border-radius: 4px;
-                                        margin-bottom: 12px;
-                                        color: #166534;
-                                        font-size: 0.9em;
-                                        font-weight: bold;
-                                        line-height: 1.4;
-                                    ">
-                                        <div style="font-weight: bold; margin-bottom: 3px;">
+                                if details_html:
+                                    st.markdown(
+                                        f"""
+                                        <details class="status-tag" style="border-left: 3px solid #86efac; color: #166534;">
+                                            <summary><span style="color: #86efac; font-style: normal; margin-right: 5px;">✅</span>Teilgenommen</summary>
+                                            <div class="status-content" style="color: #166534;">
+                                                {details_html}
+                                            </div>
+                                        </details>
+                                        """,
+                                        unsafe_allow_html=True
+                                    )
+                                else:
+                                    st.markdown(
+                                        """
+                                        <div class="status-tag-static" style="border-left: 3px solid #86efac; color: #166534;">
                                             <span style="color: #86efac; font-style: normal; margin-right: 5px;">✅</span>Teilgenommen
                                         </div>
-                                        {details_html}
-                                    </div>
-                                    """,
-                                    unsafe_allow_html=True
-                                )
+                                        """,
+                                        unsafe_allow_html=True
+                                    )
 
                             st.markdown(f"### {item['title']} *(Beendet)*")
                             
