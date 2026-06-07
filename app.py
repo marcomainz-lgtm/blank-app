@@ -288,7 +288,7 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
     try:
         current_date = start_date_obj
         limit = 0
-        while current_date <= end_date_obj and limit < 10:
+        while current_date <= end_date_obj && limit < 10:
             day_name = weekday_names[current_date.weekday()]
             if day_name == day_selection:
                 return current_date
@@ -299,39 +299,24 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
     return None
 
 
-def is_tournament_blocked(item, vacation_dates, occupied_dates):
-    """Prüft, ob ein Turnier durch Urlaub blockiert ist oder an ALLEN Tagen durch andere Turniere belegt ist."""
+def can_still_register(item, vacation_dates, occupied_dates):
+    """Prüft, ob ein Turnier noch offen für Anmeldungen ist.
+    Das ist der Fall, wenn man für das Turnier noch nicht gemeldet ist UND mindestens ein Tag im Turnierzeitraum komplett frei ist."""
+    # 1. Wenn man bereits gemeldet ist, kann man sich nicht 'noch anmelden'
+    if item.get('registered', False):
+        return False
+        
     start_date_obj = item['Start_Date_Obj']
     end_date_obj = item['End_Date_Obj']
     if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
-        return False
+        return True
         
-    # 1. Überlappung mit Urlaub prüfen
+    # 2. Prüfen, ob mindestens ein Turniertag komplett unberührt (kein Urlaub, kein anderes Turnier) ist
     curr_date = start_date_obj
     while curr_date <= end_date_obj:
-        if curr_date in vacation_dates:
+        if curr_date not in vacation_dates and curr_date not in occupied_dates:
             return True
         curr_date += datetime.timedelta(days=1)
-        
-    # 2. Überprüfen, ob alle Turniertage vollständig belegt sind (durch andere Turniere)
-    curr_date = start_date_obj
-    total_days = 0
-    occupied_days = 0
-    while curr_date <= end_date_obj:
-        total_days += 1
-        if curr_date in occupied_dates:
-            # Prüfen, ob eine Belegung für ein ANDERES Turnier vorliegt
-            has_other_conflict = False
-            for conflict in occupied_dates[curr_date]:
-                if conflict["title"] != item["title"]:
-                    has_other_conflict = True
-                    break
-            if has_other_conflict:
-                occupied_days += 1
-        curr_date += datetime.timedelta(days=1)
-        
-    if total_days > 0 and occupied_days == total_days:
-        return True
         
     return False
 
@@ -462,8 +447,8 @@ if os.path.exists(DB_FILE):
         vac_data = load_vacations()
         for v in vac_data.values():
             try:
-                v_start_dt = datetime.datetime.strptime(v['start_date'], "%d.%m.%Y").date()
-                v_end_dt = datetime.datetime.strptime(v['end_date'], "%d.%m.%Y").date()
+                v_start_dt = datetime.strptime(v['start_date'], "%d.%m.%Y").date()
+                v_end_dt = datetime.strptime(v['end_date'], "%d.%m.%Y").date()
                 
                 curr_date = v_start_dt
                 limit_dt = 0
@@ -570,18 +555,27 @@ if os.path.exists(DB_FILE):
         st.write("")
         st.markdown("### Filter")
         
-        # Vertikal untereinander gerendert
-        only_registered = st.toggle("Angemeldete Turniere", value=False)
-        only_available = st.toggle("Verfügbare Turniere", value=False)
+        # Vertikal untereinander gerendert mit präzisem neuen Wording
+        only_registered = st.toggle("Turniere, an denen ich angemeldet bin", value=False)
+        only_available = st.toggle("Turniere, an denen ich mich noch anmelden kann", value=False)
 
-        # Filter auf Datensätze anwenden
-        if only_registered:
-            df_upcoming = df_upcoming[df_upcoming['registered'] == True]
-            df_past = df_past[df_past['registered'] == True]
+        # Filter logisch und additiv anwenden (Union-Logik, wenn beide aktiv sind)
+        if only_registered or only_available:
+            def row_passes_filter(row):
+                is_reg = bool(row.get('registered', False))
+                is_avail = can_still_register(row, vacation_dates, occupied_dates)
+                
+                # Wenn beide aktiv sind: Zeige Turniere, die angemeldet ODER noch anmeldebar sind
+                if only_registered and only_available:
+                    return is_reg or is_avail
+                elif only_registered:
+                    return is_reg
+                elif only_available:
+                    return is_avail
+                return True
 
-        if only_available:
-            df_upcoming = df_upcoming[df_upcoming.apply(lambda row: not is_tournament_blocked(row, vacation_dates, occupied_dates), axis=1)]
-            df_past = df_past[df_past.apply(lambda row: not is_tournament_blocked(row, vacation_dates, occupied_dates), axis=1)]
+            df_upcoming = df_upcoming[df_upcoming.apply(row_passes_filter, axis=1)]
+            df_past = df_past[df_past.apply(row_passes_filter, axis=1)]
 
 
         # Deutsche Monatsnamen-Mapping
