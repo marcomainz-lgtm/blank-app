@@ -568,12 +568,11 @@ if os.path.exists(DB_FILE):
 
         # --- MELDUNGS- UND VERFÜGBARKEITSFILTER ---
         st.write("")
-        st.markdown("### 🔍 Filter")
-        col_filter1, col_filter2 = st.columns(2)
-        with col_filter1:
-            only_registered = st.toggle("🎯 Nur Turniere anzeigen, bei denen ich gemeldet bin", value=False)
-        with col_filter2:
-            only_available = st.toggle("🟢 Nur verfügbare Turniere anzeigen (ohne Urlaubs- oder Terminkonflikte)", value=False)
+        st.markdown("### Filter")
+        
+        # Vertikal untereinander gerendert
+        only_registered = st.toggle("Angemeldete Turniere", value=False)
+        only_available = st.toggle("Verfügbare Turniere", value=False)
 
         # Filter auf Datensätze anwenden
         if only_registered:
