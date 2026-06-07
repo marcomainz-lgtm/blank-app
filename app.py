@@ -174,13 +174,14 @@ st.markdown(
     .org-badge { background-color: #ecfeff; color: #0891b2; }
     .date-badge { background-color: #f5f3ff; color: #6d28d9; }
     
-    /* Sub-Boxes / Discipline Grid - EINHEITLICHE DRITTEL-AUFTEILUNG */
+    /* Sub-Boxes / Discipline Grid - EINHEITLICHE DRITTEL-AUFTEILUNG & GLEICHE HÖHE */
     .discipline-container {
         display: flex;
         gap: 12px;
         margin-top: 10px;
         margin-bottom: 10px;
         flex-wrap: wrap;
+        align-items: stretch;
     }
     .discipline-card {
         flex: 0 1 calc(33.333% - 8px);
@@ -191,6 +192,10 @@ st.markdown(
         padding: 12px;
         text-align: center;
         box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 140px;
         transition: all 0.2s ease-in-out;
     }
     .discipline-card:hover {
@@ -244,6 +249,14 @@ st.markdown(
         border-radius: 4px;
         display: inline-block;
     }
+    
+    /* Neutraler TBA-Style für unklare Spieltage */
+    .discipline-day.tba-day {
+        background-color: #f1f5f9 !important;
+        color: #94a3b8 !important;
+        border: 1px dashed #cbd5e1;
+    }
+
     .discipline-status {
         font-size: 0.75rem;
         color: #94a3b8;
@@ -258,13 +271,13 @@ st.markdown(
         font-weight: bold;
     }
     
-    /* Globaler Belegungs-Status (Warnung) */
+    /* GRAUER Paralleltermin-Status aus V2 */
     .discipline-status.conflict {
-        color: #ca8a04 !important;
+        color: #64748b !important;
         font-weight: 600;
     }
     
-    /* Doppel-Meldungs-Warnung (Fehler) */
+    /* ROTER Terminkonflikt-Status bei Doppel-Meldung */
     .discipline-status.double-booking {
         color: #dc2626 !important;
         font-weight: 700;
@@ -582,13 +595,13 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             curr_date += datetime.timedelta(days=1)
             limit_dt += 1
 
-    # Badges-Leiste aufbauen
+    # Badges-Leiste aufbauen (Datum an erster Stelle!)
     badges_html = f"""
     <div class="meta-badges-container">
+        <span class="meta-badge date-badge">📅 {date_range_str}</span>
         <span class="meta-badge loc-badge">📍 {city}</span>
         <span class="meta-badge dist-badge">🚗 {dist_str}</span>
         <span class="meta-badge org-badge">🛡️ {org_str}</span>
-        <span class="meta-badge date-badge">📅 {date_range_str}</span>
     </div>
     """
 
@@ -602,10 +615,19 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         </div>
         """
     else:
-        # Kachelfilter: Nur anzeigen wenn Tag gesetzt ist ODER angemeldet ist
-        show_he = (bool(day_he) and day_he != "Nicht festgelegt" and day_he != "-- Tag wählen --") or reg_he
-        show_hd = (bool(day_hd) and day_hd != "Nicht festgelegt" and day_hd != "-- Tag wählen --") or reg_hd
-        show_mx = (bool(day_mx) and day_mx != "Nicht festgelegt" and day_mx != "-- Tag wählen --") or reg_mx
+        # Backend-Abwahl prüfen (Findet die Disziplin überhaupt statt?)
+        has_he = bool(item.get('has_he', True))
+        has_hd = bool(item.get('has_hd', True))
+        has_mx = bool(item.get('has_mx', True))
+
+        # Bestimme den anzuzeigenden Text für den Spieltag (TBA als Default)
+        display_day_he = day_he if (day_he and day_he != "-- Tag wählen --") else "TBA"
+        display_day_hd = day_hd if (day_hd and day_hd != "-- Tag wählen --") else "TBA"
+        display_day_mx = day_mx if (day_mx and day_mx != "-- Tag wählen --") else "TBA"
+
+        day_class_he = "tba-day" if display_day_he == "TBA" else ""
+        day_class_hd = "tba-day" if display_day_hd == "TBA" else ""
+        day_class_mx = "tba-day" if display_day_mx == "TBA" else ""
 
         # Sub-Boxen für Disziplinen mit globaler Belegungsprüfung & Doppel-Meldungs-Erkennung
         # -- Einzel --
@@ -615,16 +637,15 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         
         dt_he = get_date_for_weekday(day_he, start_date_obj, end_date_obj)
         if dt_he and dt_he in occupied_dates:
-            # Überprüfe auf ANDERE Meldungen am selben Tag
             other_regs = [c for c in occupied_dates[dt_he] if c["title"] != title]
             if other_regs:
                 conflict = other_regs[0]
                 p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
                 if reg_he:
-                    he_status_text = f"❌ Konflikt: Doppel-Meldung! (Auch gemeldet in {conflict['city']}{p_suffix} - {conflict['disc']})"
+                    he_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
                     he_status_class = "double-booking"
                 else:
-                    he_status_text = f"⚠️ Belegt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    he_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
                     he_status_class = "conflict"
         
         # -- Doppel --
@@ -647,10 +668,10 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                 conflict = other_regs[0]
                 p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
                 if reg_hd:
-                    hd_status_text = f"❌ Konflikt: Doppel-Meldung! (Auch gemeldet in {conflict['city']}{p_suffix} - {conflict['disc']})"
+                    hd_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
                     hd_status_class = "double-booking"
                 else:
-                    hd_status_text = f"⚠️ Belegt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    hd_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
                     hd_status_class = "conflict"
 
         # -- Mixed --
@@ -673,39 +694,45 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                 conflict = other_regs[0]
                 p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
                 if reg_mx:
-                    mx_status_text = f"❌ Konflikt: Doppel-Meldung! (Auch gemeldet in {conflict['city']}{p_suffix} - {conflict['disc']})"
+                    mx_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
                     mx_status_class = "double-booking"
                 else:
-                    mx_status_text = f"⚠️ Belegt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    mx_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
                     mx_status_class = "conflict"
 
-        # Nur Kacheln rendern, die aktiv oder gemeldet sind (Wochentag an erster Stelle!)
+        # Nur Kacheln rendern, die im Backend erlaubt sind (Datum steht an erster Stelle!)
         he_card = f"""
         <div class="discipline-card {he_class}">
-            <div class="discipline-day">{day_he}</div>
-            <div class="discipline-icon">👤</div>
-            <div class="discipline-title">Einzel</div>
+            <div>
+                <div class="discipline-day {day_class_he}">{display_day_he}</div>
+                <div class="discipline-icon">👤</div>
+                <div class="discipline-title">Einzel</div>
+            </div>
             <div class="discipline-status {he_status_class}">{he_status_text}</div>
         </div>
-        """ if show_he else ""
+        """ if has_he else ""
 
         hd_card = f"""
         <div class="discipline-card {hd_class}">
-            <div class="discipline-day">{day_hd}</div>
-            <div class="discipline-icon">👥</div>
-            <div class="discipline-title">Doppel</div>
+            <div>
+                <div class="discipline-day {day_class_hd}">{display_day_hd}</div>
+                <div class="discipline-icon">👥</div>
+                <div class="discipline-title">Doppel</div>
+            </div>
             <div class="discipline-status {hd_status_class}">{hd_status_text}</div>
         </div>
-        """ if show_hd else ""
+        """ if has_hd else ""
 
         mx_card = f"""
         <div class="discipline-card {mx_class}">
-            <div class="discipline-day">{day_mx}</div>
-            <div class="discipline-icon">👥</div>
-            <div class="discipline-title">Mixed</div>
+            <div>
+                <div class="discipline-day {day_class_mx}">{display_day_mx}</div>
+                <div class="discipline-icon">👥</div>
+                <div class="discipline-title">Mixed</div>
+            </div>
             <div class="discipline-status {mx_status_class}">{mx_status_text}</div>
         </div>
-        """ if show_mx else ""
+        """ if has_mx else ""
 
         disciplines_html = f"""
         <div class="discipline-container">
@@ -713,7 +740,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             {hd_card}
             {mx_card}
         </div>
-        """ if (show_he or show_hd or show_mx) else ""
+        """ if (has_he or has_hd or has_mx) else ""
 
     # HTML Output generieren (Ohne Überschrift / Emblem im HTML)
     html_out = f"""
@@ -748,6 +775,9 @@ if os.path.exists(DB_FILE):
             'day_he': '',
             'day_hd': '',
             'day_mx': '',
+            'has_he': True,   # Ob Einzel im Turnier existiert
+            'has_hd': True,   # Ob Doppel im Turnier existiert
+            'has_mx': True,   # Ob Mixed im Turnier existiert
             'participation_day': 'Keine Angabe',
             'logo_url': '',
             'city': 'Unbekannt',
@@ -764,7 +794,7 @@ if os.path.exists(DB_FILE):
                 df[col] = df[col].fillna(default)
         
         # Datentypen für die Checkbox-Spalten erzwingen
-        for col in ['registered', 'reg_he', 'reg_hd', 'reg_mx']:
+        for col in ['registered', 'reg_he', 'reg_hd', 'reg_mx', 'has_he', 'has_hd', 'has_mx']:
             df[col] = df[col].astype(bool)
 
         # Convert dates for chronological sorting
@@ -946,8 +976,8 @@ if os.path.exists(DB_FILE):
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
-                            # NATIVE ÜBERSCHRIFT WIEDER GEWÜNSCHT (ZURÜCKGEWANDELT)
-                            st.markdown(f"### 🏸 {item['title']}")
+                            # NATIVE ÜBERSCHRIFT WIEDER GEWÜNSCHT (OHNE BADMINTON-SCHLÄGER)
+                            st.markdown(f"### {item['title']}")
 
                             # RENDERE DIE SPEZIELLE TURNIERKACHEL (DYNAMISCH)
                             render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes)
@@ -965,6 +995,16 @@ if os.path.exists(DB_FILE):
                                 start_date_obj = item['Start_Date_Obj']
                                 end_date_obj = item['End_Date_Obj']
                                 day_options = get_tournament_day_options(start_date_obj, end_date_obj)
+
+                                # Disziplinen aktivieren/deaktivieren (Soll die Disziplin ganz gestrichen werden?)
+                                st.markdown("**Disziplinen aktivieren/deaktivieren (Nicht angebotene komplett streichen):**")
+                                col_has_he, col_has_hd, col_has_mx = st.columns(3)
+                                with col_has_he:
+                                    val_has_he = st.checkbox("Einzel findet statt", value=bool(item.get('has_he', True)), key=f"has_he_{item['id']}")
+                                with col_has_hd:
+                                    val_has_hd = st.checkbox("Doppel findet statt", value=bool(item.get('has_hd', True)), key=f"has_hd_{item['id']}")
+                                with col_has_mx:
+                                    val_has_mx = st.checkbox("Mixed findet statt", value=bool(item.get('has_mx', True)), key=f"has_mx_{item['id']}")
 
                                 # Dropdowns zur Zuweisung des Zeitplans (Für alle sichtbar)
                                 st.markdown("**Allgemeiner Zeitplan (Für alle Kacheln sichtbar):**")
@@ -1047,7 +1087,10 @@ if os.path.exists(DB_FILE):
                                     val_partner_mx != item.get('partner_mx', '') or
                                     val_day_he != item.get('day_he', '') or
                                     val_day_hd != item.get('day_hd', '') or
-                                    val_day_mx != item.get('day_mx', '')
+                                    val_day_mx != item.get('day_mx', '') or
+                                    val_has_he != bool(item.get('has_he', True)) or
+                                    val_has_hd != bool(item.get('has_hd', True)) or
+                                    val_has_mx != bool(item.get('has_mx', True))
                                 )
                                 
                                 if has_changed:
@@ -1060,6 +1103,9 @@ if os.path.exists(DB_FILE):
                                     data[item['id']]['day_he'] = val_day_he
                                     data[item['id']]['day_hd'] = val_day_hd
                                     data[item['id']]['day_mx'] = val_day_mx
+                                    data[item['id']]['has_he'] = val_has_he
+                                    data[item['id']]['has_hd'] = val_has_hd
+                                    data[item['id']]['has_mx'] = val_has_mx
                                     
                                     with open(DB_FILE, "w", encoding="utf-8") as f:
                                         json.dump(data, f, ensure_ascii=False, indent=4)
@@ -1104,8 +1150,8 @@ if os.path.exists(DB_FILE):
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
-                            # NATIVE ÜBERSCHRIFT BEENDET (ZURÜCKGEWANDELT)
-                            st.markdown(f"### 🏸 {item['title']} *(Beendet)*")
+                            # NATIVE ÜBERSCHRIFT BEENDET WIEDER GEWÜNSCHT (OHNE BADMINTON-SCHLÄGER)
+                            st.markdown(f"### {item['title']} *(Beendet)*")
 
                             # RENDERE DIE SPEZIELLE TURNIERKACHEL (DYNAMISCH)
                             render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes)
@@ -1118,7 +1164,20 @@ if os.path.exists(DB_FILE):
                                 end_date_obj = item['End_Date_Obj']
                                 day_options = get_tournament_day_options(start_date_obj, end_date_obj)
                                 
-                                with col_he:
+                                # Disziplinen aktivieren/deaktivieren (Soll die Disziplin ganz gestrichen werden?)
+                                st.markdown("**Disziplinen aktivieren/deaktivieren (Nicht angebotene komplett streichen):**")
+                                col_has_he, col_has_hd, col_has_mx = st.columns(3)
+                                with col_has_he:
+                                    val_has_he = st.checkbox("Einzel findet statt", value=bool(item.get('has_he', True)), key=f"has_he_past_{item['id']}")
+                                with col_has_hd:
+                                    val_has_hd = st.checkbox("Doppel findet statt", value=bool(item.get('has_hd', True)), key=f"has_hd_past_{item['id']}")
+                                with col_has_mx:
+                                    val_has_mx = st.checkbox("Mixed findet statt", value=bool(item.get('has_mx', True)), key=f"has_mx_past_{item['id']}")
+
+                                st.write("")
+                                col_past_he, col_past_hd, col_past_mx = st.columns(3)
+
+                                with col_past_he:
                                     st.markdown("**Herreneinzel**")
                                     val_he = st.checkbox("Herreneinzel", value=bool(item.get('reg_he', False)), key=f"he_past_{item['id']}")
                                     val_day_he_db = item.get('day_he', '')
@@ -1134,7 +1193,7 @@ if os.path.exists(DB_FILE):
                                     else:
                                         val_day_he = ""
                                 
-                                with col_hd:
+                                with col_past_hd:
                                     st.markdown("**Herrendoppel**")
                                     val_hd = st.checkbox("Herrendoppel", value=bool(item.get('reg_hd', False)), key=f"hd_past_{item['id']}")
                                     val_partner_hd = item.get('partner_hd', '')
@@ -1159,7 +1218,7 @@ if os.path.exists(DB_FILE):
                                         val_partner_hd = ""
                                         val_day_hd = ""
                                 
-                                with col_mx:
+                                with col_past_mx:
                                     st.markdown("**Mixed**")
                                     val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_past_{item['id']}")
                                     val_partner_mx = item.get('partner_mx', '')
@@ -1194,7 +1253,10 @@ if os.path.exists(DB_FILE):
                                     val_partner_mx != item.get('partner_mx', '') or
                                     val_day_he != item.get('day_he', '') or
                                     val_day_hd != item.get('day_hd', '') or
-                                    val_day_mx != item.get('day_mx', '')
+                                    val_day_mx != item.get('day_mx', '') or
+                                    val_has_he != bool(item.get('has_he', True)) or
+                                    val_has_hd != bool(item.get('has_hd', True)) or
+                                    val_has_mx != bool(item.get('has_mx', True))
                                 )
                                 
                                 if has_changed:
@@ -1207,6 +1269,9 @@ if os.path.exists(DB_FILE):
                                     data[item['id']]['day_he'] = val_day_he
                                     data[item['id']]['day_hd'] = val_day_hd
                                     data[item['id']]['day_mx'] = val_day_mx
+                                    data[item['id']]['has_he'] = val_has_he
+                                    data[item['id']]['has_hd'] = val_has_hd
+                                    data[item['id']]['has_mx'] = val_has_mx
                                     
                                     with open(DB_FILE, "w", encoding="utf-8") as f:
                                         json.dump(data, f, ensure_ascii=False, indent=4)
