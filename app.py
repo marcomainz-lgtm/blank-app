@@ -270,6 +270,8 @@ st.markdown(
         box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15) !important;
     }
     .discipline-card.is-vacation .discipline-title {
+        font-size: 1rem !important;
+        font-weight: 800 !important;
         color: #1e40af !important;
     }
     .discipline-card.is-vacation .discipline-day {
@@ -277,8 +279,7 @@ st.markdown(
         color: #1e40af !important;
     }
     .discipline-card.is-vacation .discipline-status {
-        color: #2563eb !important;
-        font-weight: bold;
+        display: none !important; /* Infotext komplett gestrichen */
     }
 
     .discipline-icon {
@@ -324,6 +325,27 @@ st.markdown(
     .discipline-status.registered {
         color: #15803d;
         font-weight: bold;
+    }
+
+    /* Urlaub Kachel-Ersatz (Full-Width) */
+    .vacation-full-card {
+        background-color: #eff6ff !important;
+        border: 2px solid #3b82f6 !important;
+        border-radius: 8px;
+        padding: 24px;
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    .vacation-emoji {
+        font-size: 2.5rem;
+        margin-bottom: 6px;
+    }
+    .vacation-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #1e40af;
+        letter-spacing: 1px;
     }
     </style>
     """,
@@ -466,7 +488,7 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
     try:
         current_date = start_date_obj
         limit = 0
-        while current_date <= end_date_obj and limit < 20:
+        while current_date <= end_date_obj && limit < 20:
             day_name = weekday_names[current_date.weekday()]
             formatted_dt_short = current_date.strftime("%d.%m.")
             current_day_str = f"{day_name}, {formatted_dt_short}"
@@ -597,15 +619,10 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     start_date_obj = item['Start_Date_Obj']
     end_date_obj = item['End_Date_Obj']
 
-    # Badges-Leiste aufbauen (Datum an erster Stelle!)
-    badges_html = f"""
-    <div class="meta-badges-container">
-        <span class="meta-badge date-badge">📅 {date_range_str}</span>
-        <span class="meta-badge loc-badge">📍 {city}</span>
-        <span class="meta-badge dist-badge">🚗 {dist_str}</span>
-        <span class="meta-badge org-badge">🛡️ {org_str}</span>
-    </div>
-    """
+    # Backend-Abwahl direkt über das Zeitplan-Dropdown steuern
+    has_he = (day_he != "Disziplin findet nicht statt")
+    has_hd = (day_hd != "Disziplin findet nicht statt")
+    has_mx = (day_mx != "Disziplin findet nicht statt")
 
     # Helper zur Formatierung des Kachel-Datum-Badges (erster Platz in Kachel)
     def format_day_badge(day_val, s_obj, e_obj):
@@ -626,11 +643,6 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         
         return day_val
 
-    # Backend-Abwahl direkt über das Zeitplan-Dropdown steuern
-    has_he = (day_he != "Disziplin findet nicht statt")
-    has_hd = (day_hd != "Disziplin findet nicht statt")
-    has_mx = (day_mx != "Disziplin findet nicht statt")
-
     # Bestimme den anzuzeigenden Text für den Spieltag (TBA als Default)
     display_day_he = format_day_badge(day_he, start_date_obj, end_date_obj)
     display_day_hd = format_day_badge(day_hd, start_date_obj, end_date_obj)
@@ -640,146 +652,190 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     day_class_hd = "tba-day" if display_day_hd == "TBA" else ""
     day_class_mx = "tba-day" if display_day_mx == "TBA" else ""
 
-    # Sub-Boxen für Disziplinen mit globaler Belegungsprüfung, Doppel-Meldungs-Erkennung & Feingranularem Urlaubsschutz
-    # -- Einzel --
-    he_class = "active-registered" if reg_he else ""
-    he_status_class = "registered" if reg_he else ""
-    he_status_text = "Gemeldet" if reg_he else "Nicht gemeldet"
-    he_icon = "👤"
+    # 3. Hybride Urlaubs-Prüfung: Liegt das gesamte Turnier (alle bespielbaren Tage) im Urlaub?
+    active_days = set()
+    if has_he and display_day_he != "TBA":
+        dt = get_date_for_weekday(day_he, start_date_obj, end_date_obj)
+        if dt: active_days.add(dt)
+    if has_hd and display_day_hd != "TBA":
+        dt = get_date_for_weekday(day_hd, start_date_obj, end_date_obj)
+        if dt: active_days.add(dt)
+    if has_mx and display_day_mx != "TBA":
+        dt = get_date_for_weekday(day_mx, start_date_obj, end_date_obj)
+        if dt: active_days.add(dt)
+
+    # Fallback, falls Termine noch völlig unklar (TBA): Gesamtes Wochenende prüfen
+    if not active_days and not pd.isnull(start_date_obj) and not pd.isnull(end_date_obj):
+        curr_date = start_date_obj
+        limit_dt = 0
+        while curr_date <= end_date_obj and limit_dt < 10:
+            active_days.add(curr_date)
+            curr_date += datetime.timedelta(days=1)
+            limit_dt += 1
+
+    vacation_active_days = {d for d in active_days if d in vacation_dates}
     
-    dt_he = get_date_for_weekday(day_he, start_date_obj, end_date_obj)
-    
-    # 1. Feingranulare Urlaubsprüfung für diesen Spieltag
-    if dt_he and dt_he in vacation_dates:
-        he_status_text = vacation_notes.get(dt_he, "Urlaub")
-        he_status_class = "vacation-status"
-        he_class = "is-vacation"
-        he_icon = "🏖️"
-    elif dt_he and dt_he in occupied_dates:
-        other_regs = [c for c in occupied_dates[dt_he] if c["title"] != title]
-        if other_regs:
-            conflict = other_regs[0]
-            p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
-            if reg_he:
-                he_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
-                he_status_class = "double-booking"
-                he_class = "has-double-booking"
-            else:
-                he_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
-                he_status_class = "conflict"
-                he_class = "has-conflict"
-    
-    # -- Doppel --
-    hd_class = "active-registered" if reg_hd else ""
-    hd_status_class = "registered" if reg_hd else ""
-    hd_icon = "👥"
-    if reg_hd:
-        if partner_hd and partner_hd in PARTNERS_HD:
-            hd_status_text = f"Mit <a href='{PARTNERS_HD[partner_hd]}' target='_blank'>{partner_hd}</a>"
-        elif partner_hd:
-            hd_status_text = f"Mit {partner_hd}"
-        else:
-            hd_status_text = "Ohne Partner"
+    # Case A: Das gesamte Turnier liegt im Urlaub -> Komplettes seitenbreites Urlaubs-Modul
+    entire_tournament_is_vacation = (len(vacation_active_days) == len(active_days) and len(active_days) > 0)
+
+    # Badges-Leiste aufbauen (Datum an erster Stelle!)
+    badges_html = f"""
+    <div class="meta-badges-container">
+        <span class="meta-badge date-badge">📅 {date_range_str}</span>
+        <span class="meta-badge loc-badge">📍 {city}</span>
+        <span class="meta-badge dist-badge">🚗 {dist_str}</span>
+        <span class="meta-badge org-badge">🛡️ {org_str}</span>
+    </div>
+    """
+
+    if entire_tournament_is_vacation:
+        disciplines_html = f"""
+        <div class="vacation-full-card">
+            <div class="vacation-emoji">🏖️</div>
+            <div class="vacation-title">URLAUB</div>
+        </div>
+        """
     else:
-        hd_status_text = "Nicht gemeldet"
+        # Case B: Nur einzelne Tage liegen im Urlaub. Blockiere betroffene Kacheln feingranular.
+        # Sub-Boxen für Disziplinen mit globaler Belegungsprüfung, Doppel-Meldungs-Erkennung & feingranularem Urlaubsschutz
+        # -- Einzel --
+        he_class = "active-registered" if reg_he else ""
+        he_status_class = "registered" if reg_he else ""
+        he_status_text = "Gemeldet" if reg_he else "Nicht gemeldet"
+        he_icon = "👤"
         
-    dt_hd = get_date_for_weekday(day_hd, start_date_obj, end_date_obj)
-    
-    if dt_hd and dt_hd in vacation_dates:
-        hd_status_text = vacation_notes.get(dt_hd, "Urlaub")
-        hd_status_class = "vacation-status"
-        hd_class = "is-vacation"
-        hd_icon = "🏖️"
-    elif dt_hd and dt_hd in occupied_dates:
-        other_regs = [c for c in occupied_dates[dt_hd] if c["title"] != title]
-        if other_regs:
-            conflict = other_regs[0]
-            p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
-            if reg_hd:
-                hd_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
-                hd_status_class = "double-booking"
-                hd_class = "has-double-booking"
+        dt_he = get_date_for_weekday(day_he, start_date_obj, end_date_obj)
+        
+        if dt_he and dt_he in vacation_dates:
+            he_status_text = ""
+            he_status_class = "vacation-status"
+            he_class = "is-vacation"
+            he_icon = "🏖️"
+        elif dt_he and dt_he in occupied_dates:
+            other_regs = [c for c in occupied_dates[dt_he] if c["title"] != title]
+            if other_regs:
+                conflict = other_regs[0]
+                p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
+                if reg_he:
+                    he_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    he_status_class = "double-booking"
+                    he_class = "has-double-booking"
+                else:
+                    he_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    he_status_class = "conflict"
+                    he_class = "has-conflict"
+        
+        # -- Doppel --
+        hd_class = "active-registered" if reg_hd else ""
+        hd_status_class = "registered" if reg_hd else ""
+        hd_icon = "👥"
+        if reg_hd:
+            if partner_hd and partner_hd in PARTNERS_HD:
+                hd_status_text = f"Mit <a href='{PARTNERS_HD[partner_hd]}' target='_blank'>{partner_hd}</a>"
+            elif partner_hd:
+                hd_status_text = f"Mit {partner_hd}"
             else:
-                hd_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
-                hd_status_class = "conflict"
-                hd_class = "has-conflict"
-
-    # -- Mixed --
-    mx_class = "active-registered" if reg_mx else ""
-    mx_status_class = "registered" if reg_mx else ""
-    mx_icon = "👥"
-    if reg_mx:
-        if partner_mx and partner_mx in PARTNERS_MX:
-            mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{partner_mx}</a>"
-        elif partner_mx:
-            mx_status_text = f"Mit {partner_mx}"
+                hd_status_text = "Ohne Partner"
         else:
-            mx_status_text = "Ohne Partnerin"
-    else:
-        mx_status_text = "Nicht gemeldet"
+            hd_status_text = "Nicht gemeldet"
+            
+        dt_hd = get_date_for_weekday(day_hd, start_date_obj, end_date_obj)
         
-    dt_mx = get_date_for_weekday(day_mx, start_date_obj, end_date_obj)
-    
-    if dt_mx and dt_mx in vacation_dates:
-        mx_status_text = vacation_notes.get(dt_mx, "Urlaub")
-        mx_status_class = "vacation-status"
-        mx_class = "is-vacation"
-        mx_icon = "🏖️"
-    elif dt_mx and dt_mx in occupied_dates:
-        other_regs = [c for c in occupied_dates[dt_mx] if c["title"] != title]
-        if other_regs:
-            conflict = other_regs[0]
-            p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
-            if reg_mx:
-                mx_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
-                mx_status_class = "double-booking"
-                mx_class = "has-double-booking"
+        if dt_hd and dt_hd in vacation_dates:
+            hd_status_text = ""
+            hd_status_class = "vacation-status"
+            hd_class = "is-vacation"
+            hd_icon = "🏖️"
+        elif dt_hd and dt_hd in occupied_dates:
+            other_regs = [c for c in occupied_dates[dt_hd] if c["title"] != title]
+            if other_regs:
+                conflict = other_regs[0]
+                p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
+                if reg_hd:
+                    hd_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    hd_status_class = "double-booking"
+                    hd_class = "has-double-booking"
+                else:
+                    hd_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    hd_status_class = "conflict"
+                    hd_class = "has-conflict"
+
+        # -- Mixed --
+        mx_class = "active-registered" if reg_mx else ""
+        mx_status_class = "registered" if reg_mx else ""
+        mx_icon = "👥"
+        if reg_mx:
+            if partner_mx and partner_mx in PARTNERS_MX:
+                mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{partner_mx}</a>"
+            elif partner_mx:
+                mx_status_text = f"Mit {partner_mx}"
             else:
-                mx_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
-                mx_status_class = "conflict"
-                mx_class = "has-conflict"
+                mx_status_text = "Ohne Partnerin"
+        else:
+            mx_status_text = "Nicht gemeldet"
+            
+        dt_mx = get_date_for_weekday(day_mx, start_date_obj, end_date_obj)
+        
+        if dt_mx and dt_mx in vacation_dates:
+            mx_status_text = ""
+            mx_status_class = "vacation-status"
+            mx_class = "is-vacation"
+            mx_icon = "🏖️"
+        elif dt_mx and dt_mx in occupied_dates:
+            other_regs = [c for c in occupied_dates[dt_mx] if c["title"] != title]
+            if other_regs:
+                conflict = other_regs[0]
+                p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
+                if reg_mx:
+                    mx_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    mx_status_class = "double-booking"
+                    mx_class = "has-double-booking"
+                else:
+                    mx_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    mx_status_class = "conflict"
+                    mx_class = "has-conflict"
 
-    # Nur Kacheln rendern, die im Backend erlaubt sind (Datum steht an erster Stelle!)
-    he_card = f"""
-    <div class="discipline-card {he_class}">
-        <div>
-            <div class="discipline-day {day_class_he}">{display_day_he}</div>
-            <div class="discipline-icon">{he_icon}</div>
-            <div class="discipline-title">Einzel</div>
+        # Nur Kacheln rendern, die im Backend erlaubt sind (Datum steht an erster Stelle!)
+        he_card = f"""
+        <div class="discipline-card {he_class}">
+            <div>
+                <div class="discipline-day {day_class_he}">{display_day_he}</div>
+                <div class="discipline-icon">{he_icon}</div>
+                <div class="discipline-title">{"Urlaub" if (dt_he and dt_he in vacation_dates) else "Einzel"}</div>
+            </div>
+            <div class="discipline-status {he_status_class}">{he_status_text}</div>
         </div>
-        <div class="discipline-status {he_status_class}">{he_status_text}</div>
-    </div>
-    """ if has_he else ""
+        """ if has_he else ""
 
-    hd_card = f"""
-    <div class="discipline-card {hd_class}">
-        <div>
-            <div class="discipline-day {day_class_hd}">{display_day_hd}</div>
-            <div class="discipline-icon">{hd_icon}</div>
-            <div class="discipline-title">Doppel</div>
+        hd_card = f"""
+        <div class="discipline-card {hd_class}">
+            <div>
+                <div class="discipline-day {day_class_hd}">{display_day_hd}</div>
+                <div class="discipline-icon">{hd_icon}</div>
+                <div class="discipline-title">{"Urlaub" if (dt_hd and dt_hd in vacation_dates) else "Doppel"}</div>
+            </div>
+            <div class="discipline-status {hd_status_class}">{hd_status_text}</div>
         </div>
-        <div class="discipline-status {hd_status_class}">{hd_status_text}</div>
-    </div>
-    """ if has_hd else ""
+        """ if has_hd else ""
 
-    mx_card = f"""
-    <div class="discipline-card {mx_class}">
-        <div>
-            <div class="discipline-day {day_class_mx}">{display_day_mx}</div>
-            <div class="discipline-icon">{mx_icon}</div>
-            <div class="discipline-title">Mixed</div>
+        mx_card = f"""
+        <div class="discipline-card {mx_class}">
+            <div>
+                <div class="discipline-day {day_class_mx}">{display_day_mx}</div>
+                <div class="discipline-icon">{mx_icon}</div>
+                <div class="discipline-title">{"Urlaub" if (dt_mx and dt_mx in vacation_dates) else "Mixed"}</div>
+            </div>
+            <div class="discipline-status {mx_status_class}">{mx_status_text}</div>
         </div>
-        <div class="discipline-status {mx_status_class}">{mx_status_text}</div>
-    </div>
-    """ if has_mx else ""
+        """ if has_mx else ""
 
-    disciplines_html = f"""
-    <div class="discipline-container">
-        {he_card}
-        {hd_card}
-        {mx_card}
-    </div>
-    """ if (has_he or has_hd or has_mx) else ""
+        disciplines_html = f"""
+        <div class="discipline-container">
+            {he_card}
+            {hd_card}
+            {mx_card}
+        </div>
+        """ if (has_he or has_hd or has_mx) else ""
 
     # HTML Output generieren (Ohne Überschrift / Emblem im HTML)
     html_out = f"""
@@ -1247,3 +1303,48 @@ if os.path.exists(DB_FILE):
                                                     mx_idx = o_idx
                                                     break
                                         selected_label_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_idx, key=f"day_mx_past_{item['id']}")
+                                        val_day_mx = selected_label_mx if selected_label_mx != "-- Tag wählen --" else ""
+                                    else:
+                                        val_partner_mx = ""
+                                        val_day_mx = ""
+                                        
+                                is_registered = (val_he or val_hd or val_mx)
+                                
+                                has_changed = (
+                                    val_he != bool(item.get('reg_he', False)) or
+                                    val_hd != bool(item.get('reg_hd', False)) or
+                                    val_mx != bool(item.get('reg_mx', False)) or
+                                    val_partner_hd != item.get('partner_hd', '') or
+                                    val_partner_mx != item.get('partner_mx', '') or
+                                    val_day_he != item.get('day_he', '') or
+                                    val_day_hd != item.get('day_hd', '') or
+                                    val_day_mx != item.get('day_mx', '')
+                                )
+                                
+                                if has_changed:
+                                    data[item['id']]['registered'] = is_registered
+                                    data[item['id']]['reg_he'] = val_he
+                                    data[item['id']]['reg_hd'] = val_hd
+                                    data[item['id']]['reg_mx'] = val_mx
+                                    data[item['id']]['partner_hd'] = val_partner_hd
+                                    data[item['id']]['partner_mx'] = val_partner_mx
+                                    data[item['id']]['day_he'] = val_day_he
+                                    data[item['id']]['day_hd'] = val_day_hd
+                                    data[item['id']]['day_mx'] = val_day_mx
+                                    
+                                    with open(DB_FILE, "w", encoding="utf-8") as f:
+                                        json.dump(data, f, ensure_ascii=False, indent=4)
+                                    st.rerun()
+                            
+                        with col_link:
+                            st.write("")
+                            st.write("")
+                            st.link_button("Turnierseite", item['link'], use_container_width=True)
+            else:
+                st.info("Keine vergangenen Turniere gefunden.")
+    else:
+        st.info("Der Suchlauf war erfolgreich, aber es wurden keine Turniere in Ihrem Umkreis gefunden.")
+else:
+    st.warning("Keine Turnier-Datenbank gefunden. Bitte wenden Sie sich an den Administrator, um den ersten Suchlauf durchzuführen.")
+
+# --- END OF FILE App_V3.py ---
