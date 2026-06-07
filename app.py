@@ -141,18 +141,6 @@ st.markdown(
         display: none;
     }
     
-    /* Pfeil-Indikator */
-    details.status-tag summary::after {
-        content: "▾";
-        font-size: 0.85em;
-        opacity: 0.6;
-        margin-left: 6px;
-        display: inline-block;
-    }
-    details.status-tag[open] summary::after {
-        content: "▴";
-    }
-    
     /* Inhalt des ausgeklappten Tags */
     details.status-tag .status-content {
         font-size: 0.95em;
@@ -186,22 +174,23 @@ st.markdown(
     .org-badge { background-color: #ecfeff; color: #0891b2; }
     .date-badge { background-color: #f5f3ff; color: #6d28d9; }
     
-    /* Sub-Boxes / Discipline Grid */
+    /* Sub-Boxes / Discipline Grid - EINHEITLICHE DRITTEL-AUFTEILUNG */
     .discipline-container {
         display: flex;
-        gap: 10px;
+        gap: 12px;
         margin-top: 10px;
         margin-bottom: 10px;
         flex-wrap: wrap;
     }
     .discipline-card {
-        flex: 1;
+        flex: 0 1 calc(33.333% - 8px);
         min-width: 140px;
         background-color: #f8fafc;
         border: 1px dashed #cbd5e1;
         border-radius: 8px;
-        padding: 10px;
+        padding: 12px;
         text-align: center;
+        box-sizing: border-box;
         transition: all 0.2s ease-in-out;
     }
     .discipline-card:hover {
@@ -214,12 +203,13 @@ st.markdown(
     .discipline-card.active-registered {
         border: 2.5px solid #16a34a !important;
         background-color: #dcfce7 !important;
-        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2) !important;
+        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25) !important;
     }
     .discipline-card.active-registered .discipline-title {
         color: #14532d !important;
     }
     .discipline-card.active-registered .discipline-day {
+        background-color: #bbf7d0 !important;
         color: #15803d !important;
     }
     .discipline-card.active-registered .discipline-status {
@@ -242,11 +232,17 @@ st.markdown(
         text-transform: uppercase;
         letter-spacing: 0.3px;
     }
+    
+    /* Datum an erster Stelle (Badge) */
     .discipline-day {
         font-size: 0.75rem;
-        color: #64748b;
-        font-weight: 600;
-        margin: 2px 0 4px 0;
+        color: #475569;
+        font-weight: 700;
+        margin-bottom: 6px;
+        background-color: #e2e8f0;
+        padding: 2px 6px;
+        border-radius: 4px;
+        display: inline-block;
     }
     .discipline-status {
         font-size: 0.75rem;
@@ -265,6 +261,38 @@ st.markdown(
     /* Globaler Belegungs-Status (Warnung) */
     .discipline-status.conflict {
         color: #ca8a04 !important;
+        font-weight: 600;
+    }
+    
+    /* Doppel-Meldungs-Warnung (Fehler) */
+    .discipline-status.double-booking {
+        color: #dc2626 !important;
+        font-weight: 700;
+    }
+
+    /* Urlaub Kachel-Ersatz */
+    .vacation-full-card {
+        background-color: #eff6ff !important;
+        border: 1.5px solid #3b82f6 !important;
+        border-radius: 8px;
+        padding: 16px;
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    .vacation-emoji {
+        font-size: 2rem;
+        margin-bottom: 4px;
+    }
+    .vacation-title {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #1e40af;
+        letter-spacing: 0.8px;
+    }
+    .vacation-subtitle {
+        font-size: 0.825rem;
+        color: #2563eb;
         font-weight: 600;
     }
     </style>
@@ -492,7 +520,7 @@ def format_discipline_with_partner(disc_type, partner_name, partners_dict, text_
 
 
 # --- V3 GRAPHICAL RENDERING ENGINE ---
-def render_styled_tournament_card(item, occupied_dates):
+def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes):
     """Erzeugt eine visuell ansprechende Kachel mit dynamic SVGs, Pill-Badges und Sub-Boxes für Disziplinen."""
     city = item.get('city', 'Unbekannt')
     title = item.get('title', 'Turnier')
@@ -539,71 +567,22 @@ def render_styled_tournament_card(item, occupied_dates):
     start_date_obj = item['Start_Date_Obj']
     end_date_obj = item['End_Date_Obj']
 
-    # 3. Kachelfilter: Nur anzeigen wenn Tag gesetzt ist ODER angemeldet ist
-    show_he = (bool(day_he) and day_he != "Nicht festgelegt" and day_he != "-- Tag wählen --") or reg_he
-    show_hd = (bool(day_hd) and day_hd != "Nicht festgelegt" and day_hd != "-- Tag wählen --") or reg_hd
-    show_mx = (bool(day_mx) and day_mx != "Nicht festgelegt" and day_mx != "-- Tag wählen --") or reg_mx
+    # 3. Urlaubs-Prüfung für das gesamte Turnierwochenende
+    tournament_has_vacation = False
+    vacation_note = "Urlaub"
+    if not pd.isnull(start_date_obj) and not pd.isnull(end_date_obj):
+        curr_date = start_date_obj
+        limit_dt = 0
+        while curr_date <= end_date_obj and limit_dt < 10:
+            if curr_date in vacation_dates:
+                tournament_has_vacation = True
+                if curr_date in vacation_notes:
+                    vacation_note = vacation_notes[curr_date]
+                break
+            curr_date += datetime.timedelta(days=1)
+            limit_dt += 1
 
-    # Sub-Boxen für Disziplinen mit globaler Belegungsprüfung
-    # -- Einzel --
-    he_class = "active-registered" if reg_he else ""
-    he_status_class = "registered" if reg_he else ""
-    he_status_text = "Gemeldet" if reg_he else "Nicht gemeldet"
-    if not reg_he and show_he:
-        dt_he = get_date_for_weekday(day_he, start_date_obj, end_date_obj)
-        if dt_he and dt_he in occupied_dates:
-            for conflict in occupied_dates[dt_he]:
-                if conflict["title"] != title:
-                    p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
-                    he_status_text = f"⚠️ Belegt: {conflict['disc']} in {conflict['city']}{p_suffix}"
-                    he_status_class = "conflict"
-                    break
-    
-    # -- Doppel --
-    hd_class = "active-registered" if reg_hd else ""
-    hd_status_class = "registered" if reg_hd else ""
-    if reg_hd:
-        if partner_hd and partner_hd in PARTNERS_HD:
-            hd_status_text = f"Mit <a href='{PARTNERS_HD[partner_hd]}' target='_blank'>{partner_hd}</a>"
-        elif partner_hd:
-            hd_status_text = f"Mit {partner_hd}"
-        else:
-            hd_status_text = "Ohne Partner"
-    else:
-        hd_status_text = "Nicht gemeldet"
-        if show_hd:
-            dt_hd = get_date_for_weekday(day_hd, start_date_obj, end_date_obj)
-            if dt_hd and dt_hd in occupied_dates:
-                for conflict in occupied_dates[dt_hd]:
-                    if conflict["title"] != title:
-                        p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
-                        hd_status_text = f"⚠️ Belegt: {conflict['disc']} in {conflict['city']}{p_suffix}"
-                        hd_status_class = "conflict"
-                        break
-
-    # -- Mixed --
-    mx_class = "active-registered" if reg_mx else ""
-    mx_status_class = "registered" if reg_mx else ""
-    if reg_mx:
-        if partner_mx and partner_mx in PARTNERS_MX:
-            mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{partner_mx}</a>"
-        elif partner_mx:
-            mx_status_text = f"Mit {partner_mx}"
-        else:
-            mx_status_text = "Ohne Partnerin"
-    else:
-        mx_status_text = "Nicht gemeldet"
-        if show_mx:
-            dt_mx = get_date_for_weekday(day_mx, start_date_obj, end_date_obj)
-            if dt_mx and dt_mx in occupied_dates:
-                for conflict in occupied_dates[dt_mx]:
-                    if conflict["title"] != title:
-                        p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
-                        mx_status_text = f"⚠️ Belegt: {conflict['disc']} in {conflict['city']}{p_suffix}"
-                        mx_status_class = "conflict"
-                        break
-
-    # Sub-Boxen & Badges als separate Fragmente
+    # Badges-Leiste aufbauen
     badges_html = f"""
     <div class="meta-badges-container">
         <span class="meta-badge loc-badge">📍 {city}</span>
@@ -612,44 +591,131 @@ def render_styled_tournament_card(item, occupied_dates):
         <span class="meta-badge date-badge">📅 {date_range_str}</span>
     </div>
     """
-    
-    # Nur Kacheln rendern, die eingeblendet werden sollen
-    he_card = f"""
-    <div class="discipline-card {he_class}">
-        <div class="discipline-icon">👤</div>
-        <div class="discipline-title">Einzel</div>
-        <div class="discipline-day">{day_he}</div>
-        <div class="discipline-status {he_status_class}">{he_status_text}</div>
-    </div>
-    """ if show_he else ""
 
-    hd_card = f"""
-    <div class="discipline-card {hd_class}">
-        <div class="discipline-icon">👥</div>
-        <div class="discipline-title">Doppel</div>
-        <div class="discipline-day">{day_hd}</div>
-        <div class="discipline-status {hd_status_class}">{hd_status_text}</div>
-    </div>
-    """ if show_hd else ""
+    # 4. Kachel-Verhalten bei Urlaub: Keine Disziplinboxen, sondern ein großes Urlaubs-Banner!
+    if tournament_has_vacation:
+        disciplines_html = f"""
+        <div class="vacation-full-card">
+            <div class="vacation-emoji">🏖️</div>
+            <div class="vacation-title">URLAUB</div>
+            <div class="vacation-subtitle">Keine Anmeldung möglich ({vacation_note})</div>
+        </div>
+        """
+    else:
+        # Kachelfilter: Nur anzeigen wenn Tag gesetzt ist ODER angemeldet ist
+        show_he = (bool(day_he) and day_he != "Nicht festgelegt" and day_he != "-- Tag wählen --") or reg_he
+        show_hd = (bool(day_hd) and day_hd != "Nicht festgelegt" and day_hd != "-- Tag wählen --") or reg_hd
+        show_mx = (bool(day_mx) and day_mx != "Nicht festgelegt" and day_mx != "-- Tag wählen --") or reg_mx
 
-    mx_card = f"""
-    <div class="discipline-card {mx_class}">
-        <div class="discipline-icon">👥</div>
-        <div class="discipline-title">Mixed</div>
-        <div class="discipline-day">{day_mx}</div>
-        <div class="discipline-status {mx_status_class}">{mx_status_text}</div>
-    </div>
-    """ if show_mx else ""
+        # Sub-Boxen für Disziplinen mit globaler Belegungsprüfung & Doppel-Meldungs-Erkennung
+        # -- Einzel --
+        he_class = "active-registered" if reg_he else ""
+        he_status_class = "registered" if reg_he else ""
+        he_status_text = "Gemeldet" if reg_he else "Nicht gemeldet"
+        
+        dt_he = get_date_for_weekday(day_he, start_date_obj, end_date_obj)
+        if dt_he and dt_he in occupied_dates:
+            # Überprüfe auf ANDERE Meldungen am selben Tag
+            other_regs = [c for c in occupied_dates[dt_he] if c["title"] != title]
+            if other_regs:
+                conflict = other_regs[0]
+                p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
+                if reg_he:
+                    he_status_text = f"❌ Konflikt: Doppel-Meldung! (Auch gemeldet in {conflict['city']}{p_suffix} - {conflict['disc']})"
+                    he_status_class = "double-booking"
+                else:
+                    he_status_text = f"⚠️ Belegt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    he_status_class = "conflict"
+        
+        # -- Doppel --
+        hd_class = "active-registered" if reg_hd else ""
+        hd_status_class = "registered" if reg_hd else ""
+        if reg_hd:
+            if partner_hd and partner_hd in PARTNERS_HD:
+                hd_status_text = f"Mit <a href='{PARTNERS_HD[partner_hd]}' target='_blank'>{partner_hd}</a>"
+            elif partner_hd:
+                hd_status_text = f"Mit {partner_hd}"
+            else:
+                hd_status_text = "Ohne Partner"
+        else:
+            hd_status_text = "Nicht gemeldet"
+            
+        dt_hd = get_date_for_weekday(day_hd, start_date_obj, end_date_obj)
+        if dt_hd and dt_hd in occupied_dates:
+            other_regs = [c for c in occupied_dates[dt_hd] if c["title"] != title]
+            if other_regs:
+                conflict = other_regs[0]
+                p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
+                if reg_hd:
+                    hd_status_text = f"❌ Konflikt: Doppel-Meldung! (Auch gemeldet in {conflict['city']}{p_suffix} - {conflict['disc']})"
+                    hd_status_class = "double-booking"
+                else:
+                    hd_status_text = f"⚠️ Belegt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    hd_status_class = "conflict"
 
-    disciplines_html = f"""
-    <div class="discipline-container">
-        {he_card}
-        {hd_card}
-        {mx_card}
-    </div>
-    """ if (show_he or show_hd or show_mx) else ""
+        # -- Mixed --
+        mx_class = "active-registered" if reg_mx else ""
+        mx_status_class = "registered" if reg_mx else ""
+        if reg_mx:
+            if partner_mx and partner_mx in PARTNERS_MX:
+                mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{partner_mx}</a>"
+            elif partner_mx:
+                mx_status_text = f"Mit {partner_mx}"
+            else:
+                mx_status_text = "Ohne Partnerin"
+        else:
+            mx_status_text = "Nicht gemeldet"
+            
+        dt_mx = get_date_for_weekday(day_mx, start_date_obj, end_date_obj)
+        if dt_mx and dt_mx in occupied_dates:
+            other_regs = [c for c in occupied_dates[dt_mx] if c["title"] != title]
+            if other_regs:
+                conflict = other_regs[0]
+                p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
+                if reg_mx:
+                    mx_status_text = f"❌ Konflikt: Doppel-Meldung! (Auch gemeldet in {conflict['city']}{p_suffix} - {conflict['disc']})"
+                    mx_status_class = "double-booking"
+                else:
+                    mx_status_text = f"⚠️ Belegt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    mx_status_class = "conflict"
 
-    # HTML Output generieren
+        # Nur Kacheln rendern, die aktiv oder gemeldet sind (Wochentag an erster Stelle!)
+        he_card = f"""
+        <div class="discipline-card {he_class}">
+            <div class="discipline-day">{day_he}</div>
+            <div class="discipline-icon">👤</div>
+            <div class="discipline-title">Einzel</div>
+            <div class="discipline-status {he_status_class}">{he_status_text}</div>
+        </div>
+        """ if show_he else ""
+
+        hd_card = f"""
+        <div class="discipline-card {hd_class}">
+            <div class="discipline-day">{day_hd}</div>
+            <div class="discipline-icon">👥</div>
+            <div class="discipline-title">Doppel</div>
+            <div class="discipline-status {hd_status_class}">{hd_status_text}</div>
+        </div>
+        """ if show_hd else ""
+
+        mx_card = f"""
+        <div class="discipline-card {mx_class}">
+            <div class="discipline-day">{day_mx}</div>
+            <div class="discipline-icon">👥</div>
+            <div class="discipline-title">Mixed</div>
+            <div class="discipline-status {mx_status_class}">{mx_status_text}</div>
+        </div>
+        """ if show_mx else ""
+
+        disciplines_html = f"""
+        <div class="discipline-container">
+            {he_card}
+            {hd_card}
+            {mx_card}
+        </div>
+        """ if (show_he or show_hd or show_mx) else ""
+
+    # HTML Output generieren (Ohne Überschrift / Emblem im HTML)
     html_out = f"""
     <div class="card-inner-container">
         {badges_html}
@@ -880,147 +946,11 @@ if os.path.exists(DB_FILE):
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
-                            start_date_obj = item['Start_Date_Obj']
-                            end_date_obj = item['End_Date_Obj']
-                            
-                            # Prüfe auf Urlaub
-                            tournament_has_vacation = False
-                            if not pd.isnull(start_date_obj) and not pd.isnull(end_date_obj):
-                                curr_date = start_date_obj
-                                limit_dt = 0
-                                while curr_date <= end_date_obj and limit_dt < 10:
-                                    if curr_date in vacation_dates:
-                                        tournament_has_vacation = True
-                                        break
-                                    curr_date += datetime.timedelta(days=1)
-                                    limit_dt += 1
-                                    
-                            # Prüfe auf Konflikte mit anderen Turnieren
-                            tournament_conflicts = []
-                            if not pd.isnull(start_date_obj) and not pd.isnull(end_date_obj):
-                                curr_date = start_date_obj
-                                limit_dt = 0
-                                while curr_date <= end_date_obj and limit_dt < 10:
-                                    if curr_date in occupied_dates:
-                                        for conflict in occupied_dates[curr_date]:
-                                            if conflict["title"] != item["title"]:
-                                                tournament_conflicts.append({
-                                                    "date": curr_date,
-                                                    "disc": conflict["disc"],
-                                                    "city": conflict["city"],
-                                                    "title": conflict["title"],
-                                                    "partner": conflict["partner"]
-                                                })
-                                    curr_date += datetime.timedelta(days=1)
-                                    limit_dt += 1
-                            
-                            # 1. Urlaub (Dezenter kompakter statischer Tag)
-                            if tournament_has_vacation:
-                                tag_html = """
-                                <div class="status-tag-static" style="border-left: 3px solid #3b82f6; color: #1e40af;">
-                                    <span style="margin-right: 6px;">🏖️</span>Urlaub
-                                </div>
-                                """
-                                st.markdown(clean_html(tag_html), unsafe_allow_html=True)
-                            
-                            # 2. Gemeldet (Ausklappbarer kompakter Tag)
-                            elif bool(item.get('registered', False)):
-                                date_groups = {}
-                                unassigned_parts = []
-                                
-                                # Einzel
-                                if bool(item.get('reg_he', False)):
-                                    day_val = item.get('day_he', '')
-                                    dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
-                                    text_part = "Herreneinzel"
-                                    if dt:
-                                        date_groups.setdefault(dt, []).append(text_part)
-                                    else:
-                                        unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
-                                
-                                # Doppel
-                                if bool(item.get('reg_hd', False)):
-                                    text_part = format_discipline_with_partner("Herrendoppel", item.get('partner_hd', ''), PARTNERS_HD, "#166534")
-                                    day_val = item.get('day_hd', '')
-                                    dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
-                                    if dt:
-                                        date_groups.setdefault(dt, []).append(text_part)
-                                    else:
-                                        unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
-                                
-                                # Mixed
-                                if bool(item.get('reg_mx', False)):
-                                    text_part = format_discipline_with_partner("Mixed", item.get('partner_mx', ''), PARTNERS_MX, "#166534")
-                                    day_val = item.get('day_mx', '')
-                                    dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
-                                    if dt:
-                                        date_groups.setdefault(dt, []).append(text_part)
-                                    else:
-                                        unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
-                                        
-                                sorted_dates = sorted(date_groups.keys())
-                                html_lines = []
-                                for dt in sorted_dates:
-                                    w_name = weekday_names_real[dt.weekday()]
-                                    formatted_dt = dt.strftime("%d.%m.%Y")
-                                    disciplines_str = ", ".join(date_groups[dt])
-                                    html_lines.append(f"<div style='margin-top: 2px;'>• <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>")
-                                    
-                                if unassigned_parts:
-                                    html_lines.append(f"<div style='margin-top: 2px;'>📋 <strong>Noch ohne Tag:</strong> {', '.join(unassigned_parts)}</div>")
-                                    
-                                details_html = ""
-                                if html_lines:
-                                    details_html = f"<div style='font-weight: normal; font-size: 0.95em; margin-top: 4px; color: #166534;'>{ ''.join(html_lines) }</div>"
-
-                                if details_html:
-                                    tag_html = f"""
-                                    <details class="status-tag" style="border-left: 3px solid #22c55e; color: #15803d;">
-                                        <summary><span style="margin-right: 6px;">✅</span>Gemeldet</summary>
-                                        <div class="status-content" style="color: #166534;">
-                                            {details_html}
-                                        </div>
-                                    </details>
-                                    """
-                                    st.markdown(clean_html(tag_html), unsafe_allow_html=True)
-                                else:
-                                    tag_html = """
-                                    <div class="status-tag-static" style="border-left: 3px solid #22c55e; color: #15803d;">
-                                        <span style="margin-right: 6px;">✅</span>Gemeldet
-                                    </div>
-                                    """
-                                    st.markdown(clean_html(tag_html), unsafe_allow_html=True)
-                                
-                            # 3. Paralleltermin
-                            elif tournament_conflicts:
-                                html_lines = []
-                                for conflict in tournament_conflicts:
-                                    w_name = weekday_names_real[conflict["date"].weekday()]
-                                    formatted_dt = conflict["date"].strftime("%d.%m.%Y")
-                                    formatted_disc = format_discipline_with_partner(
-                                        conflict["disc"], 
-                                        conflict["partner"], 
-                                        PARTNERS_HD if conflict["disc"] == "Herrendoppel" else PARTNERS_MX, 
-                                        "#475569"
-                                    )
-                                    html_lines.append(f"<div style='margin-top: 2px;'>• <strong>{w_name}, {formatted_dt}:</strong> {formatted_disc} in {conflict['city']} ({conflict['title']})</div>")
-                                    
-                                details_html = "".join(html_lines)
-                                tag_html = f"""
-                                <details class="status-tag" style="border-left: 3px solid #cbd5e1; color: #475569;">
-                                    <summary><span style="margin-right: 6px;">ℹ</span>Paralleltermin</summary>
-                                    <div class="status-content" style="color: #475569;">
-                                        {details_html}
-                                    </div>
-                                </details>
-                                """
-                                st.markdown(clean_html(tag_html), unsafe_allow_html=True)
-
-                            # NATIVE ÜBERSCHRIFT MIT 🏸-EMOJI WIE GEWÜNSCHT (ZURÜCKGEWANDELT)
+                            # NATIVE ÜBERSCHRIFT WIEDER GEWÜNSCHT (ZURÜCKGEWANDELT)
                             st.markdown(f"### 🏸 {item['title']}")
 
                             # RENDERE DIE SPEZIELLE TURNIERKACHEL (DYNAMISCH)
-                            render_styled_tournament_card(item, occupied_dates)
+                            render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes)
                             
                             # Admin-Ansicht
                             if IS_ADMIN:
@@ -1174,79 +1104,11 @@ if os.path.exists(DB_FILE):
                             st.image(logo_to_show, width=140)
                                 
                         with col_info:
-                            # Sanftes grünes Alert-Banner für vergangene Turniere mit denselben Verlinkungen
-                            if bool(item.get('registered', False)):
-                                start_date_obj = item['Start_Date_Obj']
-                                end_date_obj = item['End_Date_Obj']
-                                
-                                date_groups = {}
-                                unassigned_parts = []
-                                
-                                if bool(item.get('reg_he', False)):
-                                    day_val = item.get('day_he', '')
-                                    dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
-                                    text_part = "Herreneinzel"
-                                    if dt:
-                                        date_groups.setdefault(dt, []).append(text_part)
-                                    else:
-                                        unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
-                                
-                                if bool(item.get('reg_hd', False)):
-                                    text_part = format_discipline_with_partner("Herrendoppel", item.get('partner_hd', ''), PARTNERS_HD, "#166534")
-                                    day_val = item.get('day_hd', '')
-                                    dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
-                                    if dt:
-                                        date_groups.setdefault(dt, []).append(text_part)
-                                    else:
-                                        unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
-                                        
-                                if bool(item.get('reg_mx', False)):
-                                    text_part = format_discipline_with_partner("Mixed", item.get('partner_mx', ''), PARTNERS_MX, "#166534")
-                                    day_val = item.get('day_mx', '')
-                                    dt = get_date_for_weekday(day_val, start_date_obj, end_date_obj)
-                                    if dt:
-                                        date_groups.setdefault(dt, []).append(text_part)
-                                    else:
-                                        unassigned_parts.append(text_part + (f" ({day_val})" if day_val else ""))
-                                        
-                                sorted_dates = sorted(date_groups.keys())
-                                html_lines = []
-                                for dt in sorted_dates:
-                                    w_name = weekday_names_real[dt.weekday()]
-                                    formatted_dt = dt.strftime("%d.%m.%Y")
-                                    disciplines_str = ", ".join(date_groups[dt])
-                                    html_lines.append(f"<div style='margin-top: 2px;'>• <strong>{w_name}, {formatted_dt}:</strong> {disciplines_str}</div>")
-                                    
-                                if unassigned_parts:
-                                    html_lines.append(f"<div style='margin-top: 2px;'>📋 <strong>Noch ohne Tag:</strong> {', '.join(unassigned_parts)}</div>")
-                                    
-                                details_html = ""
-                                if html_lines:
-                                    details_html = f"<div style='font-weight: normal; font-size: 0.95em; margin-top: 4px; color: #166534;'>{ ''.join(html_lines) }</div>"
-
-                                if details_html:
-                                    tag_html = f"""
-                                    <details class="status-tag" style="border-left: 3px solid #86efac; color: #166534;">
-                                        <summary><span style="color: #86efac; font-style: normal; margin-right: 5px;">✅</span>Teilgenommen</summary>
-                                        <div class="status-content" style="color: #166534;">
-                                            {details_html}
-                                        </div>
-                                    </details>
-                                    """
-                                    st.markdown(clean_html(tag_html), unsafe_allow_html=True)
-                                else:
-                                    tag_html = """
-                                    <div class="status-tag-static" style="border-left: 3px solid #86efac; color: #166534;">
-                                        <span style="color: #86efac; font-style: normal; margin-right: 5px;">✅</span>Teilgenommen
-                                    </div>
-                                    """
-                                    st.markdown(clean_html(tag_html), unsafe_allow_html=True)
-
                             # NATIVE ÜBERSCHRIFT BEENDET (ZURÜCKGEWANDELT)
                             st.markdown(f"### 🏸 {item['title']} *(Beendet)*")
 
                             # RENDERE DIE SPEZIELLE TURNIERKACHEL (DYNAMISCH)
-                            render_styled_tournament_card(item, occupied_dates)
+                            render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes)
                             
                             # Admin-Ansicht
                             if IS_ADMIN:
