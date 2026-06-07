@@ -174,17 +174,31 @@ st.markdown(
     .org-badge { background-color: #ecfeff; color: #0891b2; }
     .date-badge { background-color: #f5f3ff; color: #6d28d9; }
     
-    /* Sub-Boxes / Discipline Grid - EINHEITLICHE DRITTEL-AUFTEILUNG & GLEICHE HÖHE */
+    /* Sub-Boxes / Discipline Grid - CAROUSEL-SLIDER AUF MOBILGERÄTEN */
     .discipline-container {
         display: flex;
         gap: 12px;
         margin-top: 10px;
         margin-bottom: 10px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
         align-items: stretch;
     }
+    
+    /* Scrollbalken in der Kachelzeile verstecken */
+    .discipline-container::-webkit-scrollbar {
+        display: none;
+    }
+    .discipline-container {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
     .discipline-card {
-        flex: 0 1 calc(33.333% - 8px);
+        flex: 0 0 calc(33.333% - 8px);
+        scroll-snap-align: start;
         min-width: 140px;
         background-color: #f8fafc;
         border: 1px dashed #cbd5e1;
@@ -346,6 +360,14 @@ st.markdown(
         font-weight: 800;
         color: #1e40af;
         letter-spacing: 1px;
+    }
+
+    /* SMARTPHONE RESPONSIVE CAROUSEL SLIDER (max. 3 Kacheln) */
+    @media (max-width: 768px) {
+        .discipline-card {
+            flex: 0 0 82% !important; /* Nimmt 82% Platz ein, 18% lugen für die nächste Kachel hervor */
+            min-width: 250px !important;
+        }
     }
     </style>
     """,
