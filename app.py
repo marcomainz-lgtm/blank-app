@@ -472,12 +472,12 @@ if IS_ADMIN:
 
 # --- DYNAMISCHE HILFSFUNKTIONEN FÜR DATUM UND WOCHENTAGE ---
 def get_tournament_day_options(start_date_obj, end_date_obj):
-    """Generiert eine dynamische Liste aller echten Turniertage plus der Optionen 'Disziplin findet nicht statt' und 'Feld voll'."""
+    """Generiert eine dynamische Liste aller echten Turniertage plus der Option 'Disziplin findet nicht statt'."""
     weekday_names = {
         0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
         4: "Freitag", 5: "Samstag", 6: "Sonntag"
     }
-    options = ["-- Tag wählen --", "Disziplin findet nicht statt", "Feld voll"]
+    options = ["-- Tag wählen --", "Disziplin findet nicht statt"]
     if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
         return options
     
@@ -495,7 +495,7 @@ def get_tournament_day_options(start_date_obj, end_date_obj):
 
 def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
     """Findet das erste Datum im Turnierzeitraum, das dem ausgewählten Wochentag entspricht."""
-    if not day_selection or day_selection in ["-- Tag wählen --", "Keine Angabe", "Disziplin findet nicht statt", "Feld voll", ""]:
+    if not day_selection or day_selection in ["-- Tag wählen --", "Keine Angabe", "Disziplin findet nicht statt", ""]:
         return None
     if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
         return None
@@ -534,14 +534,14 @@ def can_still_register(item, vacation_dates, occupied_dates):
 
     # Wir prüfen alle drei Disziplinen
     disciplines = [
-        ('he', item.get('day_he', ''), bool(item.get('reg_he', False))),
-        ('hd', item.get('day_hd', ''), bool(item.get('reg_hd', False))),
-        ('mx', item.get('day_mx', ''), bool(item.get('reg_mx', False))),
+        ('he', item.get('day_he', ''), bool(item.get('reg_he', False)), bool(item.get('full_he', False))),
+        ('hd', item.get('day_hd', ''), bool(item.get('reg_hd', False)), bool(item.get('full_hd', False))),
+        ('mx', item.get('day_mx', ''), bool(item.get('reg_mx', False)), bool(item.get('full_mx', False))),
     ]
 
-    for key, day_val, is_reg in disciplines:
+    for key, day_val, is_reg, is_full in disciplines:
         # 1. Wenn die Disziplin gar nicht stattfindet oder voll ist, überspringen
-        if day_val in ["Disziplin findet nicht statt", "Feld voll"]:
+        if day_val == "Disziplin findet nicht statt" or is_full:
             continue
             
         # 2. Wenn wir für diese Disziplin bereits gemeldet sind, ist diese spezifische Disziplin nicht mehr "offen"
@@ -621,6 +621,11 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     reg_hd = bool(item.get('reg_hd', False))
     reg_mx = bool(item.get('reg_mx', False))
 
+    # Feld-Voll-Zustände auslesen
+    he_full = bool(item.get('full_he', False))
+    hd_full = bool(item.get('full_hd', False))
+    mx_full = bool(item.get('full_mx', False))
+
     partner_hd = item.get('partner_hd', '').strip()
     partner_mx = item.get('partner_mx', '').strip()
 
@@ -638,8 +643,6 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             return "TBA"
         if day_val == "Disziplin findet nicht statt":
             return "Gestrichen"
-        if day_val == "Feld voll":
-            return "Voll"
         
         # Versuche ein präzises Datum zu ermitteln
         dt = get_date_for_weekday(day_val, s_obj, e_obj)
@@ -664,9 +667,9 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     display_day_hd = format_day_badge(day_hd, start_date_obj, end_date_obj)
     display_day_mx = format_day_badge(day_mx, start_date_obj, end_date_obj)
 
-    day_class_he = "tba-day" if display_day_he in ["TBA", "Voll"] else ""
-    day_class_hd = "tba-day" if display_day_hd in ["TBA", "Voll"] else ""
-    day_class_mx = "tba-day" if display_day_mx in ["TBA", "Voll"] else ""
+    day_class_he = "tba-day" if display_day_he == "TBA" else ""
+    day_class_hd = "tba-day" if display_day_hd == "TBA" else ""
+    day_class_mx = "tba-day" if display_day_mx == "TBA" else ""
 
     # Badges-Leiste aufbauen (Datum an erster Stelle!)
     badges_html = f"""
@@ -686,7 +689,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     he_status_text = "Gemeldet" if reg_he else "Nicht gemeldet"
     he_icon = "👤"
     
-    if day_he == "Feld voll":
+    if he_full:
         if reg_he:
             he_status_text = "Gemeldet (Feld voll)"
         else:
@@ -701,7 +704,6 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             he_status_text = f"🏖️ Urlaub: {vac_note}" if vac_note else "🏖️ Urlaub"
             he_status_class = "vacation-status"
             he_class = "is-vacation"
-            # he_icon bleibt "👤" wie vom Benutzer gewünscht
         elif dt_he and dt_he in occupied_dates:
             other_regs = [c for c in occupied_dates[dt_he] if c["title"] != title]
             if other_regs:
@@ -730,7 +732,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     else:
         hd_status_text = "Nicht gemeldet"
         
-    if day_hd == "Feld voll":
+    if hd_full:
         if reg_hd:
             if partner_hd and partner_hd in PARTNERS_HD:
                 hd_status_text = f"Mit <a href='{PARTNERS_HD[partner_hd]}' target='_blank'>{partner_hd}</a> (Feld voll)"
@@ -750,7 +752,6 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             hd_status_text = f"🏖️ Urlaub: {vac_note}" if vac_note else "🏖️ Urlaub"
             hd_status_class = "vacation-status"
             hd_class = "is-vacation"
-            # hd_icon bleibt "👥" wie vom Benutzer gewünscht
         elif dt_hd and dt_hd in occupied_dates:
             other_regs = [c for c in occupied_dates[dt_hd] if c["title"] != title]
             if other_regs:
@@ -779,7 +780,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     else:
         mx_status_text = "Nicht gemeldet"
         
-    if day_mx == "Feld voll":
+    if mx_full:
         if reg_mx:
             if partner_mx and partner_mx in PARTNERS_MX:
                 mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{partner_mx}</a> (Feld voll)"
@@ -799,7 +800,6 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             mx_status_text = f"🏖️ Urlaub: {vac_note}" if vac_note else "🏖️ Urlaub"
             mx_status_class = "vacation-status"
             mx_class = "is-vacation"
-            # mx_icon bleibt "👥" wie vom Benutzer gewünscht
         elif dt_mx and dt_mx in occupied_dates:
             other_regs = [c for c in occupied_dates[dt_mx] if c["title"] != title]
             if other_regs:
@@ -884,6 +884,9 @@ if os.path.exists(DB_FILE):
             'reg_he': False,
             'reg_hd': False,
             'reg_mx': False,
+            'full_he': False,
+            'full_hd': False,
+            'full_mx': False,
             'partner_hd': '',
             'partner_mx': '',
             'day_he': '',
@@ -905,7 +908,7 @@ if os.path.exists(DB_FILE):
                 df[col] = df[col].fillna(default)
         
         # Datentypen für die Checkbox-Spalten erzwingen
-        for col in ['registered', 'reg_he', 'reg_hd', 'reg_mx']:
+        for col in ['registered', 'reg_he', 'reg_hd', 'reg_mx', 'full_he', 'full_hd', 'full_mx']:
             df[col] = df[col].astype(bool)
 
         # Convert dates for chronological sorting
@@ -1139,6 +1142,15 @@ if os.path.exists(DB_FILE):
                                     selected_label_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_idx, key=f"day_mx_{item['id']}")
                                     val_day_mx = selected_label_mx if selected_label_mx != "-- Tag wählen --" else ""
 
+                                # Checkboxen für "Feld voll" (Sperren der Anmeldung bei laufendem Spieltag)
+                                col_full_he, col_full_hd, col_full_mx = st.columns(3)
+                                with col_full_he:
+                                    val_full_he = st.checkbox("Feld voll (Einzel)", value=bool(item.get('full_he', False)), key=f"full_he_{item['id']}")
+                                with col_full_hd:
+                                    val_full_hd = st.checkbox("Feld voll (Doppel)", value=bool(item.get('full_hd', False)), key=f"full_hd_{item['id']}")
+                                with col_full_mx:
+                                    val_full_mx = st.checkbox("Feld voll (Mixed)", value=bool(item.get('full_mx', False)), key=f"full_mx_{item['id']}")
+
                                 # Checkboxen für die persönliche Anmeldung
                                 st.write("")
                                 st.markdown("**Meine Anmeldung (Für das grüne Banner):**")
@@ -1179,6 +1191,9 @@ if os.path.exists(DB_FILE):
                                     val_he != bool(item.get('reg_he', False)) or
                                     val_hd != bool(item.get('reg_hd', False)) or
                                     val_mx != bool(item.get('reg_mx', False)) or
+                                    val_full_he != bool(item.get('full_he', False)) or
+                                    val_full_hd != bool(item.get('full_hd', False)) or
+                                    val_full_mx != bool(item.get('full_mx', False)) or
                                     val_partner_hd != item.get('partner_hd', '') or
                                     val_partner_mx != item.get('partner_mx', '') or
                                     val_day_he != item.get('day_he', '') or
@@ -1191,6 +1206,9 @@ if os.path.exists(DB_FILE):
                                     data[item['id']]['reg_he'] = val_he
                                     data[item['id']]['reg_hd'] = val_hd
                                     data[item['id']]['reg_mx'] = val_mx
+                                    data[item['id']]['full_he'] = val_full_he
+                                    data[item['id']]['full_hd'] = val_full_hd
+                                    data[item['id']]['full_mx'] = val_full_mx
                                     data[item['id']]['partner_hd'] = val_partner_hd
                                     data[item['id']]['partner_mx'] = val_partner_mx
                                     data[item['id']]['day_he'] = val_day_he
@@ -1249,7 +1267,6 @@ if os.path.exists(DB_FILE):
                             # Admin-Ansicht
                             if IS_ADMIN:
                                 st.write("---")
-                                col_he, col_hd, col_mx = st.columns(3)
                                 start_date_obj = item['Start_Date_Obj']
                                 end_date_obj = item['End_Date_Obj']
                                 day_options = get_tournament_day_options(start_date_obj, end_date_obj)
@@ -1259,6 +1276,7 @@ if os.path.exists(DB_FILE):
                                 with col_past_he:
                                     st.markdown("**Herreneinzel**")
                                     val_he = st.checkbox("Herreneinzel", value=bool(item.get('reg_he', False)), key=f"he_past_{item['id']}")
+                                    val_full_he = st.checkbox("Feld voll (Einzel)", value=bool(item.get('full_he', False)), key=f"full_he_past_{item['id']}")
                                     val_day_he_db = item.get('day_he', '')
                                     if val_he:
                                         he_idx = 0
@@ -1275,6 +1293,7 @@ if os.path.exists(DB_FILE):
                                 with col_past_hd:
                                     st.markdown("**Herrendoppel**")
                                     val_hd = st.checkbox("Herrendoppel", value=bool(item.get('reg_hd', False)), key=f"hd_past_{item['id']}")
+                                    val_full_hd = st.checkbox("Feld voll (Doppel)", value=bool(item.get('full_hd', False)), key=f"full_hd_past_{item['id']}")
                                     val_partner_hd = item.get('partner_hd', '')
                                     val_day_hd_db = item.get('day_hd', '')
                                     
@@ -1300,6 +1319,7 @@ if os.path.exists(DB_FILE):
                                 with col_past_mx:
                                     st.markdown("**Mixed**")
                                     val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_past_{item['id']}")
+                                    val_full_mx = st.checkbox("Feld voll (Mixed)", value=bool(item.get('full_mx', False)), key=f"full_mx_past_{item['id']}")
                                     val_partner_mx = item.get('partner_mx', '')
                                     val_day_mx_db = item.get('day_mx', '')
                                     
@@ -1328,6 +1348,9 @@ if os.path.exists(DB_FILE):
                                     val_he != bool(item.get('reg_he', False)) or
                                     val_hd != bool(item.get('reg_hd', False)) or
                                     val_mx != bool(item.get('reg_mx', False)) or
+                                    val_full_he != bool(item.get('full_he', False)) or
+                                    val_full_hd != bool(item.get('full_hd', False)) or
+                                    val_full_mx != bool(item.get('full_mx', False)) or
                                     val_partner_hd != item.get('partner_hd', '') or
                                     val_partner_mx != item.get('partner_mx', '') or
                                     val_day_he != item.get('day_he', '') or
@@ -1340,6 +1363,9 @@ if os.path.exists(DB_FILE):
                                     data[item['id']]['reg_he'] = val_he
                                     data[item['id']]['reg_hd'] = val_hd
                                     data[item['id']]['reg_mx'] = val_mx
+                                    data[item['id']]['full_he'] = val_full_he
+                                    data[item['id']]['full_hd'] = val_full_hd
+                                    data[item['id']]['full_mx'] = val_full_mx
                                     data[item['id']]['partner_hd'] = val_partner_hd
                                     data[item['id']]['partner_mx'] = val_partner_mx
                                     data[item['id']]['day_he'] = val_day_he

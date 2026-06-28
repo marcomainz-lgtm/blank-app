@@ -203,11 +203,13 @@ def scrape_tournaments(s):
                     "start_date": start_date,
                     "end_date": end_date,
                     "tags": tags,
-                    # Keine automatischen Disziplintage vorausfüllen - wir belassen diese leer
                     "registered": False,
                     "reg_he": False,
                     "reg_hd": False,
                     "reg_mx": False,
+                    "full_he": False,
+                    "full_hd": False,
+                    "full_mx": False,
                     "partner_hd": "",
                     "partner_mx": "",
                     "day_he": "",
@@ -313,16 +315,22 @@ def check_for_updates_generator():
             t["day_he"] = ""
             t["day_hd"] = ""
             t["day_mx"] = ""
+            t["full_he"] = False
+            t["full_hd"] = False
+            t["full_mx"] = False
             
             new_tournaments.append(t)
             known_tournaments[t_id] = t
         else:
-            # Sicherheits-Sync (Meldungen, Spieltage und Partner werden sicher beibehalten)
+            # Sicherheits-Sync (Meldungen, Spieltage, Partner & "Feld voll" werden sicher beibehalten)
             old_t = known_tournaments[t_id]
             is_registered = old_t.get('registered', False)
             reg_he = old_t.get('reg_he', False)
             reg_hd = old_t.get('reg_hd', False)
             reg_mx = old_t.get('reg_mx', False)
+            full_he = old_t.get('full_he', False)
+            full_hd = old_t.get('full_hd', False)
+            full_mx = old_t.get('full_mx', False)
             partner_hd = old_t.get('partner_hd', '')
             partner_mx = old_t.get('partner_mx', '')
             day_he = old_t.get('day_he', '')
@@ -340,6 +348,9 @@ def check_for_updates_generator():
             known_tournaments[t_id]['reg_he'] = reg_he
             known_tournaments[t_id]['reg_hd'] = reg_hd
             known_tournaments[t_id]['reg_mx'] = reg_mx
+            known_tournaments[t_id]['full_he'] = full_he
+            known_tournaments[t_id]['full_hd'] = full_hd
+            known_tournaments[t_id]['full_mx'] = full_mx
             known_tournaments[t_id]['partner_hd'] = partner_hd
             known_tournaments[t_id]['partner_mx'] = partner_mx
             known_tournaments[t_id]['day_he'] = day_he
