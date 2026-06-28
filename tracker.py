@@ -1,10 +1,7 @@
-# --- START OF FILE tracker.py ---
-
 import os
 import json
 import re
 import requests
-import base64
 from bs4 import BeautifulSoup
 import urllib.parse
 
@@ -242,9 +239,9 @@ def send_push_notification(new_items):
 
     count = len(new_items)
     
-    summary_lines = ["Folgende neue Turniere wurden gefunden:"]
+    summary_lines = []
     for idx, item in enumerate(new_items[:5]):
-        summary_lines.append(f"🏸 {item['title']} in {item['city']} ({item['start_date']})")
+        summary_lines.append(f"- {item['title']} in {item['city']} ({item['start_date']})")
         
     if count > 5:
         summary_lines.append(f"... sowie {count - 5} weitere neue Turniere.")
@@ -253,17 +250,13 @@ def send_push_notification(new_items):
     message = "\n".join(summary_lines)
     
     try:
-        # UTF-8 Base64 Codierung für Emojis im Header-Titel (verhindert Darstellungsfehler)
-        title_text = "Yeah, ein neues Turnier ist online! 🥳"
-        encoded_title = f"=?utf-8?b?{base64.b64encode(title_text.encode('utf-8')).decode('utf-8')}?="
-
         requests.post(
             f"https://ntfy.sh/{NTFY_TOPIC}",
             data=message.encode('utf-8'),
             headers={
-                "Title": encoded_title,
+                "Title": "Letztes Update der Datenbank",
                 "Priority": "high",
-                "Tags": "badminton,party_popper"
+                "Tags": "badminton,sports,exclamation"
             }
         )
         print(f"Consolidated notification sent for {count} tournament(s).")
@@ -362,9 +355,3 @@ def check_for_updates_generator():
         send_push_notification(new_tournaments)
     else:
         yield "Fertig! Keine neuen Turniere erkannt."
-
-
-if __name__ == "__main__":
-    check_for_updates()
-
-# --- END OF FILE tracker.py ---

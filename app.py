@@ -1,5 +1,3 @@
-# --- START OF FILE app.py ---
-
 import streamlit as st
 import pandas as pd
 import json
@@ -11,7 +9,6 @@ from zoneinfo import ZoneInfo  # Für die deutsche Zeitzone
 # --- HILFSFUNKTION FÜR SAUBERES HTML-RENDERING ---
 def clean_html(html_str):
     """Entfernt Zeilenumbrüche und überschüssige Einrückungen, damit der
-
     Markdown-Parser von Streamlit das HTML nicht fälschlicherweise als Codeblock anzeigt.
     """
     return re.sub(r'\s+', ' ', html_str).strip()
@@ -475,12 +472,12 @@ if IS_ADMIN:
 
 # --- DYNAMISCHE HILFSFUNKTIONEN FÜR DATUM UND WOCHENTAGE ---
 def get_tournament_day_options(start_date_obj, end_date_obj):
-    """Generiert eine dynamische Liste aller echten Turniertage plus der Option 'Disziplin findet nicht statt'."""
+    """Generiert eine dynamische Liste aller echten Turniertage plus der Optionen 'Disziplin findet nicht statt' und 'Feld voll'."""
     weekday_names = {
         0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag",
         4: "Freitag", 5: "Samstag", 6: "Sonntag"
     }
-    options = ["-- Tag wählen --", "Disziplin findet nicht statt"]
+    options = ["-- Tag wählen --", "Disziplin findet nicht statt", "Feld voll"]
     if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
         return options
     
@@ -498,7 +495,7 @@ def get_tournament_day_options(start_date_obj, end_date_obj):
 
 def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
     """Findet das erste Datum im Turnierzeitraum, das dem ausgewählten Wochentag entspricht."""
-    if not day_selection or day_selection in ["-- Tag wählen --", "Keine Angabe", "Disziplin findet nicht statt", ""]:
+    if not day_selection or day_selection in ["-- Tag wählen --", "Keine Angabe", "Disziplin findet nicht statt", "Feld voll", ""]:
         return None
     if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
         return None
@@ -528,7 +525,6 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
 
 def can_still_register(item, vacation_dates, occupied_dates):
     """Prüft, ob ein Turnier noch offen für Anmeldungen in mindestens einer angebotenen
-
     Disziplin ist, für die der Nutzer noch nicht gemeldet ist und an deren Spieltag er Zeit hat.
     """
     start_date_obj = item['Start_Date_Obj']
@@ -544,8 +540,8 @@ def can_still_register(item, vacation_dates, occupied_dates):
     ]
 
     for key, day_val, is_reg in disciplines:
-        # 1. Wenn die Disziplin gar nicht stattfindet, überspringen
-        if day_val == "Disziplin findet nicht statt":
+        # 1. Wenn die Disziplin gar nicht stattfindet oder voll ist, überspringen
+        if day_val in ["Disziplin findet nicht statt", "Feld voll"]:
             continue
             
         # 2. Wenn wir für diese Disziplin bereits gemeldet sind, ist diese spezifische Disziplin nicht mehr "offen"
@@ -642,6 +638,8 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             return "TBA"
         if day_val == "Disziplin findet nicht statt":
             return "Gestrichen"
+        if day_val == "Feld voll":
+            return "Voll"
         
         # Versuche ein präzises Datum zu ermitteln
         dt = get_date_for_weekday(day_val, s_obj, e_obj)
@@ -666,9 +664,9 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     display_day_hd = format_day_badge(day_hd, start_date_obj, end_date_obj)
     display_day_mx = format_day_badge(day_mx, start_date_obj, end_date_obj)
 
-    day_class_he = "tba-day" if display_day_he == "TBA" else ""
-    day_class_hd = "tba-day" if display_day_hd == "TBA" else ""
-    day_class_mx = "tba-day" if display_day_mx == "TBA" else ""
+    day_class_he = "tba-day" if display_day_he in ["TBA", "Voll"] else ""
+    day_class_hd = "tba-day" if display_day_hd in ["TBA", "Voll"] else ""
+    day_class_mx = "tba-day" if display_day_mx in ["TBA", "Voll"] else ""
 
     # Badges-Leiste aufbauen (Datum an erster Stelle!)
     badges_html = f"""
@@ -681,33 +679,42 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     """
 
     # Sub-Boxen für Disziplinen mit globaler Belegungsprüfung, Doppel-Meldungs-Erkennung & feingranularem Urlaubsschutz
+    
     # -- Einzel --
     he_class = "active-registered" if reg_he else ""
     he_status_class = "registered" if reg_he else ""
     he_status_text = "Gemeldet" if reg_he else "Nicht gemeldet"
     he_icon = "👤"
     
-    dt_he = get_date_for_weekday(day_he, start_date_obj, end_date_obj)
-    
-    if dt_he and dt_he in vacation_dates:
-        vac_note = vacation_notes.get(dt_he, "")
-        he_status_text = f"Urlaub: {vac_note}" if vac_note else "Urlaub"
-        he_status_class = "vacation-status"
-        he_class = "is-vacation"
-        he_icon = "🏖️"
-    elif dt_he and dt_he in occupied_dates:
-        other_regs = [c for c in occupied_dates[dt_he] if c["title"] != title]
-        if other_regs:
-            conflict = other_regs[0]
-            p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
-            if reg_he:
-                he_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
-                he_status_class = "double-booking"
-                he_class = "has-double-booking"
-            else:
-                he_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
-                he_status_class = "conflict"
-                he_class = "has-conflict"
+    if day_he == "Feld voll":
+        if reg_he:
+            he_status_text = "Gemeldet (Feld voll)"
+        else:
+            he_status_text = "🔒 Feld voll"
+            he_status_class = "conflict"
+            he_class = "has-conflict"
+    else:
+        dt_he = get_date_for_weekday(day_he, start_date_obj, end_date_obj)
+        
+        if dt_he and dt_he in vacation_dates:
+            vac_note = vacation_notes.get(dt_he, "")
+            he_status_text = f"🏖️ Urlaub: {vac_note}" if vac_note else "🏖️ Urlaub"
+            he_status_class = "vacation-status"
+            he_class = "is-vacation"
+            # he_icon bleibt "👤" wie vom Benutzer gewünscht
+        elif dt_he and dt_he in occupied_dates:
+            other_regs = [c for c in occupied_dates[dt_he] if c["title"] != title]
+            if other_regs:
+                conflict = other_regs[0]
+                p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
+                if reg_he:
+                    he_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    he_status_class = "double-booking"
+                    he_class = "has-double-booking"
+                else:
+                    he_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    he_status_class = "conflict"
+                    he_class = "has-conflict"
     
     # -- Doppel --
     hd_class = "active-registered" if reg_hd else ""
@@ -723,27 +730,40 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     else:
         hd_status_text = "Nicht gemeldet"
         
-    dt_hd = get_date_for_weekday(day_hd, start_date_obj, end_date_obj)
-    
-    if dt_hd and dt_hd in vacation_dates:
-        vac_note = vacation_notes.get(dt_hd, "")
-        hd_status_text = f"Urlaub: {vac_note}" if vac_note else "Urlaub"
-        hd_status_class = "vacation-status"
-        hd_class = "is-vacation"
-        hd_icon = "🏖️"
-    elif dt_hd and dt_hd in occupied_dates:
-        other_regs = [c for c in occupied_dates[dt_hd] if c["title"] != title]
-        if other_regs:
-            conflict = other_regs[0]
-            p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
-            if reg_hd:
-                hd_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
-                hd_status_class = "double-booking"
-                hd_class = "has-double-booking"
+    if day_hd == "Feld voll":
+        if reg_hd:
+            if partner_hd and partner_hd in PARTNERS_HD:
+                hd_status_text = f"Mit <a href='{PARTNERS_HD[partner_hd]}' target='_blank'>{partner_hd}</a> (Feld voll)"
+            elif partner_hd:
+                hd_status_text = f"Mit {partner_hd} (Feld voll)"
             else:
-                hd_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
-                hd_status_class = "conflict"
-                hd_class = "has-conflict"
+                hd_status_text = "Ohne Partner (Feld voll)"
+        else:
+            hd_status_text = "🔒 Feld voll"
+            hd_status_class = "conflict"
+            hd_class = "has-conflict"
+    else:
+        dt_hd = get_date_for_weekday(day_hd, start_date_obj, end_date_obj)
+        
+        if dt_hd and dt_hd in vacation_dates:
+            vac_note = vacation_notes.get(dt_hd, "")
+            hd_status_text = f"🏖️ Urlaub: {vac_note}" if vac_note else "🏖️ Urlaub"
+            hd_status_class = "vacation-status"
+            hd_class = "is-vacation"
+            # hd_icon bleibt "👥" wie vom Benutzer gewünscht
+        elif dt_hd and dt_hd in occupied_dates:
+            other_regs = [c for c in occupied_dates[dt_hd] if c["title"] != title]
+            if other_regs:
+                conflict = other_regs[0]
+                p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
+                if reg_hd:
+                    hd_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    hd_status_class = "double-booking"
+                    hd_class = "has-double-booking"
+                else:
+                    hd_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    hd_status_class = "conflict"
+                    hd_class = "has-conflict"
 
     # -- Mixed --
     mx_class = "active-registered" if reg_mx else ""
@@ -759,27 +779,40 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     else:
         mx_status_text = "Nicht gemeldet"
         
-    dt_mx = get_date_for_weekday(day_mx, start_date_obj, end_date_obj)
-    
-    if dt_mx and dt_mx in vacation_dates:
-        vac_note = vacation_notes.get(dt_mx, "")
-        mx_status_text = f"Urlaub: {vac_note}" if vac_note else "Urlaub"
-        mx_status_class = "vacation-status"
-        mx_class = "is-vacation"
-        mx_icon = "🏖️"
-    elif dt_mx and dt_mx in occupied_dates:
-        other_regs = [c for c in occupied_dates[dt_mx] if c["title"] != title]
-        if other_regs:
-            conflict = other_regs[0]
-            p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
-            if reg_mx:
-                mx_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
-                mx_status_class = "double-booking"
-                mx_class = "has-double-booking"
+    if day_mx == "Feld voll":
+        if reg_mx:
+            if partner_mx and partner_mx in PARTNERS_MX:
+                mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{partner_mx}</a> (Feld voll)"
+            elif partner_mx:
+                mx_status_text = f"Mit {partner_mx} (Feld voll)"
             else:
-                mx_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
-                mx_status_class = "conflict"
-                mx_class = "has-conflict"
+                mx_status_text = "Ohne Partnerin (Feld voll)"
+        else:
+            mx_status_text = "🔒 Feld voll"
+            mx_status_class = "conflict"
+            mx_class = "has-conflict"
+    else:
+        dt_mx = get_date_for_weekday(day_mx, start_date_obj, end_date_obj)
+        
+        if dt_mx and dt_mx in vacation_dates:
+            vac_note = vacation_notes.get(dt_mx, "")
+            mx_status_text = f"🏖️ Urlaub: {vac_note}" if vac_note else "🏖️ Urlaub"
+            mx_status_class = "vacation-status"
+            mx_class = "is-vacation"
+            # mx_icon bleibt "👥" wie vom Benutzer gewünscht
+        elif dt_mx and dt_mx in occupied_dates:
+            other_regs = [c for c in occupied_dates[dt_mx] if c["title"] != title]
+            if other_regs:
+                conflict = other_regs[0]
+                p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
+                if reg_mx:
+                    mx_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    mx_status_class = "double-booking"
+                    mx_class = "has-double-booking"
+                else:
+                    mx_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    mx_status_class = "conflict"
+                    mx_class = "has-conflict"
 
     # Nur Kacheln rendern, die im Backend erlaubt sind (Datum steht an erster Stelle!)
     he_card = f"""
@@ -1327,5 +1360,3 @@ if os.path.exists(DB_FILE):
         st.info("Der Suchlauf war erfolgreich, aber es wurden keine Turniere in Ihrem Umkreis gefunden.")
 else:
     st.warning("Keine Turnier-Datenbank gefunden. Bitte wenden Sie sich an den Administrator, um den ersten Suchlauf durchzuführen.")
-
-# --- END OF FILE app.py ---
