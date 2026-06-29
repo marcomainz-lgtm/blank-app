@@ -62,12 +62,11 @@ def sync_tournament_to_gcal(item):
     """Synchronisiert alle Disziplinen eines Turniers mit dem Google Kalender."""
     service = get_gcal_service()
     if not service:
-        return
+        raise Exception("Google Service Account konnte nicht initialisiert werden. Überprüfe die Secrets.")
         
     calendar_id = st.secrets.get("calendar_id")
     if not calendar_id:
-        print("Warnung: 'calendar_id' fehlt in den Streamlit Secrets.")
-        return
+        raise Exception("'calendar_id' fehlt in den Streamlit Secrets.")
 
     t_id = item.get("id")
     title = item.get("title", "Turnier")
@@ -85,7 +84,7 @@ def sync_tournament_to_gcal(item):
     ]
 
     for disc_key, disc_name, is_registered, day_selection, partner in disciplines:
-        # Erzeuge eine eindeutige, deterministische ID für diesen Event (erlaubt nur Kleinbuchstaben/Zahlen)
+        # Erzeuge eine eindeutige ID für diesen Event
         event_id = hashlib.md5(f"{t_id}_{disc_key}".encode()).hexdigest()
         
         # Bestimme das konkrete Datum für den Spieltag
@@ -94,7 +93,6 @@ def sync_tournament_to_gcal(item):
         # Falls gemeldet UND Spieltag bekannt -> Event eintragen oder aktualisieren
         if is_registered and dt:
             start_date_str = dt.strftime("%Y-%m-%d")
-            # Google Calendar ganztägige Events benötigen das exklusive Enddatum (Folgetag)
             end_date_str = (dt + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
 
             description_lines = [
@@ -109,12 +107,10 @@ def sync_tournament_to_gcal(item):
                 "location": f"{city} ({dist_str})",
                 "description": "\n".join(description_lines),
                 "start": {
-                    "date": start_date_str,
-                    "timeZone": "Europe/Berlin"
+                    "date": start_date_str
                 },
                 "end": {
-                    "date": end_date_str,
-                    "timeZone": "Europe/Berlin"
+                    "date": end_date_str
                 }
             }
 
@@ -129,16 +125,16 @@ def sync_tournament_to_gcal(item):
                     event_payload["id"] = event_id
                     service.events().insert(calendarId=calendar_id, body=event_payload).execute()
                 else:
-                    print(f"Fehler bei Sync von {title} ({disc_name}): {e}")
+                    raise e
             except Exception as e:
-                print(f"Unerwarteter Fehler bei Sync von {title} ({disc_name}): {e}")
+                raise e
                 
         else:
-            # Falls nicht gemeldet (oder Spieltag gestrichen) -> Event löschen falls vorhanden
+            # Falls nicht gemeldet -> Event löschen falls vorhanden
             try:
                 service.events().delete(calendarId=calendar_id, eventId=event_id).execute()
             except HttpError as e:
                 if e.resp.status != 404:  # Ignoriere Fehler, wenn Event sowieso nicht existierte
-                    print(f"Fehler beim Löschen des Events für {title} ({disc_name}): {e}")
-            except Exception:
-                pass
+                    raise e
+            except Exception as e:
+                raise e
