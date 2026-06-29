@@ -197,8 +197,8 @@ st.markdown(
         flex: 0 1 calc(33.333% - 8px);
         scroll-snap-align: start;
         min-width: 140px;
-        background-color: #f8fafc;
-        border: 1px dashed #cbd5e1;
+        background-color: #ffffff !important; /* Reines Weiß für neutrale Kacheln */
+        border: 1.5px dashed #cbd5e1 !important; /* Gestrichelter, sauberer Rahmen */
         border-radius: 8px;
         padding: 12px;
         text-align: center;
@@ -210,8 +210,8 @@ st.markdown(
         transition: all 0.2s ease-in-out;
     }
     .discipline-card:hover {
-        border-color: #94a3b8;
-        background-color: #f1f5f9;
+        border-color: #94a3b8 !important;
+        background-color: #fafafa !important;
         transform: translateY(-1px);
     }
     
@@ -240,9 +240,9 @@ st.markdown(
 
     /* DEAKTIVIERTER / BLOCKIERTENLOOK BEI PARALLELTERMIN (grau) */
     .discipline-card.has-conflict {
-        border: 1.5px solid #94a3b8 !important;
-        background-color: #f1f5f9 !important;
-        opacity: 0.75;
+        border: 1.5px solid #cbd5e1 !important;
+        background-color: #f1f5f9 !important; /* Matt-grauer Hintergrund */
+        opacity: 0.9 !important; /* Deutlich erhöhte Lesbarkeit */
     }
     .discipline-card.has-conflict .discipline-title {
         color: #475569 !important;
@@ -252,7 +252,7 @@ st.markdown(
         color: #475569 !important;
     }
     .discipline-card.has-conflict .discipline-status {
-        color: #475569 !important;
+        color: #334155 !important; /* Deutlich dunklerer Text für hohen Kontrast */
         font-weight: 600;
     }
 
@@ -261,6 +261,7 @@ st.markdown(
         border: 2.5px solid #ef4444 !important;
         background-color: #fef2f2 !important;
         box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15) !important;
+        opacity: 1 !important;
     }
     .discipline-card.has-double-booking .discipline-title {
         color: #991b1b !important;
@@ -274,15 +275,15 @@ st.markdown(
         font-weight: bold;
     }
 
-    /* URLAUBS-LOOK FÜR EINZELNE KACHELN (blau) */
+    /* URLAUBS-LOOK FÜR EINZELNE KACHELN (blau / soft) */
     .discipline-card.is-vacation {
-        border: 2px solid #3b82f6 !important;
-        background-color: #eff6ff !important;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15) !important;
-        opacity: 1 !important;
+        border: 1.5px dashed #60a5fa !important; /* Gestrichelte, weiche blaue Linie */
+        background-color: #f0f7ff !important; /* Sanfteres Pastel-Blau */
+        box-shadow: none !important; /* Aufdringlichen Schatten entfernt */
+        opacity: 0.85 !important; /* Leicht transparent zur Signalisierung eines passiven Zustands */
     }
     .discipline-card.is-vacation .discipline-title {
-        color: #1e40af !important;
+        color: #2563eb !important;
     }
     .discipline-card.is-vacation .discipline-day {
         background-color: #dbeafe !important;
@@ -327,7 +328,7 @@ st.markdown(
 
     .discipline-status {
         font-size: 0.75rem;
-        color: #94a3b8;
+        color: #64748b; /* Aufgewertetes, lesbares Neutral-Grau für Nicht gemeldet */
     }
     .discipline-status a {
         color: #15803d;
