@@ -509,7 +509,7 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
     try:
         current_date = start_date_obj
         limit = 0
-        while current_date <= end_date_obj && limit < 20:
+        while current_date <= end_date_obj and limit < 20:
             day_name = weekday_names[current_date.weekday()]
             formatted_dt_short = current_date.strftime("%d.%m.")
             current_day_str = f"{day_name}, {formatted_dt_short}"
@@ -1218,6 +1218,15 @@ if os.path.exists(DB_FILE):
                                     
                                     with open(DB_FILE, "w", encoding="utf-8") as f:
                                         json.dump(data, f, ensure_ascii=False, indent=4)
+                                        
+                                    # Google Calendar Sync triggern
+                                    try:
+                                        from gcal_sync import sync_tournament_to_gcal
+                                        sync_tournament_to_gcal(data[item['id']])
+                                        st.toast("Google Kalender erfolgreich aktualisiert!", icon="📅")
+                                    except Exception as e:
+                                        st.toast(f"Fehler bei Google Kalender Sync: {e}", icon="⚠️")
+                                        
                                     st.rerun()
                             
                         with col_link:
@@ -1375,6 +1384,15 @@ if os.path.exists(DB_FILE):
                                     
                                     with open(DB_FILE, "w", encoding="utf-8") as f:
                                         json.dump(data, f, ensure_ascii=False, indent=4)
+                                        
+                                    # Google Calendar Sync triggern
+                                    try:
+                                        from gcal_sync import sync_tournament_to_gcal
+                                        sync_tournament_to_gcal(data[item['id']])
+                                        st.toast("Google Kalender erfolgreich aktualisiert!", icon="📅")
+                                    except Exception as e:
+                                        st.toast(f"Fehler bei Google Kalender Sync: {e}", icon="⚠️")
+                                        
                                     st.rerun()
                             
                         with col_link:
