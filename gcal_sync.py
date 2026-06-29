@@ -48,7 +48,12 @@ def get_gcal_service():
     try:
         info = dict(st.secrets["gcp_service_account"])
         if "private_key" in info:
-            info["private_key"] = info["private_key"].replace("\\n", "\n")
+            pk = info["private_key"]
+            # Bereinige Windows-Zeilenumbrüche (\r\n) und maskierte Umbrüche (\\n)
+            pk = pk.replace("\r\n", "\n").replace("\\n", "\n")
+            # Entferne versehentliche Leerzeichen am Zeilenanfang/-ende
+            pk = "\n".join([line.strip() for line in pk.split("\n") if line.strip()])
+            info["private_key"] = pk
             
         scopes = ["https://www.googleapis.com/auth/calendar"]
         creds = service_account.Credentials.from_service_account_info(info, scopes=scopes)
