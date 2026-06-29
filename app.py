@@ -240,19 +240,19 @@ st.markdown(
 
     /* DEAKTIVIERTER / BLOCKIERTENLOOK BEI PARALLELTERMIN (grau) */
     .discipline-card.has-conflict {
-        border: 1.5px solid #cbd5e1 !important;
-        background-color: #f1f5f9 !important; /* Matt-grauer Hintergrund */
-        opacity: 0.9 !important; /* Deutlich erhöhte Lesbarkeit */
+        border: 1.5px solid #94a3b8 !important; /* Solider, dunklerer grauer Rahmen */
+        background-color: #e2e8f0 !important; /* Deutlicheres Mittelgrau für optimalen Kontrast zu Weiß */
+        opacity: 0.85 !important;
     }
     .discipline-card.has-conflict .discipline-title {
-        color: #475569 !important;
+        color: #334155 !important;
     }
     .discipline-card.has-conflict .discipline-day {
         background-color: #cbd5e1 !important;
-        color: #475569 !important;
+        color: #1e293b !important;
     }
     .discipline-card.has-conflict .discipline-status {
-        color: #334155 !important; /* Deutlich dunklerer Text für hohen Kontrast */
+        color: #1e293b !important; /* Fast schwarz für exzellenten Kontrast */
         font-weight: 600;
     }
 
@@ -277,10 +277,10 @@ st.markdown(
 
     /* URLAUBS-LOOK FÜR EINZELNE KACHELN (blau / soft) */
     .discipline-card.is-vacation {
-        border: 1.5px dashed #60a5fa !important; /* Gestrichelte, weiche blaue Linie */
-        background-color: #f0f7ff !important; /* Sanfteres Pastel-Blau */
-        box-shadow: none !important; /* Aufdringlichen Schatten entfernt */
-        opacity: 0.85 !important; /* Leicht transparent zur Signalisierung eines passiven Zustands */
+        border: 1.5px dashed #3b82f6 !important; /* Gestrichelte, klare blaue Linie */
+        background-color: #eff6ff !important; /* Sanftes, frisches Himmelblau */
+        box-shadow: none !important;
+        opacity: 0.85 !important;
     }
     .discipline-card.is-vacation .discipline-title {
         color: #2563eb !important;
@@ -328,7 +328,7 @@ st.markdown(
 
     .discipline-status {
         font-size: 0.75rem;
-        color: #64748b; /* Aufgewertetes, lesbares Neutral-Grau für Nicht gemeldet */
+        color: #64748b; /* Lesbares Slate-Grau für Nicht gemeldet */
     }
     .discipline-status a {
         color: #15803d;
@@ -509,7 +509,7 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
     try:
         current_date = start_date_obj
         limit = 0
-        while current_date <= end_date_obj and limit < 20:
+        while current_date <= end_date_obj && limit < 20:
             day_name = weekday_names[current_date.weekday()]
             formatted_dt_short = current_date.strftime("%d.%m.")
             current_day_str = f"{day_name}, {formatted_dt_short}"
