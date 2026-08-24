@@ -4,6 +4,7 @@ import re
 import requests
 from bs4 import BeautifulSoup
 import urllib.parse
+from gist_db import load_gist_file, save_gist_file
 
 # Ihr stabiler ntfy-Push-Kanal
 NTFY_TOPIC = "my_badminton_tournaments_40723_v2" 
@@ -297,13 +298,8 @@ def check_for_updates_generator():
         yield f"Fehler beim Laden der Turnierliste: {e}"
         return
 
-    known_tournaments = {}
-    if os.path.exists(DB_FILE):
-        try:
-            with open(DB_FILE, "r", encoding="utf-8") as f:
-                known_tournaments = json.load(f)
-        except Exception:
-            yield "Konnte bestehende Datenbank nicht lesen, initialisiere neu."
+    # Lade bestehende Daten aus dem Gist
+    known_tournaments = load_gist_file(DB_FILE, fallback_default={})
 
     # Neue Turniere aus dem Suchlauf in die Datenbank integrieren
     new_tournaments = []
@@ -358,8 +354,8 @@ def check_for_updates_generator():
             known_tournaments[t_id]['day_mx'] = day_mx
             known_tournaments[t_id]['description'] = desc
 
-    with open(DB_FILE, "w", encoding="utf-8") as f:
-        json.dump(known_tournaments, f, ensure_ascii=False, indent=4)
+    # Speichere die aktualisierte Datenbank zurück ins Gist
+    save_gist_file(DB_FILE, known_tournaments)
 
     if new_tournaments:
         yield f"Fertig! {len(new_tournaments)} neue(s) Turnier(e) gefunden."

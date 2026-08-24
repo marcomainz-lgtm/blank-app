@@ -5,6 +5,7 @@ import os
 import datetime
 import re
 from zoneinfo import ZoneInfo  # Für die deutsche Zeitzone
+from gist_db import load_gist_file, save_gist_file
 
 # --- HILFSFUNKTION FÜR SAUBERES HTML-RENDERING ---
 def clean_html(html_str):
@@ -18,20 +19,10 @@ def clean_html(html_str):
 VACATION_FILE = "vacations.json"
 
 def load_vacations():
-    if os.path.exists(VACATION_FILE):
-        try:
-            with open(VACATION_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            pass
-    return {}
+    return load_gist_file(VACATION_FILE, fallback_default={})
 
 def save_vacations(vacations):
-    try:
-        with open(VACATION_FILE, "w", encoding="utf-8") as f:
-            json.dump(vacations, f, ensure_ascii=False, indent=4)
-    except Exception:
-        pass
+    save_gist_file(VACATION_FILE, vacations)
 
 def add_vacation(start, end, note):
     vacations = load_vacations()
@@ -869,11 +860,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
 
 # Load and present database
 if os.path.exists(DB_FILE):
-    try:
-        with open(DB_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    except Exception:
-        data = {}
+    data = load_gist_file(DB_FILE, fallback_default={})
 
     if data:
         # Build DataFrame
@@ -1216,8 +1203,7 @@ if os.path.exists(DB_FILE):
                                     data[item['id']]['day_hd'] = val_day_hd
                                     data[item['id']]['day_mx'] = val_day_mx
                                     
-                                    with open(DB_FILE, "w", encoding="utf-8") as f:
-                                        json.dump(data, f, ensure_ascii=False, indent=4)
+                                    save_gist_file(DB_FILE, data)
                                         
                                     # Google Calendar Sync triggern
                                     try:
@@ -1382,8 +1368,7 @@ if os.path.exists(DB_FILE):
                                     data[item['id']]['day_hd'] = val_day_hd
                                     data[item['id']]['day_mx'] = val_day_mx
                                     
-                                    with open(DB_FILE, "w", encoding="utf-8") as f:
-                                        json.dump(data, f, ensure_ascii=False, indent=4)
+                                    save_gist_file(DB_FILE, data)
                                         
                                     # Google Calendar Sync triggern
                                     try:
