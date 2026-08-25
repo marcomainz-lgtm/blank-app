@@ -51,7 +51,7 @@ def get_gcal_service():
             pk = info["private_key"]
             # Bereinige Windows-Zeilenumbrüche (\r\n) und maskierte Umbrüche (\\n)
             pk = pk.replace("\r\n", "\n").replace("\\n", "\n")
-            # Entferne versehentliche Leerzeichen am Zeilenanfang/-ende
+            # Entferne Leerzeichen am Zeilenanfang/-ende (Behebt Einrückungsfehler)
             pk = "\n".join([line.strip() for line in pk.split("\n") if line.strip()])
             info["private_key"] = pk
             
