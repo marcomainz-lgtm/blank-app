@@ -4,9 +4,22 @@ import requests
 import streamlit as st
 
 def get_gist_secrets():
-    """Liest die Gist-Geheimnisse aus den Streamlit Secrets."""
-    token = st.secrets.get("github_token")
-    gist_id = st.secrets.get("gist_id")
+    """Liest die Gist-Geheimnisse aus den Streamlit Secrets oder den Umgebungsvariablen (für GitHub Actions)."""
+    # 1. Prüfe, ob wir in GitHub Actions laufen (über Umgebungsvariablen)
+    token = os.environ.get("GIST_TOKEN")
+    gist_id = os.environ.get("GIST_ID")
+    
+    # 2. Falls nicht, nutze die Streamlit Secrets (sicher verpackt gegen Standalone-Abbrüche)
+    if not token or not gist_id:
+        try:
+            if "github_token" in st.secrets:
+                token = st.secrets["github_token"]
+            if "gist_id" in st.secrets:
+                gist_id = st.secrets["gist_id"]
+        except Exception:
+            # Falls st.secrets außerhalb der Streamlit-Umgebung aufgerufen wird und fehlt
+            pass
+            
     return token, gist_id
 
 
