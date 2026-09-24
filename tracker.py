@@ -4,7 +4,7 @@ import re
 import requests
 from bs4 import BeautifulSoup
 import urllib.parse
-from gist_db import load_gist_file, save_gist_file
+from gist_db import load_gist_file, save_gist_file, DatabaseConnectionError
 
 # Ihr stabiler ntfy-Push-Kanal
 NTFY_TOPIC = "my_badminton_tournaments_40723_v2" 
@@ -45,12 +45,10 @@ def get_tournament_description(session, tournament_url):
         r = session.get(tournament_url, headers=headers, timeout=10)
         if r.status_code == 200:
             soup = BeautifulSoup(r.content, 'html.parser')
-            # Versuche den blauen Ausschreibungs-Infokasten (alert--info) zu finden
             alert_box = soup.find(class_=re.compile(r'alert--info|alert__body'))
             if alert_box:
                 return alert_box.get_text(separator="\n").strip()
             
-            # Fallback: Versuche den Haupt-Inhaltsbereich zu lesen
             main_content = soup.find(id="main")
             if main_content:
                 return main_content.get_text(separator="\n").strip()[:1000]
@@ -73,7 +71,7 @@ def scrape_tournaments(s):
     tournaments = []
     seen_ids = set()
     page = 1
-    max_pages = 20  # Sicherheitsgrenze für Scraper
+    max_pages = 20
 
     while page <= max_pages:
         print(f"Scraping page {page}...")
@@ -136,12 +134,10 @@ def scrape_tournaments(s):
                         if part_strip and part_strip != title and part_strip not in cleaned_parts:
                             cleaned_parts.append(part_strip)
 
-                    # 1. Bild-Logo auslesen
                     img_el = container.find('img')
                     if img_el and img_el.get('src'):
                         logo_url = urllib.parse.urljoin("https://dbv.turnier.de", img_el['src'])
 
-                    # 2. Start- und Enddatum extrahieren (Muster: DD.MM.YYYY)
                     dates = re.findall(r'\b\d{2}\.\d{2}\.\d{4}\b', raw_text)
                     if len(dates) >= 2:
                         start_date = dates[0]
@@ -150,7 +146,6 @@ def scrape_tournaments(s):
                         start_date = dates[0]
                         end_date = dates[0]
 
-                    # 3. Stadt und Kilometerzahl extrahieren
                     for part in cleaned_parts:
                         if 'km' in part.lower():
                             dist_match = re.search(r'(\d+)\s*km', part.lower())
@@ -162,7 +157,6 @@ def scrape_tournaments(s):
                             city = cleaned.strip()
                             break
 
-                    # 4. Ausrichter / Verein ("The Team") ermitteln
                     non_meta_parts = []
                     for part in cleaned_parts:
                         has_date = bool(re.search(r'\b\d{2}\.\d{2}\.\d{4}\b', part))
@@ -172,7 +166,6 @@ def scrape_tournaments(s):
                     if non_meta_parts:
                         organizer = non_meta_parts[0]
 
-                    # 5. Klassen (Tags) segmentieren
                     for part in cleaned_parts:
                         if re.search(r'\b\d{2}\.\d{2}\.\d{4}\b', part):
                             continue
@@ -188,7 +181,6 @@ def scrape_tournaments(s):
                 else:
                     tags = ""
 
-                # Jugendfilter anwenden
                 if is_youth_tournament(title, tag_parts):
                     continue
 
@@ -220,19 +212,16 @@ def scrape_tournaments(s):
                 })
                 page_tournaments_count += 1
 
-        print(f"Page {page} yielded {page_tournaments_count} tournament(s).")
-        
         if page_tournaments_count == 0:
             break
             
         has_more = response.headers.get('HasMoreResults')
         if has_more and has_more.lower() == 'false':
-            print("Server indicated no further results are available.")
             break
 
         page += 1
 
-    print(f"Successfully scraped {len(tournaments)} tournament(s) in total across {page} page(s).")
+    print(f"Scraped {len(tournaments)} tournament(s) across {page} page(s).")
     return tournaments
 
 
@@ -241,7 +230,6 @@ def send_push_notification(new_items):
         return
 
     count = len(new_items)
-    
     summary_lines = []
     for idx, item in enumerate(new_items[:5]):
         summary_lines.append(f"- {item['title']} in {item['city']} ({item['start_date']})")
@@ -257,28 +245,40 @@ def send_push_notification(new_items):
             f"https://ntfy.sh/{NTFY_TOPIC}",
             data=message.encode('utf-8'),
             headers={
-                "Title": "Letztes Update der Datenbank",
+                "Title": f"🏸 {count} neue(s) Badminton-Turnier(e) gefunden!",
                 "Priority": "high",
-                "Tags": "badminton,sports,exclamation"
-            }
+                "Tags": "badminton,sports,tada"
+            },
+            timeout=10
         )
-        print(f"Consolidated notification sent for {count} tournament(s).")
+        print(f"Push-Benachrichtigung für {count} Turniere erfolgreich gesendet.")
     except Exception as e:
-        print(f"Error sending notification: {e}")
+        print(f"Fehler beim Senden der Push-Nachricht: {e}")
 
 
 def check_for_updates():
-    """Fallback-Funktion für Kompatibilität."""
+    """Fallback-Funktion."""
     for _ in check_for_updates_generator():
         pass
 
 
 def check_for_updates_generator():
-    """Generator-Funktion für das Echtzeit-Web-Aktivitätsprotokoll."""
+    """Generator-Funktion mit FAIL-SAFE Datenbankprüfung vor dem Scrapen."""
+    yield "Verbinde mit zentraler Cloud-Datenbank (GitHub Gist)..."
+    
+    # 1. NOTBREMSE: Erst Datenbank prüfen
+    try:
+        known_tournaments = load_gist_file(DB_FILE)
+        yield f"✅ Datenbank erfolgreich geladen ({len(known_tournaments)} bekannte Turniere in der Cloud)."
+    except DatabaseConnectionError as e:
+        yield f"🚨 KRITISCHER DATENBANKFEHLER: {e}"
+        yield "❌ VORGANG ABGEBROCHEN! Es wurden weder Turniere gescrapt noch Push-Nachrichten versendet."
+        return
+
+    # 2. Erst nach erfolgreicher Datenbankprüfung auf turnier.de zugreifen
     yield "Suche nach neuen Turnieren auf turnier.de..."
     session = requests.Session()
     
-    # Setze Sprach- und Consent-Cookies für alle Subdomains von turnier.de
     for dom in ["dbv.turnier.de", ".turnier.de", "www.turnier.de"]:
         session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain=dom, path="/")
     
@@ -287,26 +287,22 @@ def check_for_updates_generator():
     }
     try:
         session.get("https://dbv.turnier.de/find", headers=headers_init, timeout=10)
-        yield "Frische Session-Cookies erfolgreich geladen."
+        yield "Frische Session-Cookies geladen."
     except Exception as e:
-        yield f"Warnung beim Laden der Session-Cookies: {e}."
+        yield f"Warnung Session-Cookies: {e}."
     
     try:
         current_list = scrape_tournaments(session)
-        yield f"Suche beendet. {len(current_list)} Turniere im Umkreis von 100km ermittelt."
+        yield f"Suche beendet: {len(current_list)} Turniere im 100km-Umkreis ermittelt."
     except Exception as e:
-        yield f"Fehler beim Laden der Turnierliste: {e}"
+        yield f"Fehler beim Scraping: {e}"
         return
 
-    # Lade bestehende Daten aus dem Gist
-    known_tournaments = load_gist_file(DB_FILE, fallback_default={})
-
-    # Neue Turniere aus dem Suchlauf in die Datenbank integrieren
     new_tournaments = []
     for t in current_list:
         t_id = t["id"]
         if t_id not in known_tournaments:
-            yield f"Neues Turnier gefunden: {t['title']}. Lade Ausschreibungstext..."
+            yield f"Neues Turnier erkannt: {t['title']}. Lade Ausschreibung..."
             t["description"] = get_tournament_description(session, t["link"])
             t["day_he"] = ""
             t["day_hd"] = ""
@@ -318,7 +314,7 @@ def check_for_updates_generator():
             new_tournaments.append(t)
             known_tournaments[t_id] = t
         else:
-            # Sicherheits-Sync (Meldungen, Spieltage, Partner & "Feld voll" werden sicher beibehalten)
+            # Bestehende Einstellungen erhalten
             old_t = known_tournaments[t_id]
             is_registered = old_t.get('registered', False)
             reg_he = old_t.get('reg_he', False)
@@ -333,7 +329,6 @@ def check_for_updates_generator():
             day_hd = old_t.get('day_hd', '')
             day_mx = old_t.get('day_mx', '')
             
-            # Fehlenden Beschreibungstext bei bestehenden Turnieren nachladen
             desc = old_t.get('description', '')
             if not desc:
                 yield f"Lade Ausschreibungstext für '{t['title']}' nach..."
@@ -354,11 +349,16 @@ def check_for_updates_generator():
             known_tournaments[t_id]['day_mx'] = day_mx
             known_tournaments[t_id]['description'] = desc
 
-    # Speichere die aktualisierte Datenbank zurück ins Gist
-    save_gist_file(DB_FILE, known_tournaments)
+    # Sicher speichern
+    try:
+        save_gist_file(DB_FILE, known_tournaments)
+        yield "💾 Änderungen erfolgreich in GitHub Gist gespeichert."
+    except DatabaseConnectionError as e:
+        yield f"🚨 FEHLER BEIM SPEICHERN IM GIST: {e}"
+        return
 
     if new_tournaments:
         yield f"Fertig! {len(new_tournaments)} neue(s) Turnier(e) gefunden."
         send_push_notification(new_tournaments)
     else:
-        yield "Fertig! Keine neuen Turniere erkannt."
+        yield "Fertig! Keine neuen Turniere erkannt (Datenbestand unverändert)."
