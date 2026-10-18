@@ -94,7 +94,6 @@ PARTNERS_MX = {
     "Vanessa Joppien": "https://dbv.turnier.de/player-profile/76DA93E6-43E2-45CE-B28F-FDA12433FDBA"
 }
 
-# Umfassende Auswahl für KO-, Monrad- und Gruppensysteme
 PLACEMENT_OPTIONS = [
     "-- Keine Angabe --",
     "🥇 1. Platz",
@@ -119,6 +118,114 @@ FIELD_OPTIONS = [
     "C-Feld",
     "Sonstiges"
 ]
+
+# --- KOORDINATEN-DATENBANK FÜR NRW & UMGEBUNG (~100km um Hilden) ---
+CITY_COORDINATES = {
+    "Hilden": (51.1693, 6.9328),
+    "Solingen": (51.1712, 7.0841),
+    "Düsseldorf": (51.2277, 6.7735),
+    "Wuppertal": (51.2562, 7.1508),
+    "Remscheid": (51.1798, 7.1923),
+    "Mettmann": (51.2541, 6.9765),
+    "Ratingen": (51.2964, 6.8526),
+    "Erkrath": (51.2239, 6.9142),
+    "Haan": (51.1931, 7.0125),
+    "Velbert": (51.3402, 7.0422),
+    "Heiligenhaus": (51.3256, 6.9711),
+    "Langenfeld": (51.1114, 6.9497),
+    "Monheim am Rhein": (51.0911, 6.8906),
+    "Monheim": (51.0911, 6.8906),
+    "Leverkusen": (51.0459, 6.9856),
+    "Köln": (50.9375, 6.9603),
+    "Bonn": (50.7374, 7.0982),
+    "Bergisch Gladbach": (50.9929, 7.1293),
+    "Siegburg": (50.7997, 7.2074),
+    "Sankt Augustin": (50.7702, 7.1873),
+    "Troisdorf": (50.8167, 7.1583),
+    "Hennef": (50.7758, 7.2831),
+    "Euskirchen": (50.6606, 6.7872),
+    "Düren": (50.8022, 6.4842),
+    "Aachen": (50.7753, 6.0839),
+    "Stolberg": (50.7681, 6.2308),
+    "Eschweiler": (50.8197, 6.2625),
+    "Jülich": (50.9224, 6.3606),
+    "Mönchengladbach": (51.1911, 6.4431),
+    "Viersen": (51.2564, 6.3917),
+    "Krefeld": (51.3388, 6.5853),
+    "Neuss": (51.1982, 6.6917),
+    "Dormagen": (51.0964, 6.8397),
+    "Grevenbroich": (51.0883, 6.5878),
+    "Willich": (51.2628, 6.5494),
+    "Meerbusch": (51.2725, 6.6692),
+    "Kaarst": (51.2269, 6.6206),
+    "Kempen": (51.3653, 6.4194),
+    "Nettetal": (51.3167, 6.2833),
+    "Moers": (51.4514, 6.6286),
+    "Duisburg": (51.4344, 6.7623),
+    "Oberhausen": (51.4700, 6.8517),
+    "Mülheim an der Ruhr": (51.4272, 6.8828),
+    "Mülheim": (51.4272, 6.8828),
+    "Essen": (51.4556, 7.0116),
+    "Bottrop": (51.5239, 6.9286),
+    "Gelsenkirchen": (51.5175, 7.0858),
+    "Bochum": (51.4818, 7.2162),
+    "Herne": (51.5425, 7.2239),
+    "Recklinghausen": (51.6167, 7.2000),
+    "Gladbeck": (51.5714, 6.9911),
+    "Marl": (51.6667, 7.1167),
+    "Dorsten": (51.6603, 6.9653),
+    "Castrop-Rauxel": (51.5500, 7.3167),
+    "Dortmund": (51.5136, 7.4653),
+    "Witten": (51.4417, 7.3361),
+    "Hagen": (51.3671, 7.4633),
+    "Schwerte": (51.4417, 7.5667),
+    "Lünen": (51.6167, 7.5167),
+    "Unna": (51.5350, 7.6889),
+    "Kamen": (51.5917, 7.6639),
+    "Hamm": (51.6811, 7.8186),
+    "Iserlohn": (51.3761, 7.6958),
+    "Menden": (51.4333, 7.7833),
+    "Lüdenscheid": (51.2197, 7.6269),
+    "Arnsberg": (51.3967, 8.0644),
+    "Soest": (51.5714, 8.1067),
+    "Münster": (51.9607, 7.6261),
+    "Coesfeld": (51.9461, 7.1683),
+    "Dülmen": (51.8308, 7.2783),
+    "Borken": (51.8439, 6.8583),
+    "Bocholt": (51.8389, 6.6167),
+    "Wesel": (51.6583, 6.6167),
+    "Dinslaken": (51.5667, 6.7333),
+    "Voerde": (51.6000, 6.6833),
+    "Kleve": (51.7889, 6.1389),
+    "Emmerich": (51.8333, 6.2500),
+    "Geldern": (51.5194, 6.3319),
+    "Kevelaer": (51.5833, 6.2500),
+    "Kamp-Lintfort": (51.5000, 6.5333),
+    "Wermelskirchen": (51.1389, 7.2167),
+    "Wipperfürth": (51.1167, 7.4000),
+    "Radevormwald": (51.2000, 7.3500),
+    "Gummersbach": (51.0264, 7.5658),
+    "Wiehl": (50.9500, 7.5500),
+    "Waldbröl": (50.9000, 7.6167),
+    "Olpe": (51.0294, 7.8461),
+    "Siegen": (50.8747, 8.0244),
+    "Koblenz": (50.3569, 7.5889),
+    "Neuwied": (50.4286, 7.4614),
+    "Andernach": (50.4397, 7.4014),
+    "Bad Neuenahr-Ahrweiler": (50.5447, 7.1133),
+    "Remagen": (50.5786, 7.2306),
+    "Königswinter": (50.6833, 7.1833),
+    "Bad Honnef": (50.6444, 7.2278),
+    "Bornheim": (50.7594, 6.9931),
+    "Meckenheim": (50.6272, 7.0253),
+    "Rheinbach": (50.6256, 6.9483),
+    "Niederkassel": (50.8167, 7.0333),
+    "Lohmar": (50.8417, 7.2167),
+    "Rösrath": (50.9000, 7.1833),
+    "Overath": (50.9333, 7.2833),
+    "Burscheid": (51.0833, 7.1167),
+    "Leichlingen": (51.1167, 7.0167)
+}
 
 # Custom CSS
 st.markdown(
@@ -210,7 +317,7 @@ st.markdown(
         color: #e2e8f0;
     }
 
-    /* Medaillen-Badges direkt in den Disziplin-Kacheln */
+    /* Medaillen-Badges in Disziplin-Kacheln */
     .discipline-result-pill {
         font-size: 0.72rem;
         font-weight: 700;
@@ -230,7 +337,6 @@ st.markdown(
     .badge-bronze { background-color: #ffedd5; color: #9a3412; border: 1.5px solid #ea580c; }
     .badge-neutral { background-color: #f8fafc; color: #475569; border: 1px solid #cbd5e1; }
 
-    /* Medaillen-Karten-Akzente */
     .discipline-card.card-gold { border: 2px solid #f59e0b !important; background-color: #fffdf5 !important; }
     .discipline-card.card-silver { border: 2px solid #94a3b8 !important; background-color: #f8fafc !important; }
     .discipline-card.card-bronze { border: 2px solid #ea580c !important; background-color: #fffaf5 !important; }
@@ -655,7 +761,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             if partner_mx and partner_mx in PARTNERS_MX and PARTNERS_MX[partner_mx]:
                 mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{safe_partner_mx}</a> (Feld voll)"
             elif partner_mx:
-                mx_status_text = f"Mit {safe_partner_mx}"
+                mx_status_text = f"Mit {safe_partner_mx} (Feld voll)"
             else:
                 mx_status_text = "Ohne Partnerin (Feld voll)"
         else:
@@ -832,7 +938,6 @@ def render_season_chart(df):
     df_chart = pd.DataFrame(records)
     df_chart = df_chart.sort_values(by="date", ascending=True)
 
-    # Intelligente Bündelung für die Y-Achse (verhindert das Explodieren bei ausgespielten Plätzen)
     def normalize_placement_for_axis(p):
         p_lower = p.lower()
         if "1." in p or "gold" in p_lower:
@@ -855,13 +960,11 @@ def render_season_chart(df):
 
     df_chart["axis_placement"] = df_chart["placement"].apply(normalize_placement_for_axis)
 
-    # Medaillen-Zähler für den ZEIT-Header
     gold_cnt = sum(1 for p in df_chart["placement"] if "1." in p or "Gold" in p)
     silver_cnt = sum(1 for p in df_chart["placement"] if "2." in p or "Silber" in p)
     bronze_cnt = sum(1 for p in df_chart["placement"] if "3." in p or "Bronze" in p)
     total_played = len(df_chart["title"].unique())
 
-    # Feste, aufgeräumte 8-Stufen-Skala (von unten nach oben)
     y_categories = [
         "Teilgenommen",
         "Gruppenphase / Vorrunde",
@@ -877,11 +980,10 @@ def render_season_chart(df):
         if p not in y_categories:
             y_categories.insert(0, p)
 
-    # ZEIT Online Neon-Palette
     colors = {
-        "Einzel": "#22d3ee",  # Electric Cyan
-        "Doppel": "#4ade80",  # Neon Mint Green
-        "Mixed": "#c084fc"   # Neon Lilac
+        "Einzel": "#22d3ee",
+        "Doppel": "#4ade80",
+        "Mixed": "#c084fc"
     }
 
     fig = go.Figure()
@@ -959,7 +1061,6 @@ def render_season_chart(df):
         )
     )
 
-    # ZEIT Online Hero-Tile
     st.markdown(
         f"""
         <div class="zeit-card">
@@ -977,6 +1078,145 @@ def render_season_chart(df):
     )
 
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+
+# --- DEUTSCHLANDKARTE / HEATMAP DER SPIELORTE (ZEIT-LOOK) ---
+def render_tournament_heatmap(df):
+    city_counts = {}
+    city_tournaments = {}
+
+    for _, row in df.iterrows():
+        raw_city = str(row.get('city', '')).strip()
+        if not raw_city or raw_city == "Unbekannt":
+            continue
+        
+        clean_c = re.sub(r'^\d+\s*', '', raw_city).strip()
+        matched_city = None
+        
+        if clean_c in CITY_COORDINATES:
+            matched_city = clean_c
+        else:
+            for known_c in CITY_COORDINATES.keys():
+                if known_c.lower() in clean_c.lower() or clean_c.lower() in known_c.lower():
+                    matched_city = known_c
+                    break
+
+        if matched_city:
+            city_counts[matched_city] = city_counts.get(matched_city, 0) + 1
+            t_title = row.get('title', 'Turnier')
+            city_tournaments.setdefault(matched_city, []).append(t_title)
+
+    if not city_counts:
+        st.info("Keine geocodierten Spielorte für die Karte gefunden.")
+        return
+
+    lats = [CITY_COORDINATES[c][0] for c in city_counts.keys()]
+    lons = [CITY_COORDINATES[c][1] for c in city_counts.keys()]
+    counts = [city_counts[c] for c in city_counts.keys()]
+    cities = list(city_counts.keys())
+
+    # ZEIT Online Hero-Tile für die Karte
+    top_cities = sorted(city_counts.items(), key=lambda x: x[1], reverse=True)[:3]
+    hotspot_str = " • ".join([f"{c} ({cnt})" for c, cnt in top_cities])
+
+    st.markdown(
+        f"""
+        <div class="zeit-card">
+            <div class="zeit-header-title">Geografische Verteilung • Spielorte 2026</div>
+            <div class="zeit-hero-number">{len(cities)} Städte</div>
+            <div class="zeit-hero-sub">Konzentration der Badminton-Turniere im Umkreis von Hilden</div>
+            <div class="zeit-kpi-row">
+                <span class="zeit-kpi-tag" style="border-color: #22d3ee; color: #22d3ee;">📍 Top-Standorte: {hotspot_str}</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    hover_texts = []
+    for c in cities:
+        t_list = city_tournaments[c]
+        t_sample = "<br>• " + "<br>• ".join(t_list[:3])
+        if len(t_list) > 3:
+            t_sample += f"<br>• ... (+{len(t_list)-3} weitere)"
+        hover_texts.append(
+            f"<span style='font-size:14px; font-weight:800; color:#22d3ee;'>📍 {c}</span><br>"
+            f"<span style='font-size:12px; color:#f8fafc;'><b>{city_counts[c]} Turniere</b></span>"
+            f"<span style='font-size:11px; color:#94a3b8;'>{t_sample}</span>"
+        )
+
+    fig_map = go.Figure()
+
+    # 1. Heatmap-Glow Layer (weicher Dichte-Nebel im Hintergrund)
+    fig_map.add_trace(go.Densitymapbox(
+        lat=lats,
+        lon=lons,
+        z=counts,
+        radius=35,
+        colorscale=[
+            [0.0, "rgba(15, 23, 42, 0)"],
+            [0.2, "rgba(8, 145, 178, 0.4)"],
+            [0.5, "rgba(6, 182, 212, 0.7)"],
+            [0.8, "rgba(34, 211, 238, 0.9)"],
+            [1.0, "rgba(56, 189, 248, 1.0)"]
+        ],
+        showscale=False,
+        hoverinfo="skip"
+    ))
+
+    # 2. Präzise Neon-Punkte mit Hover-Information
+    fig_map.add_trace(go.Scattermapbox(
+        lat=lats,
+        lon=lons,
+        mode="markers",
+        marker=dict(
+            size=[min(8 + c * 4, 24) for c in counts],
+            color="#22d3ee",
+            opacity=0.95
+        ),
+        text=hover_texts,
+        hoverinfo="text"
+    ))
+
+    # Hilden als Heimat-Marker hervorheben
+    hilden_coord = CITY_COORDINATES["Hilden"]
+    fig_map.add_trace(go.Scattermapbox(
+        lat=[hilden_coord[0]],
+        lon=[hilden_coord[1]],
+        mode="markers",
+        marker=dict(
+            size=14,
+            color="#f59e0b",
+            symbol="circle"
+        ),
+        text=["<span style='font-size:13px; font-weight:800; color:#f59e0b;'>🏠 Hilden (Heimatbasis)</span>"],
+        hoverinfo="text",
+        showlegend=False
+    ))
+
+    avg_lat = sum(lats) / len(lats) if lats else 51.17
+    avg_lon = sum(lons) / len(lons) if lons else 6.95
+
+    fig_map.update_layout(
+        height=420,
+        margin=dict(l=0, r=0, t=0, b=0),
+        showlegend=False,
+        mapbox_style="carto-darkmatter",
+        mapbox=dict(
+            center=dict(lat=avg_lat, lon=avg_lon),
+            zoom=8.0
+        ),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        hoverlabel=dict(
+            bgcolor="#1e293b",
+            bordercolor="rgba(255, 255, 255, 0.15)",
+            font_size=12,
+            font_family="Inter, -apple-system, sans-serif"
+        )
+    )
+
+    st.plotly_chart(fig_map, use_container_width=True, config={"displayModeBar": False})
 
 
 # --- WIEDERVERWENDBARER ADMIN-EDITOR ---
@@ -1454,6 +1694,11 @@ elif data is not None:
 
         month_names = {1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni", 7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"}
 
+        # --- DEUTSCHLANDKARTE / HEATMAP DER SPIELORTE ---
+        st.write("")
+        with st.expander("🗺️ Deutschlandkarte & Spielorte (Heatmap anzeigen)", expanded=False):
+            render_tournament_heatmap(df)
+
         # --- ANSTEHENDE TURNIERE ---
         st.subheader(f"📅 Anstehende Turniere ({len(df_upcoming)})")
         
@@ -1497,7 +1742,7 @@ elif data is not None:
         # --- VERGANGENE TURNIERE & INTERAKTIVE FORMKURVE ---
         st.subheader(f"🕰️ Vergangene Turniere ({len(df_past)})")
 
-        with st.expander("📈 Saisonverlauf & Formkurve 2026 anzeigen", expanded=True):
+        with st.expander("📈 Saisonverlauf & Formkurve 2026 anzeigen", expanded=False):
             render_season_chart(df)
 
         with st.expander("Vergangene Turniere anzeigen", expanded=False):
