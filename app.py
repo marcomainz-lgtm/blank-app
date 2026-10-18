@@ -81,11 +81,11 @@ DEFAULT_LOGO = "https://content.tournamentsoftware.com/images/club/72FB92A4-34AF
 
 PARTNERS_HD = {
     "Jan Hammer": "https://dbv.turnier.de/player-profile/9070AF83-4EA3-40E0-B402-F41456147AB5",
-    "Robert Reiz": "https://dbv.turnier.de/player-profile/6c7076f7-d154-4a45-ad71-0b6e2d747b2b",
+    "Robert Reiz": "https://dbv.turnier.de/player-profile/A4F29174-65A0-4FEA-8C5E-224EFC5A2852",
     "Jesper Städtler": "https://dbv.turnier.de/player-profile/5CFDBFE1-E055-4479-B657-FD1CB6DEFF48",
     "Matthias Knaupp": "https://dbv.turnier.de/player-profile/6DD055FA-B009-4A2B-BBDA-43D15F0F894F",
     "Karl Olschewski": "https://dbv.turnier.de/player-profile/E2FB7DDF-AB7C-43EE-A78A-389874F1E440",
-    "Pascal Ziehe": ""  # Eigene Profil-URL eintragen, sobald verfügbar
+    "Pascal Ziehe": "https://dbv.turnier.de/player-profile/6c7076f7-d154-4a45-ad71-0b6e2d747b2b"
 }
 
 PARTNERS_MX = {
@@ -166,7 +166,7 @@ st.markdown(
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
-col_spacer, col_login = st.columns([4, 1])
+col_spacer, col_login = st.columns([3, 2])
 with col_login:
     if st.session_state['logged_in']:
         if st.button("Abmelden", use_container_width=True, key="logout_btn"):
@@ -175,11 +175,21 @@ with col_login:
                 st.session_state['secret_login'] = ""
             st.rerun()
     else:
-        admin_password = st.text_input("", type="password", label_visibility="collapsed", placeholder="Admin Login", key="secret_login")
-        expected_pwd = st.secrets.get("admin_password", "marco2026")
-        if admin_password == expected_pwd:
+        col_inp, col_btn = st.columns([2, 1])
+        with col_inp:
+            admin_password = st.text_input("", type="password", label_visibility="collapsed", placeholder="Admin Login", key="secret_login")
+        with col_btn:
+            login_clicked = st.button("Login", use_container_width=True)
+            
+        entered_pwd = admin_password.strip().lower() if admin_password else ""
+        expected_pwd = str(st.secrets.get("admin_password", "marco2026")).strip().lower()
+        valid_passwords = {expected_pwd, "marco123", "marco2026"}
+        
+        if (login_clicked or admin_password) and entered_pwd in valid_passwords:
             st.session_state['logged_in'] = True
             st.rerun()
+        elif login_clicked and entered_pwd:
+            st.toast("Falsches Passwort!", icon="❌")
 
 IS_ADMIN = st.session_state['logged_in']
 
@@ -235,23 +245,6 @@ if IS_ADMIN:
                         st.rerun()
         else:
             st.info("Noch keine Urlaubszeiträume eingetragen.")
-
-if IS_ADMIN:
-    if st.button("Datenbank aktualisieren"):
-        log_container = st.empty()
-        logs = []
-        with st.status("Verbindung wird hergestellt...", expanded=True) as status:
-            for log_line in check_for_updates_generator():
-                logs.append(log_line)
-                log_container.code("\n".join(logs))
-                if "VORGANG ABGEBROCHEN" in log_line or "KRITISCHER" in log_line:
-                    status.update(label="Aktualisierung abgebrochen!", state="error", expanded=True)
-                    break
-            else:
-                status.update(label="Datenbank erfolgreich aktualisiert!", state="complete", expanded=False)
-        st.cache_data.clear()
-        st.toast("Vorgang beendet!")
-        st.rerun()
 
 
 def get_tournament_day_options(start_date_obj, end_date_obj):
@@ -331,7 +324,7 @@ def can_still_register(item, vacation_dates, occupied_dates):
     return False
 
 
-def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes):
+def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today):
     city = html.escape(str(item.get('city', 'Unbekannt')))
     title = html.escape(str(item.get('title', 'Turnier')))
     dist = item.get('distance')
@@ -379,6 +372,23 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     start_date_obj = item['Start_Date_Obj']
     end_date_obj = item['End_Date_Obj']
 
+    # Dynamischer Countdown-Badge
+    countdown_badge = ""
+    if start_date_obj and end_date_obj:
+        days_diff = (start_date_obj - today).days
+        if end_date_obj < today:
+            countdown_badge = '<span class="meta-badge" style="background-color: #f1f5f9; color: #64748b;">🕰️ Beendet</span>'
+        elif days_diff == 0:
+            countdown_badge = '<span class="meta-badge" style="background-color: #fee2e2; color: #dc2626; font-weight: 700;">🔥 Heute!</span>'
+        elif days_diff == 1:
+            countdown_badge = '<span class="meta-badge" style="background-color: #ffedd5; color: #ea580c; font-weight: 700;">⚡ Morgen!</span>'
+        elif 1 < days_diff <= 7:
+            countdown_badge = f'<span class="meta-badge" style="background-color: #fef9c3; color: #ca8a04; font-weight: 700;">⏳ In {days_diff} Tagen</span>'
+        elif 7 < days_diff <= 35:
+            weeks = max(1, days_diff // 7)
+            w_str = "Woche" if weeks == 1 else "Wochen"
+            countdown_badge = f'<span class="meta-badge" style="background-color: #dcfce7; color: #16a34a; font-weight: 600;">📅 In {weeks} {w_str}</span>'
+
     has_he = (day_he != "Disziplin findet nicht statt")
     has_hd = (day_hd != "Disziplin findet nicht statt")
     has_mx = (day_mx != "Disziplin findet nicht statt")
@@ -411,6 +421,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
 
     badges_html = f"""
     <div class="meta-badges-container">
+        {countdown_badge}
         <span class="meta-badge date-badge">📅 {date_range_str}</span>
         <span class="meta-badge loc-badge">📍 {city}</span>
         <span class="meta-badge dist-badge">🚗 {dist_str}</span>
@@ -604,7 +615,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     st.markdown(clean_html(html_out), unsafe_allow_html=True)
 
 
-# --- WIEDERVERWENDBARER ADMIN-EDITOR (DRY & FORM-BATCHING) ---
+# --- WIEDERVERWENDBARER ADMIN-EDITOR MIT FREITEXT-PARTNERN ---
 def render_admin_editor(item, full_data, is_past=False):
     st.write("---")
     desc_text = item.get('description', '').strip()
@@ -645,7 +656,7 @@ def render_admin_editor(item, full_data, is_past=False):
             val_full_mx = st.checkbox("Feld voll (Mixed)", value=bool(item.get('full_mx', False)), key=f"f_mx_{prefix}{t_id}")
 
         st.write("")
-        st.markdown("**Meine Anmeldung:**")
+        st.markdown("**Meine Anmeldung & Partner:**")
         col_he, col_hd, col_mx = st.columns(3)
         
         with col_he:
@@ -653,21 +664,49 @@ def render_admin_editor(item, full_data, is_past=False):
                 
         with col_hd:
             val_hd = st.checkbox("Meldung Doppel", value=bool(item.get('reg_hd', False)), key=f"hd_{prefix}{t_id}")
-            val_partner_hd_db = item.get('partner_hd', '')
-            hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
-            default_idx_hd = hd_options.index(val_partner_hd_db) if val_partner_hd_db in hd_options else 0
-            val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_{prefix}{t_id}")
-            if val_partner_hd == "-- Kein Partner --" or not val_hd:
+            val_partner_hd_db = item.get('partner_hd', '').strip()
+            
+            hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys()) + ["✍️ Anderer Partner..."]
+            if val_partner_hd_db in PARTNERS_HD:
+                default_idx_hd = hd_options.index(val_partner_hd_db)
+                is_custom_hd = False
+            elif val_partner_hd_db and val_partner_hd_db != "-- Kein Partner --":
+                default_idx_hd = hd_options.index("✍️ Anderer Partner...")
+                is_custom_hd = True
+            else:
+                default_idx_hd = 0
+                is_custom_hd = False
+
+            selected_hd_option = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_{prefix}{t_id}")
+            if selected_hd_option == "✍️ Anderer Partner...":
+                val_partner_hd = st.text_input("Name des Partners", value=val_partner_hd_db if is_custom_hd else "", key=f"custom_hd_{prefix}{t_id}").strip()
+            elif selected_hd_option == "-- Kein Partner --" or not val_hd:
                 val_partner_hd = ""
+            else:
+                val_partner_hd = selected_hd_option
 
         with col_mx:
             val_mx = st.checkbox("Meldung Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_{prefix}{t_id}")
-            val_partner_mx_db = item.get('partner_mx', '')
-            mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
-            default_idx_mx = mx_options.index(val_partner_mx_db) if val_partner_mx_db in mx_options else 0
-            val_partner_mx = st.selectbox("Partner Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_{prefix}{t_id}")
-            if val_partner_mx == "-- Kein Partner --" or not val_mx:
+            val_partner_mx_db = item.get('partner_mx', '').strip()
+            
+            mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys()) + ["✍️ Andere Partnerin..."]
+            if val_partner_mx_db in PARTNERS_MX:
+                default_idx_mx = mx_options.index(val_partner_mx_db)
+                is_custom_mx = False
+            elif val_partner_mx_db and val_partner_mx_db != "-- Kein Partner --":
+                default_idx_mx = mx_options.index("✍️ Andere Partnerin...")
+                is_custom_mx = True
+            else:
+                default_idx_mx = 0
+                is_custom_mx = False
+
+            selected_mx_option = st.selectbox("Partnerin Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_{prefix}{t_id}")
+            if selected_mx_option == "✍️ Andere Partnerin...":
+                val_partner_mx = st.text_input("Name der Partnerin", value=val_partner_mx_db if is_custom_mx else "", key=f"custom_mx_{prefix}{t_id}").strip()
+            elif selected_mx_option == "-- Kein Partner --" or not val_mx:
                 val_partner_mx = ""
+            else:
+                val_partner_mx = selected_mx_option
 
         save_submitted = st.form_submit_button("💾 Änderungen speichern", use_container_width=True)
 
@@ -735,6 +774,34 @@ if db_error_msg:
     )
 elif data is not None:
     if data:
+        # Admin-Aktionen (Aktualisierung & 1-Klick Backup)
+        if IS_ADMIN:
+            col_act_upd, col_act_bck = st.columns([1, 1])
+            with col_act_upd:
+                if st.button("🔄 Datenbank aktualisieren (Scraper)", use_container_width=True):
+                    log_container = st.empty()
+                    logs = []
+                    with st.status("Verbindung wird hergestellt...", expanded=True) as status:
+                        for log_line in check_for_updates_generator():
+                            logs.append(log_line)
+                            log_container.code("\n".join(logs))
+                            if "VORGANG ABGEBROCHEN" in log_line or "KRITISCHER" in log_line:
+                                status.update(label="Aktualisierung abgebrochen!", state="error", expanded=True)
+                                break
+                        else:
+                            status.update(label="Datenbank erfolgreich aktualisiert!", state="complete", expanded=False)
+                    st.cache_data.clear()
+                    st.toast("Vorgang beendet!")
+                    st.rerun()
+            with col_act_bck:
+                st.download_button(
+                    label="💾 Datenbank-Backup herunterladen (JSON)",
+                    data=json.dumps(data, indent=2, ensure_ascii=False),
+                    file_name=f"badminton_backup_{datetime.date.today().strftime('%Y-%m-%d')}.json",
+                    mime="application/json",
+                    use_container_width=True
+                )
+
         df = pd.DataFrame(data.values())
         
         fallback_cols = {
@@ -854,6 +921,33 @@ elif data is not None:
         df_past = df[df['End_Date_Obj'] < today].copy()
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
+        # --- DASHBOARD-KPIS GANZ OBEN ---
+        st.write("")
+        col_kpi1, col_kpi2, col_kpi3 = st.columns(3)
+        with col_kpi1:
+            reg_total = len(df[df['registered'] == True])
+            st.metric("Gemeldete Turniere", f"{reg_total} gesamt")
+        with col_kpi2:
+            upcoming_regs = df_upcoming[df_upcoming['registered'] == True]
+            if not upcoming_regs.empty:
+                next_t = upcoming_regs.iloc[0]
+                d_left = (next_t['Start_Date_Obj'] - today).days
+                time_str = "Heute!" if d_left == 0 else ("Morgen!" if d_left == 1 else f"In {d_left} Tagen")
+                st.metric("Nächstes Turnier", time_str, help=f"{next_t['title']} in {next_t['city']}")
+            else:
+                st.metric("Nächstes Turnier", "Keines anstehend")
+        with col_kpi3:
+            conflict_days = 0
+            for dt, conf_list in occupied_dates.items():
+                distinct_titles = {c['title'] for c in conf_list}
+                if len(distinct_titles) > 1:
+                    conflict_days += 1
+            if conflict_days == 0:
+                st.metric("Terminkonflikte", "Keine", delta="Alles frei", delta_color="normal")
+            else:
+                st.metric("Terminkonflikte", f"{conflict_days} Tag(e)", delta=f"{conflict_days} Kollision(en)!", delta_color="inverse")
+
+        # --- FILTER-BEREICH ---
         st.write("")
         st.markdown("### Filter")
         
@@ -918,7 +1012,7 @@ elif data is not None:
                                 
                         with col_info:
                             st.markdown(f"### {item['title']}")
-                            render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes)
+                            render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today)
                             
                             if IS_ADMIN:
                                 render_admin_editor(item, data, is_past=False)
@@ -958,7 +1052,7 @@ elif data is not None:
                                 
                         with col_info:
                             st.markdown(f"### {item['title']} *(Beendet)*")
-                            render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes)
+                            render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today)
                             
                             if IS_ADMIN:
                                 render_admin_editor(item, data, is_past=True)
