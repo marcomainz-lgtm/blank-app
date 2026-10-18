@@ -3,18 +3,20 @@ import pandas as pd
 import json
 import os
 import datetime
+import html
 import re
 from zoneinfo import ZoneInfo
 from gist_db import load_gist_file, save_gist_file, DatabaseConnectionError
 
 # --- HILFSFUNKTION FÜR SAUBERES HTML-RENDERING ---
-def clean_html(html_str):
+def clean_html(html_str: str) -> str:
     return re.sub(r'\s+', ' ', html_str).strip()
 
 
-# --- HILFSFUNKTIONEN FÜR DIE URLAUBS-DATENBANK ---
+# --- HILFSFUNKTIONEN FÜR DIE URLAUBS-DATENBANK MIT CACHING ---
 VACATION_FILE = "vacations.json"
 
+@st.cache_data(ttl=60)
 def load_vacations():
     try:
         return load_gist_file(VACATION_FILE)
@@ -23,9 +25,10 @@ def load_vacations():
 
 def save_vacations(vacations):
     save_gist_file(VACATION_FILE, vacations)
+    st.cache_data.clear()
 
 def add_vacation(start, end, note):
-    vacations = load_vacations()
+    vacations = dict(load_vacations())
     v_id = str(int(datetime.datetime.now().timestamp()))
     vacations[v_id] = {
         "id": v_id,
@@ -36,10 +39,20 @@ def add_vacation(start, end, note):
     save_vacations(vacations)
 
 def delete_vacation(v_id):
-    vacations = load_vacations()
+    vacations = dict(load_vacations())
     if v_id in vacations:
         del vacations[v_id]
         save_vacations(vacations)
+
+
+# --- TURNIER-DATEN LADEN MIT CACHING ---
+@st.cache_data(ttl=60)
+def load_tournaments_data(db_file):
+    return load_gist_file(db_file)
+
+def save_tournaments_data(db_file, data):
+    save_gist_file(db_file, data)
+    st.cache_data.clear()
 
 
 # --- SICHERER IMPORT MIT AUTOMATISCHEM FALLBACK ---
@@ -72,7 +85,7 @@ PARTNERS_HD = {
     "Jesper Städtler": "https://dbv.turnier.de/player-profile/5CFDBFE1-E055-4479-B657-FD1CB6DEFF48",
     "Matthias Knaupp": "https://dbv.turnier.de/player-profile/6DD055FA-B009-4A2B-BBDA-43D15F0F894F",
     "Karl Olschewski": "https://dbv.turnier.de/player-profile/E2FB7DDF-AB7C-43EE-A78A-389874F1E440",
-    "Pascal Ziehe": "https://dbv.turnier.de/player-profile/6c7076f7-d154-4a45-ad71-0b6e2d747b2b"
+    "Pascal Ziehe": ""  # Eigene Profil-URL eintragen, sobald verfügbar
 }
 
 PARTNERS_MX = {
@@ -163,7 +176,8 @@ with col_login:
             st.rerun()
     else:
         admin_password = st.text_input("", type="password", label_visibility="collapsed", placeholder="Admin Login", key="secret_login")
-        if admin_password == "marco2026":
+        expected_pwd = st.secrets.get("admin_password", "marco2026")
+        if admin_password == expected_pwd:
             st.session_state['logged_in'] = True
             st.rerun()
 
@@ -212,7 +226,7 @@ if IS_ADMIN:
             for v_id, v in list(vacations_data.items()):
                 v_col_info, v_col_btn = st.columns([5, 1])
                 with v_col_info:
-                    note_suffix = f" (*{v['note']}*)" if v['note'] else ""
+                    note_suffix = f" (*{html.escape(v['note'])}*)" if v.get('note') else ""
                     st.markdown(f"🌴 **{v['start_date']}** bis **{v['end_date']}**{note_suffix}")
                 with v_col_btn:
                     if st.button("Zeitraum löschen", key=f"del_v_{v_id}", use_container_width=True):
@@ -235,6 +249,7 @@ if IS_ADMIN:
                     break
             else:
                 status.update(label="Datenbank erfolgreich aktualisiert!", state="complete", expanded=False)
+        st.cache_data.clear()
         st.toast("Vorgang beendet!")
         st.rerun()
 
@@ -245,14 +260,12 @@ def get_tournament_day_options(start_date_obj, end_date_obj):
     if pd.isnull(start_date_obj) or pd.isnull(end_date_obj):
         return options
     
-    current_date = start_date_obj
-    limit = 0
-    while current_date <= end_date_obj and limit < 20:
+    num_days = max(0, (end_date_obj - start_date_obj).days + 1)
+    for i in range(min(num_days, 14)):
+        current_date = start_date_obj + datetime.timedelta(days=i)
         day_name = weekday_names[current_date.weekday()]
         formatted_date = current_date.strftime("%d.%m.")
         options.append(f"{day_name}, {formatted_date}")
-        current_date += datetime.timedelta(days=1)
-        limit += 1
         
     return options
 
@@ -265,17 +278,15 @@ def get_date_for_weekday(day_selection, start_date_obj, end_date_obj):
     
     weekday_names = {0: "Montag", 1: "Dienstag", 2: "Mittwoch", 3: "Donnerstag", 4: "Freitag", 5: "Samstag", 6: "Sonntag"}
     try:
-        current_date = start_date_obj
-        limit = 0
-        while current_date <= end_date_obj and limit < 20:
+        num_days = max(0, (end_date_obj - start_date_obj).days + 1)
+        for i in range(min(num_days, 14)):
+            current_date = start_date_obj + datetime.timedelta(days=i)
             day_name = weekday_names[current_date.weekday()]
             formatted_dt_short = current_date.strftime("%d.%m.")
             current_day_str = f"{day_name}, {formatted_dt_short}"
             
             if day_selection == current_day_str or day_selection == day_name:
                 return current_date
-            current_date += datetime.timedelta(days=1)
-            limit += 1
     except Exception:
         pass
     return None
@@ -321,20 +332,21 @@ def can_still_register(item, vacation_dates, occupied_dates):
 
 
 def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes):
-    city = item.get('city', 'Unbekannt')
-    title = item.get('title', 'Turnier')
+    city = html.escape(str(item.get('city', 'Unbekannt')))
+    title = html.escape(str(item.get('title', 'Turnier')))
     dist = item.get('distance')
     dist_str = f"{dist} km" if dist is not None else "Keine Angabe"
     
-    org_str = item.get('organizer', 'Unbekannt')
+    org_str = str(item.get('organizer', 'Unbekannt'))
     if org_str.startswith("NRW - "):
         org_str = org_str[len("NRW - "):].strip()
+    org_str = html.escape(org_str)
     
     start_str = item.get('start_date')
     end_str = item.get('end_date')
     if start_str and end_str:
         if start_str == end_str:
-            date_range_str = start_str
+            date_range_str = html.escape(start_str)
         else:
             try:
                 s_parts = start_str.split('.')
@@ -345,6 +357,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                     date_range_str = f"{start_str} - {end_str}"
             except Exception:
                 date_range_str = f"{start_str} - {end_str}"
+            date_range_str = html.escape(date_range_str)
     else:
         date_range_str = "Datum unbekannt"
 
@@ -384,9 +397,9 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         
         if isinstance(day_val, str) and "," in day_val:
             parts = day_val.split(",")
-            return f"{parts[0].strip()}<br>{parts[1].strip()}"
+            return f"{html.escape(parts[0].strip())}<br>{html.escape(parts[1].strip())}"
         
-        return day_val
+        return html.escape(str(day_val))
 
     display_day_he = format_day_badge(day_he, start_date_obj, end_date_obj)
     display_day_hd = format_day_badge(day_hd, start_date_obj, end_date_obj)
@@ -422,20 +435,22 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         dt_he = get_date_for_weekday(day_he, start_date_obj, end_date_obj)
         if dt_he and dt_he in vacation_dates:
             vac_note = vacation_notes.get(dt_he, "")
-            he_status_text = f"🏖️ Urlaub: {vac_note}" if vac_note else "🏖️ Urlaub"
+            he_status_text = f"🏖️ Urlaub: {html.escape(vac_note)}" if vac_note else "🏖️ Urlaub"
             he_status_class = "vacation-status"
             he_class = "is-vacation"
         elif dt_he and dt_he in occupied_dates:
-            other_regs = [c for c in occupied_dates[dt_he] if c["title"] != title]
+            other_regs = [c for c in occupied_dates[dt_he] if c["title"] != item.get('title')]
             if other_regs:
                 conflict = other_regs[0]
-                p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
+                p_suffix = f" mit {html.escape(conflict['partner'])}" if conflict['partner'] else ""
+                c_disc = html.escape(conflict['disc'])
+                c_city = html.escape(conflict['city'])
                 if reg_he:
-                    he_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    he_status_text = f"Terminkonflikt: {c_disc} in {c_city}{p_suffix}"
                     he_status_class = "double-booking"
                     he_class = "has-double-booking"
                 else:
-                    he_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    he_status_text = f"Paralleltermin: {c_disc} in {c_city}{p_suffix}"
                     he_status_class = "conflict"
                     he_class = "has-conflict"
     
@@ -443,11 +458,12 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     hd_class = "active-registered" if reg_hd else ""
     hd_status_class = "registered" if reg_hd else ""
     hd_icon = "👥"
+    safe_partner_hd = html.escape(partner_hd)
     if reg_hd:
-        if partner_hd and partner_hd in PARTNERS_HD:
-            hd_status_text = f"Mit <a href='{PARTNERS_HD[partner_hd]}' target='_blank'>{partner_hd}</a>"
+        if partner_hd and partner_hd in PARTNERS_HD and PARTNERS_HD[partner_hd]:
+            hd_status_text = f"Mit <a href='{PARTNERS_HD[partner_hd]}' target='_blank'>{safe_partner_hd}</a>"
         elif partner_hd:
-            hd_status_text = f"Mit {partner_hd}"
+            hd_status_text = f"Mit {safe_partner_hd}"
         else:
             hd_status_text = "Ohne Partner"
     else:
@@ -455,10 +471,10 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         
     if hd_full:
         if reg_hd:
-            if partner_hd and partner_hd in PARTNERS_HD:
-                hd_status_text = f"Mit <a href='{PARTNERS_HD[partner_hd]}' target='_blank'>{partner_hd}</a> (Feld voll)"
+            if partner_hd and partner_hd in PARTNERS_HD and PARTNERS_HD[partner_hd]:
+                hd_status_text = f"Mit <a href='{PARTNERS_HD[partner_hd]}' target='_blank'>{safe_partner_hd}</a> (Feld voll)"
             elif partner_hd:
-                hd_status_text = f"Mit {partner_hd} (Feld voll)"
+                hd_status_text = f"Mit {safe_partner_hd} (Feld voll)"
             else:
                 hd_status_text = "Ohne Partner (Feld voll)"
         else:
@@ -469,20 +485,22 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         dt_hd = get_date_for_weekday(day_hd, start_date_obj, end_date_obj)
         if dt_hd and dt_hd in vacation_dates:
             vac_note = vacation_notes.get(dt_hd, "")
-            hd_status_text = f"🏖️ Urlaub: {vac_note}" if vac_note else "🏖️ Urlaub"
+            hd_status_text = f"🏖️ Urlaub: {html.escape(vac_note)}" if vac_note else "🏖️ Urlaub"
             hd_status_class = "vacation-status"
             hd_class = "is-vacation"
         elif dt_hd and dt_hd in occupied_dates:
-            other_regs = [c for c in occupied_dates[dt_hd] if c["title"] != title]
+            other_regs = [c for c in occupied_dates[dt_hd] if c["title"] != item.get('title')]
             if other_regs:
                 conflict = other_regs[0]
-                p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
+                p_suffix = f" mit {html.escape(conflict['partner'])}" if conflict['partner'] else ""
+                c_disc = html.escape(conflict['disc'])
+                c_city = html.escape(conflict['city'])
                 if reg_hd:
-                    hd_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    hd_status_text = f"Terminkonflikt: {c_disc} in {c_city}{p_suffix}"
                     hd_status_class = "double-booking"
                     hd_class = "has-double-booking"
                 else:
-                    hd_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    hd_status_text = f"Paralleltermin: {c_disc} in {c_city}{p_suffix}"
                     hd_status_class = "conflict"
                     hd_class = "has-conflict"
 
@@ -490,11 +508,12 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     mx_class = "active-registered" if reg_mx else ""
     mx_status_class = "registered" if reg_mx else ""
     mx_icon = "👥"
+    safe_partner_mx = html.escape(partner_mx)
     if reg_mx:
-        if partner_mx and partner_mx in PARTNERS_MX:
-            mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{partner_mx}</a>"
+        if partner_mx and partner_mx in PARTNERS_MX and PARTNERS_MX[partner_mx]:
+            mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{safe_partner_mx}</a>"
         elif partner_mx:
-            mx_status_text = f"Mit {partner_mx}"
+            mx_status_text = f"Mit {safe_partner_mx}"
         else:
             mx_status_text = "Ohne Partnerin"
     else:
@@ -502,10 +521,10 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         
     if mx_full:
         if reg_mx:
-            if partner_mx and partner_mx in PARTNERS_MX:
-                mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{partner_mx}</a> (Feld voll)"
+            if partner_mx and partner_mx in PARTNERS_MX and PARTNERS_MX[partner_mx]:
+                mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{safe_partner_mx}</a> (Feld voll)"
             elif partner_mx:
-                mx_status_text = f"Mit {partner_mx} (Feld voll)"
+                mx_status_text = f"Mit {safe_partner_mx} (Feld voll)"
             else:
                 mx_status_text = "Ohne Partnerin (Feld voll)"
         else:
@@ -516,20 +535,22 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         dt_mx = get_date_for_weekday(day_mx, start_date_obj, end_date_obj)
         if dt_mx and dt_mx in vacation_dates:
             vac_note = vacation_notes.get(dt_mx, "")
-            mx_status_text = f"🏖️ Urlaub: {vac_note}" if vac_note else "🏖️ Urlaub"
+            mx_status_text = f"🏖️ Urlaub: {html.escape(vac_note)}" if vac_note else "🏖️ Urlaub"
             mx_status_class = "vacation-status"
             mx_class = "is-vacation"
         elif dt_mx and dt_mx in occupied_dates:
-            other_regs = [c for c in occupied_dates[dt_mx] if c["title"] != title]
+            other_regs = [c for c in occupied_dates[dt_mx] if c["title"] != item.get('title')]
             if other_regs:
                 conflict = other_regs[0]
-                p_suffix = f" mit {conflict['partner']}" if conflict['partner'] else ""
+                p_suffix = f" mit {html.escape(conflict['partner'])}" if conflict['partner'] else ""
+                c_disc = html.escape(conflict['disc'])
+                c_city = html.escape(conflict['city'])
                 if reg_mx:
-                    mx_status_text = f"Terminkonflikt: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    mx_status_text = f"Terminkonflikt: {c_disc} in {c_city}{p_suffix}"
                     mx_status_class = "double-booking"
                     mx_class = "has-double-booking"
                 else:
-                    mx_status_text = f"Paralleltermin: {conflict['disc']} in {conflict['city']}{p_suffix}"
+                    mx_status_text = f"Paralleltermin: {c_disc} in {c_city}{p_suffix}"
                     mx_status_class = "conflict"
                     mx_class = "has-conflict"
 
@@ -583,12 +604,122 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     st.markdown(clean_html(html_out), unsafe_allow_html=True)
 
 
+# --- WIEDERVERWENDBARER ADMIN-EDITOR (DRY & FORM-BATCHING) ---
+def render_admin_editor(item, full_data, is_past=False):
+    st.write("---")
+    desc_text = item.get('description', '').strip()
+    if desc_text:
+        with st.expander("📝 Ausschreibungstext von turnier.de anzeigen", expanded=False):
+            st.write(desc_text)
+            
+    start_date_obj = item['Start_Date_Obj']
+    end_date_obj = item['End_Date_Obj']
+    day_options = get_tournament_day_options(start_date_obj, end_date_obj)
+
+    prefix = "past_" if is_past else ""
+    t_id = item['id']
+
+    with st.form(key=f"edit_form_{prefix}{t_id}"):
+        st.markdown("**Allgemeiner Zeitplan & Kapazitäten:**")
+        col_day_he, col_day_hd, col_day_mx = st.columns(3)
+        
+        with col_day_he:
+            val_day_he_db = item.get('day_he', '')
+            he_idx = next((i for i, opt in enumerate(day_options) if opt == val_day_he_db or (val_day_he_db and opt.startswith(val_day_he_db))), 0)
+            selected_label_he = st.selectbox("Spieltag Einzel", options=day_options, index=he_idx, key=f"d_he_{prefix}{t_id}")
+            val_day_he = selected_label_he if selected_label_he != "-- Tag wählen --" else ""
+            val_full_he = st.checkbox("Feld voll (Einzel)", value=bool(item.get('full_he', False)), key=f"f_he_{prefix}{t_id}")
+
+        with col_day_hd:
+            val_day_hd_db = item.get('day_hd', '')
+            hd_idx = next((i for i, opt in enumerate(day_options) if opt == val_day_hd_db or (val_day_hd_db and opt.startswith(val_day_hd_db))), 0)
+            selected_label_hd = st.selectbox("Spieltag Doppel", options=day_options, index=hd_idx, key=f"d_hd_{prefix}{t_id}")
+            val_day_hd = selected_label_hd if selected_label_hd != "-- Tag wählen --" else ""
+            val_full_hd = st.checkbox("Feld voll (Doppel)", value=bool(item.get('full_hd', False)), key=f"f_hd_{prefix}{t_id}")
+
+        with col_day_mx:
+            val_day_mx_db = item.get('day_mx', '')
+            mx_idx = next((i for i, opt in enumerate(day_options) if opt == val_day_mx_db or (val_day_mx_db and opt.startswith(val_day_mx_db))), 0)
+            selected_label_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_idx, key=f"d_mx_{prefix}{t_id}")
+            val_day_mx = selected_label_mx if selected_label_mx != "-- Tag wählen --" else ""
+            val_full_mx = st.checkbox("Feld voll (Mixed)", value=bool(item.get('full_mx', False)), key=f"f_mx_{prefix}{t_id}")
+
+        st.write("")
+        st.markdown("**Meine Anmeldung:**")
+        col_he, col_hd, col_mx = st.columns(3)
+        
+        with col_he:
+            val_he = st.checkbox("Meldung Einzel", value=bool(item.get('reg_he', False)), key=f"he_{prefix}{t_id}")
+                
+        with col_hd:
+            val_hd = st.checkbox("Meldung Doppel", value=bool(item.get('reg_hd', False)), key=f"hd_{prefix}{t_id}")
+            val_partner_hd_db = item.get('partner_hd', '')
+            hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
+            default_idx_hd = hd_options.index(val_partner_hd_db) if val_partner_hd_db in hd_options else 0
+            val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_{prefix}{t_id}")
+            if val_partner_hd == "-- Kein Partner --" or not val_hd:
+                val_partner_hd = ""
+
+        with col_mx:
+            val_mx = st.checkbox("Meldung Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_{prefix}{t_id}")
+            val_partner_mx_db = item.get('partner_mx', '')
+            mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
+            default_idx_mx = mx_options.index(val_partner_mx_db) if val_partner_mx_db in mx_options else 0
+            val_partner_mx = st.selectbox("Partner Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_{prefix}{t_id}")
+            if val_partner_mx == "-- Kein Partner --" or not val_mx:
+                val_partner_mx = ""
+
+        save_submitted = st.form_submit_button("💾 Änderungen speichern", use_container_width=True)
+
+        if save_submitted:
+            is_registered = (val_he or val_hd or val_mx)
+            has_changed = (
+                val_he != bool(item.get('reg_he', False)) or
+                val_hd != bool(item.get('reg_hd', False)) or
+                val_mx != bool(item.get('reg_mx', False)) or
+                val_full_he != bool(item.get('full_he', False)) or
+                val_full_hd != bool(item.get('full_hd', False)) or
+                val_full_mx != bool(item.get('full_mx', False)) or
+                val_partner_hd != item.get('partner_hd', '') or
+                val_partner_mx != item.get('partner_mx', '') or
+                val_day_he != item.get('day_he', '') or
+                val_day_hd != item.get('day_hd', '') or
+                val_day_mx != item.get('day_mx', '')
+            )
+            
+            if has_changed:
+                full_data[t_id]['registered'] = is_registered
+                full_data[t_id]['reg_he'] = val_he
+                full_data[t_id]['reg_hd'] = val_hd
+                full_data[t_id]['reg_mx'] = val_mx
+                full_data[t_id]['full_he'] = val_full_he
+                full_data[t_id]['full_hd'] = val_full_hd
+                full_data[t_id]['full_mx'] = val_full_mx
+                full_data[t_id]['partner_hd'] = val_partner_hd
+                full_data[t_id]['partner_mx'] = val_partner_mx
+                full_data[t_id]['day_he'] = val_day_he
+                full_data[t_id]['day_hd'] = val_day_hd
+                full_data[t_id]['day_mx'] = val_day_mx
+                
+                save_tournaments_data(DB_FILE, full_data)
+                    
+                try:
+                    from gcal_sync import sync_tournament_to_gcal
+                    sync_tournament_to_gcal(full_data[t_id])
+                    st.toast("Google Kalender erfolgreich aktualisiert!", icon="📅")
+                except Exception as e:
+                    st.toast(f"Fehler bei Google Kalender Sync: {e}", icon="⚠️")
+                    
+                st.success("Turnier erfolgreich aktualisiert!")
+                st.rerun()
+
+
 # --- DATEN AUS DEM GIST LADEN (MIT SICHERHEITSNETZ) ---
 data = None
 db_error_msg = None
 
 try:
-    data = load_gist_file(DB_FILE)
+    data = load_tournaments_data(DB_FILE)
 except DatabaseConnectionError as e:
     db_error_msg = str(e)
 except Exception as e:
@@ -652,14 +783,12 @@ elif data is not None:
                 v_start_dt = datetime.datetime.strptime(v['start_date'], "%d.%m.%Y").date()
                 v_end_dt = datetime.datetime.strptime(v['end_date'], "%d.%m.%Y").date()
                 
-                curr_date = v_start_dt
-                limit_dt = 0
-                while curr_date <= v_end_dt and limit_dt < 100:
+                num_days = max(0, (v_end_dt - v_start_dt).days + 1)
+                for i in range(min(num_days, 60)):
+                    curr_date = v_start_dt + datetime.timedelta(days=i)
                     vacation_dates.add(curr_date)
                     if v.get('note'):
                         vacation_notes[curr_date] = v['note']
-                    curr_date += datetime.timedelta(days=1)
-                    limit_dt += 1
             except Exception:
                 pass
 
@@ -706,13 +835,13 @@ elif data is not None:
                 if not active_discs:
                     active_discs = [{"name": "Turnier", "partner": ""}]
                 
-                curr_date = r_start
-                while curr_date <= r_end:
+                num_days = max(0, (r_end - r_start).days + 1)
+                for i in range(min(num_days, 14)):
+                    curr_date = r_start + datetime.timedelta(days=i)
                     for disc_info in active_discs:
                         occupied_dates.setdefault(curr_date, []).append({
                             "disc": disc_info["name"], "city": r_city, "title": r_title, "partner": disc_info["partner"]
                         })
-                    curr_date += datetime.timedelta(days=1)
 
         try:
             today = datetime.datetime.now(ZoneInfo("Europe/Berlin")).date()
@@ -728,8 +857,13 @@ elif data is not None:
         st.write("")
         st.markdown("### Filter")
         
-        only_registered = st.toggle("Turniere, an denen ich angemeldet bin", value=False)
-        only_available = st.toggle("Turniere, an denen ich mich noch anmelden kann", value=False)
+        col_f1, col_f2 = st.columns(2)
+        with col_f1:
+            only_registered = st.toggle("Turniere, an denen ich angemeldet bin", value=False)
+        with col_f2:
+            only_available = st.toggle("Turniere, an denen ich mich noch anmelden kann", value=False)
+
+        search_query = st.text_input("🔍 Suche nach Turniername oder Ort", placeholder="z. B. Hilden, Solingen, Doppel...", key="search_filter").strip()
 
         if only_registered or only_available:
             def row_passes_filter(row):
@@ -745,6 +879,17 @@ elif data is not None:
 
             df_upcoming = df_upcoming[df_upcoming.apply(row_passes_filter, axis=1)]
             df_past = df_past[df_past.apply(row_passes_filter, axis=1)]
+
+        if search_query:
+            query_lower = search_query.lower()
+            df_upcoming = df_upcoming[
+                df_upcoming['title'].str.lower().str.contains(query_lower, na=False) |
+                df_upcoming['city'].str.lower().str.contains(query_lower, na=False)
+            ]
+            df_past = df_past[
+                df_past['title'].str.lower().str.contains(query_lower, na=False) |
+                df_past['city'].str.lower().str.contains(query_lower, na=False)
+            ]
 
         month_names = {1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni", 7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"}
 
@@ -776,129 +921,7 @@ elif data is not None:
                             render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes)
                             
                             if IS_ADMIN:
-                                st.write("---")
-                                desc_text = item.get('description', '').strip()
-                                if desc_text:
-                                    with st.expander("📝 Ausschreibungstext von turnier.de anzeigen", expanded=False):
-                                        st.write(desc_text)
-                                
-                                start_date_obj = item['Start_Date_Obj']
-                                end_date_obj = item['End_Date_Obj']
-                                day_options = get_tournament_day_options(start_date_obj, end_date_obj)
-
-                                st.markdown("**Allgemeiner Zeitplan (Für alle Kacheln sichtbar):**")
-                                col_day_he, col_day_hd, col_day_mx = st.columns(3)
-                                
-                                with col_day_he:
-                                    val_day_he_db = item.get('day_he', '')
-                                    he_idx = 0
-                                    if val_day_he_db:
-                                        for o_idx, opt in enumerate(day_options):
-                                            if opt == val_day_he_db or opt.startswith(val_day_he_db):
-                                                he_idx = o_idx
-                                                break
-                                    selected_label_he = st.selectbox("Spieltag Einzel", options=day_options, index=he_idx, key=f"day_he_{item['id']}")
-                                    val_day_he = selected_label_he if selected_label_he != "-- Tag wählen --" else ""
-                                    
-                                with col_day_hd:
-                                    val_day_hd_db = item.get('day_hd', '')
-                                    hd_idx = 0
-                                    if val_day_hd_db:
-                                        for o_idx, opt in enumerate(day_options):
-                                            if opt == val_day_hd_db or opt.startswith(val_day_hd_db):
-                                                hd_idx = o_idx
-                                                break
-                                    selected_label_hd = st.selectbox("Spieltag Doppel", options=day_options, index=hd_idx, key=f"day_hd_{item['id']}")
-                                    val_day_hd = selected_label_hd if selected_label_hd != "-- Tag wählen --" else ""
-                                    
-                                with col_day_mx:
-                                    val_day_mx_db = item.get('day_mx', '')
-                                    mx_idx = 0
-                                    if val_day_mx_db:
-                                        for o_idx, opt in enumerate(day_options):
-                                            if opt == val_day_mx_db or opt.startswith(val_day_mx_db):
-                                                mx_idx = o_idx
-                                                break
-                                    selected_label_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_idx, key=f"day_mx_{item['id']}")
-                                    val_day_mx = selected_label_mx if selected_label_mx != "-- Tag wählen --" else ""
-
-                                col_full_he, col_full_hd, col_full_mx = st.columns(3)
-                                with col_full_he:
-                                    val_full_he = st.checkbox("Feld voll (Einzel)", value=bool(item.get('full_he', False)), key=f"full_he_{item['id']}")
-                                with col_full_hd:
-                                    val_full_hd = st.checkbox("Feld voll (Doppel)", value=bool(item.get('full_hd', False)), key=f"full_hd_{item['id']}")
-                                with col_full_mx:
-                                    val_full_mx = st.checkbox("Feld voll (Mixed)", value=bool(item.get('full_mx', False)), key=f"full_mx_{item['id']}")
-
-                                st.write("")
-                                st.markdown("**Meine Anmeldung (Für das grüne Banner):**")
-                                col_he, col_hd, col_mx = st.columns(3)
-                                
-                                with col_he:
-                                    val_he = st.checkbox("Meldung Einzel", value=bool(item.get('reg_he', False)), key=f"he_{item['id']}")
-                                        
-                                with col_hd:
-                                    val_hd = st.checkbox("Meldung Doppel", value=bool(item.get('reg_hd', False)), key=f"hd_{item['id']}")
-                                    val_partner_hd = item.get('partner_hd', '')
-                                    if val_hd:
-                                        hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
-                                        default_idx_hd = hd_options.index(val_partner_hd) if val_partner_hd in hd_options else 0
-                                        val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_{item['id']}")
-                                        if val_partner_hd == "-- Kein Partner --": val_partner_hd = ""
-                                    else:
-                                        val_partner_hd = ""
-                                        
-                                with col_mx:
-                                    val_mx = st.checkbox("Meldung Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_{item['id']}")
-                                    val_partner_mx = item.get('partner_mx', '')
-                                    if val_mx:
-                                        mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
-                                        default_idx_mx = mx_options.index(val_partner_mx) if val_partner_mx in mx_options else 0
-                                        val_partner_mx = st.selectbox("Partner Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_{item['id']}")
-                                        if val_partner_mx == "-- Kein Partner --": val_partner_mx = ""
-                                    else:
-                                        val_partner_mx = ""
-                                        
-                                is_registered = (val_he or val_hd or val_mx)
-                                
-                                has_changed = (
-                                    val_he != bool(item.get('reg_he', False)) or
-                                    val_hd != bool(item.get('reg_hd', False)) or
-                                    val_mx != bool(item.get('reg_mx', False)) or
-                                    val_full_he != bool(item.get('full_he', False)) or
-                                    val_full_hd != bool(item.get('full_hd', False)) or
-                                    val_full_mx != bool(item.get('full_mx', False)) or
-                                    val_partner_hd != item.get('partner_hd', '') or
-                                    val_partner_mx != item.get('partner_mx', '') or
-                                    val_day_he != item.get('day_he', '') or
-                                    val_day_hd != item.get('day_hd', '') or
-                                    val_day_mx != item.get('day_mx', '')
-                                )
-                                
-                                if has_changed:
-                                    data[item['id']]['registered'] = is_registered
-                                    data[item['id']]['reg_he'] = val_he
-                                    data[item['id']]['reg_hd'] = val_hd
-                                    data[item['id']]['reg_mx'] = val_mx
-                                    data[item['id']]['full_he'] = val_full_he
-                                    data[item['id']]['full_hd'] = val_full_hd
-                                    data[item['id']]['full_mx'] = val_full_mx
-                                    data[item['id']]['partner_hd'] = val_partner_hd
-                                    data[item['id']]['partner_mx'] = val_partner_mx
-                                    data[item['id']]['day_he'] = val_day_he
-                                    data[item['id']]['day_hd'] = val_day_hd
-                                    data[item['id']]['day_mx'] = val_day_mx
-                                    
-                                    save_gist_file(DB_FILE, data)
-                                        
-                                    try:
-                                        from gcal_sync import sync_tournament_to_gcal
-                                        sync_tournament_to_gcal(data[item['id']])
-                                        st.toast("Google Kalender erfolgreich aktualisiert!", icon="📅")
-                                    except Exception as e:
-                                        st.toast(f"Fehler bei Google Kalender Sync: {e}", icon="⚠️")
-                                        
-                                    st.rerun()
+                                render_admin_editor(item, data, is_past=False)
                             
                         with col_link:
                             st.write("")
@@ -938,120 +961,7 @@ elif data is not None:
                             render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes)
                             
                             if IS_ADMIN:
-                                st.write("---")
-                                start_date_obj = item['Start_Date_Obj']
-                                end_date_obj = item['End_Date_Obj']
-                                day_options = get_tournament_day_options(start_date_obj, end_date_obj)
-                                
-                                col_past_he, col_past_hd, col_past_mx = st.columns(3)
-
-                                with col_past_he:
-                                    st.markdown("**Herreneinzel**")
-                                    val_he = st.checkbox("Herreneinzel", value=bool(item.get('reg_he', False)), key=f"he_past_{item['id']}")
-                                    val_full_he = st.checkbox("Feld voll (Einzel)", value=bool(item.get('full_he', False)), key=f"full_he_past_{item['id']}")
-                                    val_day_he_db = item.get('day_he', '')
-                                    if val_he:
-                                        he_idx = 0
-                                        if val_day_he_db:
-                                            for o_idx, opt in enumerate(day_options):
-                                                if opt == val_day_he_db or opt.startswith(val_day_he_db):
-                                                    he_idx = o_idx
-                                                    break
-                                        selected_label_he = st.selectbox("Spieltag Einzel", options=day_options, index=he_idx, key=f"day_he_past_{item['id']}")
-                                        val_day_he = selected_label_he if selected_label_he != "-- Tag wählen --" else ""
-                                    else:
-                                        val_day_he = ""
-                                
-                                with col_past_hd:
-                                    st.markdown("**Herrendoppel**")
-                                    val_hd = st.checkbox("Herrendoppel", value=bool(item.get('reg_hd', False)), key=f"hd_past_{item['id']}")
-                                    val_full_hd = st.checkbox("Feld voll (Doppel)", value=bool(item.get('full_hd', False)), key=f"full_hd_past_{item['id']}")
-                                    val_partner_hd = item.get('partner_hd', '')
-                                    val_day_hd_db = item.get('day_hd', '')
-                                    
-                                    if val_hd:
-                                        hd_options = ["-- Kein Partner --"] + list(PARTNERS_HD.keys())
-                                        default_idx_hd = hd_options.index(val_partner_hd) if val_partner_hd in hd_options else 0
-                                        val_partner_hd = st.selectbox("Partner Herrendoppel", options=hd_options, index=default_idx_hd, key=f"p_hd_past_{item['id']}")
-                                        if val_partner_hd == "-- Kein Partner --": val_partner_hd = ""
-                                            
-                                        hd_idx = 0
-                                        if val_day_hd_db:
-                                            for o_idx, opt in enumerate(day_options):
-                                                if opt == val_day_hd_db or opt.startswith(val_day_hd_db):
-                                                    hd_idx = o_idx
-                                                    break
-                                        selected_label_hd = st.selectbox("Spieltag Doppel", options=day_options, index=hd_idx, key=f"day_hd_past_{item['id']}")
-                                        val_day_hd = selected_label_hd if selected_label_hd != "-- Tag wählen --" else ""
-                                    else:
-                                        val_partner_hd = ""
-                                        val_day_hd = ""
-                                
-                                with col_past_mx:
-                                    st.markdown("**Mixed**")
-                                    val_mx = st.checkbox("Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_past_{item['id']}")
-                                    val_full_mx = st.checkbox("Feld voll (Mixed)", value=bool(item.get('full_mx', False)), key=f"full_mx_past_{item['id']}")
-                                    val_partner_mx = item.get('partner_mx', '')
-                                    val_day_mx_db = item.get('day_mx', '')
-                                    
-                                    if val_mx:
-                                        mx_options = ["-- Kein Partner --"] + list(PARTNERS_MX.keys())
-                                        default_idx_mx = mx_options.index(val_partner_mx) if val_partner_mx in mx_options else 0
-                                        val_partner_mx = st.selectbox("Partner Mixed", options=mx_options, index=default_idx_mx, key=f"p_mx_past_{item['id']}")
-                                        if val_partner_mx == "-- Kein Partner --": val_partner_mx = ""
-                                            
-                                        mx_idx = 0
-                                        if val_day_mx_db:
-                                            for o_idx, opt in enumerate(day_options):
-                                                if opt == val_day_mx_db or opt.startswith(val_day_mx_db):
-                                                    mx_idx = o_idx
-                                                    break
-                                        selected_label_mx = st.selectbox("Spieltag Mixed", options=day_options, index=mx_idx, key=f"day_mx_past_{item['id']}")
-                                        val_day_mx = selected_label_mx if selected_label_mx != "-- Tag wählen --" else ""
-                                    else:
-                                        val_partner_mx = ""
-                                        val_day_mx = ""
-                                        
-                                is_registered = (val_he or val_hd or val_mx)
-                                
-                                has_changed = (
-                                    val_he != bool(item.get('reg_he', False)) or
-                                    val_hd != bool(item.get('reg_hd', False)) or
-                                    val_mx != bool(item.get('reg_mx', False)) or
-                                    val_full_he != bool(item.get('full_he', False)) or
-                                    val_full_hd != bool(item.get('full_hd', False)) or
-                                    val_full_mx != bool(item.get('full_mx', False)) or
-                                    val_partner_hd != item.get('partner_hd', '') or
-                                    val_partner_mx != item.get('partner_mx', '') or
-                                    val_day_he != item.get('day_he', '') or
-                                    val_day_hd != item.get('day_hd', '') or
-                                    val_day_mx != item.get('day_mx', '')
-                                )
-                                
-                                if has_changed:
-                                    data[item['id']]['registered'] = is_registered
-                                    data[item['id']]['reg_he'] = val_he
-                                    data[item['id']]['reg_hd'] = val_hd
-                                    data[item['id']]['reg_mx'] = val_mx
-                                    data[item['id']]['full_he'] = val_full_he
-                                    data[item['id']]['full_hd'] = val_full_hd
-                                    data[item['id']]['full_mx'] = val_full_mx
-                                    data[item['id']]['partner_hd'] = val_partner_hd
-                                    data[item['id']]['partner_mx'] = val_partner_mx
-                                    data[item['id']]['day_he'] = val_day_he
-                                    data[item['id']]['day_hd'] = val_day_hd
-                                    data[item['id']]['day_mx'] = val_day_mx
-                                    
-                                    save_gist_file(DB_FILE, data)
-                                        
-                                    try:
-                                        from gcal_sync import sync_tournament_to_gcal
-                                        sync_tournament_to_gcal(data[item['id']])
-                                        st.toast("Google Kalender erfolgreich aktualisiert!", icon="📅")
-                                    except Exception as e:
-                                        st.toast(f"Fehler bei Google Kalender Sync: {e}", icon="⚠️")
-                                        
-                                    st.rerun()
+                                render_admin_editor(item, data, is_past=True)
                             
                         with col_link:
                             st.write("")
