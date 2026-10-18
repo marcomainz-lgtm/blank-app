@@ -106,6 +106,14 @@ PLACEMENT_OPTIONS = [
     "✍️ Eigene Angabe..."
 ]
 
+FIELD_OPTIONS = [
+    "-- Feld wählen --",
+    "A-Feld",
+    "B-Feld",
+    "C-Feld",
+    "Sonstiges"
+]
+
 # Custom CSS
 st.markdown(
     """
@@ -162,8 +170,8 @@ st.markdown(
         border-radius: 6px;
         font-size: 0.8rem;
         font-weight: 700;
-        margin-top: 6px;
-        margin-bottom: 6px;
+        margin-top: 4px;
+        margin-bottom: 4px;
     }
     .badge-gold { background-color: #fef3c7; color: #92400e; border: 1.5px solid #f59e0b; }
     .badge-silver { background-color: #f1f5f9; color: #334155; border: 1.5px solid #94a3b8; }
@@ -668,16 +676,10 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     </div>
     """ if notes_val else ""
 
-    # Platzierungs-Badge (Strukturiert)
-    placement_val = item.get('placement', '').strip()
-    placement_detail = item.get('placement_detail', '').strip()
-    
-    # Fallback auf altes result-Feld
-    if not placement_val and item.get('result', '').strip():
-        placement_val = item.get('result', '').strip()
-
-    placement_badge_html = ""
-    if placement_val and placement_val != "-- Keine Angabe --":
+    # Platzierungs-Badges pro Disziplin
+    def build_placement_badge(disc_name, placement_val, field_val):
+        if not placement_val or placement_val == "-- Keine Angabe --":
+            return ""
         p_class = "badge-neutral"
         if "1." in placement_val or "Gold" in placement_val:
             p_class = "badge-gold"
@@ -686,14 +688,30 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         elif "3." in placement_val or "Bronze" in placement_val:
             p_class = "badge-bronze"
             
-        detail_suffix = f" <span style='font-weight: 500;'>• {html.escape(placement_detail)}</span>" if placement_detail else ""
-        placement_badge_html = f"""
-        <div>
-            <div class="placement-badge {p_class}">
-                {html.escape(placement_val)}{detail_suffix}
-            </div>
-        </div>
-        """
+        field_str = f" ({html.escape(field_val)})" if field_val and field_val != "-- Feld wählen --" else ""
+        return f'<div class="placement-badge {p_class}">🏆 {disc_name}: {html.escape(placement_val)}{field_str}</div>'
+
+    badges_results = []
+    b_he = build_placement_badge("Einzel", item.get('placement_he', '').strip(), item.get('field_he', '').strip())
+    b_hd = build_placement_badge("Doppel", item.get('placement_hd', '').strip(), item.get('field_hd', '').strip())
+    b_mx = build_placement_badge("Mixed", item.get('placement_mx', '').strip(), item.get('field_mx', '').strip())
+    
+    for b in [b_he, b_hd, b_mx]:
+        if b: badges_results.append(b)
+
+    # Fallback auf alte Platzierungsfelder, falls vorhanden
+    if not badges_results:
+        old_p = item.get('placement', '').strip() or item.get('result', '').strip()
+        old_det = item.get('placement_detail', '').strip()
+        if old_p and old_p != "-- Keine Angabe --":
+            b_old = build_placement_badge("Ergebnis", old_p, old_det)
+            if b_old: badges_results.append(b_old)
+
+    placement_badge_html = f"""
+    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; margin-bottom: 6px;">
+        {' '.join(badges_results)}
+    </div>
+    """ if badges_results else ""
 
     html_out = f"""
     <div class="card-inner-container">
@@ -800,35 +818,81 @@ def render_admin_editor(item, full_data, is_past=False):
             else:
                 val_partner_mx = selected_mx_option
 
+        # --- SAISONTAGEBUCH (ERGEBNISSE PRO DISZIPLIN) AN ERSTER STELLE ---
+        st.write("")
+        st.markdown("**🏆 Saisontagebuch (Platzierung & Spielklasse pro Disziplin):**")
+        col_res_he, col_res_hd, col_res_mx = st.columns(3)
+
+        def render_discipline_result_inputs(disc_label, disc_key):
+            st.markdown(f"**{disc_label}**")
+            
+            # 1. Platzierung / Runde
+            cur_p = item.get(f'placement_{disc_key}', '')
+            p_idx = 0
+            if cur_p in PLACEMENT_OPTIONS:
+                p_idx = PLACEMENT_OPTIONS.index(cur_p)
+            elif cur_p:
+                p_idx = PLACEMENT_OPTIONS.index("✍️ Eigene Angabe...")
+                
+            sel_p = st.selectbox(
+                f"Runde / Platz ({disc_label})",
+                options=PLACEMENT_OPTIONS,
+                index=p_idx,
+                key=f"sel_p_{disc_key}_{prefix}{t_id}"
+            )
+            
+            if sel_p == "✍️ Eigene Angabe...":
+                val_p = st.text_input(
+                    f"Eigene Platzierung ({disc_label})",
+                    value=cur_p if cur_p not in PLACEMENT_OPTIONS else "",
+                    key=f"custom_p_{disc_key}_{prefix}{t_id}"
+                ).strip()
+            elif sel_p == "-- Keine Angabe --":
+                val_p = ""
+            else:
+                val_p = sel_p
+                
+            # 2. Spielklasse (A-Feld, B-Feld, etc.)
+            cur_f = item.get(f'field_{disc_key}', '')
+            f_idx = 0
+            if cur_f in FIELD_OPTIONS:
+                f_idx = FIELD_OPTIONS.index(cur_f)
+            elif cur_f:
+                f_idx = FIELD_OPTIONS.index("Sonstiges")
+                
+            sel_f = st.selectbox(
+                f"Klasse / Feld ({disc_label})",
+                options=FIELD_OPTIONS,
+                index=f_idx,
+                key=f"sel_f_{disc_key}_{prefix}{t_id}"
+            )
+            
+            if sel_f == "Sonstiges":
+                val_f = st.text_input(
+                    f"Sonstige Klasse ({disc_label})",
+                    value=cur_f if cur_f not in FIELD_OPTIONS else "",
+                    placeholder="z. B. O35, D-Feld...",
+                    key=f"custom_f_{disc_key}_{prefix}{t_id}"
+                ).strip()
+            elif sel_f == "-- Feld wählen --":
+                val_f = ""
+            else:
+                val_f = sel_f
+                
+            return val_p, val_f
+
+        with col_res_he:
+            val_p_he, val_f_he = render_discipline_result_inputs("Einzel", "he")
+
+        with col_res_hd:
+            val_p_hd, val_f_hd = render_discipline_result_inputs("Doppel", "hd")
+
+        with col_res_mx:
+            val_p_mx, val_f_mx = render_discipline_result_inputs("Mixed", "mx")
+
+        # --- PERSÖNLICHE NOTIZEN / FAHRGEMEINSCHAFT UNTER DEM SAISONTAGEBUCH ---
         st.write("")
         val_notes = st.text_input("🚗 Persönliche Notiz / Fahrgemeinschaft", value=item.get('notes', ''), placeholder="z. B. Treffpunkt mit Jan 08:30 Uhr, 15 € Startgeld bar", key=f"note_{prefix}{t_id}").strip()
-
-        # Platzierungs-Editor (nur bei vergangenen Turnieren)
-        if is_past:
-            st.markdown("**🏆 Saisontagebuch / Platzierung:**")
-            col_p1, col_p2 = st.columns([1, 1])
-            with col_p1:
-                cur_placement = item.get('placement', '')
-                p_idx = 0
-                if cur_placement in PLACEMENT_OPTIONS:
-                    p_idx = PLACEMENT_OPTIONS.index(cur_placement)
-                elif cur_placement:
-                    p_idx = PLACEMENT_OPTIONS.index("✍️ Eigene Angabe...")
-                
-                sel_placement = st.selectbox("Erreichte Runde / Platz", options=PLACEMENT_OPTIONS, index=p_idx, key=f"sel_p_{prefix}{t_id}")
-                
-                if sel_placement == "✍️ Eigene Angabe...":
-                    val_placement = st.text_input("Eigene Bezeichnung", value=cur_placement if cur_placement not in PLACEMENT_OPTIONS else "", key=f"custom_p_{prefix}{t_id}").strip()
-                elif sel_placement == "-- Keine Angabe --":
-                    val_placement = ""
-                else:
-                    val_placement = sel_placement
-
-            with col_p2:
-                val_placement_detail = st.text_input("Zusatz / Disziplin (optional)", value=item.get('placement_detail', ''), placeholder="z. B. mit Robert (HD O35)", key=f"p_det_{prefix}{t_id}").strip()
-        else:
-            val_placement = item.get('placement', '')
-            val_placement_detail = item.get('placement_detail', '')
 
         save_submitted = st.form_submit_button("💾 Änderungen speichern", use_container_width=True)
 
@@ -846,9 +910,13 @@ def render_admin_editor(item, full_data, is_past=False):
                 val_day_he != item.get('day_he', '') or
                 val_day_hd != item.get('day_hd', '') or
                 val_day_mx != item.get('day_mx', '') or
-                val_notes != item.get('notes', '') or
-                val_placement != item.get('placement', '') or
-                val_placement_detail != item.get('placement_detail', '')
+                val_p_he != item.get('placement_he', '') or
+                val_f_he != item.get('field_he', '') or
+                val_p_hd != item.get('placement_hd', '') or
+                val_f_hd != item.get('field_hd', '') or
+                val_p_mx != item.get('placement_mx', '') or
+                val_f_mx != item.get('field_mx', '') or
+                val_notes != item.get('notes', '')
             )
             
             if has_changed:
@@ -864,9 +932,13 @@ def render_admin_editor(item, full_data, is_past=False):
                 full_data[t_id]['day_he'] = val_day_he
                 full_data[t_id]['day_hd'] = val_day_hd
                 full_data[t_id]['day_mx'] = val_day_mx
+                full_data[t_id]['placement_he'] = val_p_he
+                full_data[t_id]['field_he'] = val_f_he
+                full_data[t_id]['placement_hd'] = val_p_hd
+                full_data[t_id]['field_hd'] = val_f_hd
+                full_data[t_id]['placement_mx'] = val_p_mx
+                full_data[t_id]['field_mx'] = val_f_mx
                 full_data[t_id]['notes'] = val_notes
-                full_data[t_id]['placement'] = val_placement
-                full_data[t_id]['placement_detail'] = val_placement_detail
                 
                 save_tournaments_data(DB_FILE, full_data)
                 
@@ -956,6 +1028,12 @@ elif data is not None:
             'organizer': 'Unbekannt',
             'description': '',
             'notes': '',
+            'placement_he': '',
+            'field_he': '',
+            'placement_hd': '',
+            'field_hd': '',
+            'placement_mx': '',
+            'field_mx': '',
             'placement': '',
             'placement_detail': '',
             'result': ''
@@ -1058,7 +1136,6 @@ elif data is not None:
         # --- KOMPAKTER, AUFGERÄUMTER FILTER-EXPANDER ---
         st.write("")
         with st.expander("🔍 Filter & Suche", expanded=False):
-            # Suchfeld (nur halbe Breite auf Desktop)
             col_search, _ = st.columns([1, 1])
             with col_search:
                 search_query = st.text_input("Suche nach Turniername, Ort, Partner", placeholder="z. B. Hilden, Solingen, Reiz...", key="search_filter").strip()
@@ -1114,8 +1191,12 @@ elif data is not None:
                 df_past['title'].str.lower().str.contains(query_lower, na=False) |
                 df_past['city'].str.lower().str.contains(query_lower, na=False) |
                 df_past['notes'].str.lower().str.contains(query_lower, na=False) |
-                df_past['placement'].str.lower().str.contains(query_lower, na=False) |
-                df_past['placement_detail'].str.lower().str.contains(query_lower, na=False) |
+                df_past['placement_he'].str.lower().str.contains(query_lower, na=False) |
+                df_past['placement_hd'].str.lower().str.contains(query_lower, na=False) |
+                df_past['placement_mx'].str.lower().str.contains(query_lower, na=False) |
+                df_past['field_he'].str.lower().str.contains(query_lower, na=False) |
+                df_past['field_hd'].str.lower().str.contains(query_lower, na=False) |
+                df_past['field_mx'].str.lower().str.contains(query_lower, na=False) |
                 df_past['partner_hd'].str.lower().str.contains(query_lower, na=False) |
                 df_past['partner_mx'].str.lower().str.contains(query_lower, na=False)
             ]
