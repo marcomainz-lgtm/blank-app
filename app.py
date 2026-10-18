@@ -119,7 +119,6 @@ FIELD_OPTIONS = [
     "Sonstiges"
 ]
 
-# --- KOORDINATEN-DATENBANK FÜR NRW & UMGEBUNG (~100km um Hilden) ---
 CITY_COORDINATES = {
     "Hilden": (51.1693, 6.9328),
     "Solingen": (51.1712, 7.0841),
@@ -274,45 +273,44 @@ st.markdown(
         text-transform: uppercase;
     }
 
-    /* ZEIT Online Dashboard Style */
+    /* ZEIT Online Dashboard Style - Kompakt */
     .zeit-card {
         background-color: #12161f;
         border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 12px;
-        padding: 16px 20px;
-        margin-bottom: 10px;
-        min-height: 110px;
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-bottom: 6px;
     }
     .zeit-header-title {
-        font-size: 0.8rem;
+        font-size: 0.72rem;
         font-weight: 700;
         color: #94a3b8;
         text-transform: uppercase;
-        letter-spacing: 0.8px;
-        margin-bottom: 4px;
+        letter-spacing: 0.6px;
+        margin-bottom: 2px;
     }
     .zeit-hero-number {
-        font-size: 1.9rem;
+        font-size: 1.45rem;
         font-weight: 800;
         color: #f8fafc;
         line-height: 1.1;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
     }
     .zeit-hero-sub {
-        font-size: 0.82rem;
+        font-size: 0.75rem;
         color: #64748b;
-        margin-bottom: 10px;
+        margin-bottom: 6px;
     }
     .zeit-kpi-row {
         display: flex;
-        gap: 8px;
+        gap: 6px;
         flex-wrap: wrap;
     }
     .zeit-kpi-tag {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: 700;
-        padding: 3px 8px;
-        border-radius: 6px;
+        padding: 2px 7px;
+        border-radius: 5px;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
         color: #e2e8f0;
@@ -792,7 +790,6 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                     mx_status_class = "conflict"
                     mx_class = "has-conflict"
 
-    # --- HILFSFUNKTION FÜR IN-KACHEL-PLATZIERUNGSBADGES ---
     def get_card_result_info(placement_val, field_val):
         if not placement_val or placement_val == "-- Keine Angabe --":
             return "", ""
@@ -890,7 +887,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     st.markdown(clean_html(html_out), unsafe_allow_html=True)
 
 
-# --- INTERAKTIVE FORMKURVE (ZEIT ONLINE DASHBOARD STYLE) ---
+# --- INTERAKTIVE FORMKURVE (ZEIT ONLINE DASHBOARD STYLE) - KOMPAKT & OHNE TOUCH-FALLE ---
 def render_season_chart(df):
     records = []
     for _, row in df.iterrows():
@@ -998,10 +995,10 @@ def render_season_chart(df):
             field_str = f" • {r['field']}" if r['field'] else ""
             partner_str = f"<br>👥 Partner: <b>{r['partner']}</b>" if r['partner'] else ""
             hover_text = (
-                f"<span style='font-size:13px; font-weight:700; color:{colors[disc_name]};'>{disc_name} • {r['placement']}</span>"
+                f"<span style='font-size:12px; font-weight:700; color:{colors[disc_name]};'>{disc_name} • {r['placement']}</span>"
                 f"<span style='color:#94a3b8;'>{field_str}</span><br>"
-                f"<span style='font-size:12px; color:#f8fafc;'>🏸 {r['title']} ({r['city']})</span><br>"
-                f"<span style='font-size:11px; color:#64748b;'>📅 {r['date'].strftime('%d.%m.%Y')}</span>"
+                f"<span style='font-size:11px; color:#f8fafc;'>🏸 {r['title']} ({r['city']})</span><br>"
+                f"<span style='font-size:10px; color:#64748b;'>📅 {r['date'].strftime('%d.%m.%Y')}</span>"
                 f"{partner_str}"
             )
             hover_texts.append(hover_text)
@@ -1013,50 +1010,46 @@ def render_season_chart(df):
             name=disc_name,
             line=dict(
                 color=colors.get(disc_name, "#94a3b8"),
-                width=2.5,
+                width=2,
                 shape="spline",
-                smoothing=0.5
+                smoothing=0.4
             ),
             marker=dict(
-                size=9,
+                size=7,
                 symbol="circle",
                 color=colors.get(disc_name, "#94a3b8"),
-                line=dict(color="#12161f", width=2)
+                line=dict(color="#12161f", width=1.5)
             ),
             text=hover_texts,
             hoverinfo="text"
         ))
 
+    # Kompaktes Layout ohne Zoom-Trap auf dem Handy (fixedrange=True)
     fig.update_layout(
-        height=330,
-        margin=dict(l=10, r=10, t=10, b=10),
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.04,
-            xanchor="right",
-            x=1,
-            font=dict(color="#94a3b8", size=11, family="Inter, -apple-system, sans-serif")
-        ),
+        height=180,
+        margin=dict(l=0, r=0, t=5, b=0),
+        showlegend=False,
         yaxis=dict(
             categoryorder="array",
             categoryarray=y_categories,
             gridcolor="rgba(255, 255, 255, 0.06)",
             zeroline=False,
-            tickfont=dict(color="#94a3b8", size=10, family="Inter, -apple-system, sans-serif")
+            fixedrange=True,  # Verhindert Touch-Zoom-Trap beim Scrollen
+            tickfont=dict(color="#94a3b8", size=8.5, family="Inter, -apple-system, sans-serif")
         ),
         xaxis=dict(
             gridcolor="rgba(255, 255, 255, 0.04)",
             zeroline=False,
+            fixedrange=True,  # Verhindert Touch-Zoom-Trap beim Scrollen
             tickformat="%d.%m.",
-            tickfont=dict(color="#64748b", size=10, family="Inter, -apple-system, sans-serif")
+            tickfont=dict(color="#64748b", size=8.5, family="Inter, -apple-system, sans-serif")
         ),
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         hoverlabel=dict(
             bgcolor="#1e293b",
             bordercolor="rgba(255, 255, 255, 0.15)",
-            font_size=12,
+            font_size=11,
             font_family="Inter, -apple-system, sans-serif"
         )
     )
@@ -1064,7 +1057,14 @@ def render_season_chart(df):
     st.markdown(
         f"""
         <div class="zeit-card">
-            <div class="zeit-header-title">Saisonverlauf & Formkurve 2026</div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="zeit-header-title">Saisonverlauf & Formkurve 2026</div>
+                <div style="font-size:0.7rem; color:#94a3b8; display:flex; gap:8px;">
+                    <span><span style="color:#22d3ee;">●</span> Einzel</span>
+                    <span><span style="color:#4ade80;">●</span> Doppel</span>
+                    <span><span style="color:#c084fc;">●</span> Mixed</span>
+                </div>
+            </div>
             <div class="zeit-hero-number">{total_played} Turniere</div>
             <div class="zeit-hero-sub">Gespielte Turniere im Jahresverlauf</div>
             <div class="zeit-kpi-row">
@@ -1077,16 +1077,19 @@ def render_season_chart(df):
         unsafe_allow_html=True
     )
 
-    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+    st.plotly_chart(
+        fig,
+        use_container_width=True,
+        config={"displayModeBar": False, "scrollZoom": False, "doubleClick": False}
+    )
 
 
-# --- DETAILREICHE STRASSENKARTE (OPENSTREETMAP MIT DARK-FILTER, 100% OHNE API-KEY) ---
+# --- DETAILREICHE STRASSENKARTE - KOMPAKT & OHNE TOUCH-FALLE ---
 def render_tournament_heatmap(df, today):
     city_counts = {}
     city_tournaments = {}
 
     for _, row in df.iterrows():
-        # Streng nur Turniere, an denen Marco teilgenommen hat
         is_reg = bool(row.get('registered', False))
         has_result = bool(
             (row.get('placement_he') and row.get('placement_he') != "-- Keine Angabe --") or
@@ -1146,22 +1149,21 @@ def render_tournament_heatmap(df, today):
     avg_lat = sum(lats) / len(lats) if lats else 51.17
     avg_lon = sum(lons) / len(lons) if lons else 6.95
 
-    # Marker-Daten für Leaflet aufbereiten
     markers_js = []
     for c, cnt in city_counts.items():
         lat, lon = CITY_COORDINATES[c]
-        t_sample = " • " + " • ".join(city_tournaments[c][:3])
-        if len(city_tournaments[c]) > 3:
-            t_sample += f" (+{len(city_tournaments[c])-3} weitere)"
+        t_sample = " • " + " • ".join(city_tournaments[c][:2])
+        if len(city_tournaments[c]) > 2:
+            t_sample += f" (+{len(city_tournaments[c])-2} weitere)"
         safe_sample = html.escape(t_sample).replace("'", "&#39;")
         safe_city = html.escape(c)
-        radius = min(8 + cnt * 4, 22)
+        radius = min(6 + cnt * 3, 16)
         
         markers_js.append(f"""
             L.circleMarker([{lat}, {lon}], {{
                 radius: {radius},
                 color: '#22d3ee',
-                weight: 2,
+                weight: 1.5,
                 fillColor: '#06b6d4',
                 fillOpacity: 0.85
             }}).addTo(map).bindPopup("<b>📍 {safe_city}</b><br>{cnt} gespielte(s) Turnier(e)<br><small style='color:#94a3b8;'>{safe_sample}</small>");
@@ -1171,7 +1173,7 @@ def render_tournament_heatmap(df, today):
     h_lat, h_lon = CITY_COORDINATES["Hilden"]
     markers_js.append(f"""
         L.circleMarker([{h_lat}, {h_lon}], {{
-            radius: 8,
+            radius: 6,
             color: '#f59e0b',
             weight: 2,
             fillColor: '#fbbf24',
@@ -1181,7 +1183,7 @@ def render_tournament_heatmap(df, today):
 
     markers_script = "\n".join(markers_js)
 
-    # Echte, detaillierte OpenStreetMap-Kachelkarte mit Dark-Mode-Filter (100% frei ohne API-Key)
+    # Detaillierte OpenStreetMap-Karte mit Dark-Filter - Scroll- & Touch-Trap deaktiviert (dragging: false)
     map_html = f"""
     <!DOCTYPE html>
     <html>
@@ -1191,19 +1193,26 @@ def render_tournament_heatmap(df, today):
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <style>
             html, body {{ margin:0; padding:0; height:100%; background:#12161f; }}
-            #map {{ width:100%; height:330px; border-radius:10px; background:#12161f; }}
-            /* Dark Mode Filter auf die offiziellen OpenStreetMap-Kacheln */
+            #map {{ width:100%; height:180px; border-radius:10px; background:#12161f; }}
             .leaflet-tile {{
                 filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
             }}
-            .leaflet-popup-content-wrapper {{ background: #1e293b; color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); }}
+            .leaflet-popup-content-wrapper {{ background: #1e293b; color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 11px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); }}
             .leaflet-popup-tip {{ background: #1e293b; }}
         </style>
     </head>
     <body>
         <div id="map"></div>
         <script>
-            var map = L.map('map', {{ attributionControl: false, zoomControl: true }}).setView([{avg_lat}, {avg_lon}], 9);
+            // dragging: false & scrollWheelZoom: false verhindern das Festhängen beim Scrollen auf dem Smartphone
+            var map = L.map('map', {{ 
+                attributionControl: false, 
+                zoomControl: false,
+                scrollWheelZoom: false,
+                dragging: false,
+                touchZoom: false,
+                doubleClickZoom: false
+            }}).setView([{avg_lat}, {avg_lon}], 8);
             L.tileLayer('https://tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
                 maxZoom: 18
             }}).addTo(map);
@@ -1213,7 +1222,7 @@ def render_tournament_heatmap(df, today):
     </html>
     """
 
-    st.components.v1.html(map_html, height=335)
+    st.components.v1.html(map_html, height=185)
 
 
 # --- WIEDERVERWENDBARER ADMIN-EDITOR ---
@@ -1690,7 +1699,7 @@ elif data is not None:
 
         month_names = {1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni", 7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"}
 
-        # --- BEIDE DATENKACHELN OBEN NEBENEINANDER (FORMKURVE & KARTE) ---
+        # --- BEIDE DATENKACHELN OBEN NEBENEINANDER (KOMPAKT WIE IM ZEIT-DASHBOARD) ---
         st.write("")
         with st.expander("📊 Saison-Analyse 2026 (Formkurve & Gespielte Spielorte)", expanded=True):
             col_chart_box, col_map_box = st.columns(2)
