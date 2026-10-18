@@ -94,6 +94,19 @@ PARTNERS_MX = {
     "Vanessa Joppien": "https://dbv.turnier.de/player-profile/76DA93E6-43E2-45CE-B28F-FDA12433FDBA"
 }
 
+PLACEMENT_OPTIONS = [
+    "-- Keine Angabe --",
+    "🥇 1. Platz",
+    "🥈 2. Platz",
+    "🥉 3. Platz",
+    "🏅 4. Platz",
+    "Viertelfinale",
+    "Achtelfinale",
+    "Gruppenphase",
+    "Teilgenommen",
+    "✍️ Eigene Angabe..."
+]
+
 # Custom CSS
 st.markdown(
     """
@@ -109,37 +122,50 @@ st.markdown(
 
     .card-inner-container { font-family: 'Inter', -apple-system, sans-serif; }
     
-    /* Aufmerksamkeitsstarke Störer */
-    .alert-stoerer-today {
-        background: linear-gradient(135deg, #ef4444, #b91c1c);
-        color: #ffffff !important;
-        font-weight: 800;
-        font-size: 0.82rem;
-        padding: 5px 12px;
-        border-radius: 6px;
-        letter-spacing: 0.6px;
+    /* Sanfte, dezente Störer */
+    .soft-stoerer-today {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        box-shadow: 0 3px 10px rgba(239, 68, 68, 0.4);
-        margin-bottom: 10px;
-        text-transform: uppercase;
+        background-color: #ecfdf5;
+        color: #065f46;
+        border: 1px solid #6ee7b7;
+        font-weight: 700;
+        font-size: 0.78rem;
+        padding: 3px 10px;
+        border-radius: 9999px;
+        margin-bottom: 8px;
     }
-    .alert-stoerer-tomorrow {
-        background: linear-gradient(135deg, #f97316, #c2410c);
-        color: #ffffff !important;
-        font-weight: 800;
-        font-size: 0.82rem;
-        padding: 5px 12px;
-        border-radius: 6px;
-        letter-spacing: 0.6px;
+    .soft-stoerer-tomorrow {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        box-shadow: 0 3px 10px rgba(249, 115, 22, 0.35);
-        margin-bottom: 10px;
-        text-transform: uppercase;
+        background-color: #fff7ed;
+        color: #9a3412;
+        border: 1px solid #fdba74;
+        font-weight: 700;
+        font-size: 0.78rem;
+        padding: 3px 10px;
+        border-radius: 9999px;
+        margin-bottom: 8px;
     }
+
+    /* Platzierungs-Badges */
+    .placement-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-top: 6px;
+        margin-bottom: 6px;
+    }
+    .badge-gold { background-color: #fef3c7; color: #92400e; border: 1.5px solid #f59e0b; }
+    .badge-silver { background-color: #f1f5f9; color: #334155; border: 1.5px solid #94a3b8; }
+    .badge-bronze { background-color: #ffedd5; color: #9a3412; border: 1.5px solid #ea580c; }
+    .badge-neutral { background-color: #f8fafc; color: #475569; border: 1px solid #cbd5e1; }
 
     .meta-badges-container { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
     .meta-badge { font-size: 0.75rem; font-weight: 600; padding: 3px 8px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; }
@@ -408,13 +434,13 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     start_date_obj = item['Start_Date_Obj']
     end_date_obj = item['End_Date_Obj']
 
-    # --- AUFMERKSAMKEITSSTARKER STÖRER (NUR HEUTE & MORGEN) ---
+    # --- SANFTER STÖRER (NUR HEUTE & MORGEN) ---
     stoerer_html = ""
     if start_date_obj and end_date_obj:
         if start_date_obj <= today <= end_date_obj:
-            stoerer_html = '<div class="alert-stoerer-today">🚨 HEUTE TURNIERTAG!</div>'
+            stoerer_html = '<div class="soft-stoerer-today">🏸 Heute Turniertag</div>'
         elif (start_date_obj - today).days == 1:
-            stoerer_html = '<div class="alert-stoerer-tomorrow">⚡ MORGEN SPIELTAG!</div>'
+            stoerer_html = '<div class="soft-stoerer-tomorrow">🏸 Morgen Turniertag</div>'
 
     # --- 1-KLICK GOOGLE MAPS LINK ---
     maps_query = urllib.parse.quote(f"Badminton Sporthalle {raw_city}")
@@ -645,19 +671,38 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     </div>
     """ if notes_val else ""
 
-    # Ergebnis-Anzeige (Platzierung)
-    result_val = item.get('result', '').strip()
-    result_html = f"""
-    <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 7px 12px; border-radius: 4px; font-size: 0.85rem; color: #065f46; font-weight: 700; margin-top: 8px; margin-bottom: 6px;">
-        🏆 Ergebnis: {html.escape(result_val)}
-    </div>
-    """ if result_val else ""
+    # Platzierungs-Badge (Strukturiert)
+    placement_val = item.get('placement', '').strip()
+    placement_detail = item.get('placement_detail', '').strip()
+    
+    # Fallback auf altes result-Feld
+    if not placement_val and item.get('result', '').strip():
+        placement_val = item.get('result', '').strip()
+
+    placement_badge_html = ""
+    if placement_val and placement_val != "-- Keine Angabe --":
+        p_class = "badge-neutral"
+        if "1." in placement_val or "Gold" in placement_val:
+            p_class = "badge-gold"
+        elif "2." in placement_val or "Silber" in placement_val:
+            p_class = "badge-silver"
+        elif "3." in placement_val or "Bronze" in placement_val:
+            p_class = "badge-bronze"
+            
+        detail_suffix = f" <span style='font-weight: 500;'>• {html.escape(placement_detail)}</span>" if placement_detail else ""
+        placement_badge_html = f"""
+        <div>
+            <div class="placement-badge {p_class}">
+                {html.escape(placement_val)}{detail_suffix}
+            </div>
+        </div>
+        """
 
     html_out = f"""
     <div class="card-inner-container">
         {stoerer_html}
         {badges_html}
-        {result_html}
+        {placement_badge_html}
         {notes_html}
         {disciplines_html}
     </div>
@@ -759,11 +804,34 @@ def render_admin_editor(item, full_data, is_past=False):
                 val_partner_mx = selected_mx_option
 
         st.write("")
-        col_note, col_res = st.columns([1, 1])
-        with col_note:
-            val_notes = st.text_input("📝 Persönliche Notiz / Fahrgemeinschaft", value=item.get('notes', ''), placeholder="z. B. Treffpunkt mit Jan 08:30 Uhr, 15 € Startgeld bar", key=f"note_{prefix}{t_id}").strip()
-        with col_res:
-            val_result = st.text_input("🏆 Platzierung / Ergebnis", value=item.get('result', ''), placeholder="z. B. 1. Platz HD mit Robert", key=f"res_{prefix}{t_id}").strip()
+        val_notes = st.text_input("🚗 Persönliche Notiz / Fahrgemeinschaft", value=item.get('notes', ''), placeholder="z. B. Treffpunkt mit Jan 08:30 Uhr, 15 € Startgeld bar", key=f"note_{prefix}{t_id}").strip()
+
+        # Platzierungs-Editor (nur bei vergangenen Turnieren)
+        if is_past:
+            st.markdown("**🏆 Saisontagebuch / Platzierung:**")
+            col_p1, col_p2 = st.columns([1, 1])
+            with col_p1:
+                cur_placement = item.get('placement', '')
+                p_idx = 0
+                if cur_placement in PLACEMENT_OPTIONS:
+                    p_idx = PLACEMENT_OPTIONS.index(cur_placement)
+                elif cur_placement:
+                    p_idx = PLACEMENT_OPTIONS.index("✍️ Eigene Angabe...")
+                
+                sel_placement = st.selectbox("Erreichte Runde / Platz", options=PLACEMENT_OPTIONS, index=p_idx, key=f"sel_p_{prefix}{t_id}")
+                
+                if sel_placement == "✍️ Eigene Angabe...":
+                    val_placement = st.text_input("Eigene Bezeichnung", value=cur_placement if cur_placement not in PLACEMENT_OPTIONS else "", key=f"custom_p_{prefix}{t_id}").strip()
+                elif sel_placement == "-- Keine Angabe --":
+                    val_placement = ""
+                else:
+                    val_placement = sel_placement
+
+            with col_p2:
+                val_placement_detail = st.text_input("Zusatz / Disziplin (optional)", value=item.get('placement_detail', ''), placeholder="z. B. mit Robert (HD O35)", key=f"p_det_{prefix}{t_id}").strip()
+        else:
+            val_placement = item.get('placement', '')
+            val_placement_detail = item.get('placement_detail', '')
 
         save_submitted = st.form_submit_button("💾 Änderungen speichern", use_container_width=True)
 
@@ -782,7 +850,8 @@ def render_admin_editor(item, full_data, is_past=False):
                 val_day_hd != item.get('day_hd', '') or
                 val_day_mx != item.get('day_mx', '') or
                 val_notes != item.get('notes', '') or
-                val_result != item.get('result', '')
+                val_placement != item.get('placement', '') or
+                val_placement_detail != item.get('placement_detail', '')
             )
             
             if has_changed:
@@ -799,16 +868,19 @@ def render_admin_editor(item, full_data, is_past=False):
                 full_data[t_id]['day_hd'] = val_day_hd
                 full_data[t_id]['day_mx'] = val_day_mx
                 full_data[t_id]['notes'] = val_notes
-                full_data[t_id]['result'] = val_result
+                full_data[t_id]['placement'] = val_placement
+                full_data[t_id]['placement_detail'] = val_placement_detail
                 
                 save_tournaments_data(DB_FILE, full_data)
-                    
-                try:
-                    from gcal_sync import sync_tournament_to_gcal
-                    sync_tournament_to_gcal(full_data[t_id])
-                    st.toast("Google Kalender erfolgreich aktualisiert!", icon="📅")
-                except Exception as e:
-                    st.toast(f"Fehler bei Google Kalender Sync: {e}", icon="⚠️")
+                
+                # Google Kalender nur für zukünftige Turniere synchronisieren (verhindert HttpError 410)
+                if not is_past:
+                    try:
+                        from gcal_sync import sync_tournament_to_gcal
+                        sync_tournament_to_gcal(full_data[t_id])
+                        st.toast("Google Kalender erfolgreich aktualisiert!", icon="📅")
+                    except Exception as e:
+                        st.toast(f"Fehler bei Google Kalender Sync: {e}", icon="⚠️")
                     
                 st.success("Turnier erfolgreich aktualisiert!")
                 st.rerun()
@@ -887,6 +959,8 @@ elif data is not None:
             'organizer': 'Unbekannt',
             'description': '',
             'notes': '',
+            'placement': '',
+            'placement_detail': '',
             'result': ''
         }
         for col, default in fallback_cols.items():
@@ -984,26 +1058,24 @@ elif data is not None:
         df_past = df[df['End_Date_Obj'] < today].copy()
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
-        # --- FILTER-BEREICH ---
+        # --- KOMPAKTER, AUFGERÄUMTER FILTER-EXPANDER ---
         st.write("")
-        st.markdown("### Filter")
-        
-        col_f1, col_f2 = st.columns(2)
-        with col_f1:
-            only_registered = st.toggle("Turniere, an denen ich angemeldet bin", value=False)
-        with col_f2:
-            only_available = st.toggle("Turniere, an denen ich mich noch anmelden kann", value=False)
+        with st.expander("🔍 Filter & Suche", expanded=False):
+            # Suchfeld (nur halbe Breite auf Desktop)
+            col_search, _ = st.columns([1, 1])
+            with col_search:
+                search_query = st.text_input("Suche nach Turniername, Ort, Partner", placeholder="z. B. Hilden, Solingen, Reiz...", key="search_filter").strip()
 
-        # Disziplinen-Filter
-        col_d1, col_d2, col_d3 = st.columns(3)
-        with col_d1:
-            filter_he = st.checkbox("👤 Nur mit Herreneinzel", value=False)
-        with col_d2:
-            filter_hd = st.checkbox("👥 Nur mit Herrendoppel", value=False)
-        with col_d3:
-            filter_mx = st.checkbox("👥 Nur mit Mixed", value=False)
+            st.write("")
+            st.markdown("**Status:**")
+            only_registered = st.checkbox("Turniere, an denen ich angemeldet bin", value=False)
+            only_available = st.checkbox("Turniere, an denen ich mich noch anmelden kann", value=False)
 
-        search_query = st.text_input("🔍 Suche nach Turniername oder Ort", placeholder="z. B. Hilden, Solingen, Reiz...", key="search_filter").strip()
+            st.write("")
+            st.markdown("**Disziplinen:**")
+            filter_he = st.checkbox("👤 Herreneinzel (HE)", value=False)
+            filter_hd = st.checkbox("👥 Herrendoppel (HD)", value=False)
+            filter_mx = st.checkbox("👥 Mixed (MX)", value=False)
 
         # Filter anwenden
         if only_registered or only_available:
@@ -1045,7 +1117,8 @@ elif data is not None:
                 df_past['title'].str.lower().str.contains(query_lower, na=False) |
                 df_past['city'].str.lower().str.contains(query_lower, na=False) |
                 df_past['notes'].str.lower().str.contains(query_lower, na=False) |
-                df_past['result'].str.lower().str.contains(query_lower, na=False) |
+                df_past['placement'].str.lower().str.contains(query_lower, na=False) |
+                df_past['placement_detail'].str.lower().str.contains(query_lower, na=False) |
                 df_past['partner_hd'].str.lower().str.contains(query_lower, na=False) |
                 df_past['partner_mx'].str.lower().str.contains(query_lower, na=False)
             ]
