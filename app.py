@@ -7,6 +7,7 @@ import html
 import re
 from zoneinfo import ZoneInfo
 import plotly.graph_objects as go
+import plotly.express as px
 from gist_db import load_gist_file, save_gist_file, DatabaseConnectionError
 
 # --- HILFSFUNKTION FÜR SAUBERES HTML-RENDERING ---
@@ -932,7 +933,7 @@ def render_season_chart(df):
             })
             
     if not records:
-        st.info("Noch keine Ergebnisse im Saisontagebuch eingetragen. Sobald du bei vergangenen Turnieren Platzierungen einträgst, entsteht hier deine Formkurve!")
+        st.info("Noch keine Ergebnisse im Saisontagebuch eingetragen.")
         return
 
     df_chart = pd.DataFrame(records)
@@ -1028,7 +1029,7 @@ def render_season_chart(df):
         ))
 
     fig.update_layout(
-        height=320,
+        height=330,
         margin=dict(l=10, r=10, t=10, b=10),
         legend=dict(
             orientation="h",
@@ -1080,15 +1081,21 @@ def render_season_chart(df):
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 
-# --- DETAILREICHE DEUTSCHLANDKARTE DER GESPIELTEN TURNIERE ---
+# --- DETAILREICHE DEUTSCHLANDKARTE (ECHTE STRASSEN & STÄDTE MIT CARTO-DARKMATTER) ---
 def render_tournament_heatmap(df, today):
     city_counts = {}
     city_tournaments = {}
 
     for _, row in df.iterrows():
-        # NUR Turniere berücksichtigen, an denen Marco teilgenommen hat (gemeldet & vergangen bzw. mit Ergebnis)
+        # Streng nur Turniere, an denen Marco teilgenommen hat
         is_reg = bool(row.get('registered', False))
-        has_result = bool(row.get('placement_he') or row.get('placement_hd') or row.get('placement_mx') or row.get('placement') or row.get('result'))
+        has_result = bool(
+            (row.get('placement_he') and row.get('placement_he') != "-- Keine Angabe --") or
+            (row.get('placement_hd') and row.get('placement_hd') != "-- Keine Angabe --") or
+            (row.get('placement_mx') and row.get('placement_mx') != "-- Keine Angabe --") or
+            (row.get('placement') and row.get('placement') != "-- Keine Angabe --") or
+            row.get('result')
+        )
         is_past = row.get('End_Date_Obj') and row.get('End_Date_Obj') < today
 
         if not (is_reg and (is_past or has_result)):
@@ -1115,13 +1122,30 @@ def render_tournament_heatmap(df, today):
             city_tournaments.setdefault(matched_city, []).append(t_title)
 
     if not city_counts:
-        st.info("Noch keine gespielten Turniere mit bekanntem Spielort erfasst.")
+        st.info("Noch keine teilgenommenen Turniere mit bekanntem Spielort erfasst.")
         return
 
-    lats = [CITY_COORDINATES[c][0] for c in city_counts.keys()]
-    lons = [CITY_COORDINATES[c][1] for c in city_counts.keys()]
-    counts = [city_counts[c] for c in city_counts.keys()]
-    cities = list(city_counts.keys())
+    map_rows = []
+    for c, cnt in city_counts.items():
+        t_list = city_tournaments[c]
+        t_sample = "<br>• " + "<br>• ".join(t_list[:3])
+        if len(t_list) > 3:
+            t_sample += f"<br>• ... (+{len(t_list)-3} weitere)"
+            
+        map_rows.append({
+            "Stadt": c,
+            "Turniere": cnt,
+            "lat": CITY_COORDINATES[c][0],
+            "lon": CITY_COORDINATES[c][1],
+            "Details": t_sample,
+            "Groesse": min(10 + cnt * 6, 26)
+        })
+
+    df_map = pd.DataFrame(map_rows)
+    lats = df_map["lat"].tolist()
+    lons = df_map["lon"].tolist()
+    avg_lat = sum(lats) / len(lats) if lats else 51.17
+    avg_lon = sum(lons) / len(lons) if lons else 6.95
 
     top_cities = sorted(city_counts.items(), key=lambda x: x[1], reverse=True)[:3]
     hotspot_str = " • ".join([f"{c} ({cnt})" for c, cnt in top_cities])
@@ -1130,7 +1154,7 @@ def render_tournament_heatmap(df, today):
         f"""
         <div class="zeit-card">
             <div class="zeit-header-title">Gespielte Spielorte 2026</div>
-            <div class="zeit-hero-number">{len(cities)} Städte</div>
+            <div class="zeit-hero-number">{len(city_counts)} Städte</div>
             <div class="zeit-hero-sub">Orte von Turnieren, an denen du teilgenommen hast</div>
             <div class="zeit-kpi-row">
                 <span class="zeit-kpi-tag" style="border-color: #22d3ee; color: #22d3ee;">📍 Hotspots: {hotspot_str}</span>
@@ -1140,82 +1164,44 @@ def render_tournament_heatmap(df, today):
         unsafe_allow_html=True
     )
 
-    hover_texts = []
-    for c in cities:
-        t_list = city_tournaments[c]
-        t_sample = "<br>• " + "<br>• ".join(t_list[:3])
-        if len(t_list) > 3:
-            t_sample += f"<br>• ... (+{len(t_list)-3} weitere)"
-        hover_texts.append(
-            f"<span style='font-size:14px; font-weight:800; color:#22d3ee;'>📍 {c}</span><br>"
-            f"<span style='font-size:12px; color:#f8fafc;'><b>{city_counts[c]} gespielte(s) Turnier(e)</b></span>"
-            f"<span style='font-size:11px; color:#94a3b8;'>{t_sample}</span>"
+    # Plotly MapLibre / Mapbox Umschalter für echte Kacheln mit Straßen & Städtenamen
+    if hasattr(px, "scatter_map"):
+        fig_map = px.scatter_map(
+            df_map,
+            lat="lat",
+            lon="lon",
+            size="Groesse",
+            hover_name="Stadt",
+            custom_data=["Turniere", "Details"],
+            color_discrete_sequence=["#22d3ee"],
+            zoom=8.0,
+            center=dict(lat=avg_lat, lon=avg_lon)
         )
+        fig_map.update_layout(map_style="carto-darkmatter")
+    else:
+        fig_map = px.scatter_mapbox(
+            df_map,
+            lat="lat",
+            lon="lon",
+            size="Groesse",
+            hover_name="Stadt",
+            custom_data=["Turniere", "Details"],
+            color_discrete_sequence=["#22d3ee"],
+            zoom=8.0,
+            center=dict(lat=avg_lat, lon=avg_lon)
+        )
+        fig_map.update_layout(mapbox_style="carto-darkmatter")
 
-    fig_map = go.Figure()
-
-    # Detaillierte Punkte der teilgenommenen Turniere
-    fig_map.add_trace(go.Scatter(
-        x=lons,
-        y=lats,
-        mode="markers+text",
-        marker=dict(
-            size=[min(12 + c * 5, 26) for c in counts],
-            color="#22d3ee",
-            opacity=0.9,
-            line=dict(color="#ffffff", width=1.5)
-        ),
-        text=cities,
-        textposition="top center",
-        textfont=dict(color="#e2e8f0", size=10, family="Inter, sans-serif"),
-        hovertext=hover_texts,
-        hoverinfo="text"
-    ))
-
-    # Heimatbasis Hilden mit Spezial-Marker
-    hilden_coord = CITY_COORDINATES["Hilden"]
-    fig_map.add_trace(go.Scatter(
-        x=[hilden_coord[1]],
-        y=[hilden_coord[0]],
-        mode="markers+text",
-        marker=dict(
-            size=14,
-            color="#f59e0b",
-            symbol="star",
-            line=dict(color="#ffffff", width=1)
-        ),
-        text=["Hilden (Basis)"],
-        textposition="bottom center",
-        textfont=dict(color="#f59e0b", size=10, family="Inter, sans-serif"),
-        hovertext=["<span style='font-size:13px; font-weight:800; color:#f59e0b;'>🏠 Hilden (Heimatbasis)</span>"],
-        hoverinfo="text"
-    ))
-
-    min_lon, max_lon = min(lons + [hilden_coord[1]]) - 0.4, max(lons + [hilden_coord[1]]) + 0.4
-    min_lat, max_lat = min(lats + [hilden_coord[0]]) - 0.3, max(lats + [hilden_coord[0]]) + 0.3
+    fig_map.update_traces(
+        hovertemplate="<b>📍 %{hovertext}</b><br>Gespielte Turniere: <b>%{customdata[0]}</b>%{customdata[1]}<extra></extra>",
+        marker=dict(opacity=0.9, line=dict(width=1.5, color="#12161f"))
+    )
 
     fig_map.update_layout(
-        height=320,
-        margin=dict(l=10, r=10, t=10, b=10),
-        showlegend=False,
-        xaxis=dict(
-            range=[min_lon, max_lon],
-            showgrid=True,
-            gridcolor="rgba(255, 255, 255, 0.05)",
-            zeroline=False,
-            showticklabels=False
-        ),
-        yaxis=dict(
-            range=[min_lat, max_lat],
-            showgrid=True,
-            gridcolor="rgba(255, 255, 255, 0.05)",
-            zeroline=False,
-            showticklabels=False,
-            scaleanchor="x",
-            scaleratio=1.6
-        ),
-        plot_bgcolor="#12161f",
+        height=330,
+        margin=dict(l=0, r=0, t=0, b=0),
         paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
         hoverlabel=dict(
             bgcolor="#1e293b",
             bordercolor="rgba(255, 255, 255, 0.15)",
