@@ -4,6 +4,7 @@ import json
 import os
 import datetime
 import html
+import urllib.parse
 import re
 from zoneinfo import ZoneInfo
 from gist_db import load_gist_file, save_gist_file, DatabaseConnectionError
@@ -107,9 +108,43 @@ st.markdown(
     details.status-tag .status-content { font-size: 0.95em; padding: 0 10px 8px 10px; cursor: default; }
 
     .card-inner-container { font-family: 'Inter', -apple-system, sans-serif; }
+    
+    /* Aufmerksamkeitsstarke Störer */
+    .alert-stoerer-today {
+        background: linear-gradient(135deg, #ef4444, #b91c1c);
+        color: #ffffff !important;
+        font-weight: 800;
+        font-size: 0.82rem;
+        padding: 5px 12px;
+        border-radius: 6px;
+        letter-spacing: 0.6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 3px 10px rgba(239, 68, 68, 0.4);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+    .alert-stoerer-tomorrow {
+        background: linear-gradient(135deg, #f97316, #c2410c);
+        color: #ffffff !important;
+        font-weight: 800;
+        font-size: 0.82rem;
+        padding: 5px 12px;
+        border-radius: 6px;
+        letter-spacing: 0.6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 3px 10px rgba(249, 115, 22, 0.35);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
     .meta-badges-container { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-    .meta-badge { font-size: 0.75rem; font-weight: 600; padding: 3px 8px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 4px; }
-    .loc-badge { background-color: #f1f5f9; color: #334155; }
+    .meta-badge { font-size: 0.75rem; font-weight: 600; padding: 3px 8px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; }
+    .loc-badge { background-color: #f1f5f9; color: #1e293b; transition: background-color 0.15s; }
+    .loc-badge:hover { background-color: #e2e8f0; color: #0f172a; }
     .dist-badge { background-color: #fef3c7; color: #b45309; }
     .org-badge { background-color: #ecfeff; color: #0891b2; }
     .date-badge { background-color: #f5f3ff; color: #6d28d9; }
@@ -325,7 +360,8 @@ def can_still_register(item, vacation_dates, occupied_dates):
 
 
 def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today):
-    city = html.escape(str(item.get('city', 'Unbekannt')))
+    raw_city = str(item.get('city', 'Unbekannt'))
+    city = html.escape(raw_city)
     title = html.escape(str(item.get('title', 'Turnier')))
     dist = item.get('distance')
     dist_str = f"{dist} km" if dist is not None else "Keine Angabe"
@@ -372,22 +408,18 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     start_date_obj = item['Start_Date_Obj']
     end_date_obj = item['End_Date_Obj']
 
-    # Dynamischer Countdown-Badge
-    countdown_badge = ""
+    # --- AUFMERKSAMKEITSSTARKER STÖRER (NUR HEUTE & MORGEN) ---
+    stoerer_html = ""
     if start_date_obj and end_date_obj:
-        days_diff = (start_date_obj - today).days
-        if end_date_obj < today:
-            countdown_badge = '<span class="meta-badge" style="background-color: #f1f5f9; color: #64748b;">🕰️ Beendet</span>'
-        elif days_diff == 0:
-            countdown_badge = '<span class="meta-badge" style="background-color: #fee2e2; color: #dc2626; font-weight: 700;">🔥 Heute!</span>'
-        elif days_diff == 1:
-            countdown_badge = '<span class="meta-badge" style="background-color: #ffedd5; color: #ea580c; font-weight: 700;">⚡ Morgen!</span>'
-        elif 1 < days_diff <= 7:
-            countdown_badge = f'<span class="meta-badge" style="background-color: #fef9c3; color: #ca8a04; font-weight: 700;">⏳ In {days_diff} Tagen</span>'
-        elif 7 < days_diff <= 35:
-            weeks = max(1, days_diff // 7)
-            w_str = "Woche" if weeks == 1 else "Wochen"
-            countdown_badge = f'<span class="meta-badge" style="background-color: #dcfce7; color: #16a34a; font-weight: 600;">📅 In {weeks} {w_str}</span>'
+        if start_date_obj <= today <= end_date_obj:
+            stoerer_html = '<div class="alert-stoerer-today">🚨 HEUTE TURNIERTAG!</div>'
+        elif (start_date_obj - today).days == 1:
+            stoerer_html = '<div class="alert-stoerer-tomorrow">⚡ MORGEN SPIELTAG!</div>'
+
+    # --- 1-KLICK GOOGLE MAPS LINK ---
+    maps_query = urllib.parse.quote(f"Badminton Sporthalle {raw_city}")
+    maps_url = f"https://www.google.com/maps/search/?api=1&query={maps_query}"
+    loc_badge_html = f'<a href="{maps_url}" target="_blank" class="meta-badge loc-badge" title="Route in Google Maps planen">📍 {city} (🗺️ Maps)</a>'
 
     has_he = (day_he != "Disziplin findet nicht statt")
     has_hd = (day_hd != "Disziplin findet nicht statt")
@@ -421,9 +453,8 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
 
     badges_html = f"""
     <div class="meta-badges-container">
-        {countdown_badge}
         <span class="meta-badge date-badge">📅 {date_range_str}</span>
-        <span class="meta-badge loc-badge">📍 {city}</span>
+        {loc_badge_html}
         <span class="meta-badge dist-badge">🚗 {dist_str}</span>
         <span class="meta-badge org-badge">🛡️ {org_str}</span>
     </div>
@@ -606,16 +637,35 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     </div>
     """ if (has_he or has_hd or has_mx) else ""
 
+    # Notizen-Anzeige (Fahrgemeinschaft)
+    notes_val = item.get('notes', '').strip()
+    notes_html = f"""
+    <div style="background-color: #fefce8; border-left: 4px solid #eab308; padding: 7px 12px; border-radius: 4px; font-size: 0.8rem; color: #854d0e; margin-top: 8px; margin-bottom: 6px;">
+        <strong>🚗 Notiz / Fahrgemeinschaft:</strong> {html.escape(notes_val)}
+    </div>
+    """ if notes_val else ""
+
+    # Ergebnis-Anzeige (Platzierung)
+    result_val = item.get('result', '').strip()
+    result_html = f"""
+    <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 7px 12px; border-radius: 4px; font-size: 0.85rem; color: #065f46; font-weight: 700; margin-top: 8px; margin-bottom: 6px;">
+        🏆 Ergebnis: {html.escape(result_val)}
+    </div>
+    """ if result_val else ""
+
     html_out = f"""
     <div class="card-inner-container">
+        {stoerer_html}
         {badges_html}
+        {result_html}
+        {notes_html}
         {disciplines_html}
     </div>
     """
     st.markdown(clean_html(html_out), unsafe_allow_html=True)
 
 
-# --- WIEDERVERWENDBARER ADMIN-EDITOR MIT FREITEXT-PARTNERN ---
+# --- WIEDERVERWENDBARER ADMIN-EDITOR ---
 def render_admin_editor(item, full_data, is_past=False):
     st.write("---")
     desc_text = item.get('description', '').strip()
@@ -708,6 +758,13 @@ def render_admin_editor(item, full_data, is_past=False):
             else:
                 val_partner_mx = selected_mx_option
 
+        st.write("")
+        col_note, col_res = st.columns([1, 1])
+        with col_note:
+            val_notes = st.text_input("📝 Persönliche Notiz / Fahrgemeinschaft", value=item.get('notes', ''), placeholder="z. B. Treffpunkt mit Jan 08:30 Uhr, 15 € Startgeld bar", key=f"note_{prefix}{t_id}").strip()
+        with col_res:
+            val_result = st.text_input("🏆 Platzierung / Ergebnis", value=item.get('result', ''), placeholder="z. B. 1. Platz HD mit Robert", key=f"res_{prefix}{t_id}").strip()
+
         save_submitted = st.form_submit_button("💾 Änderungen speichern", use_container_width=True)
 
         if save_submitted:
@@ -723,7 +780,9 @@ def render_admin_editor(item, full_data, is_past=False):
                 val_partner_mx != item.get('partner_mx', '') or
                 val_day_he != item.get('day_he', '') or
                 val_day_hd != item.get('day_hd', '') or
-                val_day_mx != item.get('day_mx', '')
+                val_day_mx != item.get('day_mx', '') or
+                val_notes != item.get('notes', '') or
+                val_result != item.get('result', '')
             )
             
             if has_changed:
@@ -739,6 +798,8 @@ def render_admin_editor(item, full_data, is_past=False):
                 full_data[t_id]['day_he'] = val_day_he
                 full_data[t_id]['day_hd'] = val_day_hd
                 full_data[t_id]['day_mx'] = val_day_mx
+                full_data[t_id]['notes'] = val_notes
+                full_data[t_id]['result'] = val_result
                 
                 save_tournaments_data(DB_FILE, full_data)
                     
@@ -824,7 +885,9 @@ elif data is not None:
             'start_date': None,
             'end_date': None,
             'organizer': 'Unbekannt',
-            'description': ''
+            'description': '',
+            'notes': '',
+            'result': ''
         }
         for col, default in fallback_cols.items():
             if col not in df.columns:
@@ -921,32 +984,6 @@ elif data is not None:
         df_past = df[df['End_Date_Obj'] < today].copy()
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
-        # --- DASHBOARD-KPIS GANZ OBEN ---
-        st.write("")
-        col_kpi1, col_kpi2, col_kpi3 = st.columns(3)
-        with col_kpi1:
-            reg_total = len(df[df['registered'] == True])
-            st.metric("Gemeldete Turniere", f"{reg_total} gesamt")
-        with col_kpi2:
-            upcoming_regs = df_upcoming[df_upcoming['registered'] == True]
-            if not upcoming_regs.empty:
-                next_t = upcoming_regs.iloc[0]
-                d_left = (next_t['Start_Date_Obj'] - today).days
-                time_str = "Heute!" if d_left == 0 else ("Morgen!" if d_left == 1 else f"In {d_left} Tagen")
-                st.metric("Nächstes Turnier", time_str, help=f"{next_t['title']} in {next_t['city']}")
-            else:
-                st.metric("Nächstes Turnier", "Keines anstehend")
-        with col_kpi3:
-            conflict_days = 0
-            for dt, conf_list in occupied_dates.items():
-                distinct_titles = {c['title'] for c in conf_list}
-                if len(distinct_titles) > 1:
-                    conflict_days += 1
-            if conflict_days == 0:
-                st.metric("Terminkonflikte", "Keine", delta="Alles frei", delta_color="normal")
-            else:
-                st.metric("Terminkonflikte", f"{conflict_days} Tag(e)", delta=f"{conflict_days} Kollision(en)!", delta_color="inverse")
-
         # --- FILTER-BEREICH ---
         st.write("")
         st.markdown("### Filter")
@@ -957,8 +994,18 @@ elif data is not None:
         with col_f2:
             only_available = st.toggle("Turniere, an denen ich mich noch anmelden kann", value=False)
 
-        search_query = st.text_input("🔍 Suche nach Turniername oder Ort", placeholder="z. B. Hilden, Solingen, Doppel...", key="search_filter").strip()
+        # Disziplinen-Filter
+        col_d1, col_d2, col_d3 = st.columns(3)
+        with col_d1:
+            filter_he = st.checkbox("👤 Nur mit Herreneinzel", value=False)
+        with col_d2:
+            filter_hd = st.checkbox("👥 Nur mit Herrendoppel", value=False)
+        with col_d3:
+            filter_mx = st.checkbox("👥 Nur mit Mixed", value=False)
 
+        search_query = st.text_input("🔍 Suche nach Turniername oder Ort", placeholder="z. B. Hilden, Solingen, Reiz...", key="search_filter").strip()
+
+        # Filter anwenden
         if only_registered or only_available:
             def row_passes_filter(row):
                 is_reg = bool(row.get('registered', False))
@@ -974,15 +1021,33 @@ elif data is not None:
             df_upcoming = df_upcoming[df_upcoming.apply(row_passes_filter, axis=1)]
             df_past = df_past[df_past.apply(row_passes_filter, axis=1)]
 
+        selected_disc_filters = []
+        if filter_he: selected_disc_filters.append('day_he')
+        if filter_hd: selected_disc_filters.append('day_hd')
+        if filter_mx: selected_disc_filters.append('day_mx')
+
+        if selected_disc_filters:
+            def disc_filter(row):
+                return any(row.get(col) != "Disziplin findet nicht statt" for col in selected_disc_filters)
+            df_upcoming = df_upcoming[df_upcoming.apply(disc_filter, axis=1)]
+            df_past = df_past[df_past.apply(disc_filter, axis=1)]
+
         if search_query:
             query_lower = search_query.lower()
             df_upcoming = df_upcoming[
                 df_upcoming['title'].str.lower().str.contains(query_lower, na=False) |
-                df_upcoming['city'].str.lower().str.contains(query_lower, na=False)
+                df_upcoming['city'].str.lower().str.contains(query_lower, na=False) |
+                df_upcoming['notes'].str.lower().str.contains(query_lower, na=False) |
+                df_upcoming['partner_hd'].str.lower().str.contains(query_lower, na=False) |
+                df_upcoming['partner_mx'].str.lower().str.contains(query_lower, na=False)
             ]
             df_past = df_past[
                 df_past['title'].str.lower().str.contains(query_lower, na=False) |
-                df_past['city'].str.lower().str.contains(query_lower, na=False)
+                df_past['city'].str.lower().str.contains(query_lower, na=False) |
+                df_past['notes'].str.lower().str.contains(query_lower, na=False) |
+                df_past['result'].str.lower().str.contains(query_lower, na=False) |
+                df_past['partner_hd'].str.lower().str.contains(query_lower, na=False) |
+                df_past['partner_mx'].str.lower().str.contains(query_lower, na=False)
             ]
 
         month_names = {1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni", 7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"}
