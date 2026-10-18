@@ -94,15 +94,20 @@ PARTNERS_MX = {
     "Vanessa Joppien": "https://dbv.turnier.de/player-profile/76DA93E6-43E2-45CE-B28F-FDA12433FDBA"
 }
 
+# Umfassende Auswahl für KO-, Monrad- und Gruppensysteme
 PLACEMENT_OPTIONS = [
     "-- Keine Angabe --",
     "🥇 1. Platz",
     "🥈 2. Platz",
     "🥉 3. Platz",
     "🏅 4. Platz",
-    "Viertelfinale",
-    "Achtelfinale",
-    "Gruppenphase",
+    "5. Platz",
+    "6. Platz",
+    "7. Platz",
+    "8. Platz",
+    "Viertelfinale (Plätze 5–8)",
+    "9.–16. Platz / Achtelfinale",
+    "Gruppenphase / Vorrunde",
     "Teilgenommen",
     "✍️ Eigene Angabe..."
 ]
@@ -115,7 +120,7 @@ FIELD_OPTIONS = [
     "Sonstiges"
 ]
 
-# Custom CSS inklusive ZEIT Online Dashboard Styling
+# Custom CSS
 st.markdown(
     """
     <style>
@@ -205,22 +210,30 @@ st.markdown(
         color: #e2e8f0;
     }
 
-    /* Platzierungs-Badges auf Kacheln */
-    .placement-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 0.8rem;
+    /* Medaillen-Badges direkt in den Disziplin-Kacheln */
+    .discipline-result-pill {
+        font-size: 0.72rem;
         font-weight: 700;
-        margin-top: 4px;
-        margin-bottom: 4px;
+        padding: 3px 6px;
+        border-radius: 4px;
+        margin-top: 5px;
+        display: inline-block;
+        line-height: 1.25;
+        text-align: center;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
     .badge-gold { background-color: #fef3c7; color: #92400e; border: 1.5px solid #f59e0b; }
     .badge-silver { background-color: #f1f5f9; color: #334155; border: 1.5px solid #94a3b8; }
     .badge-bronze { background-color: #ffedd5; color: #9a3412; border: 1.5px solid #ea580c; }
     .badge-neutral { background-color: #f8fafc; color: #475569; border: 1px solid #cbd5e1; }
+
+    /* Medaillen-Karten-Akzente */
+    .discipline-card.card-gold { border: 2px solid #f59e0b !important; background-color: #fffdf5 !important; }
+    .discipline-card.card-silver { border: 2px solid #94a3b8 !important; background-color: #f8fafc !important; }
+    .discipline-card.card-bronze { border: 2px solid #ea580c !important; background-color: #fffaf5 !important; }
 
     .meta-badges-container { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
     .meta-badge { font-size: 0.75rem; font-weight: 600; padding: 3px 8px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 4px; }
@@ -272,6 +285,7 @@ st.markdown(
         .discipline-title { font-size: 0.65rem !important; }
         .discipline-day { font-size: 0.6rem !important; padding: 2px 4px !important; margin-bottom: 2px !important; line-height: 1.15 !important; }
         .discipline-status { font-size: 0.55rem !important; line-height: 1.1 !important; }
+        .discipline-result-pill { font-size: 0.55rem !important; padding: 1px 3px !important; margin-top: 3px !important; }
     }
     </style>
     """,
@@ -641,7 +655,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             if partner_mx and partner_mx in PARTNERS_MX and PARTNERS_MX[partner_mx]:
                 mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{safe_partner_mx}</a> (Feld voll)"
             elif partner_mx:
-                mx_status_text = f"Mit {safe_partner_mx} (Feld voll)"
+                mx_status_text = f"Mit {safe_partner_mx}"
             else:
                 mx_status_text = "Ohne Partnerin (Feld voll)"
         else:
@@ -671,6 +685,36 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                     mx_status_class = "conflict"
                     mx_class = "has-conflict"
 
+    # --- HILFSFUNKTION FÜR IN-KACHEL-PLATZIERUNGSBADGES ---
+    def get_card_result_info(placement_val, field_val):
+        if not placement_val or placement_val == "-- Keine Angabe --":
+            return "", ""
+        
+        p_class = "badge-neutral"
+        card_extra_class = ""
+        p_lower = placement_val.lower()
+        if "1." in placement_val or "gold" in p_lower:
+            p_class = "badge-gold"
+            card_extra_class = "card-gold"
+        elif "2." in placement_val or "silber" in p_lower:
+            p_class = "badge-silver"
+            card_extra_class = "card-silver"
+        elif "3." in placement_val or "bronze" in p_lower:
+            p_class = "badge-bronze"
+            card_extra_class = "card-bronze"
+            
+        field_str = f" ({html.escape(field_val)})" if field_val and field_val != "-- Feld wählen --" else ""
+        pill_html = f'<div class="discipline-result-pill {p_class}" title="{html.escape(placement_val)}{field_str}">🏆 {html.escape(placement_val)}{field_str}</div>'
+        return pill_html, card_extra_class
+
+    res_pill_he, card_extra_he = get_card_result_info(item.get('placement_he', '').strip(), item.get('field_he', '').strip())
+    res_pill_hd, card_extra_hd = get_card_result_info(item.get('placement_hd', '').strip(), item.get('field_hd', '').strip())
+    res_pill_mx, card_extra_mx = get_card_result_info(item.get('placement_mx', '').strip(), item.get('field_mx', '').strip())
+
+    if card_extra_he: he_class = f"{he_class} {card_extra_he}".strip()
+    if card_extra_hd: hd_class = f"{hd_class} {card_extra_hd}".strip()
+    if card_extra_mx: mx_class = f"{mx_class} {card_extra_mx}".strip()
+
     he_card = f"""
     <div class="discipline-card {he_class}">
         <div>
@@ -678,7 +722,10 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             <div class="discipline-icon">{he_icon}</div>
             <div class="discipline-title">Einzel</div>
         </div>
-        <div class="discipline-status {he_status_class}">{he_status_text}</div>
+        <div>
+            <div class="discipline-status {he_status_class}">{he_status_text}</div>
+            {res_pill_he}
+        </div>
     </div>
     """ if has_he else ""
 
@@ -689,7 +736,10 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             <div class="discipline-icon">{hd_icon}</div>
             <div class="discipline-title">Doppel</div>
         </div>
-        <div class="discipline-status {hd_status_class}">{hd_status_text}</div>
+        <div>
+            <div class="discipline-status {hd_status_class}">{hd_status_text}</div>
+            {res_pill_hd}
+        </div>
     </div>
     """ if has_hd else ""
 
@@ -700,7 +750,10 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             <div class="discipline-icon">{mx_icon}</div>
             <div class="discipline-title">Mixed</div>
         </div>
-        <div class="discipline-status {mx_status_class}">{mx_status_text}</div>
+        <div>
+            <div class="discipline-status {mx_status_class}">{mx_status_text}</div>
+            {res_pill_mx}
+        </div>
     </div>
     """ if has_mx else ""
 
@@ -720,48 +773,10 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     </div>
     """ if notes_val else ""
 
-    # Platzierungs-Badges pro Disziplin
-    def build_placement_badge(disc_name, placement_val, field_val):
-        if not placement_val or placement_val == "-- Keine Angabe --":
-            return ""
-        p_class = "badge-neutral"
-        if "1." in placement_val or "Gold" in placement_val:
-            p_class = "badge-gold"
-        elif "2." in placement_val or "Silber" in placement_val:
-            p_class = "badge-silver"
-        elif "3." in placement_val or "Bronze" in placement_val:
-            p_class = "badge-bronze"
-            
-        field_str = f" ({html.escape(field_val)})" if field_val and field_val != "-- Feld wählen --" else ""
-        return f'<div class="placement-badge {p_class}">🏆 {disc_name}: {html.escape(placement_val)}{field_str}</div>'
-
-    badges_results = []
-    b_he = build_placement_badge("Einzel", item.get('placement_he', '').strip(), item.get('field_he', '').strip())
-    b_hd = build_placement_badge("Doppel", item.get('placement_hd', '').strip(), item.get('field_hd', '').strip())
-    b_mx = build_placement_badge("Mixed", item.get('placement_mx', '').strip(), item.get('field_mx', '').strip())
-    
-    for b in [b_he, b_hd, b_mx]:
-        if b: badges_results.append(b)
-
-    # Fallback auf alte Platzierungsfelder, falls vorhanden
-    if not badges_results:
-        old_p = item.get('placement', '').strip() or item.get('result', '').strip()
-        old_det = item.get('placement_detail', '').strip()
-        if old_p and old_p != "-- Keine Angabe --":
-            b_old = build_placement_badge("Ergebnis", old_p, old_det)
-            if b_old: badges_results.append(b_old)
-
-    placement_badge_html = f"""
-    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; margin-bottom: 6px;">
-        {' '.join(badges_results)}
-    </div>
-    """ if badges_results else ""
-
     html_out = f"""
     <div class="card-inner-container">
         {stoerer_html}
         {badges_html}
-        {placement_badge_html}
         {notes_html}
         {disciplines_html}
     </div>
@@ -815,41 +830,50 @@ def render_season_chart(df):
         return
 
     df_chart = pd.DataFrame(records)
-    # Exakte chronologische Sortierung
     df_chart = df_chart.sort_values(by="date", ascending=True)
 
-    def normalize_placement(p):
-        if "1." in p: return "1. Platz"
-        if "2." in p: return "2. Platz"
-        if "3." in p: return "3. Platz"
-        if "4." in p: return "4. Platz"
-        if "Viertel" in p: return "Viertelfinale"
-        if "Achtel" in p: return "Achtelfinale"
-        if "Gruppe" in p: return "Gruppenphase"
-        if "Teilgenomm" in p: return "Teilgenommen"
+    # Intelligente Bündelung für die Y-Achse (verhindert das Explodieren bei ausgespielten Plätzen)
+    def normalize_placement_for_axis(p):
+        p_lower = p.lower()
+        if "1." in p or "gold" in p_lower:
+            return "🥇 1. Platz"
+        if "2." in p or "silber" in p_lower:
+            return "🥈 2. Platz"
+        if "3." in p or "bronze" in p_lower:
+            return "🥉 3. Platz"
+        if "4." in p:
+            return "🏅 4. Platz"
+        if any(k in p_lower for k in ["5.", "6.", "7.", "8.", "viertel", "5–8", "5-8"]):
+            return "Plätze 5–8 / Viertelfinale"
+        if any(k in p_lower for k in ["9.", "10.", "11.", "12.", "13.", "14.", "15.", "16.", "achtel", "9–16", "9-16"]):
+            return "Plätze 9–16 / Achtelfinale"
+        if any(k in p_lower for k in ["gruppe", "vorrunde", "17", "18", "19", "20"]):
+            return "Gruppenphase / Vorrunde"
+        if "teilgenomm" in p_lower:
+            return "Teilgenommen"
         return p
 
-    df_chart["norm_placement"] = df_chart["placement"].apply(normalize_placement)
+    df_chart["axis_placement"] = df_chart["placement"].apply(normalize_placement_for_axis)
 
     # Medaillen-Zähler für den ZEIT-Header
-    gold_cnt = sum(1 for p in df_chart["norm_placement"] if "1." in p)
-    silver_cnt = sum(1 for p in df_chart["norm_placement"] if "2." in p)
-    bronze_cnt = sum(1 for p in df_chart["norm_placement"] if "3." in p)
+    gold_cnt = sum(1 for p in df_chart["placement"] if "1." in p or "Gold" in p)
+    silver_cnt = sum(1 for p in df_chart["placement"] if "2." in p or "Silber" in p)
+    bronze_cnt = sum(1 for p in df_chart["placement"] if "3." in p or "Bronze" in p)
     total_played = len(df_chart["title"].unique())
 
-    # Feste Y-Kategorien (1. Platz ganz oben)
+    # Feste, aufgeräumte 8-Stufen-Skala (von unten nach oben)
     y_categories = [
         "Teilgenommen",
-        "Gruppenphase",
-        "Achtelfinale",
-        "Viertelfinale",
-        "4. Platz",
-        "3. Platz",
-        "2. Platz",
-        "1. Platz"
+        "Gruppenphase / Vorrunde",
+        "Plätze 9–16 / Achtelfinale",
+        "Plätze 5–8 / Viertelfinale",
+        "🏅 4. Platz",
+        "🥉 3. Platz",
+        "🥈 2. Platz",
+        "🥇 1. Platz"
     ]
 
-    for p in df_chart["norm_placement"].unique():
+    for p in df_chart["axis_placement"].unique():
         if p not in y_categories:
             y_categories.insert(0, p)
 
@@ -872,7 +896,7 @@ def render_season_chart(df):
             field_str = f" • {r['field']}" if r['field'] else ""
             partner_str = f"<br>👥 Partner: <b>{r['partner']}</b>" if r['partner'] else ""
             hover_text = (
-                f"<span style='font-size:13px; font-weight:700; color:{colors[disc_name]};'>{disc_name} • {r['norm_placement']}</span>"
+                f"<span style='font-size:13px; font-weight:700; color:{colors[disc_name]};'>{disc_name} • {r['placement']}</span>"
                 f"<span style='color:#94a3b8;'>{field_str}</span><br>"
                 f"<span style='font-size:12px; color:#f8fafc;'>🏸 {r['title']} ({r['city']})</span><br>"
                 f"<span style='font-size:11px; color:#64748b;'>📅 {r['date'].strftime('%d.%m.%Y')}</span>"
@@ -882,7 +906,7 @@ def render_season_chart(df):
 
         fig.add_trace(go.Scatter(
             x=disc_data["date"],
-            y=disc_data["norm_placement"],
+            y=disc_data["axis_placement"],
             mode="lines+markers",
             name=disc_name,
             line=dict(
@@ -952,7 +976,6 @@ def render_season_chart(df):
         unsafe_allow_html=True
     )
 
-    # Chart ohne störende Toolbar rendern
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 
@@ -1171,7 +1194,6 @@ def render_admin_editor(item, full_data, is_past=False):
                 
                 save_tournaments_data(DB_FILE, full_data)
                 
-                # Google Kalender nur für zukünftige Turniere synchronisieren (verhindert HttpError 410)
                 if not is_past:
                     try:
                         from gcal_sync import sync_tournament_to_gcal
