@@ -4,7 +4,6 @@ import json
 import os
 import datetime
 import html
-import urllib.parse
 import re
 from zoneinfo import ZoneInfo
 from gist_db import load_gist_file, save_gist_file, DatabaseConnectionError
@@ -122,32 +121,36 @@ st.markdown(
 
     .card-inner-container { font-family: 'Inter', -apple-system, sans-serif; }
     
-    /* Sanfte, dezente Störer */
-    .soft-stoerer-today {
+    /* Sportlich-markante Störer mit Signalwirkung (ohne Alarm-Rot) */
+    .stoerer-banner-today {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background-color: #ecfdf5;
-        color: #065f46;
-        border: 1px solid #6ee7b7;
-        font-weight: 700;
-        font-size: 0.78rem;
-        padding: 3px 10px;
-        border-radius: 9999px;
-        margin-bottom: 8px;
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        color: #ffffff !important;
+        font-weight: 800;
+        font-size: 0.82rem;
+        padding: 5px 12px;
+        border-radius: 6px;
+        letter-spacing: 0.6px;
+        box-shadow: 0 3px 10px rgba(234, 88, 12, 0.35);
+        margin-bottom: 10px;
+        text-transform: uppercase;
     }
-    .soft-stoerer-tomorrow {
+    .stoerer-banner-tomorrow {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background-color: #fff7ed;
-        color: #9a3412;
-        border: 1px solid #fdba74;
-        font-weight: 700;
-        font-size: 0.78rem;
-        padding: 3px 10px;
-        border-radius: 9999px;
-        margin-bottom: 8px;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #ffffff !important;
+        font-weight: 800;
+        font-size: 0.82rem;
+        padding: 5px 12px;
+        border-radius: 6px;
+        letter-spacing: 0.6px;
+        box-shadow: 0 3px 10px rgba(217, 119, 6, 0.3);
+        margin-bottom: 10px;
+        text-transform: uppercase;
     }
 
     /* Platzierungs-Badges */
@@ -168,9 +171,8 @@ st.markdown(
     .badge-neutral { background-color: #f8fafc; color: #475569; border: 1px solid #cbd5e1; }
 
     .meta-badges-container { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-    .meta-badge { font-size: 0.75rem; font-weight: 600; padding: 3px 8px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; }
-    .loc-badge { background-color: #f1f5f9; color: #1e293b; transition: background-color 0.15s; }
-    .loc-badge:hover { background-color: #e2e8f0; color: #0f172a; }
+    .meta-badge { font-size: 0.75rem; font-weight: 600; padding: 3px 8px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 4px; }
+    .loc-badge { background-color: #f1f5f9; color: #1e293b; }
     .dist-badge { background-color: #fef3c7; color: #b45309; }
     .org-badge { background-color: #ecfeff; color: #0891b2; }
     .date-badge { background-color: #f5f3ff; color: #6d28d9; }
@@ -434,18 +436,13 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     start_date_obj = item['Start_Date_Obj']
     end_date_obj = item['End_Date_Obj']
 
-    # --- SANFTER STÖRER (NUR HEUTE & MORGEN) ---
+    # --- SPORTLICH-MARKANTER STÖRER (NUR HEUTE & MORGEN) ---
     stoerer_html = ""
     if start_date_obj and end_date_obj:
         if start_date_obj <= today <= end_date_obj:
-            stoerer_html = '<div class="soft-stoerer-today">🏸 Heute Turniertag</div>'
+            stoerer_html = '<div class="stoerer-banner-today">🏸 HEUTE SPIELTAG!</div>'
         elif (start_date_obj - today).days == 1:
-            stoerer_html = '<div class="soft-stoerer-tomorrow">🏸 Morgen Turniertag</div>'
-
-    # --- 1-KLICK GOOGLE MAPS LINK ---
-    maps_query = urllib.parse.quote(f"Badminton Sporthalle {raw_city}")
-    maps_url = f"https://www.google.com/maps/search/?api=1&query={maps_query}"
-    loc_badge_html = f'<a href="{maps_url}" target="_blank" class="meta-badge loc-badge" title="Route in Google Maps planen">📍 {city} (🗺️ Maps)</a>'
+            stoerer_html = '<div class="stoerer-banner-tomorrow">⏳ MORGEN SPIELTAG</div>'
 
     has_he = (day_he != "Disziplin findet nicht statt")
     has_hd = (day_hd != "Disziplin findet nicht statt")
@@ -480,7 +477,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     badges_html = f"""
     <div class="meta-badges-container">
         <span class="meta-badge date-badge">📅 {date_range_str}</span>
-        {loc_badge_html}
+        <span class="meta-badge loc-badge">📍 {city}</span>
         <span class="meta-badge dist-badge">🚗 {dist_str}</span>
         <span class="meta-badge org-badge">🛡️ {org_str}</span>
     </div>
