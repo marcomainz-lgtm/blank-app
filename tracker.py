@@ -4,7 +4,7 @@ import re
 import requests
 from bs4 import BeautifulSoup
 import urllib.parse
-from gist_db import load_gist_file, save_gist_file, DatabaseConnectionError
+from gist_db import load_gist_file, save_gist_file
 
 # Ihr stabiler ntfy-Push-Kanal
 NTFY_TOPIC = "my_badminton_tournaments_40723_v2" 
@@ -241,11 +241,13 @@ def send_push_notification(new_items):
     message = "\n".join(summary_lines)
     
     try:
+        # WICHTIG: Das Header-Feld "Title" darf in Python requests keine Emojis enthalten (Latin-1 Encoding)!
+        # Emojis stattdessen über "Tags" übergeben.
         requests.post(
             f"https://ntfy.sh/{NTFY_TOPIC}",
             data=message.encode('utf-8'),
             headers={
-                "Title": f"🏸 {count} neue(s) Badminton-Turnier(e) gefunden!",
+                "Title": f"{count} neue(s) Badminton-Turnier(e) gefunden!",
                 "Priority": "high",
                 "Tags": "badminton,sports,tada"
             },
@@ -268,9 +270,9 @@ def check_for_updates_generator():
     
     # 1. NOTBREMSE: Erst Datenbank prüfen
     try:
-        known_tournaments = load_gist_file(DB_FILE)
+        known_tournaments = load_gist_file(DB_FILE, fallback_default={})
         yield f"✅ Datenbank erfolgreich geladen ({len(known_tournaments)} bekannte Turniere in der Cloud)."
-    except DatabaseConnectionError as e:
+    except Exception as e:
         yield f"🚨 KRITISCHER DATENBANKFEHLER: {e}"
         yield "❌ VORGANG ABGEBROCHEN! Es wurden weder Turniere gescrapt noch Push-Nachrichten versendet."
         return
@@ -353,7 +355,7 @@ def check_for_updates_generator():
     try:
         save_gist_file(DB_FILE, known_tournaments)
         yield "💾 Änderungen erfolgreich in GitHub Gist gespeichert."
-    except DatabaseConnectionError as e:
+    except Exception as e:
         yield f"🚨 FEHLER BEIM SPEICHERN IM GIST: {e}"
         return
 
@@ -362,3 +364,7 @@ def check_for_updates_generator():
         send_push_notification(new_tournaments)
     else:
         yield "Fertig! Keine neuen Turniere erkannt (Datenbestand unverändert)."
+
+
+if __name__ == "__main__":
+    check_for_updates()
