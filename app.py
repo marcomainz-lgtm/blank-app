@@ -1080,7 +1080,7 @@ def render_season_chart(df):
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 
-# --- DETAILREICHE INTERAKTIVE STRASSENKARTE (CARTO DARKMATTER MIT LEAFLET / HTML) ---
+# --- DETAILREICHE STRASSENKARTE (OPENSTREETMAP MIT DARK-FILTER, 100% OHNE API-KEY) ---
 def render_tournament_heatmap(df, today):
     city_counts = {}
     city_tournaments = {}
@@ -1141,7 +1141,6 @@ def render_tournament_heatmap(df, today):
         unsafe_allow_html=True
     )
 
-    # Zentrum berechnen
     lats = [CITY_COORDINATES[c][0] for c in city_counts.keys()]
     lons = [CITY_COORDINATES[c][1] for c in city_counts.keys()]
     avg_lat = sum(lats) / len(lats) if lats else 51.17
@@ -1164,7 +1163,7 @@ def render_tournament_heatmap(df, today):
                 color: '#22d3ee',
                 weight: 2,
                 fillColor: '#06b6d4',
-                fillOpacity: 0.8
+                fillOpacity: 0.85
             }}).addTo(map).bindPopup("<b>📍 {safe_city}</b><br>{cnt} gespielte(s) Turnier(e)<br><small style='color:#94a3b8;'>{safe_sample}</small>");
         """)
 
@@ -1182,7 +1181,7 @@ def render_tournament_heatmap(df, today):
 
     markers_script = "\n".join(markers_js)
 
-    # Echte, detaillierte Carto-Darkmatter Straßenkarte via Leaflet (funktioniert auf 100% aller Systeme)
+    # Echte, detaillierte OpenStreetMap-Kachelkarte mit Dark-Mode-Filter (100% frei ohne API-Key)
     map_html = f"""
     <!DOCTYPE html>
     <html>
@@ -1193,6 +1192,10 @@ def render_tournament_heatmap(df, today):
         <style>
             html, body {{ margin:0; padding:0; height:100%; background:#12161f; }}
             #map {{ width:100%; height:330px; border-radius:10px; background:#12161f; }}
+            /* Dark Mode Filter auf die offiziellen OpenStreetMap-Kacheln */
+            .leaflet-tile {{
+                filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+            }}
             .leaflet-popup-content-wrapper {{ background: #1e293b; color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); }}
             .leaflet-popup-tip {{ background: #1e293b; }}
         </style>
@@ -1201,9 +1204,8 @@ def render_tournament_heatmap(df, today):
         <div id="map"></div>
         <script>
             var map = L.map('map', {{ attributionControl: false, zoomControl: true }}).setView([{avg_lat}, {avg_lon}], 9);
-            L.tileLayer('https://{{s}}.basemaps.cartocdn.com/dark_all/{{z}}/{{x}}/{{y}}{{r}}.png', {{
-                maxZoom: 18,
-                subdomains: 'abcd'
+            L.tileLayer('https://tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
+                maxZoom: 18
             }}).addTo(map);
             {markers_script}
         </script>
