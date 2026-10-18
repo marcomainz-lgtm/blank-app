@@ -115,7 +115,7 @@ FIELD_OPTIONS = [
     "Sonstiges"
 ]
 
-# Custom CSS
+# Custom CSS inklusive ZEIT Online Dashboard Styling
 st.markdown(
     """
     <style>
@@ -130,7 +130,7 @@ st.markdown(
 
     .card-inner-container { font-family: 'Inter', -apple-system, sans-serif; }
     
-    /* Sportlich-markante Störer mit Signalwirkung */
+    /* Sportlich-markante Störer */
     .stoerer-banner-today {
         display: inline-flex;
         align-items: center;
@@ -162,7 +162,50 @@ st.markdown(
         text-transform: uppercase;
     }
 
-    /* Platzierungs-Badges */
+    /* ZEIT Online Dashboard Style */
+    .zeit-card {
+        background-color: #12161f;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 18px 22px;
+        margin-bottom: 12px;
+    }
+    .zeit-header-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 4px;
+    }
+    .zeit-hero-number {
+        font-size: 2.1rem;
+        font-weight: 800;
+        color: #f8fafc;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+    .zeit-hero-sub {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-bottom: 12px;
+    }
+    .zeit-kpi-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .zeit-kpi-tag {
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #e2e8f0;
+    }
+
+    /* Platzierungs-Badges auf Kacheln */
     .placement-badge {
         display: inline-flex;
         align-items: center;
@@ -726,7 +769,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     st.markdown(clean_html(html_out), unsafe_allow_html=True)
 
 
-# --- INTERAKTIVE FORMKURVE MIT PLOTLY ---
+# --- INTERAKTIVE FORMKURVE (ZEIT ONLINE DASHBOARD STYLE) ---
 def render_season_chart(df):
     records = []
     for _, row in df.iterrows():
@@ -772,13 +815,14 @@ def render_season_chart(df):
         return
 
     df_chart = pd.DataFrame(records)
+    # Exakte chronologische Sortierung
     df_chart = df_chart.sort_values(by="date", ascending=True)
 
     def normalize_placement(p):
-        if "1." in p: return "🥇 1. Platz"
-        if "2." in p: return "🥈 2. Platz"
-        if "3." in p: return "🥉 3. Platz"
-        if "4." in p: return "🏅 4. Platz"
+        if "1." in p: return "1. Platz"
+        if "2." in p: return "2. Platz"
+        if "3." in p: return "3. Platz"
+        if "4." in p: return "4. Platz"
         if "Viertel" in p: return "Viertelfinale"
         if "Achtel" in p: return "Achtelfinale"
         if "Gruppe" in p: return "Gruppenphase"
@@ -787,25 +831,33 @@ def render_season_chart(df):
 
     df_chart["norm_placement"] = df_chart["placement"].apply(normalize_placement)
 
+    # Medaillen-Zähler für den ZEIT-Header
+    gold_cnt = sum(1 for p in df_chart["norm_placement"] if "1." in p)
+    silver_cnt = sum(1 for p in df_chart["norm_placement"] if "2." in p)
+    bronze_cnt = sum(1 for p in df_chart["norm_placement"] if "3." in p)
+    total_played = len(df_chart["title"].unique())
+
+    # Feste Y-Kategorien (1. Platz ganz oben)
     y_categories = [
         "Teilgenommen",
         "Gruppenphase",
         "Achtelfinale",
         "Viertelfinale",
-        "🏅 4. Platz",
-        "🥉 3. Platz",
-        "🥈 2. Platz",
-        "🥇 1. Platz"
+        "4. Platz",
+        "3. Platz",
+        "2. Platz",
+        "1. Platz"
     ]
 
     for p in df_chart["norm_placement"].unique():
         if p not in y_categories:
             y_categories.insert(0, p)
 
+    # ZEIT Online Neon-Palette
     colors = {
-        "Einzel": "#2563eb",  # Blau
-        "Doppel": "#16a34a",  # Grün
-        "Mixed": "#9333ea"   # Lila
+        "Einzel": "#22d3ee",  # Electric Cyan
+        "Doppel": "#4ade80",  # Neon Mint Green
+        "Mixed": "#c084fc"   # Neon Lilac
     }
 
     fig = go.Figure()
@@ -817,13 +869,13 @@ def render_season_chart(df):
 
         hover_texts = []
         for _, r in disc_data.iterrows():
-            field_str = f" ({r['field']})" if r['field'] else ""
-            partner_str = f"<br>👥 Mit: <b>{r['partner']}</b>" if r['partner'] else ""
+            field_str = f" • {r['field']}" if r['field'] else ""
+            partner_str = f"<br>👥 Partner: <b>{r['partner']}</b>" if r['partner'] else ""
             hover_text = (
-                f"<b>{r['norm_placement']}</b>{field_str}<br>"
-                f"🏸 {r['title']}<br>"
-                f"📍 {r['city']}<br>"
-                f"📅 {r['date'].strftime('%d.%m.%Y')}"
+                f"<span style='font-size:13px; font-weight:700; color:{colors[disc_name]};'>{disc_name} • {r['norm_placement']}</span>"
+                f"<span style='color:#94a3b8;'>{field_str}</span><br>"
+                f"<span style='font-size:12px; color:#f8fafc;'>🏸 {r['title']} ({r['city']})</span><br>"
+                f"<span style='font-size:11px; color:#64748b;'>📅 {r['date'].strftime('%d.%m.%Y')}</span>"
                 f"{partner_str}"
             )
             hover_texts.append(hover_text)
@@ -833,33 +885,75 @@ def render_season_chart(df):
             y=disc_data["norm_placement"],
             mode="lines+markers",
             name=disc_name,
-            line=dict(color=colors.get(disc_name, "#64748b"), width=3),
-            marker=dict(size=12, symbol="circle", line=dict(color="white", width=2)),
+            line=dict(
+                color=colors.get(disc_name, "#94a3b8"),
+                width=2.5,
+                shape="spline",
+                smoothing=0.5
+            ),
+            marker=dict(
+                size=9,
+                symbol="circle",
+                color=colors.get(disc_name, "#94a3b8"),
+                line=dict(color="#12161f", width=2)
+            ),
             text=hover_texts,
             hoverinfo="text"
         ))
 
     fig.update_layout(
-        height=380,
-        margin=dict(l=20, r=20, t=30, b=20),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        height=320,
+        margin=dict(l=10, r=10, t=10, b=10),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.04,
+            xanchor="right",
+            x=1,
+            font=dict(color="#94a3b8", size=11, family="Inter, -apple-system, sans-serif")
+        ),
         yaxis=dict(
             categoryorder="array",
             categoryarray=y_categories,
-            gridcolor="#e2e8f0",
-            zeroline=False
+            gridcolor="rgba(255, 255, 255, 0.06)",
+            zeroline=False,
+            tickfont=dict(color="#94a3b8", size=11, family="Inter, -apple-system, sans-serif")
         ),
         xaxis=dict(
-            gridcolor="#e2e8f0",
+            gridcolor="rgba(255, 255, 255, 0.04)",
             zeroline=False,
-            tickformat="%d.%m."
+            tickformat="%d.%m.",
+            tickfont=dict(color="#64748b", size=10, family="Inter, -apple-system, sans-serif")
         ),
-        plot_bgcolor="#ffffff",
-        paper_bgcolor="#ffffff",
-        hoverlabel=dict(bgcolor="white", font_size=12, font_family="Inter, sans-serif")
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        hoverlabel=dict(
+            bgcolor="#1e293b",
+            bordercolor="rgba(255, 255, 255, 0.15)",
+            font_size=12,
+            font_family="Inter, -apple-system, sans-serif"
+        )
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    # ZEIT Online Hero-Tile
+    st.markdown(
+        f"""
+        <div class="zeit-card">
+            <div class="zeit-header-title">Saisonverlauf & Formkurve 2026</div>
+            <div class="zeit-hero-number">{total_played} Turniere</div>
+            <div class="zeit-hero-sub">Gespielte Seniorenturniere im Jahresverlauf</div>
+            <div class="zeit-kpi-row">
+                <span class="zeit-kpi-tag" style="border-color: #f59e0b; color: #fbbf24;">🥇 {gold_cnt}x Gold</span>
+                <span class="zeit-kpi-tag" style="border-color: #94a3b8; color: #e2e8f0;">🥈 {silver_cnt}x Silber</span>
+                <span class="zeit-kpi-tag" style="border-color: #ea580c; color: #fdba74;">🥉 {bronze_cnt}x Bronze</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Chart ohne störende Toolbar rendern
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 
 # --- WIEDERVERWENDBARER ADMIN-EDITOR ---
@@ -1378,10 +1472,10 @@ elif data is not None:
         st.write("")
         st.write("")
 
-        # --- VERGANGENE TURNIERE & FORMKURVE ---
+        # --- VERGANGENE TURNIERE & INTERAKTIVE FORMKURVE ---
         st.subheader(f"🕰️ Vergangene Turniere ({len(df_past)})")
 
-        with st.expander("📈 Saisonverlauf & Formkurve 2026 anzeigen", expanded=False):
+        with st.expander("📈 Saisonverlauf & Formkurve 2026 anzeigen", expanded=True):
             render_season_chart(df)
 
         with st.expander("Vergangene Turniere anzeigen", expanded=False):
