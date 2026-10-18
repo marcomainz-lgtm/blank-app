@@ -1080,7 +1080,7 @@ def render_season_chart(df):
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 
-# --- DEUTSCHLANDKARTE / HEATMAP DER SPIELORTE (ZEIT-LOOK) ---
+# --- DEUTSCHLANDKARTE / HEATMAP DER SPIELORTE (ABWÄRTSKOMPATIBEL & ZEIT-LOOK) ---
 def render_tournament_heatmap(df):
     city_counts = {}
     city_tournaments = {}
@@ -1145,10 +1145,19 @@ def render_tournament_heatmap(df):
             f"<span style='font-size:11px; color:#94a3b8;'>{t_sample}</span>"
         )
 
+    # Automatische Erkennung der installierten Plotly-Klassen (MapLibre vs. Mapbox)
+    use_new_map = hasattr(go, "Densitymap") and hasattr(go, "Scattermap")
+    DensityClass = getattr(go, "Densitymap", getattr(go, "Densitymapbox", None))
+    ScatterClass = getattr(go, "Scattermap", getattr(go, "Scattermapbox", None))
+
+    if not DensityClass or not ScatterClass:
+        st.warning("Kartenmodul in der installierten Plotly-Version nicht verfügbar.")
+        return
+
     fig_map = go.Figure()
 
-    # 1. Heatmap-Glow Layer (weicher Dichte-Nebel im Hintergrund)
-    fig_map.add_trace(go.Densitymapbox(
+    # 1. Heatmap-Glow Layer
+    fig_map.add_trace(DensityClass(
         lat=lats,
         lon=lons,
         z=counts,
@@ -1165,7 +1174,7 @@ def render_tournament_heatmap(df):
     ))
 
     # 2. Präzise Neon-Punkte mit Hover-Information
-    fig_map.add_trace(go.Scattermapbox(
+    fig_map.add_trace(ScatterClass(
         lat=lats,
         lon=lons,
         mode="markers",
@@ -1180,14 +1189,13 @@ def render_tournament_heatmap(df):
 
     # Hilden als Heimat-Marker hervorheben
     hilden_coord = CITY_COORDINATES["Hilden"]
-    fig_map.add_trace(go.Scattermapbox(
+    fig_map.add_trace(ScatterClass(
         lat=[hilden_coord[0]],
         lon=[hilden_coord[1]],
         mode="markers",
         marker=dict(
             size=14,
-            color="#f59e0b",
-            symbol="circle"
+            color="#f59e0b"
         ),
         text=["<span style='font-size:13px; font-weight:800; color:#f59e0b;'>🏠 Hilden (Heimatbasis)</span>"],
         hoverinfo="text",
@@ -1197,15 +1205,17 @@ def render_tournament_heatmap(df):
     avg_lat = sum(lats) / len(lats) if lats else 51.17
     avg_lon = sum(lons) / len(lons) if lons else 6.95
 
-    fig_map.update_layout(
+    # Layout-Konfiguration je nach Plotly-Version (layout.map vs layout.mapbox)
+    map_config = dict(
+        style="carto-darkmatter",
+        center=dict(lat=avg_lat, lon=avg_lon),
+        zoom=8.0
+    )
+
+    layout_kwargs = dict(
         height=420,
         margin=dict(l=0, r=0, t=0, b=0),
         showlegend=False,
-        mapbox_style="carto-darkmatter",
-        mapbox=dict(
-            center=dict(lat=avg_lat, lon=avg_lon),
-            zoom=8.0
-        ),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         hoverlabel=dict(
@@ -1215,6 +1225,13 @@ def render_tournament_heatmap(df):
             font_family="Inter, -apple-system, sans-serif"
         )
     )
+
+    if use_new_map:
+        layout_kwargs["map"] = map_config
+    else:
+        layout_kwargs["mapbox"] = map_config
+
+    fig_map.update_layout(**layout_kwargs)
 
     st.plotly_chart(fig_map, use_container_width=True, config={"displayModeBar": False})
 
