@@ -7,7 +7,6 @@ import html
 import re
 from zoneinfo import ZoneInfo
 import plotly.graph_objects as go
-import plotly.express as px
 from gist_db import load_gist_file, save_gist_file, DatabaseConnectionError
 
 # --- HILFSFUNKTION FÜR SAUBERES HTML-RENDERING ---
@@ -281,8 +280,8 @@ st.markdown(
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 12px;
         padding: 16px 20px;
-        margin-bottom: 12px;
-        min-height: 120px;
+        margin-bottom: 10px;
+        min-height: 110px;
     }
     .zeit-header-title {
         font-size: 0.8rem;
@@ -768,7 +767,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                 mx_status_text = "Ohne Partnerin (Feld voll)"
         else:
             mx_status_text = "🔒 Feld voll"
-            mx_status_class = "conflict"
+            hd_status_class = "conflict"
             hd_class = "has-conflict"
     else:
         dt_mx = get_date_for_weekday(day_mx, start_date_obj, end_date_obj)
@@ -1081,7 +1080,7 @@ def render_season_chart(df):
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 
-# --- DETAILREICHE DEUTSCHLANDKARTE (ECHTE STRASSEN & STÄDTE MIT CARTO-DARKMATTER) ---
+# --- DETAILREICHE INTERAKTIVE STRASSENKARTE (CARTO DARKMATTER MIT LEAFLET / HTML) ---
 def render_tournament_heatmap(df, today):
     city_counts = {}
     city_tournaments = {}
@@ -1125,28 +1124,6 @@ def render_tournament_heatmap(df, today):
         st.info("Noch keine teilgenommenen Turniere mit bekanntem Spielort erfasst.")
         return
 
-    map_rows = []
-    for c, cnt in city_counts.items():
-        t_list = city_tournaments[c]
-        t_sample = "<br>• " + "<br>• ".join(t_list[:3])
-        if len(t_list) > 3:
-            t_sample += f"<br>• ... (+{len(t_list)-3} weitere)"
-            
-        map_rows.append({
-            "Stadt": c,
-            "Turniere": cnt,
-            "lat": CITY_COORDINATES[c][0],
-            "lon": CITY_COORDINATES[c][1],
-            "Details": t_sample,
-            "Groesse": min(10 + cnt * 6, 26)
-        })
-
-    df_map = pd.DataFrame(map_rows)
-    lats = df_map["lat"].tolist()
-    lons = df_map["lon"].tolist()
-    avg_lat = sum(lats) / len(lats) if lats else 51.17
-    avg_lon = sum(lons) / len(lons) if lons else 6.95
-
     top_cities = sorted(city_counts.items(), key=lambda x: x[1], reverse=True)[:3]
     hotspot_str = " • ".join([f"{c} ({cnt})" for c, cnt in top_cities])
 
@@ -1164,53 +1141,77 @@ def render_tournament_heatmap(df, today):
         unsafe_allow_html=True
     )
 
-    # Plotly MapLibre / Mapbox Umschalter für echte Kacheln mit Straßen & Städtenamen
-    if hasattr(px, "scatter_map"):
-        fig_map = px.scatter_map(
-            df_map,
-            lat="lat",
-            lon="lon",
-            size="Groesse",
-            hover_name="Stadt",
-            custom_data=["Turniere", "Details"],
-            color_discrete_sequence=["#22d3ee"],
-            zoom=8.0,
-            center=dict(lat=avg_lat, lon=avg_lon)
-        )
-        fig_map.update_layout(map_style="carto-darkmatter")
-    else:
-        fig_map = px.scatter_mapbox(
-            df_map,
-            lat="lat",
-            lon="lon",
-            size="Groesse",
-            hover_name="Stadt",
-            custom_data=["Turniere", "Details"],
-            color_discrete_sequence=["#22d3ee"],
-            zoom=8.0,
-            center=dict(lat=avg_lat, lon=avg_lon)
-        )
-        fig_map.update_layout(mapbox_style="carto-darkmatter")
+    # Zentrum berechnen
+    lats = [CITY_COORDINATES[c][0] for c in city_counts.keys()]
+    lons = [CITY_COORDINATES[c][1] for c in city_counts.keys()]
+    avg_lat = sum(lats) / len(lats) if lats else 51.17
+    avg_lon = sum(lons) / len(lons) if lons else 6.95
 
-    fig_map.update_traces(
-        hovertemplate="<b>📍 %{hovertext}</b><br>Gespielte Turniere: <b>%{customdata[0]}</b>%{customdata[1]}<extra></extra>",
-        marker=dict(opacity=0.9, line=dict(width=1.5, color="#12161f"))
-    )
+    # Marker-Daten für Leaflet aufbereiten
+    markers_js = []
+    for c, cnt in city_counts.items():
+        lat, lon = CITY_COORDINATES[c]
+        t_sample = " • " + " • ".join(city_tournaments[c][:3])
+        if len(city_tournaments[c]) > 3:
+            t_sample += f" (+{len(city_tournaments[c])-3} weitere)"
+        safe_sample = html.escape(t_sample).replace("'", "&#39;")
+        safe_city = html.escape(c)
+        radius = min(8 + cnt * 4, 22)
+        
+        markers_js.append(f"""
+            L.circleMarker([{lat}, {lon}], {{
+                radius: {radius},
+                color: '#22d3ee',
+                weight: 2,
+                fillColor: '#06b6d4',
+                fillOpacity: 0.8
+            }}).addTo(map).bindPopup("<b>📍 {safe_city}</b><br>{cnt} gespielte(s) Turnier(e)<br><small style='color:#94a3b8;'>{safe_sample}</small>");
+        """)
 
-    fig_map.update_layout(
-        height=330,
-        margin=dict(l=0, r=0, t=0, b=0),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        hoverlabel=dict(
-            bgcolor="#1e293b",
-            bordercolor="rgba(255, 255, 255, 0.15)",
-            font_size=12,
-            font_family="Inter, sans-serif"
-        )
-    )
+    # Hilden Heimatbasis-Marker
+    h_lat, h_lon = CITY_COORDINATES["Hilden"]
+    markers_js.append(f"""
+        L.circleMarker([{h_lat}, {h_lon}], {{
+            radius: 8,
+            color: '#f59e0b',
+            weight: 2,
+            fillColor: '#fbbf24',
+            fillOpacity: 0.95
+        }}).addTo(map).bindPopup("<b>🏠 Hilden</b><br>Heimatbasis");
+    """)
 
-    st.plotly_chart(fig_map, use_container_width=True, config={"displayModeBar": False})
+    markers_script = "\n".join(markers_js)
+
+    # Echte, detaillierte Carto-Darkmatter Straßenkarte via Leaflet (funktioniert auf 100% aller Systeme)
+    map_html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <style>
+            html, body {{ margin:0; padding:0; height:100%; background:#12161f; }}
+            #map {{ width:100%; height:330px; border-radius:10px; background:#12161f; }}
+            .leaflet-popup-content-wrapper {{ background: #1e293b; color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); }}
+            .leaflet-popup-tip {{ background: #1e293b; }}
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+        <script>
+            var map = L.map('map', {{ attributionControl: false, zoomControl: true }}).setView([{avg_lat}, {avg_lon}], 9);
+            L.tileLayer('https://{{s}}.basemaps.cartocdn.com/dark_all/{{z}}/{{x}}/{{y}}{{r}}.png', {{
+                maxZoom: 18,
+                subdomains: 'abcd'
+            }}).addTo(map);
+            {markers_script}
+        </script>
+    </body>
+    </html>
+    """
+
+    st.components.v1.html(map_html, height=335)
 
 
 # --- WIEDERVERWENDBARER ADMIN-EDITOR ---
