@@ -7,6 +7,7 @@ import html
 import re
 from zoneinfo import ZoneInfo
 import plotly.graph_objects as go
+import plotly.express as px
 from gist_db import load_gist_file, save_gist_file, DatabaseConnectionError
 
 # --- HILFSFUNKTION FÜR SAUBERES HTML-RENDERING ---
@@ -761,7 +762,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             if partner_mx and partner_mx in PARTNERS_MX and PARTNERS_MX[partner_mx]:
                 mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{safe_partner_mx}</a> (Feld voll)"
             elif partner_mx:
-                mx_status_text = f"Mit {safe_partner_mx} (Feld voll)"
+                mx_status_text = f"Mit {safe_partner_mx}"
             else:
                 mx_status_text = "Ohne Partnerin (Feld voll)"
         else:
@@ -871,7 +872,6 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     </div>
     """ if (has_he or has_hd or has_mx) else ""
 
-    # Notizen-Anzeige (Fahrgemeinschaft)
     notes_val = item.get('notes', '').strip()
     notes_html = f"""
     <div style="background-color: #fefce8; border-left: 4px solid #eab308; padding: 7px 12px; border-radius: 4px; font-size: 0.8rem; color: #854d0e; margin-top: 8px; margin-bottom: 6px;">
@@ -1080,7 +1080,7 @@ def render_season_chart(df):
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 
-# --- DEUTSCHLANDKARTE / HEATMAP DER SPIELORTE (ABWÄRTSKOMPATIBEL & ZEIT-LOOK) ---
+# --- DEUTSCHLANDKARTE / HEATMAP DER SPIELORTE (ROBUST MIT PLOTLY EXPRESS) ---
 def render_tournament_heatmap(df):
     city_counts = {}
     city_tournaments = {}
@@ -1110,12 +1110,23 @@ def render_tournament_heatmap(df):
         st.info("Keine geocodierten Spielorte für die Karte gefunden.")
         return
 
-    lats = [CITY_COORDINATES[c][0] for c in city_counts.keys()]
-    lons = [CITY_COORDINATES[c][1] for c in city_counts.keys()]
-    counts = [city_counts[c] for c in city_counts.keys()]
-    cities = list(city_counts.keys())
+    map_rows = []
+    for c, cnt in city_counts.items():
+        t_list = city_tournaments[c]
+        t_sample = "<br>• " + "<br>• ".join(t_list[:3])
+        if len(t_list) > 3:
+            t_sample += f"<br>• ... (+{len(t_list)-3} weitere)"
+            
+        map_rows.append({
+            "Stadt": c,
+            "Turniere": cnt,
+            "lat": CITY_COORDINATES[c][0],
+            "lon": CITY_COORDINATES[c][1],
+            "Details": t_sample
+        })
 
-    # ZEIT Online Hero-Tile für die Karte
+    df_map = pd.DataFrame(map_rows)
+
     top_cities = sorted(city_counts.items(), key=lambda x: x[1], reverse=True)[:3]
     hotspot_str = " • ".join([f"{c} ({cnt})" for c, cnt in top_cities])
 
@@ -1123,7 +1134,7 @@ def render_tournament_heatmap(df):
         f"""
         <div class="zeit-card">
             <div class="zeit-header-title">Geografische Verteilung • Spielorte 2026</div>
-            <div class="zeit-hero-number">{len(cities)} Städte</div>
+            <div class="zeit-hero-number">{len(city_counts)} Städte</div>
             <div class="zeit-hero-sub">Konzentration der Badminton-Turniere im Umkreis von Hilden</div>
             <div class="zeit-kpi-row">
                 <span class="zeit-kpi-tag" style="border-color: #22d3ee; color: #22d3ee;">📍 Top-Standorte: {hotspot_str}</span>
@@ -1133,91 +1144,46 @@ def render_tournament_heatmap(df):
         unsafe_allow_html=True
     )
 
-    hover_texts = []
-    for c in cities:
-        t_list = city_tournaments[c]
-        t_sample = "<br>• " + "<br>• ".join(t_list[:3])
-        if len(t_list) > 3:
-            t_sample += f"<br>• ... (+{len(t_list)-3} weitere)"
-        hover_texts.append(
-            f"<span style='font-size:14px; font-weight:800; color:#22d3ee;'>📍 {c}</span><br>"
-            f"<span style='font-size:12px; color:#f8fafc;'><b>{city_counts[c]} Turniere</b></span>"
-            f"<span style='font-size:11px; color:#94a3b8;'>{t_sample}</span>"
-        )
-
-    # Automatische Erkennung der installierten Plotly-Klassen (MapLibre vs. Mapbox)
-    use_new_map = hasattr(go, "Densitymap") and hasattr(go, "Scattermap")
-    DensityClass = getattr(go, "Densitymap", getattr(go, "Densitymapbox", None))
-    ScatterClass = getattr(go, "Scattermap", getattr(go, "Scattermapbox", None))
-
-    if not DensityClass or not ScatterClass:
-        st.warning("Kartenmodul in der installierten Plotly-Version nicht verfügbar.")
-        return
-
-    fig_map = go.Figure()
-
-    # 1. Heatmap-Glow Layer
-    fig_map.add_trace(DensityClass(
-        lat=lats,
-        lon=lons,
-        z=counts,
-        radius=35,
-        colorscale=[
-            [0.0, "rgba(15, 23, 42, 0)"],
-            [0.2, "rgba(8, 145, 178, 0.4)"],
-            [0.5, "rgba(6, 182, 212, 0.7)"],
-            [0.8, "rgba(34, 211, 238, 0.9)"],
-            [1.0, "rgba(56, 189, 248, 1.0)"]
-        ],
-        showscale=False,
-        hoverinfo="skip"
-    ))
-
-    # 2. Präzise Neon-Punkte mit Hover-Information
-    fig_map.add_trace(ScatterClass(
-        lat=lats,
-        lon=lons,
-        mode="markers",
-        marker=dict(
-            size=[min(8 + c * 4, 24) for c in counts],
-            color="#22d3ee",
-            opacity=0.95
-        ),
-        text=hover_texts,
-        hoverinfo="text"
-    ))
-
-    # Hilden als Heimat-Marker hervorheben
-    hilden_coord = CITY_COORDINATES["Hilden"]
-    fig_map.add_trace(ScatterClass(
-        lat=[hilden_coord[0]],
-        lon=[hilden_coord[1]],
-        mode="markers",
-        marker=dict(
-            size=14,
-            color="#f59e0b"
-        ),
-        text=["<span style='font-size:13px; font-weight:800; color:#f59e0b;'>🏠 Hilden (Heimatbasis)</span>"],
-        hoverinfo="text",
-        showlegend=False
-    ))
-
-    avg_lat = sum(lats) / len(lats) if lats else 51.17
-    avg_lon = sum(lons) / len(lons) if lons else 6.95
-
-    # Layout-Konfiguration je nach Plotly-Version (layout.map vs layout.mapbox)
-    map_config = dict(
-        style="carto-darkmatter",
-        center=dict(lat=avg_lat, lon=avg_lon),
-        zoom=8.0
+    # Universell kompatible Deutschlandkarte (funktioniert auf allen Plotly- und Python-Versionen)
+    fig_map = px.scatter_geo(
+        df_map,
+        lat="lat",
+        lon="lon",
+        size="Turniere",
+        hover_name="Stadt",
+        custom_data=["Turniere", "Details"],
+        size_max=24,
+        color="Turniere",
+        color_continuous_scale=[
+            [0.0, "#0891b2"],
+            [0.5, "#22d3ee"],
+            [1.0, "#f59e0b"]
+        ]
     )
 
-    layout_kwargs = dict(
-        height=420,
+    fig_map.update_traces(
+        hovertemplate="<b>📍 %{hovertext}</b><br>Turniere: <b>%{customdata[0]}</b>%{customdata[1]}<extra></extra>",
+        marker=dict(line=dict(width=1.5, color="#12161f"), opacity=0.9)
+    )
+
+    fig_map.update_geos(
+        fitbounds="locations",
+        visible=False,
+        showcountries=True,
+        countrycolor="rgba(255, 255, 255, 0.2)",
+        showland=True,
+        landcolor="#12161f",
+        showsubunits=True,
+        subunitcolor="rgba(255, 255, 255, 0.08)",
+        bgcolor="rgba(0,0,0,0)"
+    )
+
+    fig_map.update_layout(
+        height=380,
         margin=dict(l=0, r=0, t=0, b=0),
-        showlegend=False,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
+        coloraxis_showscale=False,
         hoverlabel=dict(
             bgcolor="#1e293b",
             bordercolor="rgba(255, 255, 255, 0.15)",
@@ -1225,13 +1191,6 @@ def render_tournament_heatmap(df):
             font_family="Inter, -apple-system, sans-serif"
         )
     )
-
-    if use_new_map:
-        layout_kwargs["map"] = map_config
-    else:
-        layout_kwargs["mapbox"] = map_config
-
-    fig_map.update_layout(**layout_kwargs)
 
     st.plotly_chart(fig_map, use_container_width=True, config={"displayModeBar": False})
 
@@ -1641,7 +1600,7 @@ elif data is not None:
         df_past = df[df['End_Date_Obj'] < today].copy()
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
-        # --- KOMPAKTER, AUFGERÄUMTER FILTER-EXPANDER ---
+        # --- KOMPAKTER FILTER-EXPANDER ---
         st.write("")
         with st.expander("🔍 Filter & Suche", expanded=False):
             col_search, _ = st.columns([1, 1])
@@ -1659,7 +1618,6 @@ elif data is not None:
             filter_hd = st.checkbox("👥 Herrendoppel (HD)", value=False)
             filter_mx = st.checkbox("👥 Mixed (MX)", value=False)
 
-        # Filter anwenden
         if only_registered or only_available:
             def row_passes_filter(row):
                 is_reg = bool(row.get('registered', False))
@@ -1711,9 +1669,9 @@ elif data is not None:
 
         month_names = {1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni", 7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"}
 
-        # --- DEUTSCHLANDKARTE / HEATMAP DER SPIELORTE ---
+        # --- DEUTSCHLANDKARTE DER SPIELORTE ---
         st.write("")
-        with st.expander("🗺️ Deutschlandkarte & Spielorte (Heatmap anzeigen)", expanded=False):
+        with st.expander("🗺️ Deutschlandkarte & Spielorte anzeigen", expanded=False):
             render_tournament_heatmap(df)
 
         # --- ANSTEHENDE TURNIERE ---
@@ -1759,7 +1717,7 @@ elif data is not None:
         # --- VERGANGENE TURNIERE & INTERAKTIVE FORMKURVE ---
         st.subheader(f"🕰️ Vergangene Turniere ({len(df_past)})")
 
-        with st.expander("📈 Saisonverlauf & Formkurve 2026 anzeigen", expanded=False):
+        with st.expander("📈 Saisonverlauf & Formkurve 2026 anzeigen", expanded=True):
             render_season_chart(df)
 
         with st.expander("Vergangene Turniere anzeigen", expanded=False):
