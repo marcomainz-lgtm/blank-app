@@ -6,6 +6,7 @@ import datetime
 import html
 import re
 from zoneinfo import ZoneInfo
+import plotly.graph_objects as go
 from gist_db import load_gist_file, save_gist_file, DatabaseConnectionError
 
 # --- HILFSFUNKTION FÜR SAUBERES HTML-RENDERING ---
@@ -129,7 +130,7 @@ st.markdown(
 
     .card-inner-container { font-family: 'Inter', -apple-system, sans-serif; }
     
-    /* Sportlich-markante Störer mit Signalwirkung (ohne Alarm-Rot) */
+    /* Sportlich-markante Störer mit Signalwirkung */
     .stoerer-banner-today {
         display: inline-flex;
         align-items: center;
@@ -725,6 +726,142 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     st.markdown(clean_html(html_out), unsafe_allow_html=True)
 
 
+# --- INTERAKTIVE FORMKURVE MIT PLOTLY ---
+def render_season_chart(df):
+    records = []
+    for _, row in df.iterrows():
+        s_date = row.get('Start_Date_Obj')
+        if pd.isnull(s_date):
+            continue
+            
+        title = row.get('title', 'Turnier')
+        city = row.get('city', '')
+        
+        # Einzel
+        p_he = row.get('placement_he', '').strip()
+        f_he = row.get('field_he', '').strip()
+        if p_he and p_he != "-- Keine Angabe --":
+            records.append({
+                "date": s_date, "title": title, "city": city,
+                "disc": "Einzel", "placement": p_he,
+                "field": f_he if f_he != "-- Feld wählen --" else "", "partner": ""
+            })
+            
+        # Doppel
+        p_hd = row.get('placement_hd', '').strip()
+        f_hd = row.get('field_hd', '').strip()
+        if p_hd and p_hd != "-- Keine Angabe --":
+            records.append({
+                "date": s_date, "title": title, "city": city,
+                "disc": "Doppel", "placement": p_hd,
+                "field": f_hd if f_hd != "-- Feld wählen --" else "", "partner": row.get('partner_hd', '').strip()
+            })
+            
+        # Mixed
+        p_mx = row.get('placement_mx', '').strip()
+        f_mx = row.get('field_mx', '').strip()
+        if p_mx and p_mx != "-- Keine Angabe --":
+            records.append({
+                "date": s_date, "title": title, "city": city,
+                "disc": "Mixed", "placement": p_mx,
+                "field": f_mx if f_mx != "-- Feld wählen --" else "", "partner": row.get('partner_mx', '').strip()
+            })
+            
+    if not records:
+        st.info("Noch keine Ergebnisse im Saisontagebuch eingetragen. Sobald du bei vergangenen Turnieren Platzierungen einträgst, entsteht hier automatisch deine Formkurve!")
+        return
+
+    df_chart = pd.DataFrame(records)
+    df_chart = df_chart.sort_values(by="date", ascending=True)
+
+    def normalize_placement(p):
+        if "1." in p: return "🥇 1. Platz"
+        if "2." in p: return "🥈 2. Platz"
+        if "3." in p: return "🥉 3. Platz"
+        if "4." in p: return "🏅 4. Platz"
+        if "Viertel" in p: return "Viertelfinale"
+        if "Achtel" in p: return "Achtelfinale"
+        if "Gruppe" in p: return "Gruppenphase"
+        if "Teilgenomm" in p: return "Teilgenommen"
+        return p
+
+    df_chart["norm_placement"] = df_chart["placement"].apply(normalize_placement)
+
+    y_categories = [
+        "Teilgenommen",
+        "Gruppenphase",
+        "Achtelfinale",
+        "Viertelfinale",
+        "🏅 4. Platz",
+        "🥉 3. Platz",
+        "🥈 2. Platz",
+        "🥇 1. Platz"
+    ]
+
+    for p in df_chart["norm_placement"].unique():
+        if p not in y_categories:
+            y_categories.insert(0, p)
+
+    colors = {
+        "Einzel": "#2563eb",  # Blau
+        "Doppel": "#16a34a",  # Grün
+        "Mixed": "#9333ea"   # Lila
+    }
+
+    fig = go.Figure()
+
+    for disc_name in ["Einzel", "Doppel", "Mixed"]:
+        disc_data = df_chart[df_chart["disc"] == disc_name]
+        if disc_data.empty:
+            continue
+
+        hover_texts = []
+        for _, r in disc_data.iterrows():
+            field_str = f" ({r['field']})" if r['field'] else ""
+            partner_str = f"<br>👥 Mit: <b>{r['partner']}</b>" if r['partner'] else ""
+            hover_text = (
+                f"<b>{r['norm_placement']}</b>{field_str}<br>"
+                f"🏸 {r['title']}<br>"
+                f"📍 {r['city']}<br>"
+                f"📅 {r['date'].strftime('%d.%m.%Y')}"
+                f"{partner_str}"
+            )
+            hover_texts.append(hover_text)
+
+        fig.add_trace(go.Scatter(
+            x=disc_data["date"],
+            y=disc_data["norm_placement"],
+            mode="lines+markers",
+            name=disc_name,
+            line=dict(color=colors.get(disc_name, "#64748b"), width=3),
+            marker=dict(size=12, symbol="circle", line=dict(color="white", width=2)),
+            text=hover_texts,
+            hoverinfo="text"
+        ))
+
+    fig.update_layout(
+        height=380,
+        margin=dict(l=20, r=20, t=30, b=20),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        yaxis=dict(
+            categoryorder="array",
+            categoryarray=y_categories,
+            gridcolor="#e2e8f0",
+            zeroline=False
+        ),
+        xaxis=dict(
+            gridcolor="#e2e8f0",
+            zeroline=False,
+            tickformat="%d.%m."
+        ),
+        plot_bgcolor="#ffffff",
+        paper_bgcolor="#ffffff",
+        hoverlabel=dict(bgcolor="white", font_size=12, font_family="Inter, sans-serif")
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+
 # --- WIEDERVERWENDBARER ADMIN-EDITOR ---
 def render_admin_editor(item, full_data, is_past=False):
     st.write("---")
@@ -826,7 +963,6 @@ def render_admin_editor(item, full_data, is_past=False):
         def render_discipline_result_inputs(disc_label, disc_key):
             st.markdown(f"**{disc_label}**")
             
-            # 1. Platzierung / Runde
             cur_p = item.get(f'placement_{disc_key}', '')
             p_idx = 0
             if cur_p in PLACEMENT_OPTIONS:
@@ -852,7 +988,6 @@ def render_admin_editor(item, full_data, is_past=False):
             else:
                 val_p = sel_p
                 
-            # 2. Spielklasse (A-Feld, B-Feld, etc.)
             cur_f = item.get(f'field_{disc_key}', '')
             f_idx = 0
             if cur_f in FIELD_OPTIONS:
@@ -1243,9 +1378,12 @@ elif data is not None:
         st.write("")
         st.write("")
 
-        # --- VERGANGENE TURNIERE ---
+        # --- VERGANGENE TURNIERE & FORMKURVE ---
         st.subheader(f"🕰️ Vergangene Turniere ({len(df_past)})")
-        
+
+        with st.expander("📈 Saisonverlauf & Formkurve 2026 anzeigen", expanded=False):
+            render_season_chart(df)
+
         with st.expander("Vergangene Turniere anzeigen", expanded=False):
             if not df_past.empty:
                 current_month_str = ""
