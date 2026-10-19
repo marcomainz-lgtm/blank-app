@@ -8,7 +8,8 @@ from gist_db import load_gist_file, save_gist_file
 import datetime
 from zoneinfo import ZoneInfo
 
-NTFY_TOPIC = "my_badminton_tournaments_40723_v2" 
+# Topic auf Langenfeld aktualisiert
+NTFY_TOPIC = "my_badminton_tournaments_40764_v2" 
 DB_FILE = "known_tournaments.json"
 
 UUID_PATTERN = re.compile(r'([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})')
@@ -16,26 +17,19 @@ UUID_PATTERN = re.compile(r'([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-
 
 def is_youth_tournament(title, tag_parts):
     """
-    Filtert reine Jugendturniere heraus, BEHÄLT aber Turniere mit 
-    Erwachsenen-/Seniorenklassen (O19, O35, O40 etc.) auch bei Mischturnieren.
+    Filtert Jugendturniere basierend auf Altersklassen-Tags (U11-U19)
+    und typischen Nachwuchs-Schlüsselwörtern zuverlässig heraus.
     """
-    t_lower = title.lower()
-    
-    # Wenn Senioren/Erwachsene explizit vorkommen -> DEFINITIV BEHALTEN!
-    senior_keywords = ['o19', 'o30', 'o35', 'o40', 'o45', 'o50', 'o55', 'o60', 'o65', 'o70', 'o75', 'senioren', 'erwachsene', 'masters', 'veteran']
-    has_senior_tag = any(any(tag.lower().startswith(sk) for sk in ['o19', 'o3', 'o4', 'o5', 'o6', 'o7']) for tag in tag_parts)
-    
-    if any(sk in t_lower for sk in senior_keywords) or has_senior_tag:
-        return False
-
-    # Reine Jugend-Kennzeichnungen prüfen
-    u_pattern = re.compile(r'^u(9|11|13|15|17|19)$', re.IGNORECASE)
-    has_youth_tag = any(u_pattern.match(tag.strip()) for tag in tag_parts)
-    has_youth_title = bool(re.search(r'\b[uU](9|11|13|15|17|19)\b', title))
-    youth_keywords = ['junior', 'kids', 'küken', 'schüler', 'jugend', 'nachwuchs']
-    has_youth_kw = any(kw in t_lower for kw in youth_keywords)
-    
-    return has_youth_tag or has_youth_title or has_youth_kw
+    u_pattern = re.compile(r'^u\d+$', re.IGNORECASE)
+    for tag in tag_parts:
+        if u_pattern.match(tag.strip()):
+            return True
+    if re.search(r'\b[uU]\d{1,2}\b', title):
+        return True
+    youth_keywords = ['junior', 'kids', 'küken', 'schüler', 'jugend', 'nachwuchs', 'mini-cup']
+    if any(kw in title.lower() for kw in youth_keywords):
+        return True
+    return False
 
 
 def get_tournament_description(session, tournament_url):
@@ -85,6 +79,7 @@ def scrape_tournaments(s):
 
     while page <= max_pages:
         print(f"Scraping page {page}...")
+        # 100km Umkreis um 40764 Langenfeld
         payload = {
             "Page": str(page),
             "TournamentExtendedFilter.SportID": "2",  # 2 = Badminton
@@ -92,7 +87,7 @@ def scrape_tournaments(s):
             "TournamentFilter.DateFilterType": "0",
             "TournamentFilter.StartDate": "2026-01-01T00:00",
             "TournamentFilter.EndDate": "2026-12-31T00:00",
-            "TournamentFilter.PostalCode": "40723",
+            "TournamentFilter.PostalCode": "40764",
             "TournamentFilter.Distance": "100"
         }
 
@@ -109,7 +104,6 @@ def scrape_tournaments(s):
         for link in soup.find_all('a', href=True):
             href = link['href']
             
-            # Erkennt sowohl alte (?id=UUID) als auch neue (/tournament/UUID) Links
             match = UUID_PATTERN.search(href)
             if not match:
                 continue
@@ -159,7 +153,6 @@ def scrape_tournaments(s):
                     start_date = dates[0]
                     end_date = dates[0]
 
-                # Stadt und Distanz sauber trennen
                 for part in cleaned_parts:
                     if 'km' in part.lower():
                         dist_match = re.search(r'(\d+)\s*km', part.lower())
@@ -317,7 +310,7 @@ def check_for_updates_generator():
     
     try:
         current_list = scrape_tournaments(session)
-        yield f"Suche beendet: {len(current_list)} Turniere im 100km-Umkreis ermittelt."
+        yield f"Suche beendet: {len(current_list)} Turniere im 100km-Umkreis um Langenfeld ermittelt."
     except Exception as e:
         yield f"Fehler beim Scraping: {e}"
         return

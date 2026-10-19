@@ -77,7 +77,7 @@ except ImportError:
             yield f"Fehler bei der Aktualisierung: {e}"
 
 
-st.set_page_config(page_title="Badminton Turniere für Marco", layout="wide")
+st.set_page_config(page_title="Badminton Turniere in der Region", layout="wide")
 
 DEFAULT_LOGO = "https://content.tournamentsoftware.com/images/club/72FB92A4-34AF-41F1-8A4E-BBD56634E66E.jpg"
 
@@ -95,20 +95,20 @@ PARTNERS_MX = {
     "Vanessa Joppien": "https://dbv.turnier.de/player-profile/76DA93E6-43E2-45CE-B28F-FDA12433FDBA"
 }
 
+# Bereinigte Skala: 1.-4. Platz, Plätze 5 bis 8 / VF, Platz 9 bis 16, Vorrunde
 PLACEMENT_OPTIONS = [
     "-- Keine Angabe --",
-    "🥇 1. Platz",
-    "🥈 2. Platz",
-    "🥉 3. Platz",
-    "🏅 4. Platz",
+    "1. Platz",
+    "2. Platz",
+    "3. Platz",
+    "4. Platz",
     "5. Platz",
     "6. Platz",
     "7. Platz",
     "8. Platz",
-    "Viertelfinale (Plätze 5–8)",
-    "9.–16. Platz / Achtelfinale",
-    "Gruppenphase / Vorrunde",
-    "Teilgenommen",
+    "Plätze 5 bis 8 / VF",
+    "Platz 9 bis 16",
+    "Vorrunde",
     "✍️ Eigene Angabe..."
 ]
 
@@ -121,6 +121,7 @@ FIELD_OPTIONS = [
 ]
 
 CITY_COORDINATES = {
+    "Langenfeld": (51.1114, 6.9497),
     "Hilden": (51.1693, 6.9328),
     "Solingen": (51.1712, 7.0841),
     "Düsseldorf": (51.2277, 6.7735),
@@ -132,7 +133,6 @@ CITY_COORDINATES = {
     "Haan": (51.1931, 7.0125),
     "Velbert": (51.3402, 7.0422),
     "Heiligenhaus": (51.3256, 6.9711),
-    "Langenfeld": (51.1114, 6.9497),
     "Monheim am Rhein": (51.0911, 6.8906),
     "Monheim": (51.0911, 6.8906),
     "Leverkusen": (51.0459, 6.9856),
@@ -241,6 +241,14 @@ st.markdown(
     details.status-tag .status-content { font-size: 0.95em; padding: 0 10px 8px 10px; cursor: default; }
 
     .card-inner-container { font-family: 'Inter', -apple-system, sans-serif; }
+    
+    /* Kompakter Login-Bereich */
+    .compact-login-container {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 6px;
+    }
     
     /* Sportlich-markante Störer */
     .stoerer-banner-today {
@@ -385,6 +393,13 @@ st.markdown(
     .discipline-status.registered { color: #15803d; font-weight: bold; }
 
     @media (max-width: 768px) {
+        .compact-login-container {
+            max-width: 210px !important;
+        }
+        .compact-login-container input {
+            font-size: 0.75rem !important;
+            padding: 4px 8px !important;
+        }
         .discipline-container { gap: 8px !important; }
         .discipline-card { flex: 0 0 29% !important; min-width: 85px !important; min-height: 100px !important; padding: 6px 4px !important; }
         .discipline-icon { font-size: 0.85rem !important; }
@@ -401,20 +416,21 @@ st.markdown(
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
-col_spacer, col_login = st.columns([3, 2])
+# Schlanker, kompakter Login-Bereich (besonders auf dem Smartphone)
+col_spacer, col_login = st.columns([4, 1.2])
 with col_login:
     if st.session_state['logged_in']:
-        if st.button("Abmelden", use_container_width=True, key="logout_btn"):
+        if st.button("Abmelden", key="logout_btn"):
             st.session_state['logged_in'] = False
             if 'secret_login' in st.session_state:
                 st.session_state['secret_login'] = ""
             st.rerun()
     else:
-        col_inp, col_btn = st.columns([2, 1])
-        with col_inp:
-            admin_password = st.text_input("", type="password", label_visibility="collapsed", placeholder="Admin Login", key="secret_login")
-        with col_btn:
-            login_clicked = st.button("Login", use_container_width=True)
+        c_pwd, c_btn = st.columns([2.5, 1], gap="small")
+        with c_pwd:
+            admin_password = st.text_input("", type="password", label_visibility="collapsed", placeholder="Passwort", key="secret_login")
+        with c_btn:
+            login_clicked = st.button("Login", key="login_submit_btn")
             
         entered_pwd = admin_password.strip().lower() if admin_password else ""
         expected_pwd = str(st.secrets.get("admin_password", "marco2026")).strip().lower()
@@ -428,10 +444,11 @@ with col_login:
 
 IS_ADMIN = st.session_state['logged_in']
 
-st.title("🏸 Badminton Turniere für Marco")
-st.write("Auf dieser Seite findet ihr alle Seniorenturniere 2026, die im Umkreis von 100 Kilometern um Hilden (40723) stattfinden.")
+# Neuer Titel & Beschreibung (Langenfeld & Region)
+st.title("🏸 Badminton Turniere in der Region")
+st.write("Auf dieser Seite findet ihr alle Seniorenturniere 2026, die im Umkreis von 100 km um Langenfeld stattfinden.")
 
-# --- ZEITSTEMPEL AUS DEM GIST LADEN (ECHTER CLOUD-ZEITSTEMPEL) ---
+# Zeitstempel aus dem Gist laden
 def get_last_update_str():
     if "last_update_override" in st.session_state:
         return st.session_state["last_update_override"]
@@ -618,7 +635,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     start_date_obj = item['Start_Date_Obj']
     end_date_obj = item['End_Date_Obj']
 
-    # --- SPORTLICH-MARKANTER STÖRER (NUR HEUTE & MORGEN) ---
+    # Sportlicher Störer
     stoerer_html = ""
     if start_date_obj and end_date_obj:
         if start_date_obj <= today <= end_date_obj:
@@ -898,7 +915,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     st.markdown(clean_html(html_out), unsafe_allow_html=True)
 
 
-# --- INTERAKTIVE FORMKURVE (ZEIT ONLINE DASHBOARD STYLE) - KOMPAKT & OHNE TOUCH-FALLE ---
+# --- INTERAKTIVE FORMKURVE (ZEIT ONLINE STYLE, SANFTE KURVEN & MONATSKÜRZEL) ---
 def render_season_chart(df):
     records = []
     for _, row in df.iterrows():
@@ -946,25 +963,22 @@ def render_season_chart(df):
     df_chart = pd.DataFrame(records)
     df_chart = df_chart.sort_values(by="date", ascending=True)
 
+    # Bereinigte Einteilung laut Wunsch
     def normalize_placement_for_axis(p):
         p_lower = p.lower()
         if "1." in p or "gold" in p_lower:
-            return "🥇 1. Platz"
+            return "1. Platz"
         if "2." in p or "silber" in p_lower:
-            return "🥈 2. Platz"
+            return "2. Platz"
         if "3." in p or "bronze" in p_lower:
-            return "🥉 3. Platz"
+            return "3. Platz"
         if "4." in p:
-            return "🏅 4. Platz"
-        if any(k in p_lower for k in ["5.", "6.", "7.", "8.", "viertel", "5–8", "5-8"]):
-            return "Plätze 5–8 / Viertelfinale"
-        if any(k in p_lower for k in ["9.", "10.", "11.", "12.", "13.", "14.", "15.", "16.", "achtel", "9–16", "9-16"]):
-            return "Plätze 9–16 / Achtelfinale"
-        if any(k in p_lower for k in ["gruppe", "vorrunde", "17", "18", "19", "20"]):
-            return "Gruppenphase / Vorrunde"
-        if "teilgenomm" in p_lower:
-            return "Teilgenommen"
-        return p
+            return "4. Platz"
+        if any(k in p_lower for k in ["5.", "6.", "7.", "8.", "viertel", "vf", "5–8", "5-8", "5 bis 8"]):
+            return "Plätze 5 bis 8 / VF"
+        if any(k in p_lower for k in ["9.", "10.", "11.", "12.", "13.", "14.", "15.", "16.", "achtel", "9–16", "9-16", "9 bis 16"]):
+            return "Platz 9 bis 16"
+        return "Vorrunde"
 
     df_chart["axis_placement"] = df_chart["placement"].apply(normalize_placement_for_axis)
 
@@ -973,15 +987,15 @@ def render_season_chart(df):
     bronze_cnt = sum(1 for p in df_chart["placement"] if "3." in p or "Bronze" in p)
     total_played = len(df_chart["title"].unique())
 
+    # Exakte Y-Kategorien laut Vorgabe (von unten nach oben)
     y_categories = [
-        "Teilgenommen",
-        "Gruppenphase / Vorrunde",
-        "Plätze 9–16 / Achtelfinale",
-        "Plätze 5–8 / Viertelfinale",
-        "🏅 4. Platz",
-        "🥉 3. Platz",
-        "🥈 2. Platz",
-        "🥇 1. Platz"
+        "Vorrunde",
+        "Platz 9 bis 16",
+        "Plätze 5 bis 8 / VF",
+        "4. Platz",
+        "3. Platz",
+        "2. Platz",
+        "1. Platz"
     ]
 
     for p in df_chart["axis_placement"].unique():
@@ -1021,9 +1035,9 @@ def render_season_chart(df):
             name=disc_name,
             line=dict(
                 color=colors.get(disc_name, "#94a3b8"),
-                width=2,
+                width=2.2,
                 shape="spline",
-                smoothing=0.4
+                smoothing=1.2  # Sanft abgerundete Kurven ohne Zacken
             ),
             marker=dict(
                 size=7,
@@ -1035,6 +1049,10 @@ def render_season_chart(df):
             hoverinfo="text"
         ))
 
+    # X-Achsen-Monatskürzel in Großbuchstaben (JAN, FEB, MÄR ...)
+    tickvals = [datetime.date(2026, m, 1) for m in range(1, 13)]
+    ticktext = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"]
+
     fig.update_layout(
         height=180,
         margin=dict(l=0, r=0, t=5, b=0),
@@ -1044,14 +1062,16 @@ def render_season_chart(df):
             categoryarray=y_categories,
             gridcolor="rgba(255, 255, 255, 0.06)",
             zeroline=False,
-            fixedrange=True,
+            fixedrange=True,  # Verhindert Touch-Falle auf dem Smartphone
             tickfont=dict(color="#94a3b8", size=8.5, family="Inter, -apple-system, sans-serif")
         ),
         xaxis=dict(
+            tickmode="array",
+            tickvals=tickvals,
+            ticktext=ticktext,
             gridcolor="rgba(255, 255, 255, 0.04)",
             zeroline=False,
-            fixedrange=True,
-            tickformat="%d.%m.",
+            fixedrange=True,  # Verhindert Touch-Falle auf dem Smartphone
             tickfont=dict(color="#64748b", size=8.5, family="Inter, -apple-system, sans-serif")
         ),
         plot_bgcolor="rgba(0,0,0,0)",
@@ -1094,7 +1114,7 @@ def render_season_chart(df):
     )
 
 
-# --- DETAILREICHE STRASSENKARTE - KOMPAKT & OHNE TOUCH-FALLE ---
+# --- DETAILREICHE STRASSENKARTE - KOMPAKT & BASIS LANGENFELD ---
 def render_tournament_heatmap(df, today):
     city_counts = {}
     city_tournaments = {}
@@ -1156,7 +1176,7 @@ def render_tournament_heatmap(df, today):
 
     lats = [CITY_COORDINATES[c][0] for c in city_counts.keys()]
     lons = [CITY_COORDINATES[c][1] for c in city_counts.keys()]
-    avg_lat = sum(lats) / len(lats) if lats else 51.17
+    avg_lat = sum(lats) / len(lats) if lats else 51.11
     avg_lon = sum(lons) / len(lons) if lons else 6.95
 
     markers_js = []
@@ -1179,15 +1199,16 @@ def render_tournament_heatmap(df, today):
             }}).addTo(map).bindPopup("<b>📍 {safe_city}</b><br>{cnt} gespielte(s) Turnier(e)<br><small style='color:#94a3b8;'>{safe_sample}</small>");
         """)
 
-    h_lat, h_lon = CITY_COORDINATES["Hilden"]
+    # Langenfeld als neue Heimatbasis
+    l_lat, l_lon = CITY_COORDINATES["Langenfeld"]
     markers_js.append(f"""
-        L.circleMarker([{h_lat}, {h_lon}], {{
-            radius: 6,
+        L.circleMarker([{l_lat}, {l_lon}], {{
+            radius: 7,
             color: '#f59e0b',
             weight: 2,
             fillColor: '#fbbf24',
             fillOpacity: 0.95
-        }}).addTo(map).bindPopup("<b>🏠 Hilden</b><br>Heimatbasis");
+        }}).addTo(map).bindPopup("<b>🏠 Langenfeld</b><br>Heimatbasis");
     """)
 
     markers_script = "\n".join(markers_js)
@@ -1325,7 +1346,7 @@ def render_admin_editor(item, full_data, is_past=False):
             else:
                 val_partner_mx = selected_mx_option
 
-        # --- SAISONTAGEBUCH (ERGEBNISSE PRO DISZIPLIN) AN ERSTER STELLE ---
+        # Saisontagebuch an erster Stelle
         st.write("")
         st.markdown("**🏆 Saisontagebuch (Platzierung & Spielklasse pro Disziplin):**")
         col_res_he, col_res_hd, col_res_mx = st.columns(3)
@@ -1395,7 +1416,7 @@ def render_admin_editor(item, full_data, is_past=False):
         with col_res_mx:
             val_p_mx, val_f_mx = render_discipline_result_inputs("Mixed", "mx")
 
-        # --- PERSÖNLICHE NOTIZEN / FAHRGEMEINSCHAFT UNTER DEM SAISONTAGEBUCH ---
+        # Notiz unter Saisontagebuch
         st.write("")
         val_notes = st.text_input("🚗 Persönliche Notiz / Fahrgemeinschaft", value=item.get('notes', ''), placeholder="z. B. Treffpunkt mit Jan 08:30 Uhr, 15 € Startgeld bar", key=f"note_{prefix}{t_id}").strip()
 
@@ -1499,7 +1520,6 @@ elif data is not None:
                         else:
                             status.update(label="Datenbank erfolgreich aktualisiert!", state="complete", expanded=False)
                     
-                    # Feedback & Zeitstempel sichern
                     st.session_state["last_scrape_feedback"] = last_msg
                     now_str = datetime.datetime.now(ZoneInfo("Europe/Berlin")).strftime("%d.%m.%Y um %H:%M Uhr")
                     st.session_state["last_update_override"] = now_str
@@ -1521,7 +1541,6 @@ elif data is not None:
                     use_container_width=True
                 )
 
-            # Sichtbares Feedback nach dem Rerun direkt anzeigen
             if "last_scrape_feedback" in st.session_state:
                 fb = st.session_state["last_scrape_feedback"]
                 if "neue(s) Turnier" in fb:
@@ -1658,23 +1677,17 @@ elif data is not None:
         df_past = df[df['End_Date_Obj'] < today].copy()
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
-        # --- KOMPAKTER FILTER-EXPANDER ---
+        # --- FILTER-EXPANDER (DISZIPLINEN ENTFERNT, SCHLANKER AUFBAU) ---
         st.write("")
         with st.expander("🔍 Filter & Suche", expanded=False):
             col_search, _ = st.columns([1, 1])
             with col_search:
-                search_query = st.text_input("Suche nach Turniername, Ort, Partner", placeholder="z. B. Hilden, Solingen, Reiz...", key="search_filter").strip()
+                search_query = st.text_input("Suche nach Turniername, Ort, Partner", placeholder="z. B. Langenfeld, Solingen, Reiz...", key="search_filter").strip()
 
             st.write("")
             st.markdown("**Status:**")
             only_registered = st.checkbox("Turniere, an denen ich angemeldet bin", value=False)
             only_available = st.checkbox("Turniere, an denen ich mich noch anmelden kann", value=False)
-
-            st.write("")
-            st.markdown("**Disziplinen:**")
-            filter_he = st.checkbox("👤 Herreneinzel (HE)", value=False)
-            filter_hd = st.checkbox("👥 Herrendoppel (HD)", value=False)
-            filter_mx = st.checkbox("👥 Mixed (MX)", value=False)
 
         if only_registered or only_available:
             def row_passes_filter(row):
@@ -1690,17 +1703,6 @@ elif data is not None:
 
             df_upcoming = df_upcoming[df_upcoming.apply(row_passes_filter, axis=1)]
             df_past = df_past[df_past.apply(row_passes_filter, axis=1)]
-
-        selected_disc_filters = []
-        if filter_he: selected_disc_filters.append('day_he')
-        if filter_hd: selected_disc_filters.append('day_hd')
-        if filter_mx: selected_disc_filters.append('day_mx')
-
-        if selected_disc_filters:
-            def disc_filter(row):
-                return any(row.get(col) != "Disziplin findet nicht statt" for col in selected_disc_filters)
-            df_upcoming = df_upcoming[df_upcoming.apply(disc_filter, axis=1)]
-            df_past = df_past[df_past.apply(disc_filter, axis=1)]
 
         if search_query:
             query_lower = search_query.lower()
