@@ -291,7 +291,9 @@ def check_for_updates_generator():
     yield "Verbinde mit zentraler Cloud-Datenbank (GitHub Gist)..."
     
     try:
-        known_tournaments = load_gist_file(DB_FILE, fallback_default={})
+        known_tournaments = load_gist_file(DB_FILE)
+if not isinstance(known_tournaments, dict):
+    known_tournaments = {}
         yield f"✅ Datenbank erfolgreich geladen ({len(known_tournaments)} bekannte Turniere in der Cloud)."
     except Exception as e:
         yield f"🚨 KRITISCHER DATENBANKFEHLER: {e}"
