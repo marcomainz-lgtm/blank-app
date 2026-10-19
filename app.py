@@ -225,23 +225,34 @@ st.markdown(
 
     .card-inner-container { font-family: 'Inter', -apple-system, sans-serif; }
     
-    /* Touch-Scroll-Fix für mobile Geräte: Verhindert das Festhängen bei Plotly */
+    /* Touch-Scroll-Fix: Verhindert Touch-Blockade am Smartphone */
     .js-plotly-plot .plotly, .js-plotly-plot .gl-container, .user-select-none.svg-container {
         touch-action: pan-y !important;
     }
     
-    /* ERZWINGT 2 KACHELN NEBENEINANDER AUCH AUF DEM SMARTPHONE (ZEIT-STYLE) */
+    /* DESKTOP-BREITE BEGRENZEN: Maximal 780px zentriert (analog ZEIT-Dashboard) */
+    div[data-testid="stExpander"]:has(.zeit-mobile-anchor) {
+        max-width: 780px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    /* MOBIL: 2 KACHELN NEBENEINANDER OHNE HORIZONTALES SWIPEN */
     @media (max-width: 768px) {
         div[data-testid="stHorizontalBlock"]:has(.zeit-mobile-anchor) {
             display: flex !important;
             flex-direction: row !important;
             flex-wrap: nowrap !important;
             gap: 6px !important;
+            width: 100% !important;
+            overflow: hidden !important;
         }
         div[data-testid="stHorizontalBlock"]:has(.zeit-mobile-anchor) > div[data-testid="column"] {
             width: calc(50% - 3px) !important;
-            min-width: calc(50% - 3px) !important;
+            min-width: 0 !important;
+            max-width: calc(50% - 3px) !important;
             flex: 1 1 calc(50% - 3px) !important;
+            overflow: hidden !important;
         }
     }
 
@@ -249,48 +260,49 @@ st.markdown(
     .zeit-card {
         background-color: #12161f;
         border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 10px;
-        padding: 8px 10px;
+        border-radius: 9px;
+        padding: 7px 9px;
         margin-bottom: 4px;
-        min-height: 82px;
+        min-height: 74px;
+        box-sizing: border-box;
     }
     .zeit-header-title {
-        font-size: 0.68rem;
+        font-size: 0.64rem;
         font-weight: 700;
         color: #94a3b8;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-bottom: 2px;
+        margin-bottom: 1px;
         display: flex;
         justify-content: space-between;
         align-items: center;
     }
     .zeit-hero-number {
-        font-size: 1.25rem;
+        font-size: 1.15rem;
         font-weight: 800;
         color: #f8fafc;
-        line-height: 1.1;
+        line-height: 1.05;
         margin-bottom: 2px;
     }
     .zeit-hero-sub {
-        font-size: 0.65rem;
+        font-size: 0.62rem;
         color: #64748b;
-        margin-bottom: 5px;
+        margin-bottom: 4px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
     .zeit-kpi-row {
         display: flex;
-        gap: 4px;
+        gap: 3px;
         flex-wrap: nowrap;
-        overflow-x: auto;
+        overflow-x: hidden;
     }
     .zeit-kpi-tag {
-        font-size: 0.62rem;
+        font-size: 0.58rem;
         font-weight: 700;
-        padding: 1px 5px;
-        border-radius: 4px;
+        padding: 1px 4px;
+        border-radius: 3px;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
         color: #e2e8f0;
@@ -981,7 +993,6 @@ def render_season_chart(df):
     bronze_cnt = sum(1 for p in df_chart["placement"] if "3." in p or "Bronze" in p)
     total_played = len(df_chart["title"].unique())
 
-    # Exakte Y-Kategorien mit Medaillen (von unten nach oben)
     y_categories = [
         "Vorrunde",
         "Platz 9 bis 16",
@@ -1031,10 +1042,10 @@ def render_season_chart(df):
                 color=colors.get(disc_name, "#94a3b8"),
                 width=2.0,
                 shape="spline",
-                smoothing=1.2
+                smoothing=1.3  # Weiche, elegante Kurven
             ),
             marker=dict(
-                size=6.5,
+                size=6.0,
                 symbol="circle",
                 color=colors.get(disc_name, "#94a3b8"),
                 line=dict(color="#12161f", width=1.5)
@@ -1043,19 +1054,21 @@ def render_season_chart(df):
             hoverinfo="text"
         ))
 
-    tickvals = [datetime.date(2026, m, 1) for m in range(1, 13)]
-    ticktext = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"]
+    # X-Achse: Entzerrt auf Zweimonatsschritte für perfekte Lesbarkeit auf Mobile
+    tickvals = [datetime.date(2026, m, 1) for m in [1, 3, 5, 7, 9, 11]]
+    ticktext = ["JAN", "MÄR", "MAI", "JUL", "SEP", "NOV"]
 
     fig.update_layout(
-        height=145,
+        height=140,
         margin=dict(l=0, r=0, t=2, b=0),
+        autosize=True,
         showlegend=False,
         yaxis=dict(
             categoryorder="array",
             categoryarray=y_categories,
             gridcolor="rgba(255, 255, 255, 0.06)",
             zeroline=False,
-            fixedrange=True,
+            fixedrange=True,  # Kein Zoom-Trap beim Wischen
             tickfont=dict(color="#94a3b8", size=7.5, family="Inter, -apple-system, sans-serif")
         ),
         xaxis=dict(
@@ -1064,7 +1077,7 @@ def render_season_chart(df):
             ticktext=ticktext,
             gridcolor="rgba(255, 255, 255, 0.04)",
             zeroline=False,
-            fixedrange=True,
+            fixedrange=True,  # Kein Zoom-Trap beim Wischen
             tickfont=dict(color="#64748b", size=7.5, family="Inter, -apple-system, sans-serif")
         ),
         plot_bgcolor="rgba(0,0,0,0)",
@@ -1082,8 +1095,8 @@ def render_season_chart(df):
         <div class="zeit-card">
             <div class="zeit-header-title">
                 <span>Formkurve 2026</span>
-                <span style="font-size:0.62rem; color:#94a3b8; font-weight:normal; text-transform:none;">
-                    <span style="color:#22d3ee;">●</span> HE &nbsp;<span style="color:#4ade80;">●</span> HD &nbsp;<span style="color:#c084fc;">●</span> MX
+                <span style="font-size:0.6rem; color:#94a3b8; font-weight:normal; text-transform:none;">
+                    <span style="color:#22d3ee;">●</span> HE <span style="color:#4ade80;">●</span> HD <span style="color:#c084fc;">●</span> MX
                 </span>
             </div>
             <div class="zeit-hero-number">{total_played} Turniere</div>
@@ -1105,7 +1118,7 @@ def render_season_chart(df):
     )
 
 
-# --- MINIMALISTISCHE VEKTORKARTE: GEZOOMT AUF REGION RHEIN-RUHR / NRW ---
+# --- ECHTE MINIMALISTISCHE NRW-VEKTORSILHOUETTE (ZEIT-LOOK, ENTZERRT & OHNE SAT-MÜLL) ---
 def render_tournament_heatmap(df, today):
     city_counts = {}
     city_tournaments = {}
@@ -1156,10 +1169,10 @@ def render_tournament_heatmap(df, today):
         <div class="zeit-card">
             <div class="zeit-header-title">
                 <span>Spielorte • NRW</span>
-                <span class="zeit-kpi-tag" style="border-color:#38bdf8; color:#38bdf8; font-size:0.6rem; padding:0 4px;">NRW</span>
+                <span class="zeit-kpi-tag" style="border-color:#38bdf8; color:#38bdf8; font-size:0.58rem; padding:0 3px;">NRW</span>
             </div>
             <div class="zeit-hero-number">{len(city_counts)} Städte</div>
-            <div class="zeit-hero-sub">Teilgenommene Spielorte 2026</div>
+            <div class="zeit-hero-sub">Teilgenommene Orte 2026</div>
             <div class="zeit-kpi-row">
                 <span class="zeit-kpi-tag" style="border-color: #22d3ee; color: #22d3ee;">📍 Top: {hotspot_str}</span>
             </div>
@@ -1168,85 +1181,67 @@ def render_tournament_heatmap(df, today):
         unsafe_allow_html=True
     )
 
-    # Fokus-Ausschnitt: 100km Region Rhein-Ruhr / Bergisches Land rund um Langenfeld
-    # Gezoomte Bounding Box: Lat 50.80 bis 51.68 | Lon 6.25 bis 7.45
-    def project_zoomed(lat, lon, width=240, height=145, pad_x=16, pad_y=12):
-        min_lat, max_lat = 50.80, 51.68
-        min_lon, max_lon = 6.25, 7.45
-        
-        # Begrenzung gegen Ausreißer
-        lat_c = max(min_lat, min(max_lat, lat))
-        lon_c = max(min_lon, min(max_lon, lon))
-        
-        x = pad_x + (lon_c - min_lon) / (max_lon - min_lon) * (width - 2 * pad_x)
-        y = height - pad_y - (lat_c - min_lat) / (max_lat - min_lat) * (height - 2 * pad_y)
+    # Projektion der echten NRW-Landesgrenzen auf kompaktes SVG-Canvas
+    def project_nrw(lat, lon, width=170, height=138, pad_x=8, pad_y=6):
+        min_lat, max_lat = 50.32, 52.53
+        min_lon, max_lon = 5.86, 9.46
+        x = pad_x + (lon - min_lon) / (max_lon - min_lon) * (width - 2 * pad_x)
+        y = height - pad_y - (lat - min_lat) / (max_lat - min_lat) * (height - 2 * pad_y)
         return round(x, 1), round(y, 1)
 
-    # Rheinverlauf als sanfte Orientierungsader (Bonn -> Köln -> Leverkusen -> Düsseldorf -> Duisburg -> Wesel)
-    RHINE_COORDS = [
-        (50.75, 7.10), (50.94, 6.97), (51.03, 6.98), (51.10, 6.88), 
-        (51.22, 6.75), (51.35, 6.72), (51.44, 6.74), (51.55, 6.65), (51.66, 6.60)
+    # Unverkennbare Vektor-Silhouette des Landes Nordrhein-Westfalen
+    NRW_OUTLINE = [
+        (52.53, 8.65), (52.40, 9.00), (52.28, 8.95), (52.12, 9.25), (51.85, 9.42), 
+        (51.64, 9.40), (51.49, 9.15), (51.45, 8.92), (51.20, 8.65), (51.05, 8.52), 
+        (50.75, 8.12), (50.70, 7.85), (50.62, 7.22), (50.55, 6.95), (50.36, 6.45), 
+        (50.55, 6.20), (50.78, 6.02), (51.05, 5.87), (51.30, 6.18), (51.50, 6.15), 
+        (51.85, 6.05), (51.90, 6.60), (52.15, 6.95), (52.28, 7.15), (52.38, 7.75), 
+        (52.30, 7.95), (52.15, 8.25), (52.14, 8.48), (52.30, 8.55), (52.53, 8.65)
     ]
-    rhine_pts = " ".join([f"{project_zoomed(lat, lon)[0]},{project_zoomed(lat, lon)[1]}" for lat, lon in RHINE_COORDS])
+    nrw_pts = " ".join([f"{project_nrw(lat, lon)[0]},{project_nrw(lat, lon)[1]}" for lat, lon in NRW_OUTLINE])
 
-    # Dezent platzierte Städte ohne Textüberlagerung
-    city_elements = []
-    
-    # Individuelle Label-Positionierung je nach Lage (verhindert Überlappung)
-    text_offsets = {
-        "Dinslaken": ("middle", 0, -8),
-        "Duisburg": ("start", 7, 3),
-        "Bochum": ("start", 7, 3),
-        "Viersen": ("end", -7, 3),
-        "Willich": ("middle", 0, -8),
-        "Düsseldorf": ("start", 7, 3),
-        "Bergisch Gladbach": ("start", 7, 4),
-        "Solingen": ("start", 7, 3),
-        "Wuppertal": ("start", 7, 3),
-        "Köln": ("end", -7, 3),
-        "Bonn": ("start", 7, 3),
-        "Krefeld": ("end", -7, 3),
-        "Mönchengladbach": ("end", -7, 3),
-        "Essen": ("start", 7, 3),
-        "Dortmund": ("start", 7, 3)
-    }
+    # Der Rhein als Orientierungsader durch NRW
+    RHINE_COORDS = [
+        (50.62, 7.22), (50.74, 7.10), (50.94, 6.97), (51.10, 6.88), 
+        (51.22, 6.75), (51.44, 6.74), (51.66, 6.60), (51.84, 6.05)
+    ]
+    rhine_pts = " ".join([f"{project_nrw(lat, lon)[0]},{project_nrw(lat, lon)[1]}" for lat, lon in RHINE_COORDS])
 
+    # Gespielte Turnierorte (Neon-Cyan, kein Text-Salat)
+    city_dots = []
     for c, cnt in city_counts.items():
         if c == "Langenfeld":
             continue
         c_lat, c_lon = CITY_COORDINATES[c]
-        cx, cy = project_zoomed(c_lat, c_lon)
+        cx, cy = project_nrw(c_lat, c_lon)
         t_sample = " • ".join(city_tournaments[c][:2])
-        label = f"{c} ({cnt})" if cnt > 1 else c
-        
-        anchor, ox, oy = text_offsets.get(c, ("start", 7, 3))
-        
-        city_elements.append(f"""
-            <circle cx="{cx}" cy="{cy}" r="3.5" fill="#22d3ee" stroke="#0891b2" stroke-width="1.2">
+        r = min(3.0 + cnt * 1.5, 6.5)
+        city_dots.append(f"""
+            <circle cx="{cx}" cy="{cy}" r="{r}" fill="#22d3ee" stroke="#0891b2" stroke-width="0.8">
                 <title>{c}: {cnt} Turnier(e)&#10;{t_sample}</title>
             </circle>
-            <text x="{cx + ox}" y="{cy + oy}" text-anchor="{anchor}" fill="#f8fafc" font-size="7.5" font-weight="700" font-family="Inter, sans-serif">{label}</text>
         """)
 
-    # Langenfeld als goldene Heimatbasis
-    lx, ly = project_zoomed(CITY_COORDINATES["Langenfeld"][0], CITY_COORDINATES["Langenfeld"][1])
+    # Langenfeld als goldene Basis
+    lx, ly = project_nrw(CITY_COORDINATES["Langenfeld"][0], CITY_COORDINATES["Langenfeld"][1])
     langenfeld_element = f"""
-        <circle cx="{lx}" cy="{ly}" r="4.5" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5">
+        <circle cx="{lx}" cy="{ly}" r="4.5" fill="#f59e0b" stroke="#ffffff" stroke-width="1.2">
             <title>Langenfeld: Heimatbasis</title>
         </circle>
-        <text x="{lx + 6}" y="{ly - 5}" fill="#fbbf24" font-size="8" font-weight="800" font-family="Inter, sans-serif">Langenfeld ★</text>
+        <text x="{lx + 6}" y="{ly + 2}" fill="#fbbf24" font-size="7.5" font-weight="800" font-family="Inter, sans-serif">Langenfeld ★</text>
     """
 
     svg_map_html = f"""
-    <div style="background-color: #12161f; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.08); padding: 4px; height: 145px; display: flex; align-items: center; justify-content: center; position: relative;">
-        <svg viewBox="0 0 240 145" style="width: 100%; height: 100%;">
-            <!-- Subtiles NRW-Wasserzeichen im Eck -->
-            <text x="232" y="16" fill="rgba(255, 255, 255, 0.08)" font-size="12" font-weight="900" font-family="Inter, sans-serif" text-anchor="end">NRW</text>
-            <!-- Der Rhein als Orientierungsader -->
-            <polyline points="{rhine_pts}" fill="none" stroke="rgba(34, 211, 238, 0.16)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            <text x="86" y="70" fill="rgba(34, 211, 238, 0.28)" font-size="6" font-style="italic" font-family="Inter, sans-serif">Rhein</text>
+    <div style="background-color: #12161f; border-radius: 9px; border: 1px solid rgba(255, 255, 255, 0.08); padding: 4px; height: 140px; display: flex; align-items: center; justify-content: center; position: relative; box-sizing: border-box; overflow: hidden;">
+        <svg viewBox="0 0 170 138" style="width: 100%; height: 100%; max-height: 132px;">
+            <!-- NRW Umrissfläche -->
+            <polygon points="{nrw_pts}" fill="#181d28" stroke="rgba(255, 255, 255, 0.22)" stroke-width="1.1" stroke-linejoin="round" />
+            <!-- Subtiles NRW-Wasserzeichen -->
+            <text x="160" y="18" fill="rgba(255, 255, 255, 0.12)" font-size="11" font-weight="900" font-family="Inter, sans-serif" text-anchor="end">NRW</text>
+            <!-- Rhein -->
+            <polyline points="{rhine_pts}" fill="none" stroke="rgba(34, 211, 238, 0.18)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
             <!-- Gespielte Spielorte -->
-            {' '.join(city_elements)}
+            {' '.join(city_dots)}
             <!-- Heimatbasis Langenfeld -->
             {langenfeld_element}
         </svg>
@@ -1731,7 +1726,7 @@ elif data is not None:
 
         month_names = {1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni", 7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"}
 
-        # --- 2 KACHELN NEBENEINANDER (AUCH AUF DEM SMARTPHONE) ---
+        # --- 2 KACHELN NEBENEINANDER (AUCH AUF DEM SMARTPHONE, OHNE HORIZONTALEN SCROLL) ---
         st.write("")
         with st.expander("📊 Saison-Analyse 2026 (Formkurve & Gespielte Spielorte)", expanded=True):
             col_chart_box, col_map_box = st.columns(2)
