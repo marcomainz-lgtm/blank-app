@@ -351,7 +351,7 @@ def check_for_updates_generator():
             })
             known_tournaments[t_id] = old_t
 
-try:
+    try:
         save_gist_file(DB_FILE, known_tournaments)
         now_str = datetime.datetime.now(ZoneInfo("Europe/Berlin")).strftime("%d.%m.%Y um %H:%M Uhr")
         save_gist_file("last_update.json", {"timestamp": now_str})
