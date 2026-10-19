@@ -206,22 +206,6 @@ CITY_COORDINATES = {
     "Gummersbach": (51.0264, 7.5658),
     "Wiehl": (50.9500, 7.5500),
     "Waldbröl": (50.9000, 7.6167),
-    "Olpe": (51.0294, 7.8461),
-    "Siegen": (50.8747, 8.0244),
-    "Koblenz": (50.3569, 7.5889),
-    "Neuwied": (50.4286, 7.4614),
-    "Andernach": (50.4397, 7.4014),
-    "Bad Neuenahr-Ahrweiler": (50.5447, 7.1133),
-    "Remagen": (50.5786, 7.2306),
-    "Königswinter": (50.6833, 7.1833),
-    "Bad Honnef": (50.6444, 7.2278),
-    "Bornheim": (50.7594, 6.9931),
-    "Meckenheim": (50.6272, 7.0253),
-    "Rheinbach": (50.6256, 6.9483),
-    "Niederkassel": (50.8167, 7.0333),
-    "Lohmar": (50.8417, 7.2167),
-    "Rösrath": (50.9000, 7.1833),
-    "Overath": (50.9333, 7.2833),
     "Burscheid": (51.0833, 7.1167),
     "Leichlingen": (51.1167, 7.0167)
 }
@@ -246,6 +230,73 @@ st.markdown(
         touch-action: pan-y !important;
     }
     
+    /* ERZWINGT 2 KACHELN NEBENEINANDER AUCH AUF DEM SMARTPHONE (ZEIT-STYLE) */
+    @media (max-width: 768px) {
+        div[data-testid="stHorizontalBlock"]:has(.zeit-mobile-anchor) {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            gap: 6px !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.zeit-mobile-anchor) > div[data-testid="column"] {
+            width: calc(50% - 3px) !important;
+            min-width: calc(50% - 3px) !important;
+            flex: 1 1 calc(50% - 3px) !important;
+        }
+    }
+
+    /* Filigranes ZEIT-Dashboard Styling */
+    .zeit-card {
+        background-color: #12161f;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 8px 10px;
+        margin-bottom: 4px;
+        min-height: 82px;
+    }
+    .zeit-header-title {
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .zeit-hero-number {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #f8fafc;
+        line-height: 1.1;
+        margin-bottom: 2px;
+    }
+    .zeit-hero-sub {
+        font-size: 0.65rem;
+        color: #64748b;
+        margin-bottom: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .zeit-kpi-row {
+        display: flex;
+        gap: 4px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+    .zeit-kpi-tag {
+        font-size: 0.62rem;
+        font-weight: 700;
+        padding: 1px 5px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #e2e8f0;
+        white-space: nowrap;
+    }
+
     /* Sportlich-markante Störer */
     .stoerer-banner-today {
         display: inline-flex;
@@ -276,49 +327,6 @@ st.markdown(
         box-shadow: 0 3px 10px rgba(217, 119, 6, 0.3);
         margin-bottom: 10px;
         text-transform: uppercase;
-    }
-
-    /* ZEIT Online Dashboard Style - Filigran & Kompakt */
-    .zeit-card {
-        background-color: #12161f;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 10px;
-        padding: 10px 14px;
-        margin-bottom: 6px;
-    }
-    .zeit-header-title {
-        font-size: 0.72rem;
-        font-weight: 700;
-        color: #94a3b8;
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
-        margin-bottom: 2px;
-    }
-    .zeit-hero-number {
-        font-size: 1.35rem;
-        font-weight: 800;
-        color: #f8fafc;
-        line-height: 1.1;
-        margin-bottom: 2px;
-    }
-    .zeit-hero-sub {
-        font-size: 0.72rem;
-        color: #64748b;
-        margin-bottom: 6px;
-    }
-    .zeit-kpi-row {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-    }
-    .zeit-kpi-tag {
-        font-size: 0.68rem;
-        font-weight: 700;
-        padding: 2px 6px;
-        border-radius: 4px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #e2e8f0;
     }
 
     /* Medaillen-Badges in Disziplin-Kacheln */
@@ -395,7 +403,7 @@ st.markdown(
         .discipline-title { font-size: 0.65rem !important; }
         .discipline-day { font-size: 0.6rem !important; padding: 2px 4px !important; margin-bottom: 2px !important; line-height: 1.15 !important; }
         .discipline-status { font-size: 0.55rem !important; line-height: 1.1 !important; }
-        .discipline-result-pill { font-size: 0.55rem !important; padding: 1px 3px !important; margin-top: 3px !important; }
+        .discipline-result-pill { font-size: 0.52rem !important; padding: 1px 3px !important; margin-top: 2px !important; }
     }
     </style>
     """,
@@ -405,8 +413,8 @@ st.markdown(
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
-# Kompakter, unaufdringlicher Login
-col_spacer, col_login = st.columns([4, 1.2])
+# Kompakter Login-Bereich
+col_spacer, col_login = st.columns([4.2, 1.3])
 with col_login:
     if st.session_state['logged_in']:
         if st.button("Abmelden", key="logout_btn"):
@@ -433,7 +441,6 @@ with col_login:
 
 IS_ADMIN = st.session_state['logged_in']
 
-# Neuer Regions-Titel
 st.title("🏸 Badminton Turniere in der Region")
 st.write("Auf dieser Seite findet ihr alle Seniorenturniere 2026, die im Umkreis von 100 km um Langenfeld stattfinden.")
 
@@ -903,7 +910,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     st.markdown(clean_html(html_out), unsafe_allow_html=True)
 
 
-# --- INTERAKTIVE FORMKURVE (ZEIT ONLINE STYLE, MIT MEDAILLEN & SMOOTH SPLINES) ---
+# --- INTERAKTIVE FORMKURVE (ZEIT-STYLE, SANFTE SPLINES, MIT MEDAILLEN) ---
 def render_season_chart(df):
     records = []
     for _, row in df.iterrows():
@@ -951,7 +958,6 @@ def render_season_chart(df):
     df_chart = pd.DataFrame(records)
     df_chart = df_chart.sort_values(by="date", ascending=True)
 
-    # Bereinigte Einteilung mit Medaillen
     def normalize_placement_for_axis(p):
         p_lower = p.lower()
         if "1." in p or "gold" in p_lower:
@@ -975,7 +981,7 @@ def render_season_chart(df):
     bronze_cnt = sum(1 for p in df_chart["placement"] if "3." in p or "Bronze" in p)
     total_played = len(df_chart["title"].unique())
 
-    # Exakte Y-Kategorien (von unten nach oben)
+    # Exakte Y-Kategorien mit Medaillen (von unten nach oben)
     y_categories = [
         "Vorrunde",
         "Platz 9 bis 16",
@@ -1008,10 +1014,10 @@ def render_season_chart(df):
             field_str = f" • {r['field']}" if r['field'] else ""
             partner_str = f"<br>👥 Partner: <b>{r['partner']}</b>" if r['partner'] else ""
             hover_text = (
-                f"<span style='font-size:12px; font-weight:700; color:{colors[disc_name]};'>{disc_name} • {r['placement']}</span>"
+                f"<span style='font-size:11px; font-weight:700; color:{colors[disc_name]};'>{disc_name} • {r['placement']}</span>"
                 f"<span style='color:#94a3b8;'>{field_str}</span><br>"
-                f"<span style='font-size:11px; color:#f8fafc;'>🏸 {r['title']} ({r['city']})</span><br>"
-                f"<span style='font-size:10px; color:#64748b;'>📅 {r['date'].strftime('%d.%m.%Y')}</span>"
+                f"<span style='font-size:10px; color:#f8fafc;'>🏸 {r['title']} ({r['city']})</span><br>"
+                f"<span style='font-size:9px; color:#64748b;'>📅 {r['date'].strftime('%d.%m.%Y')}</span>"
                 f"{partner_str}"
             )
             hover_texts.append(hover_text)
@@ -1023,12 +1029,12 @@ def render_season_chart(df):
             name=disc_name,
             line=dict(
                 color=colors.get(disc_name, "#94a3b8"),
-                width=2.2,
+                width=2.0,
                 shape="spline",
-                smoothing=1.2  # Sanft geschwungen
+                smoothing=1.2
             ),
             marker=dict(
-                size=7,
+                size=6.5,
                 symbol="circle",
                 color=colors.get(disc_name, "#94a3b8"),
                 line=dict(color="#12161f", width=1.5)
@@ -1037,21 +1043,20 @@ def render_season_chart(df):
             hoverinfo="text"
         ))
 
-    # X-Achse: Dreier-Monatskürzel in Großbuchstaben
     tickvals = [datetime.date(2026, m, 1) for m in range(1, 13)]
     ticktext = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"]
 
     fig.update_layout(
-        height=190,
-        margin=dict(l=0, r=0, t=5, b=0),
+        height=145,
+        margin=dict(l=0, r=0, t=2, b=0),
         showlegend=False,
         yaxis=dict(
             categoryorder="array",
             categoryarray=y_categories,
             gridcolor="rgba(255, 255, 255, 0.06)",
             zeroline=False,
-            fixedrange=True,  # Verhindert Touch-Falle
-            tickfont=dict(color="#94a3b8", size=8.5, family="Inter, -apple-system, sans-serif")
+            fixedrange=True,
+            tickfont=dict(color="#94a3b8", size=7.5, family="Inter, -apple-system, sans-serif")
         ),
         xaxis=dict(
             tickmode="array",
@@ -1059,15 +1064,15 @@ def render_season_chart(df):
             ticktext=ticktext,
             gridcolor="rgba(255, 255, 255, 0.04)",
             zeroline=False,
-            fixedrange=True,  # Verhindert Touch-Falle
-            tickfont=dict(color="#64748b", size=8.5, family="Inter, -apple-system, sans-serif")
+            fixedrange=True,
+            tickfont=dict(color="#64748b", size=7.5, family="Inter, -apple-system, sans-serif")
         ),
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         hoverlabel=dict(
             bgcolor="#1e293b",
             bordercolor="rgba(255, 255, 255, 0.15)",
-            font_size=11,
+            font_size=10.5,
             font_family="Inter, -apple-system, sans-serif"
         )
     )
@@ -1075,20 +1080,18 @@ def render_season_chart(df):
     st.markdown(
         f"""
         <div class="zeit-card">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div class="zeit-header-title">Saisonverlauf & Formkurve 2026</div>
-                <div style="font-size:0.68rem; color:#94a3b8; display:flex; gap:8px;">
-                    <span><span style="color:#22d3ee;">●</span> Einzel</span>
-                    <span><span style="color:#4ade80;">●</span> Doppel</span>
-                    <span><span style="color:#c084fc;">●</span> Mixed</span>
-                </div>
+            <div class="zeit-header-title">
+                <span>Formkurve 2026</span>
+                <span style="font-size:0.62rem; color:#94a3b8; font-weight:normal; text-transform:none;">
+                    <span style="color:#22d3ee;">●</span> HE &nbsp;<span style="color:#4ade80;">●</span> HD &nbsp;<span style="color:#c084fc;">●</span> MX
+                </span>
             </div>
             <div class="zeit-hero-number">{total_played} Turniere</div>
-            <div class="zeit-hero-sub">Gespielte Turniere im Jahresverlauf</div>
+            <div class="zeit-hero-sub">Ergebnisse im Jahresverlauf</div>
             <div class="zeit-kpi-row">
-                <span class="zeit-kpi-tag" style="border-color: #f59e0b; color: #fbbf24;">🥇 {gold_cnt}x Gold</span>
-                <span class="zeit-kpi-tag" style="border-color: #94a3b8; color: #e2e8f0;">🥈 {silver_cnt}x Silber</span>
-                <span class="zeit-kpi-tag" style="border-color: #ea580c; color: #fdba74;">🥉 {bronze_cnt}x Bronze</span>
+                <span class="zeit-kpi-tag" style="border-color: #f59e0b; color: #fbbf24;">🥇 {gold_cnt}</span>
+                <span class="zeit-kpi-tag" style="border-color: #94a3b8; color: #e2e8f0;">🥈 {silver_cnt}</span>
+                <span class="zeit-kpi-tag" style="border-color: #ea580c; color: #fdba74;">🥉 {bronze_cnt}</span>
             </div>
         </div>
         """,
@@ -1102,7 +1105,7 @@ def render_season_chart(df):
     )
 
 
-# --- MINIMALISTISCHE NRW-VEKTORKARTE IM ZEIT-ONLINE-STIL (REINE OUTLINES, KEIN SATELLITEN-MÜLL) ---
+# --- MINIMALISTISCHE VEKTORKARTE: GEZOOMT AUF REGION RHEIN-RUHR / NRW ---
 def render_tournament_heatmap(df, today):
     city_counts = {}
     city_tournaments = {}
@@ -1142,97 +1145,106 @@ def render_tournament_heatmap(df, today):
             city_tournaments.setdefault(matched_city, []).append(t_title)
 
     if not city_counts:
-        st.info("Noch keine teilgenommenen Turniere mit bekanntem Spielort erfasst.")
+        st.info("Noch keine teilgenommenen Turniere mit Spielort erfasst.")
         return
 
-    top_cities = sorted(city_counts.items(), key=lambda x: x[1], reverse=True)[:3]
+    top_cities = sorted(city_counts.items(), key=lambda x: x[1], reverse=True)[:2]
     hotspot_str = " • ".join([f"{c} ({cnt})" for c, cnt in top_cities])
 
     st.markdown(
         f"""
         <div class="zeit-card">
-            <div class="zeit-header-title">Gespielte Spielorte 2026</div>
+            <div class="zeit-header-title">
+                <span>Spielorte • NRW</span>
+                <span class="zeit-kpi-tag" style="border-color:#38bdf8; color:#38bdf8; font-size:0.6rem; padding:0 4px;">NRW</span>
+            </div>
             <div class="zeit-hero-number">{len(city_counts)} Städte</div>
-            <div class="zeit-hero-sub">Orte von Turnieren, an denen du teilgenommen hast</div>
+            <div class="zeit-hero-sub">Teilgenommene Spielorte 2026</div>
             <div class="zeit-kpi-row">
-                <span class="zeit-kpi-tag" style="border-color: #22d3ee; color: #22d3ee;">📍 Hotspots: {hotspot_str}</span>
+                <span class="zeit-kpi-tag" style="border-color: #22d3ee; color: #22d3ee;">📍 Top: {hotspot_str}</span>
             </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    # Projektion von Lat/Lon auf SVG-Koordinaten
-    def project(lat, lon, width=340, height=190, pad=12):
-        min_lat, max_lat = 50.32, 52.53
-        min_lon, max_lon = 5.86, 9.46
-        x = pad + (lon - min_lon) / (max_lon - min_lon) * (width - 2 * pad)
-        y = height - pad - (lat - min_lat) / (max_lat - min_lat) * (height - 2 * pad)
+    # Fokus-Ausschnitt: 100km Region Rhein-Ruhr / Bergisches Land rund um Langenfeld
+    # Gezoomte Bounding Box: Lat 50.80 bis 51.68 | Lon 6.25 bis 7.45
+    def project_zoomed(lat, lon, width=240, height=145, pad_x=16, pad_y=12):
+        min_lat, max_lat = 50.80, 51.68
+        min_lon, max_lon = 6.25, 7.45
+        
+        # Begrenzung gegen Ausreißer
+        lat_c = max(min_lat, min(max_lat, lat))
+        lon_c = max(min_lon, min(max_lon, lon))
+        
+        x = pad_x + (lon_c - min_lon) / (max_lon - min_lon) * (width - 2 * pad_x)
+        y = height - pad_y - (lat_c - min_lat) / (max_lat - min_lat) * (height - 2 * pad_y)
         return round(x, 1), round(y, 1)
 
-    # Vereinfachte NRW-Landesgrenze als Vektor-Polygon
-    NRW_BORDER_COORDS = [
-        (52.43, 8.61), (52.38, 8.97), (52.29, 8.92), (52.17, 8.86), (52.12, 9.03), 
-        (51.85, 9.25), (51.66, 9.37), (51.64, 9.45), (51.49, 9.15), (51.46, 8.85), 
-        (51.35, 8.65), (51.20, 8.71), (51.11, 8.62), (50.93, 8.42), (50.80, 8.18), 
-        (50.74, 8.08), (50.86, 7.73), (50.64, 7.23), (50.63, 7.21), (50.62, 6.95), 
-        (50.55, 6.76), (50.36, 6.48), (50.49, 6.43), (50.55, 6.24), (50.71, 6.19), 
-        (50.77, 6.02), (50.87, 6.09), (50.96, 6.12), (51.02, 5.87), (51.10, 6.16), 
-        (51.18, 6.06), (51.32, 6.18), (51.44, 6.26), (51.68, 6.16), (51.79, 5.99), 
-        (51.83, 6.24), (51.87, 6.49), (52.04, 6.82), (52.21, 7.02), (52.28, 7.19), 
-        (52.28, 7.44), (52.38, 7.60), (52.31, 7.88), (52.28, 7.95), (52.22, 7.81), 
-        (52.18, 7.87), (52.04, 8.15), (52.10, 8.30), (52.14, 8.48), (52.25, 8.51), 
-        (52.31, 8.62), (52.43, 8.61)
+    # Rheinverlauf als sanfte Orientierungsader (Bonn -> Köln -> Leverkusen -> Düsseldorf -> Duisburg -> Wesel)
+    RHINE_COORDS = [
+        (50.75, 7.10), (50.94, 6.97), (51.03, 6.98), (51.10, 6.88), 
+        (51.22, 6.75), (51.35, 6.72), (51.44, 6.74), (51.55, 6.65), (51.66, 6.60)
     ]
+    rhine_pts = " ".join([f"{project_zoomed(lat, lon)[0]},{project_zoomed(lat, lon)[1]}" for lat, lon in RHINE_COORDS])
 
-    border_points = " ".join([f"{project(lat, lon)[0]},{project(lat, lon)[1]}" for lat, lon in NRW_BORDER_COORDS])
-
-    # Dezente Referenzstädte für Orientierung
-    REF_CITIES = [
-        ("Münster", 51.96, 7.63),
-        ("Bielefeld", 52.03, 8.53),
-        ("Dortmund", 51.51, 7.47),
-        ("Köln", 50.94, 6.96),
-        ("Aachen", 50.78, 6.08)
-    ]
-    ref_elements = []
-    for r_name, r_lat, r_lon in REF_CITIES:
-        rx, ry = project(r_lat, r_lon)
-        ref_elements.append(f'<circle cx="{rx}" cy="{ry}" r="2" fill="#475569" />')
-        ref_elements.append(f'<text x="{rx+4}" y="{ry+3}" fill="#64748b" font-size="7.5" font-family="Inter, sans-serif">{r_name}</text>')
-
-    # Gespielte Turnierorte (Neon-Cyan mit Beschriftung)
+    # Dezent platzierte Städte ohne Textüberlagerung
     city_elements = []
+    
+    # Individuelle Label-Positionierung je nach Lage (verhindert Überlappung)
+    text_offsets = {
+        "Dinslaken": ("middle", 0, -8),
+        "Duisburg": ("start", 7, 3),
+        "Bochum": ("start", 7, 3),
+        "Viersen": ("end", -7, 3),
+        "Willich": ("middle", 0, -8),
+        "Düsseldorf": ("start", 7, 3),
+        "Bergisch Gladbach": ("start", 7, 4),
+        "Solingen": ("start", 7, 3),
+        "Wuppertal": ("start", 7, 3),
+        "Köln": ("end", -7, 3),
+        "Bonn": ("start", 7, 3),
+        "Krefeld": ("end", -7, 3),
+        "Mönchengladbach": ("end", -7, 3),
+        "Essen": ("start", 7, 3),
+        "Dortmund": ("start", 7, 3)
+    }
+
     for c, cnt in city_counts.items():
         if c == "Langenfeld":
             continue
         c_lat, c_lon = CITY_COORDINATES[c]
-        cx, cy = project(c_lat, c_lon)
+        cx, cy = project_zoomed(c_lat, c_lon)
         t_sample = " • ".join(city_tournaments[c][:2])
         label = f"{c} ({cnt})" if cnt > 1 else c
+        
+        anchor, ox, oy = text_offsets.get(c, ("start", 7, 3))
+        
         city_elements.append(f"""
-            <circle cx="{cx}" cy="{cy}" r="4.5" fill="#22d3ee" stroke="#0891b2" stroke-width="1.2">
+            <circle cx="{cx}" cy="{cy}" r="3.5" fill="#22d3ee" stroke="#0891b2" stroke-width="1.2">
                 <title>{c}: {cnt} Turnier(e)&#10;{t_sample}</title>
             </circle>
-            <text x="{cx+6}" y="{cy+3}" fill="#f8fafc" font-size="8.5" font-weight="700" font-family="Inter, sans-serif">{label}</text>
+            <text x="{cx + ox}" y="{cy + oy}" text-anchor="{anchor}" fill="#f8fafc" font-size="7.5" font-weight="700" font-family="Inter, sans-serif">{label}</text>
         """)
 
-    # Langenfeld Heimatbasis (Goldener Marker)
-    lx, ly = project(CITY_COORDINATES["Langenfeld"][0], CITY_COORDINATES["Langenfeld"][1])
+    # Langenfeld als goldene Heimatbasis
+    lx, ly = project_zoomed(CITY_COORDINATES["Langenfeld"][0], CITY_COORDINATES["Langenfeld"][1])
     langenfeld_element = f"""
-        <circle cx="{lx}" cy="{ly}" r="5.5" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5">
+        <circle cx="{lx}" cy="{ly}" r="4.5" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5">
             <title>Langenfeld: Heimatbasis</title>
         </circle>
-        <text x="{lx+7}" y="{ly+3}" fill="#fbbf24" font-size="9" font-weight="800" font-family="Inter, sans-serif">Langenfeld (Basis)</text>
+        <text x="{lx + 6}" y="{ly - 5}" fill="#fbbf24" font-size="8" font-weight="800" font-family="Inter, sans-serif">Langenfeld ★</text>
     """
 
     svg_map_html = f"""
-    <div style="background-color: #12161f; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.08); padding: 8px 10px; height: 190px; display: flex; align-items: center; justify-content: center;">
-        <svg viewBox="0 0 340 190" style="width: 100%; height: 100%; max-height: 180px;">
-            <!-- NRW Umrissfläche -->
-            <polygon points="{border_points}" fill="#181d28" stroke="rgba(255, 255, 255, 0.18)" stroke-width="1.2" stroke-linejoin="round" />
-            <!-- Orientierungsstädte -->
-            {' '.join(ref_elements)}
+    <div style="background-color: #12161f; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.08); padding: 4px; height: 145px; display: flex; align-items: center; justify-content: center; position: relative;">
+        <svg viewBox="0 0 240 145" style="width: 100%; height: 100%;">
+            <!-- Subtiles NRW-Wasserzeichen im Eck -->
+            <text x="232" y="16" fill="rgba(255, 255, 255, 0.08)" font-size="12" font-weight="900" font-family="Inter, sans-serif" text-anchor="end">NRW</text>
+            <!-- Der Rhein als Orientierungsader -->
+            <polyline points="{rhine_pts}" fill="none" stroke="rgba(34, 211, 238, 0.16)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <text x="86" y="70" fill="rgba(34, 211, 238, 0.28)" font-size="6" font-style="italic" font-family="Inter, sans-serif">Rhein</text>
             <!-- Gespielte Spielorte -->
             {' '.join(city_elements)}
             <!-- Heimatbasis Langenfeld -->
@@ -1407,7 +1419,6 @@ def render_admin_editor(item, full_data, is_past=False):
         with col_res_mx:
             val_p_mx, val_f_mx = render_discipline_result_inputs("Mixed", "mx")
 
-        # Notiz
         st.write("")
         val_notes = st.text_input("🚗 Persönliche Notiz / Fahrgemeinschaft", value=item.get('notes', ''), placeholder="z. B. Treffpunkt mit Jan 08:30 Uhr, 15 € Startgeld bar", key=f"note_{prefix}{t_id}").strip()
 
@@ -1668,7 +1679,7 @@ elif data is not None:
         df_past = df[df['End_Date_Obj'] < today].copy()
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
-        # --- SCHLANKER FILTER-EXPANDER (OHNE DISZIPLINEN-BOXEN) ---
+        # --- SCHLANKER FILTER-EXPANDER ---
         st.write("")
         with st.expander("🔍 Filter & Suche", expanded=False):
             col_search, _ = st.columns([1, 1])
@@ -1720,13 +1731,15 @@ elif data is not None:
 
         month_names = {1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni", 7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"}
 
-        # --- FILIGRANE ANALYSE-KACHELN IM ZEIT-ONLINE-FORMAT (MAX-BREITE BEGRENZT) ---
+        # --- 2 KACHELN NEBENEINANDER (AUCH AUF DEM SMARTPHONE) ---
         st.write("")
         with st.expander("📊 Saison-Analyse 2026 (Formkurve & Gespielte Spielorte)", expanded=True):
-            col_spacer_l, col_chart_box, col_map_box, col_spacer_r = st.columns([0.2, 4.5, 4.5, 0.2])
+            col_chart_box, col_map_box = st.columns(2)
             with col_chart_box:
+                st.markdown('<div class="zeit-mobile-anchor"></div>', unsafe_allow_html=True)
                 render_season_chart(df)
             with col_map_box:
+                st.markdown('<div class="zeit-mobile-anchor"></div>', unsafe_allow_html=True)
                 render_tournament_heatmap(df, today)
 
         # --- ANSTEHENDE TURNIERE ---
