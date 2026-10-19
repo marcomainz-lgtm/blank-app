@@ -95,18 +95,17 @@ PARTNERS_MX = {
     "Vanessa Joppien": "https://dbv.turnier.de/player-profile/76DA93E6-43E2-45CE-B28F-FDA12433FDBA"
 }
 
-# Bereinigte Skala: 1.-4. Platz, Plätze 5 bis 8 / VF, Platz 9 bis 16, Vorrunde
 PLACEMENT_OPTIONS = [
     "-- Keine Angabe --",
-    "1. Platz",
-    "2. Platz",
-    "3. Platz",
-    "4. Platz",
+    "🥇 1. Platz",
+    "🥈 2. Platz",
+    "🥉 3. Platz",
+    "🏅 4. Platz",
     "5. Platz",
     "6. Platz",
     "7. Platz",
     "8. Platz",
-    "Plätze 5 bis 8 / VF",
+    "Platz 5 bis 8 / VF",
     "Platz 9 bis 16",
     "Vorrunde",
     "✍️ Eigene Angabe..."
@@ -242,12 +241,9 @@ st.markdown(
 
     .card-inner-container { font-family: 'Inter', -apple-system, sans-serif; }
     
-    /* Kompakter Login-Bereich */
-    .compact-login-container {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        gap: 6px;
+    /* Touch-Scroll-Fix für mobile Geräte: Verhindert das Festhängen bei Plotly */
+    .js-plotly-plot .plotly, .js-plotly-plot .gl-container, .user-select-none.svg-container {
+        touch-action: pan-y !important;
     }
     
     /* Sportlich-markante Störer */
@@ -282,7 +278,7 @@ st.markdown(
         text-transform: uppercase;
     }
 
-    /* ZEIT Online Dashboard Style - Kompakt */
+    /* ZEIT Online Dashboard Style - Filigran & Kompakt */
     .zeit-card {
         background-color: #12161f;
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -299,14 +295,14 @@ st.markdown(
         margin-bottom: 2px;
     }
     .zeit-hero-number {
-        font-size: 1.45rem;
+        font-size: 1.35rem;
         font-weight: 800;
         color: #f8fafc;
         line-height: 1.1;
         margin-bottom: 2px;
     }
     .zeit-hero-sub {
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         color: #64748b;
         margin-bottom: 6px;
     }
@@ -316,10 +312,10 @@ st.markdown(
         flex-wrap: wrap;
     }
     .zeit-kpi-tag {
-        font-size: 0.7rem;
+        font-size: 0.68rem;
         font-weight: 700;
-        padding: 2px 7px;
-        border-radius: 5px;
+        padding: 2px 6px;
+        border-radius: 4px;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
         color: #e2e8f0;
@@ -393,13 +389,6 @@ st.markdown(
     .discipline-status.registered { color: #15803d; font-weight: bold; }
 
     @media (max-width: 768px) {
-        .compact-login-container {
-            max-width: 210px !important;
-        }
-        .compact-login-container input {
-            font-size: 0.75rem !important;
-            padding: 4px 8px !important;
-        }
         .discipline-container { gap: 8px !important; }
         .discipline-card { flex: 0 0 29% !important; min-width: 85px !important; min-height: 100px !important; padding: 6px 4px !important; }
         .discipline-icon { font-size: 0.85rem !important; }
@@ -416,7 +405,7 @@ st.markdown(
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
-# Schlanker, kompakter Login-Bereich (besonders auf dem Smartphone)
+# Kompakter, unaufdringlicher Login
 col_spacer, col_login = st.columns([4, 1.2])
 with col_login:
     if st.session_state['logged_in']:
@@ -444,11 +433,11 @@ with col_login:
 
 IS_ADMIN = st.session_state['logged_in']
 
-# Neuer Titel & Beschreibung (Langenfeld & Region)
+# Neuer Regions-Titel
 st.title("🏸 Badminton Turniere in der Region")
 st.write("Auf dieser Seite findet ihr alle Seniorenturniere 2026, die im Umkreis von 100 km um Langenfeld stattfinden.")
 
-# Zeitstempel aus dem Gist laden
+# Zeitstempel aus dem Gist
 def get_last_update_str():
     if "last_update_override" in st.session_state:
         return st.session_state["last_update_override"]
@@ -635,7 +624,6 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     start_date_obj = item['Start_Date_Obj']
     end_date_obj = item['End_Date_Obj']
 
-    # Sportlicher Störer
     stoerer_html = ""
     if start_date_obj and end_date_obj:
         if start_date_obj <= today <= end_date_obj:
@@ -812,11 +800,11 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                 if reg_mx:
                     mx_status_text = f"Terminkonflikt: {c_disc} in {c_city}{p_suffix}"
                     mx_status_class = "double-booking"
-                    mx_class = "has-double-booking"
+                    hd_class = "has-double-booking"
                 else:
                     mx_status_text = f"Paralleltermin: {c_disc} in {c_city}{p_suffix}"
-                    mx_status_class = "conflict"
-                    mx_class = "has-conflict"
+                    hd_status_class = "conflict"
+                    hd_class = "has-conflict"
 
     def get_card_result_info(placement_val, field_val):
         if not placement_val or placement_val == "-- Keine Angabe --":
@@ -915,7 +903,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     st.markdown(clean_html(html_out), unsafe_allow_html=True)
 
 
-# --- INTERAKTIVE FORMKURVE (ZEIT ONLINE STYLE, SANFTE KURVEN & MONATSKÜRZEL) ---
+# --- INTERAKTIVE FORMKURVE (ZEIT ONLINE STYLE, MIT MEDAILLEN & SMOOTH SPLINES) ---
 def render_season_chart(df):
     records = []
     for _, row in df.iterrows():
@@ -963,19 +951,19 @@ def render_season_chart(df):
     df_chart = pd.DataFrame(records)
     df_chart = df_chart.sort_values(by="date", ascending=True)
 
-    # Bereinigte Einteilung laut Wunsch
+    # Bereinigte Einteilung mit Medaillen
     def normalize_placement_for_axis(p):
         p_lower = p.lower()
         if "1." in p or "gold" in p_lower:
-            return "1. Platz"
+            return "🥇 1. Platz"
         if "2." in p or "silber" in p_lower:
-            return "2. Platz"
+            return "🥈 2. Platz"
         if "3." in p or "bronze" in p_lower:
-            return "3. Platz"
+            return "🥉 3. Platz"
         if "4." in p:
-            return "4. Platz"
+            return "🏅 4. Platz"
         if any(k in p_lower for k in ["5.", "6.", "7.", "8.", "viertel", "vf", "5–8", "5-8", "5 bis 8"]):
-            return "Plätze 5 bis 8 / VF"
+            return "Platz 5 bis 8 / VF"
         if any(k in p_lower for k in ["9.", "10.", "11.", "12.", "13.", "14.", "15.", "16.", "achtel", "9–16", "9-16", "9 bis 16"]):
             return "Platz 9 bis 16"
         return "Vorrunde"
@@ -987,15 +975,15 @@ def render_season_chart(df):
     bronze_cnt = sum(1 for p in df_chart["placement"] if "3." in p or "Bronze" in p)
     total_played = len(df_chart["title"].unique())
 
-    # Exakte Y-Kategorien laut Vorgabe (von unten nach oben)
+    # Exakte Y-Kategorien (von unten nach oben)
     y_categories = [
         "Vorrunde",
         "Platz 9 bis 16",
-        "Plätze 5 bis 8 / VF",
-        "4. Platz",
-        "3. Platz",
-        "2. Platz",
-        "1. Platz"
+        "Platz 5 bis 8 / VF",
+        "🏅 4. Platz",
+        "🥉 3. Platz",
+        "🥈 2. Platz",
+        "🥇 1. Platz"
     ]
 
     for p in df_chart["axis_placement"].unique():
@@ -1037,7 +1025,7 @@ def render_season_chart(df):
                 color=colors.get(disc_name, "#94a3b8"),
                 width=2.2,
                 shape="spline",
-                smoothing=1.2  # Sanft abgerundete Kurven ohne Zacken
+                smoothing=1.2  # Sanft geschwungen
             ),
             marker=dict(
                 size=7,
@@ -1049,12 +1037,12 @@ def render_season_chart(df):
             hoverinfo="text"
         ))
 
-    # X-Achsen-Monatskürzel in Großbuchstaben (JAN, FEB, MÄR ...)
+    # X-Achse: Dreier-Monatskürzel in Großbuchstaben
     tickvals = [datetime.date(2026, m, 1) for m in range(1, 13)]
     ticktext = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"]
 
     fig.update_layout(
-        height=180,
+        height=190,
         margin=dict(l=0, r=0, t=5, b=0),
         showlegend=False,
         yaxis=dict(
@@ -1062,7 +1050,7 @@ def render_season_chart(df):
             categoryarray=y_categories,
             gridcolor="rgba(255, 255, 255, 0.06)",
             zeroline=False,
-            fixedrange=True,  # Verhindert Touch-Falle auf dem Smartphone
+            fixedrange=True,  # Verhindert Touch-Falle
             tickfont=dict(color="#94a3b8", size=8.5, family="Inter, -apple-system, sans-serif")
         ),
         xaxis=dict(
@@ -1071,7 +1059,7 @@ def render_season_chart(df):
             ticktext=ticktext,
             gridcolor="rgba(255, 255, 255, 0.04)",
             zeroline=False,
-            fixedrange=True,  # Verhindert Touch-Falle auf dem Smartphone
+            fixedrange=True,  # Verhindert Touch-Falle
             tickfont=dict(color="#64748b", size=8.5, family="Inter, -apple-system, sans-serif")
         ),
         plot_bgcolor="rgba(0,0,0,0)",
@@ -1089,7 +1077,7 @@ def render_season_chart(df):
         <div class="zeit-card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div class="zeit-header-title">Saisonverlauf & Formkurve 2026</div>
-                <div style="font-size:0.7rem; color:#94a3b8; display:flex; gap:8px;">
+                <div style="font-size:0.68rem; color:#94a3b8; display:flex; gap:8px;">
                     <span><span style="color:#22d3ee;">●</span> Einzel</span>
                     <span><span style="color:#4ade80;">●</span> Doppel</span>
                     <span><span style="color:#c084fc;">●</span> Mixed</span>
@@ -1114,7 +1102,7 @@ def render_season_chart(df):
     )
 
 
-# --- DETAILREICHE STRASSENKARTE - KOMPAKT & BASIS LANGENFELD ---
+# --- MINIMALISTISCHE NRW-VEKTORKARTE IM ZEIT-ONLINE-STIL (REINE OUTLINES, KEIN SATELLITEN-MÜLL) ---
 def render_tournament_heatmap(df, today):
     city_counts = {}
     city_tournaments = {}
@@ -1174,83 +1162,86 @@ def render_tournament_heatmap(df, today):
         unsafe_allow_html=True
     )
 
-    lats = [CITY_COORDINATES[c][0] for c in city_counts.keys()]
-    lons = [CITY_COORDINATES[c][1] for c in city_counts.keys()]
-    avg_lat = sum(lats) / len(lats) if lats else 51.11
-    avg_lon = sum(lons) / len(lons) if lons else 6.95
+    # Projektion von Lat/Lon auf SVG-Koordinaten
+    def project(lat, lon, width=340, height=190, pad=12):
+        min_lat, max_lat = 50.32, 52.53
+        min_lon, max_lon = 5.86, 9.46
+        x = pad + (lon - min_lon) / (max_lon - min_lon) * (width - 2 * pad)
+        y = height - pad - (lat - min_lat) / (max_lat - min_lat) * (height - 2 * pad)
+        return round(x, 1), round(y, 1)
 
-    markers_js = []
+    # Vereinfachte NRW-Landesgrenze als Vektor-Polygon
+    NRW_BORDER_COORDS = [
+        (52.43, 8.61), (52.38, 8.97), (52.29, 8.92), (52.17, 8.86), (52.12, 9.03), 
+        (51.85, 9.25), (51.66, 9.37), (51.64, 9.45), (51.49, 9.15), (51.46, 8.85), 
+        (51.35, 8.65), (51.20, 8.71), (51.11, 8.62), (50.93, 8.42), (50.80, 8.18), 
+        (50.74, 8.08), (50.86, 7.73), (50.64, 7.23), (50.63, 7.21), (50.62, 6.95), 
+        (50.55, 6.76), (50.36, 6.48), (50.49, 6.43), (50.55, 6.24), (50.71, 6.19), 
+        (50.77, 6.02), (50.87, 6.09), (50.96, 6.12), (51.02, 5.87), (51.10, 6.16), 
+        (51.18, 6.06), (51.32, 6.18), (51.44, 6.26), (51.68, 6.16), (51.79, 5.99), 
+        (51.83, 6.24), (51.87, 6.49), (52.04, 6.82), (52.21, 7.02), (52.28, 7.19), 
+        (52.28, 7.44), (52.38, 7.60), (52.31, 7.88), (52.28, 7.95), (52.22, 7.81), 
+        (52.18, 7.87), (52.04, 8.15), (52.10, 8.30), (52.14, 8.48), (52.25, 8.51), 
+        (52.31, 8.62), (52.43, 8.61)
+    ]
+
+    border_points = " ".join([f"{project(lat, lon)[0]},{project(lat, lon)[1]}" for lat, lon in NRW_BORDER_COORDS])
+
+    # Dezente Referenzstädte für Orientierung
+    REF_CITIES = [
+        ("Münster", 51.96, 7.63),
+        ("Bielefeld", 52.03, 8.53),
+        ("Dortmund", 51.51, 7.47),
+        ("Köln", 50.94, 6.96),
+        ("Aachen", 50.78, 6.08)
+    ]
+    ref_elements = []
+    for r_name, r_lat, r_lon in REF_CITIES:
+        rx, ry = project(r_lat, r_lon)
+        ref_elements.append(f'<circle cx="{rx}" cy="{ry}" r="2" fill="#475569" />')
+        ref_elements.append(f'<text x="{rx+4}" y="{ry+3}" fill="#64748b" font-size="7.5" font-family="Inter, sans-serif">{r_name}</text>')
+
+    # Gespielte Turnierorte (Neon-Cyan mit Beschriftung)
+    city_elements = []
     for c, cnt in city_counts.items():
-        lat, lon = CITY_COORDINATES[c]
-        t_sample = " • " + " • ".join(city_tournaments[c][:2])
-        if len(city_tournaments[c]) > 2:
-            t_sample += f" (+{len(city_tournaments[c])-2} weitere)"
-        safe_sample = html.escape(t_sample).replace("'", "&#39;")
-        safe_city = html.escape(c)
-        radius = min(6 + cnt * 3, 16)
-        
-        markers_js.append(f"""
-            L.circleMarker([{lat}, {lon}], {{
-                radius: {radius},
-                color: '#22d3ee',
-                weight: 1.5,
-                fillColor: '#06b6d4',
-                fillOpacity: 0.85
-            }}).addTo(map).bindPopup("<b>📍 {safe_city}</b><br>{cnt} gespielte(s) Turnier(e)<br><small style='color:#94a3b8;'>{safe_sample}</small>");
+        if c == "Langenfeld":
+            continue
+        c_lat, c_lon = CITY_COORDINATES[c]
+        cx, cy = project(c_lat, c_lon)
+        t_sample = " • ".join(city_tournaments[c][:2])
+        label = f"{c} ({cnt})" if cnt > 1 else c
+        city_elements.append(f"""
+            <circle cx="{cx}" cy="{cy}" r="4.5" fill="#22d3ee" stroke="#0891b2" stroke-width="1.2">
+                <title>{c}: {cnt} Turnier(e)&#10;{t_sample}</title>
+            </circle>
+            <text x="{cx+6}" y="{cy+3}" fill="#f8fafc" font-size="8.5" font-weight="700" font-family="Inter, sans-serif">{label}</text>
         """)
 
-    # Langenfeld als neue Heimatbasis
-    l_lat, l_lon = CITY_COORDINATES["Langenfeld"]
-    markers_js.append(f"""
-        L.circleMarker([{l_lat}, {l_lon}], {{
-            radius: 7,
-            color: '#f59e0b',
-            weight: 2,
-            fillColor: '#fbbf24',
-            fillOpacity: 0.95
-        }}).addTo(map).bindPopup("<b>🏠 Langenfeld</b><br>Heimatbasis");
-    """)
-
-    markers_script = "\n".join(markers_js)
-
-    map_html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8" />
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-        <style>
-            html, body {{ margin:0; padding:0; height:100%; background:#12161f; }}
-            #map {{ width:100%; height:180px; border-radius:10px; background:#12161f; }}
-            .leaflet-tile {{
-                filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
-            }}
-            .leaflet-popup-content-wrapper {{ background: #1e293b; color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 11px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); }}
-            .leaflet-popup-tip {{ background: #1e293b; }}
-        </style>
-    </head>
-    <body>
-        <div id="map"></div>
-        <script>
-            var map = L.map('map', {{ 
-                attributionControl: false, 
-                zoomControl: false,
-                scrollWheelZoom: false,
-                dragging: false,
-                touchZoom: false,
-                doubleClickZoom: false
-            }}).setView([{avg_lat}, {avg_lon}], 8);
-            L.tileLayer('https://tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
-                maxZoom: 18
-            }}).addTo(map);
-            {markers_script}
-        </script>
-    </body>
-    </html>
+    # Langenfeld Heimatbasis (Goldener Marker)
+    lx, ly = project(CITY_COORDINATES["Langenfeld"][0], CITY_COORDINATES["Langenfeld"][1])
+    langenfeld_element = f"""
+        <circle cx="{lx}" cy="{ly}" r="5.5" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5">
+            <title>Langenfeld: Heimatbasis</title>
+        </circle>
+        <text x="{lx+7}" y="{ly+3}" fill="#fbbf24" font-size="9" font-weight="800" font-family="Inter, sans-serif">Langenfeld (Basis)</text>
     """
 
-    st.components.v1.html(map_html, height=185)
+    svg_map_html = f"""
+    <div style="background-color: #12161f; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.08); padding: 8px 10px; height: 190px; display: flex; align-items: center; justify-content: center;">
+        <svg viewBox="0 0 340 190" style="width: 100%; height: 100%; max-height: 180px;">
+            <!-- NRW Umrissfläche -->
+            <polygon points="{border_points}" fill="#181d28" stroke="rgba(255, 255, 255, 0.18)" stroke-width="1.2" stroke-linejoin="round" />
+            <!-- Orientierungsstädte -->
+            {' '.join(ref_elements)}
+            <!-- Gespielte Spielorte -->
+            {' '.join(city_elements)}
+            <!-- Heimatbasis Langenfeld -->
+            {langenfeld_element}
+        </svg>
+    </div>
+    """
+
+    st.markdown(clean_html(svg_map_html), unsafe_allow_html=True)
 
 
 # --- WIEDERVERWENDBARER ADMIN-EDITOR ---
@@ -1346,7 +1337,7 @@ def render_admin_editor(item, full_data, is_past=False):
             else:
                 val_partner_mx = selected_mx_option
 
-        # Saisontagebuch an erster Stelle
+        # Saisontagebuch
         st.write("")
         st.markdown("**🏆 Saisontagebuch (Platzierung & Spielklasse pro Disziplin):**")
         col_res_he, col_res_hd, col_res_mx = st.columns(3)
@@ -1416,7 +1407,7 @@ def render_admin_editor(item, full_data, is_past=False):
         with col_res_mx:
             val_p_mx, val_f_mx = render_discipline_result_inputs("Mixed", "mx")
 
-        # Notiz unter Saisontagebuch
+        # Notiz
         st.write("")
         val_notes = st.text_input("🚗 Persönliche Notiz / Fahrgemeinschaft", value=item.get('notes', ''), placeholder="z. B. Treffpunkt mit Jan 08:30 Uhr, 15 € Startgeld bar", key=f"note_{prefix}{t_id}").strip()
 
@@ -1501,7 +1492,7 @@ if db_error_msg:
     )
 elif data is not None:
     if data:
-        # Admin-Aktionen (Aktualisierung & 1-Klick Backup)
+        # Admin-Aktionen
         if IS_ADMIN:
             col_act_upd, col_act_bck = st.columns([1, 1])
             with col_act_upd:
@@ -1677,7 +1668,7 @@ elif data is not None:
         df_past = df[df['End_Date_Obj'] < today].copy()
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
-        # --- FILTER-EXPANDER (DISZIPLINEN ENTFERNT, SCHLANKER AUFBAU) ---
+        # --- SCHLANKER FILTER-EXPANDER (OHNE DISZIPLINEN-BOXEN) ---
         st.write("")
         with st.expander("🔍 Filter & Suche", expanded=False):
             col_search, _ = st.columns([1, 1])
@@ -1729,10 +1720,10 @@ elif data is not None:
 
         month_names = {1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni", 7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"}
 
-        # --- BEIDE DATENKACHELN OBEN NEBENEINANDER (KOMPAKT WIE IM ZEIT-DASHBOARD) ---
+        # --- FILIGRANE ANALYSE-KACHELN IM ZEIT-ONLINE-FORMAT (MAX-BREITE BEGRENZT) ---
         st.write("")
         with st.expander("📊 Saison-Analyse 2026 (Formkurve & Gespielte Spielorte)", expanded=True):
-            col_chart_box, col_map_box = st.columns(2)
+            col_spacer_l, col_chart_box, col_map_box, col_spacer_r = st.columns([0.2, 4.5, 4.5, 0.2])
             with col_chart_box:
                 render_season_chart(df)
             with col_map_box:
