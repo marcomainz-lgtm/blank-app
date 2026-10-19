@@ -6,53 +6,61 @@ from bs4 import BeautifulSoup
 import urllib.parse
 from gist_db import load_gist_file, save_gist_file
 
-# Ihr stabiler ntfy-Push-Kanal
 NTFY_TOPIC = "my_badminton_tournaments_40723_v2" 
 DB_FILE = "known_tournaments.json"
+
+UUID_PATTERN = re.compile(r'([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})')
 
 
 def is_youth_tournament(title, tag_parts):
     """
-    Filtert Jugendturniere basierend auf Altersklassen-Tags (U11-U19)
-    und typischen Nachwuchs-Schlüsselwörtern zuverlässig heraus.
+    Filtert reine Jugendturniere heraus, BEHÄLT aber Turniere mit 
+    Erwachsenen-/Seniorenklassen (O19, O35, O40 etc.) auch bei Mischturnieren.
     """
-    u_pattern = re.compile(r'^u\d+$', re.IGNORECASE)
-    for tag in tag_parts:
-        if u_pattern.match(tag.strip()):
-            return True
-    if re.search(r'\b[uU]\d{1,2}\b', title):
-        return True
-    youth_keywords = ['junior', 'kids', 'küken', 'schüler', 'jugend', 'nachwuchs', 'mini-cup']
-    if any(kw in title.lower() for kw in youth_keywords):
-        return True
-    return False
+    t_lower = title.lower()
+    
+    # Wenn Senioren/Erwachsene explizit vorkommen -> DEFINITIV BEHALTEN!
+    senior_keywords = ['o19', 'o30', 'o35', 'o40', 'o45', 'o50', 'o55', 'o60', 'o65', 'o70', 'o75', 'senioren', 'erwachsene', 'masters', 'veteran']
+    has_senior_tag = any(any(tag.lower().startswith(sk) for sk in ['o19', 'o3', 'o4', 'o5', 'o6', 'o7']) for tag in tag_parts)
+    
+    if any(sk in t_lower for sk in senior_keywords) or has_senior_tag:
+        return False
+
+    # Reine Jugend-Kennzeichnungen prüfen
+    u_pattern = re.compile(r'^u(9|11|13|15|17|19)$', re.IGNORECASE)
+    has_youth_tag = any(u_pattern.match(tag.strip()) for tag in tag_parts)
+    has_youth_title = bool(re.search(r'\b[uU](9|11|13|15|17|19)\b', title))
+    youth_keywords = ['junior', 'kids', 'küken', 'schüler', 'jugend', 'nachwuchs']
+    has_youth_kw = any(kw in t_lower for kw in youth_keywords)
+    
+    return has_youth_tag or has_youth_title or has_youth_kw
 
 
 def get_tournament_description(session, tournament_url):
-    """Liest den Infokasten (Ausschreibungstext) direkt von der Hauptseite aus."""
+    """Liest den Ausschreibungstext von turnier.de zuverlässig aus."""
     try:
-        if "id=" in tournament_url:
-            parsed = urllib.parse.urlparse(tournament_url)
-            params = urllib.parse.parse_qs(parsed.query)
-            t_id = params.get('id', [None])[0]
-            if t_id:
-                tournament_url = f"https://dbv.turnier.de/tournament/{t_id}"
+        match = UUID_PATTERN.search(tournament_url)
+        if match:
+            tournament_url = f"https://dbv.turnier.de/tournament/{match.group(1).upper()}"
         
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
             "Accept-Language": "de-DE,de;q=0.9"
         }
-        r = session.get(tournament_url, headers=headers, timeout=10)
+        r = session.get(tournament_url, headers=headers, timeout=12)
         if r.status_code == 200:
             soup = BeautifulSoup(r.content, 'html.parser')
-            alert_box = soup.find(class_=re.compile(r'alert--info|alert__body'))
+            alert_box = soup.find(class_=re.compile(r'alert--info|alert__body|alert'))
             if alert_box:
                 return alert_box.get_text(separator="\n").strip()
             
-            main_content = soup.find(id="main")
-            if main_content:
-                return main_content.get_text(separator="\n").strip()[:1000]
-                
+            for selector in ['#main', '.media__body', '.content']:
+                el = soup.select_one(selector)
+                if el:
+                    text = el.get_text(separator="\n").strip()
+                    if len(text) > 50:
+                        return text[:1200]
+                        
             return soup.get_text(separator="\n").strip()[:500]
     except Exception as e:
         print(f"Fehler beim Laden der Beschreibung für {tournament_url}: {e}")
@@ -71,7 +79,7 @@ def scrape_tournaments(s):
     tournaments = []
     seen_ids = set()
     page = 1
-    max_pages = 20
+    max_pages = 25
 
     while page <= max_pages:
         print(f"Scraping page {page}...")
@@ -90,7 +98,7 @@ def scrape_tournaments(s):
             response = s.post(url, data=payload, headers=headers, timeout=15)
             response.raise_for_status()
         except Exception as e:
-            print(f"Failed to fetch data on page {page}: {e}")
+            print(f"Fehler beim Laden von Seite {page}: {e}")
             break
 
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -99,118 +107,132 @@ def scrape_tournaments(s):
         for link in soup.find_all('a', href=True):
             href = link['href']
             
-            if 'id=' in href and ('/tournament' in href or '/sport/' in href):
-                title = link.text.strip()
+            # Erkennt sowohl alte (?id=UUID) als auch neue (/tournament/UUID) Links
+            match = UUID_PATTERN.search(href)
+            if not match:
+                continue
                 
-                if not title:
-                    continue
+            if not ('/tournament' in href or '/sport/' in href):
+                continue
 
-                parsed_url = urllib.parse.urlparse(href)
-                params = urllib.parse.parse_qs(parsed_url.query)
-                t_id = params.get('id', [None])[0]
+            title = link.text.strip()
+            if not title:
+                continue
 
-                if not t_id or t_id in seen_ids:
-                    continue
-                    
-                full_link = urllib.parse.urljoin("https://dbv.turnier.de", href)
+            t_id = match.group(1).upper()
+            if t_id in seen_ids:
+                continue
 
-                container = link.find_parent(['li', 'tr'])
-                if not container:
-                    container = link.find_parent('div')
+            full_link = f"https://dbv.turnier.de/tournament/{t_id}"
 
-                tag_parts = []
-                city = "Unknown"
-                distance = None
-                organizer = "Unknown"
-                start_date = None
-                end_date = None
-                logo_url = ""
+            container = link.find_parent(['li', 'tr'])
+            if not container:
+                container = link.find_parent('div')
 
-                if container:
-                    raw_text = container.get_text(separator=' | ').strip()
-                    cleaned_parts = []
-                    for part in raw_text.split('|'):
-                        part_strip = part.strip()
-                        if part_strip and part_strip != title and part_strip not in cleaned_parts:
-                            cleaned_parts.append(part_strip)
+            tag_parts = []
+            city = "Unbekannt"
+            distance = None
+            organizer = "Unbekannt"
+            start_date = None
+            end_date = None
+            logo_url = ""
 
-                    img_el = container.find('img')
-                    if img_el and img_el.get('src'):
-                        logo_url = urllib.parse.urljoin("https://dbv.turnier.de", img_el['src'])
+            if container:
+                raw_text = container.get_text(separator=' | ').strip()
+                cleaned_parts = []
+                for part in raw_text.split('|'):
+                    part_strip = part.strip()
+                    if part_strip and part_strip != title and part_strip not in cleaned_parts:
+                        cleaned_parts.append(part_strip)
 
-                    dates = re.findall(r'\b\d{2}\.\d{2}\.\d{4}\b', raw_text)
-                    if len(dates) >= 2:
-                        start_date = dates[0]
-                        end_date = dates[1]
-                    elif len(dates) == 1:
-                        start_date = dates[0]
-                        end_date = dates[0]
+                img_el = container.find('img')
+                if img_el and img_el.get('src'):
+                    logo_url = urllib.parse.urljoin("https://dbv.turnier.de", img_el['src'])
 
-                    for part in cleaned_parts:
-                        if 'km' in part.lower():
-                            dist_match = re.search(r'(\d+)\s*km', part.lower())
-                            if dist_match:
-                                distance = int(dist_match.group(1))
-                            
-                            cleaned = re.sub(r'\(.*?\)', '', part)
-                            cleaned = re.sub(r'\[.*?\]', '', cleaned)
-                            city = cleaned.strip()
-                            break
+                dates = re.findall(r'\b\d{2}\.\d{2}\.\d{4}\b', raw_text)
+                if len(dates) >= 2:
+                    start_date = dates[0]
+                    end_date = dates[1]
+                elif len(dates) == 1:
+                    start_date = dates[0]
+                    end_date = dates[0]
 
-                    non_meta_parts = []
-                    for part in cleaned_parts:
-                        has_date = bool(re.search(r'\b\d{2}\.\d{2}\.\d{4}\b', part))
-                        has_km = 'km' in part.lower()
-                        if not has_date and not has_km:
-                            non_meta_parts.append(part)
-                    if non_meta_parts:
-                        organizer = non_meta_parts[0]
+                # Stadt und Distanz sauber trennen
+                for part in cleaned_parts:
+                    if 'km' in part.lower():
+                        dist_match = re.search(r'(\d+)\s*km', part.lower())
+                        if dist_match:
+                            distance = int(dist_match.group(1))
+                        
+                        cleaned = re.sub(r'\(.*?\)', '', part)
+                        cleaned = re.sub(r'\[.*?\]', '', cleaned)
+                        cleaned = re.sub(r'\d+\s*km', '', cleaned, flags=re.IGNORECASE)
+                        clean_city = cleaned.strip(' -|,\t\n')
+                        if clean_city:
+                            city = clean_city
+                        break
 
-                    for part in cleaned_parts:
-                        if re.search(r'\b\d{2}\.\d{2}\.\d{4}\b', part):
-                            continue
+                non_meta_parts = []
+                for part in cleaned_parts:
+                    has_date = bool(re.search(r'\b\d{2}\.\d{2}\.\d{4}\b', part))
+                    has_km = 'km' in part.lower()
+                    if not has_date and not has_km:
+                        non_meta_parts.append(part)
+                if non_meta_parts:
+                    organizer = non_meta_parts[0]
 
-                        is_tag = (len(part) < 15 or 
-                                  part.lower().startswith('u') or 
-                                  part.lower().startswith('o') or 
-                                  part == 'Open')
-                        if is_tag:
-                            tag_parts.append(part)
+                for part in cleaned_parts:
+                    if re.search(r'\b\d{2}\.\d{2}\.\d{4}\b', part):
+                        continue
 
-                    tags = ", ".join(tag_parts) if tag_parts else ""
-                else:
-                    tags = ""
+                    is_tag = (len(part) < 15 or 
+                              part.lower().startswith('u') or 
+                              part.lower().startswith('o') or 
+                              part == 'Open')
+                    if is_tag:
+                        tag_parts.append(part)
 
-                if is_youth_tournament(title, tag_parts):
-                    continue
+                tags = ", ".join(tag_parts) if tag_parts else ""
+            else:
+                tags = ""
 
-                seen_ids.add(t_id)
-                tournaments.append({
-                    "id": t_id,
-                    "title": title,
-                    "link": full_link,
-                    "logo_url": logo_url,
-                    "organizer": organizer,
-                    "city": city,
-                    "distance": distance,
-                    "start_date": start_date,
-                    "end_date": end_date,
-                    "tags": tags,
-                    "registered": False,
-                    "reg_he": False,
-                    "reg_hd": False,
-                    "reg_mx": False,
-                    "full_he": False,
-                    "full_hd": False,
-                    "full_mx": False,
-                    "partner_hd": "",
-                    "partner_mx": "",
-                    "day_he": "",
-                    "day_hd": "",
-                    "day_mx": "",
-                    "description": ""
-                })
-                page_tournaments_count += 1
+            if is_youth_tournament(title, tag_parts):
+                continue
+
+            seen_ids.add(t_id)
+            tournaments.append({
+                "id": t_id,
+                "title": title,
+                "link": full_link,
+                "logo_url": logo_url,
+                "organizer": organizer,
+                "city": city,
+                "distance": distance,
+                "start_date": start_date,
+                "end_date": end_date,
+                "tags": tags,
+                "registered": False,
+                "reg_he": False,
+                "reg_hd": False,
+                "reg_mx": False,
+                "full_he": False,
+                "full_hd": False,
+                "full_mx": False,
+                "partner_hd": "",
+                "partner_mx": "",
+                "day_he": "",
+                "day_hd": "",
+                "day_mx": "",
+                "notes": "",
+                "placement_he": "",
+                "field_he": "",
+                "placement_hd": "",
+                "field_hd": "",
+                "placement_mx": "",
+                "field_mx": "",
+                "description": ""
+            })
+            page_tournaments_count += 1
 
         if page_tournaments_count == 0:
             break
@@ -241,8 +263,6 @@ def send_push_notification(new_items):
     message = "\n".join(summary_lines)
     
     try:
-        # WICHTIG: Das Header-Feld "Title" darf in Python requests keine Emojis enthalten (Latin-1 Encoding)!
-        # Emojis stattdessen über "Tags" übergeben.
         requests.post(
             f"https://ntfy.sh/{NTFY_TOPIC}",
             data=message.encode('utf-8'),
@@ -265,10 +285,9 @@ def check_for_updates():
 
 
 def check_for_updates_generator():
-    """Generator-Funktion mit FAIL-SAFE Datenbankprüfung vor dem Scrapen."""
+    """Generator-Funktion mit FAIL-SAFE Datenbankprüfung und absolutem Erhalt aller Nutzereingaben."""
     yield "Verbinde mit zentraler Cloud-Datenbank (GitHub Gist)..."
     
-    # 1. NOTBREMSE: Erst Datenbank prüfen
     try:
         known_tournaments = load_gist_file(DB_FILE, fallback_default={})
         yield f"✅ Datenbank erfolgreich geladen ({len(known_tournaments)} bekannte Turniere in der Cloud)."
@@ -277,7 +296,6 @@ def check_for_updates_generator():
         yield "❌ VORGANG ABGEBROCHEN! Es wurden weder Turniere gescrapt noch Push-Nachrichten versendet."
         return
 
-    # 2. Erst nach erfolgreicher Datenbankprüfung auf turnier.de zugreifen
     yield "Suche nach neuen Turnieren auf turnier.de..."
     session = requests.Session()
     
@@ -306,52 +324,31 @@ def check_for_updates_generator():
         if t_id not in known_tournaments:
             yield f"Neues Turnier erkannt: {t['title']}. Lade Ausschreibung..."
             t["description"] = get_tournament_description(session, t["link"])
-            t["day_he"] = ""
-            t["day_hd"] = ""
-            t["day_mx"] = ""
-            t["full_he"] = False
-            t["full_hd"] = False
-            t["full_mx"] = False
-            
             new_tournaments.append(t)
             known_tournaments[t_id] = t
         else:
-            # Bestehende Einstellungen erhalten
+            # Bestehendes Turnier: Metadaten aktualisieren, aber ALLE Marco-Eingaben 100% erhalten!
             old_t = known_tournaments[t_id]
-            is_registered = old_t.get('registered', False)
-            reg_he = old_t.get('reg_he', False)
-            reg_hd = old_t.get('reg_hd', False)
-            reg_mx = old_t.get('reg_mx', False)
-            full_he = old_t.get('full_he', False)
-            full_hd = old_t.get('full_hd', False)
-            full_mx = old_t.get('full_mx', False)
-            partner_hd = old_t.get('partner_hd', '')
-            partner_mx = old_t.get('partner_mx', '')
-            day_he = old_t.get('day_he', '')
-            day_hd = old_t.get('day_hd', '')
-            day_mx = old_t.get('day_mx', '')
-            
             desc = old_t.get('description', '')
             if not desc:
                 yield f"Lade Ausschreibungstext für '{t['title']}' nach..."
                 desc = get_tournament_description(session, t["link"])
 
-            known_tournaments[t_id] = t
-            known_tournaments[t_id]['registered'] = is_registered
-            known_tournaments[t_id]['reg_he'] = reg_he
-            known_tournaments[t_id]['reg_hd'] = reg_hd
-            known_tournaments[t_id]['reg_mx'] = reg_mx
-            known_tournaments[t_id]['full_he'] = full_he
-            known_tournaments[t_id]['full_hd'] = full_hd
-            known_tournaments[t_id]['full_mx'] = full_mx
-            known_tournaments[t_id]['partner_hd'] = partner_hd
-            known_tournaments[t_id]['partner_mx'] = partner_mx
-            known_tournaments[t_id]['day_he'] = day_he
-            known_tournaments[t_id]['day_hd'] = day_hd
-            known_tournaments[t_id]['day_mx'] = day_mx
-            known_tournaments[t_id]['description'] = desc
+            # Aktualisiert nur die vom Scraper kommenden Stammdaten:
+            old_t.update({
+                "title": t["title"],
+                "link": t["link"],
+                "logo_url": t["logo_url"] or old_t.get("logo_url", ""),
+                "organizer": t["organizer"],
+                "city": t["city"],
+                "distance": t["distance"],
+                "start_date": t["start_date"],
+                "end_date": t["end_date"],
+                "tags": t["tags"],
+                "description": desc or old_t.get("description", "")
+            })
+            known_tournaments[t_id] = old_t
 
-    # Sicher speichern
     try:
         save_gist_file(DB_FILE, known_tournaments)
         yield "💾 Änderungen erfolgreich in GitHub Gist gespeichert."
