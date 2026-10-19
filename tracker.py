@@ -292,8 +292,8 @@ def check_for_updates_generator():
     
     try:
         known_tournaments = load_gist_file(DB_FILE)
-if not isinstance(known_tournaments, dict):
-    known_tournaments = {}
+        if not isinstance(known_tournaments, dict):
+            known_tournaments = {}
         yield f"✅ Datenbank erfolgreich geladen ({len(known_tournaments)} bekannte Turniere in der Cloud)."
     except Exception as e:
         yield f"🚨 KRITISCHER DATENBANKFEHLER: {e}"
@@ -331,14 +331,12 @@ if not isinstance(known_tournaments, dict):
             new_tournaments.append(t)
             known_tournaments[t_id] = t
         else:
-            # Bestehendes Turnier: Metadaten aktualisieren, aber ALLE Marco-Eingaben 100% erhalten!
             old_t = known_tournaments[t_id]
             desc = old_t.get('description', '')
             if not desc:
                 yield f"Lade Ausschreibungstext für '{t['title']}' nach..."
                 desc = get_tournament_description(session, t["link"])
 
-            # Aktualisiert nur die vom Scraper kommenden Stammdaten:
             old_t.update({
                 "title": t["title"],
                 "link": t["link"],
