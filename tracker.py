@@ -5,6 +5,8 @@ import requests
 from bs4 import BeautifulSoup
 import urllib.parse
 from gist_db import load_gist_file, save_gist_file
+import datetime
+from zoneinfo import ZoneInfo
 
 NTFY_TOPIC = "my_badminton_tournaments_40723_v2" 
 DB_FILE = "known_tournaments.json"
@@ -349,8 +351,10 @@ def check_for_updates_generator():
             })
             known_tournaments[t_id] = old_t
 
-    try:
+try:
         save_gist_file(DB_FILE, known_tournaments)
+        now_str = datetime.datetime.now(ZoneInfo("Europe/Berlin")).strftime("%d.%m.%Y um %H:%M Uhr")
+        save_gist_file("last_update.json", {"timestamp": now_str})
         yield "💾 Änderungen erfolgreich in GitHub Gist gespeichert."
     except Exception as e:
         yield f"🚨 FEHLER BEIM SPEICHERN IM GIST: {e}"
