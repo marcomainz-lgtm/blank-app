@@ -16,6 +16,7 @@ def clean_html(html_str: str) -> str:
 
 # --- HILFSFUNKTIONEN FÜR DIE URLAUBS-DATENBANK MIT CACHING ---
 VACATION_FILE = "vacations.json"
+LAST_UPDATE_FILE = "last_update.json"
 
 @st.cache_data(ttl=60)
 def load_vacations():
@@ -430,16 +431,26 @@ IS_ADMIN = st.session_state['logged_in']
 st.title("🏸 Badminton Turniere für Marco")
 st.write("Auf dieser Seite findet ihr alle Seniorenturniere 2026, die im Umkreis von 100 Kilometern um Hilden (40723) stattfinden.")
 
-# Zeitstempel
-last_retrieved_str = "Unbekannt"
-if os.path.exists(DB_FILE):
+# --- ZEITSTEMPEL AUS DEM GIST LADEN (ECHTER CLOUD-ZEITSTEMPEL) ---
+def get_last_update_str():
+    if "last_update_override" in st.session_state:
+        return st.session_state["last_update_override"]
     try:
-        last_modified = os.path.getmtime(DB_FILE)
-        last_retrieved_dt = datetime.datetime.fromtimestamp(last_modified, tz=ZoneInfo("Europe/Berlin"))
-        last_retrieved_str = last_retrieved_dt.strftime("%d.%m.%Y um %H:%M Uhr")
+        up_data = load_gist_file(LAST_UPDATE_FILE)
+        if isinstance(up_data, dict) and "timestamp" in up_data:
+            return up_data["timestamp"]
     except Exception:
         pass
+    if os.path.exists(DB_FILE):
+        try:
+            last_modified = os.path.getmtime(DB_FILE)
+            last_retrieved_dt = datetime.datetime.fromtimestamp(last_modified, tz=ZoneInfo("Europe/Berlin"))
+            return last_retrieved_dt.strftime("%d.%m.%Y um %H:%M Uhr")
+        except Exception:
+            pass
+    return "Unbekannt"
 
+last_retrieved_str = get_last_update_str()
 st.caption(f"🕒 Letztes Update der Datenbank: {last_retrieved_str}")
 
 # Urlaubsplaner (Admin)
@@ -1024,7 +1035,6 @@ def render_season_chart(df):
             hoverinfo="text"
         ))
 
-    # Kompaktes Layout ohne Zoom-Trap auf dem Handy (fixedrange=True)
     fig.update_layout(
         height=180,
         margin=dict(l=0, r=0, t=5, b=0),
@@ -1034,13 +1044,13 @@ def render_season_chart(df):
             categoryarray=y_categories,
             gridcolor="rgba(255, 255, 255, 0.06)",
             zeroline=False,
-            fixedrange=True,  # Verhindert Touch-Zoom-Trap beim Scrollen
+            fixedrange=True,
             tickfont=dict(color="#94a3b8", size=8.5, family="Inter, -apple-system, sans-serif")
         ),
         xaxis=dict(
             gridcolor="rgba(255, 255, 255, 0.04)",
             zeroline=False,
-            fixedrange=True,  # Verhindert Touch-Zoom-Trap beim Scrollen
+            fixedrange=True,
             tickformat="%d.%m.",
             tickfont=dict(color="#64748b", size=8.5, family="Inter, -apple-system, sans-serif")
         ),
@@ -1169,7 +1179,6 @@ def render_tournament_heatmap(df, today):
             }}).addTo(map).bindPopup("<b>📍 {safe_city}</b><br>{cnt} gespielte(s) Turnier(e)<br><small style='color:#94a3b8;'>{safe_sample}</small>");
         """)
 
-    # Hilden Heimatbasis-Marker
     h_lat, h_lon = CITY_COORDINATES["Hilden"]
     markers_js.append(f"""
         L.circleMarker([{h_lat}, {h_lon}], {{
@@ -1183,7 +1192,6 @@ def render_tournament_heatmap(df, today):
 
     markers_script = "\n".join(markers_js)
 
-    # Detaillierte OpenStreetMap-Karte mit Dark-Filter - Scroll- & Touch-Trap deaktiviert (dragging: false)
     map_html = f"""
     <!DOCTYPE html>
     <html>
@@ -1204,7 +1212,6 @@ def render_tournament_heatmap(df, today):
     <body>
         <div id="map"></div>
         <script>
-            // dragging: false & scrollWheelZoom: false verhindern das Festhängen beim Scrollen auf dem Smartphone
             var map = L.map('map', {{ 
                 attributionControl: false, 
                 zoomControl: false,
@@ -1480,18 +1487,31 @@ elif data is not None:
                 if st.button("🔄 Datenbank aktualisieren (Scraper)", use_container_width=True):
                     log_container = st.empty()
                     logs = []
+                    last_msg = ""
                     with st.status("Verbindung wird hergestellt...", expanded=True) as status:
                         for log_line in check_for_updates_generator():
                             logs.append(log_line)
+                            last_msg = log_line
                             log_container.code("\n".join(logs))
                             if "VORGANG ABGEBROCHEN" in log_line or "KRITISCHER" in log_line:
                                 status.update(label="Aktualisierung abgebrochen!", state="error", expanded=True)
                                 break
                         else:
                             status.update(label="Datenbank erfolgreich aktualisiert!", state="complete", expanded=False)
+                    
+                    # Feedback & Zeitstempel sichern
+                    st.session_state["last_scrape_feedback"] = last_msg
+                    now_str = datetime.datetime.now(ZoneInfo("Europe/Berlin")).strftime("%d.%m.%Y um %H:%M Uhr")
+                    st.session_state["last_update_override"] = now_str
+                    try:
+                        save_gist_file(LAST_UPDATE_FILE, {"timestamp": now_str})
+                    except Exception:
+                        pass
+
                     st.cache_data.clear()
-                    st.toast("Vorgang beendet!")
+                    st.toast(last_msg, icon="ℹ️")
                     st.rerun()
+
             with col_act_bck:
                 st.download_button(
                     label="💾 Datenbank-Backup herunterladen (JSON)",
@@ -1500,6 +1520,14 @@ elif data is not None:
                     mime="application/json",
                     use_container_width=True
                 )
+
+            # Sichtbares Feedback nach dem Rerun direkt anzeigen
+            if "last_scrape_feedback" in st.session_state:
+                fb = st.session_state["last_scrape_feedback"]
+                if "neue(s) Turnier" in fb:
+                    st.success(f"🎉 {fb}")
+                else:
+                    st.info(f"ℹ️ {fb}")
 
         df = pd.DataFrame(data.values())
         
