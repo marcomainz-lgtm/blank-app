@@ -119,6 +119,97 @@ FIELD_OPTIONS = [
     "Sonstiges"
 ]
 
+CITY_COORDINATES = {
+    "Langenfeld": (51.1114, 6.9497),
+    "Hilden": (51.1693, 6.9328),
+    "Solingen": (51.1712, 7.0841),
+    "Düsseldorf": (51.2277, 6.7735),
+    "Wuppertal": (51.2562, 7.1508),
+    "Remscheid": (51.1798, 7.1923),
+    "Mettmann": (51.2541, 6.9765),
+    "Ratingen": (51.2964, 6.8526),
+    "Erkrath": (51.2239, 6.9142),
+    "Haan": (51.1931, 7.0125),
+    "Velbert": (51.3402, 7.0422),
+    "Heiligenhaus": (51.3256, 6.9711),
+    "Monheim am Rhein": (51.0911, 6.8906),
+    "Monheim": (51.0911, 6.8906),
+    "Leverkusen": (51.0459, 6.9856),
+    "Köln": (50.9375, 6.9603),
+    "Bonn": (50.7374, 7.0982),
+    "Bergisch Gladbach": (50.9929, 7.1293),
+    "Siegburg": (50.7997, 7.2074),
+    "Sankt Augustin": (50.7702, 7.1873),
+    "Troisdorf": (50.8167, 7.1583),
+    "Hennef": (50.7758, 7.2831),
+    "Euskirchen": (50.6606, 6.7872),
+    "Düren": (50.8022, 6.4842),
+    "Aachen": (50.7753, 6.0839),
+    "Stolberg": (50.7681, 6.2308),
+    "Eschweiler": (50.8197, 6.2625),
+    "Jülich": (50.9224, 6.3606),
+    "Mönchengladbach": (51.1911, 6.4431),
+    "Viersen": (51.2564, 6.3917),
+    "Krefeld": (51.3388, 6.5853),
+    "Neuss": (51.1982, 6.6917),
+    "Dormagen": (51.0964, 6.8397),
+    "Grevenbroich": (51.0883, 6.5878),
+    "Willich": (51.2628, 6.5494),
+    "Meerbusch": (51.2725, 6.6692),
+    "Kaarst": (51.2269, 6.6206),
+    "Kempen": (51.3653, 6.4194),
+    "Nettetal": (51.3167, 6.2833),
+    "Moers": (51.4514, 6.6286),
+    "Duisburg": (51.4344, 6.7623),
+    "Oberhausen": (51.4700, 6.8517),
+    "Mülheim an der Ruhr": (51.4272, 6.8828),
+    "Mülheim": (51.4272, 6.8828),
+    "Essen": (51.4556, 7.0116),
+    "Bottrop": (51.5239, 6.9286),
+    "Gelsenkirchen": (51.5175, 7.0858),
+    "Bochum": (51.4818, 7.2162),
+    "Herne": (51.5425, 7.2239),
+    "Recklinghausen": (51.6167, 7.2000),
+    "Gladbeck": (51.5714, 6.9911),
+    "Marl": (51.6667, 7.1167),
+    "Dorsten": (51.6603, 6.9653),
+    "Castrop-Rauxel": (51.5500, 7.3167),
+    "Dortmund": (51.5136, 7.4653),
+    "Witten": (51.4417, 7.3361),
+    "Hagen": (51.3671, 7.4633),
+    "Schwerte": (51.4417, 7.5667),
+    "Lünen": (51.6167, 7.5167),
+    "Unna": (51.5350, 7.6889),
+    "Kamen": (51.5917, 7.6639),
+    "Hamm": (51.6811, 7.8186),
+    "Iserlohn": (51.3761, 7.6958),
+    "Menden": (51.4333, 7.7833),
+    "Lüdenscheid": (51.2197, 7.6269),
+    "Arnsberg": (51.3967, 8.0644),
+    "Soest": (51.5714, 8.1067),
+    "Münster": (51.9607, 7.6261),
+    "Coesfeld": (51.9461, 7.1683),
+    "Dülmen": (51.8308, 7.2783),
+    "Borken": (51.8439, 6.8583),
+    "Bocholt": (51.8389, 6.6167),
+    "Wesel": (51.6583, 6.6167),
+    "Dinslaken": (51.5667, 6.7333),
+    "Voerde": (51.6000, 6.6833),
+    "Kleve": (51.7889, 6.1389),
+    "Emmerich": (51.8333, 6.2500),
+    "Geldern": (51.5194, 6.3319),
+    "Kevelaer": (51.5833, 6.2500),
+    "Kamp-Lintfort": (51.5000, 6.5333),
+    "Wermelskirchen": (51.1389, 7.2167),
+    "Wipperfürth": (51.1167, 7.4000),
+    "Radevormwald": (51.2000, 7.3500),
+    "Gummersbach": (51.0264, 7.5658),
+    "Wiehl": (50.9500, 7.5500),
+    "Waldbröl": (50.9000, 7.6167),
+    "Burscheid": (51.0833, 7.1167),
+    "Leichlingen": (51.1167, 7.0167)
+}
+
 # Custom CSS
 st.markdown(
     """
@@ -137,6 +228,29 @@ st.markdown(
     /* Touch-Scroll-Fix */
     .js-plotly-plot .plotly, .js-plotly-plot .gl-container, .user-select-none.svg-container {
         touch-action: pan-y !important;
+    }
+
+    /* 4. EXPANDER-BORDER ENTFERNEN: Kein "Kasten im Kasten" mehr */
+    div[data-testid="stExpander"] {
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+    div[data-testid="stExpander"] > details {
+        border: none !important;
+        background: transparent !important;
+    }
+    div[data-testid="stExpander"] > details > summary {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.09) !important;
+        border-radius: 8px !important;
+        padding: 8px 14px !important;
+        color: #94a3b8 !important;
+    }
+    div[data-testid="stExpander"] > details > div[data-testid="stExpanderDetails"] {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        border: none !important;
     }
 
     /* 1. MOBILE APP BOTTOM NAVIGATION BAR */
@@ -176,12 +290,11 @@ st.markdown(
         div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] {
             display: none !important;
         }
-        /* Platzhalter am Seitenende, damit nichts durch die Bottom-Bar verdeckt wird */
         .main .block-container {
             padding-bottom: 95px !important;
         }
 
-        /* 3. MOBILE LOGIN-ZEILE SCHMAL HALTEN (NICHT MEHR SEITENBREIT) */
+        /* 2. LOGIN AUF MOBILE: Schlank, einzeilig, oben rechts */
         div[data-testid="stHorizontalBlock"]:has(.compact-login-marker) {
             display: flex !important;
             flex-direction: row !important;
@@ -192,24 +305,16 @@ st.markdown(
             margin-bottom: 8px !important;
         }
         div[data-testid="stHorizontalBlock"]:has(.compact-login-marker) > div:first-child {
-            display: none !important; /* Versteckt den Spacer auf Mobile */
+            display: none !important;
         }
         div[data-testid="stHorizontalBlock"]:has(.compact-login-marker) > div:last-child {
-            width: 190px !important;
-            min-width: 190px !important;
-            max-width: 190px !important;
+            width: 220px !important;
+            min-width: 220px !important;
+            max-width: 240px !important;
             margin-left: auto !important;
         }
-        div[data-testid="stHorizontalBlock"]:has(.compact-login-marker) input {
-            font-size: 0.72rem !important;
-            padding: 3px 6px !important;
-        }
-        div[data-testid="stHorizontalBlock"]:has(.compact-login-marker) button {
-            font-size: 0.72rem !important;
-            padding: 3px 8px !important;
-        }
 
-        /* 2. MOBILE KARUSSELL-FUNKTION (1 KACHEL PRO BILD MIT SNAP-SCROLL) */
+        /* MOBILE KARUSSELL-FUNKTION (1 KACHEL PRO BILD MIT SNAP-SCROLL) */
         div[data-testid="stHorizontalBlock"]:has(.zeit-mobile-anchor) {
             display: flex !important;
             flex-direction: row !important;
@@ -370,15 +475,16 @@ st.markdown(
         transition: width 0.3s ease;
     }
 
-    /* BILD 1: GANZE TURNIERKACHEL HERVORHEBEN: HEUTE (GLOWING RED BORDER + TINT) */
-    div[data-testid="stVerticalBlockBorderWrapper"]:has(.today-card-marker) {
-        border: 2px solid #ef4444 !important;
-        background: #181d28 radial-gradient(circle at top, rgba(239, 68, 68, 0.14) 0%, rgba(24, 29, 40, 0) 75%) !important;
-        box-shadow: 0 0 22px rgba(239, 68, 68, 0.45), inset 0 0 12px rgba(239, 68, 68, 0.08) !important;
-        border-radius: 16px !important;
+    /* 3. GANZE TURNIERKACHEL HERVORHEBEN: HEUTE (LEUCHTEND ROTE AUSSEN-BORDER + GLOW) */
+    div:has(> * > .today-card-marker),
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.today-card-marker),
+    div[data-testid="stContainer"]:has(.today-card-marker) {
+        border: 2.5px solid #ef4444 !important;
+        background: #181d28 radial-gradient(circle at top, rgba(239, 68, 68, 0.16) 0%, rgba(24, 29, 40, 0) 75%) !important;
+        box-shadow: 0 0 22px rgba(239, 68, 68, 0.45), inset 0 0 10px rgba(239, 68, 68, 0.08) !important;
+        border-radius: 14px !important;
     }
 
-    /* 4. AUFGESATTELTER BADGE: "HEUTE SPIELTAG" */
     .today-glow-badge-container {
         display: flex;
         justify-content: center;
@@ -398,11 +504,13 @@ st.markdown(
     }
 
     /* MORGEN (BERNSTEIN-GOLD) */
-    div[data-testid="stVerticalBlockBorderWrapper"]:has(.tomorrow-card-marker) {
+    div:has(> * > .tomorrow-card-marker),
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.tomorrow-card-marker),
+    div[data-testid="stContainer"]:has(.tomorrow-card-marker) {
         border: 2px solid #f59e0b !important;
         background: #181d28 radial-gradient(circle at top, rgba(245, 158, 11, 0.12) 0%, rgba(24, 29, 40, 0) 75%) !important;
         box-shadow: 0 0 18px rgba(245, 158, 11, 0.38), inset 0 0 10px rgba(245, 158, 11, 0.06) !important;
-        border-radius: 16px !important;
+        border-radius: 14px !important;
     }
 
     .tomorrow-glow-badge-container {
@@ -507,8 +615,8 @@ st.markdown(
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
-# Kompakter Login-Bereich
-col_spacer, col_login = st.columns([4.2, 1.3])
+# Kompakter Login-Bereich (Desktop: sauber rechtsbündig, Mobile: kompakt einzeilig)
+col_spacer, col_login = st.columns([3.8, 1.8])
 with col_spacer:
     st.markdown('<div class="compact-login-marker"></div>', unsafe_allow_html=True)
 with col_login:
@@ -519,7 +627,7 @@ with col_login:
                 st.session_state['secret_login'] = ""
             st.rerun()
     else:
-        c_pwd, c_btn = st.columns([2.2, 1], gap="small")
+        c_pwd, c_btn = st.columns([1.6, 1], gap="small")
         with c_pwd:
             admin_password = st.text_input("", type="password", label_visibility="collapsed", placeholder="Passwort", key="secret_login")
         with c_btn:
@@ -997,10 +1105,43 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     st.markdown(clean_html(html_out), unsafe_allow_html=True)
 
 
+# --- HILFSFUNKTION: ECHTE GESPIELTE TURNIERE IDENTIFIZIEREN (UNIFIED DATA) ---
+def get_played_tournaments(df, today):
+    """
+    Einheitliche Logik: Ein Turnier gilt als gespielt, wenn der Nutzer gemeldet war
+    und das Turnier vergangen ist oder Ergebnisse eingetragen wurden.
+    Gibt ein dedupliziertes DataFrame nach Turnier-ID zurück!
+    """
+    def is_played_row(row):
+        is_reg = bool(row.get('registered', False))
+        has_result = bool(
+            (row.get('placement_he') and row.get('placement_he') != "-- Keine Angabe --") or
+            (row.get('placement_hd') and row.get('placement_hd') != "-- Keine Angabe --") or
+            (row.get('placement_mx') and row.get('placement_mx') != "-- Keine Angabe --") or
+            (row.get('placement') and row.get('placement') != "-- Keine Angabe --") or
+            row.get('result')
+        )
+        is_past = row.get('End_Date_Obj') and row.get('End_Date_Obj') < today
+        return is_reg and (is_past or has_result)
+
+    played_mask = df.apply(is_played_row, axis=1)
+    df_played = df[played_mask].copy()
+    if not df_played.empty:
+        df_played = df_played.drop_duplicates(subset=['id'])
+    return df_played
+
+
 # --- INTERAKTIVE FORMKURVE (ZEIT-STYLE, HARMONISCHE SCHRIFTGRÖSSEN) ---
-def render_season_chart(df):
+def render_season_chart(df, today):
+    df_played = get_played_tournaments(df, today)
+    total_played = len(df_played)
+
     records = []
-    for _, row in df.iterrows():
+    gold_cnt = 0
+    silver_cnt = 0
+    bronze_cnt = 0
+
+    for _, row in df_played.iterrows():
         s_date = row.get('Start_Date_Obj')
         if pd.isnull(s_date):
             continue
@@ -1037,7 +1178,7 @@ def render_season_chart(df):
                 "disc": "Mixed", "placement": p_mx,
                 "field": f_mx if f_mx != "-- Feld wählen --" else "", "partner": row.get('partner_mx', '').strip()
             })
-            
+
     if not records:
         st.info("Noch keine Ergebnisse im Saisontagebuch eingetragen.")
         return
@@ -1066,7 +1207,6 @@ def render_season_chart(df):
     gold_cnt = sum(1 for p in df_chart["placement"] if "1." in p or "Gold" in p)
     silver_cnt = sum(1 for p in df_chart["placement"] if "2." in p or "Silber" in p)
     bronze_cnt = sum(1 for p in df_chart["placement"] if "3." in p or "Bronze" in p)
-    total_played = len(df_chart["title"].unique())
 
     y_categories = [
         "Vorrunde",
@@ -1190,24 +1330,14 @@ def render_season_chart(df):
     )
 
 
-# --- IDEE 1: HORIZONTALE ZEIT-STYLE BALKEN (AUSTAGUNGSORTE & STATISTIK) ---
+# --- IDEE 1: HORIZONTALE ZEIT-STYLE BALKEN (1 TURNIER = 1 ZÄHLER) ---
 def render_city_hotspots(df, today):
+    df_played = get_played_tournaments(df, today)
+    total_played = len(df_played)
+
     city_stats = {}
 
-    for _, row in df.iterrows():
-        is_reg = bool(row.get('registered', False))
-        has_result = bool(
-            (row.get('placement_he') and row.get('placement_he') != "-- Keine Angabe --") or
-            (row.get('placement_hd') and row.get('placement_hd') != "-- Keine Angabe --") or
-            (row.get('placement_mx') and row.get('placement_mx') != "-- Keine Angabe --") or
-            (row.get('placement') and row.get('placement') != "-- Keine Angabe --") or
-            row.get('result')
-        )
-        is_past = row.get('End_Date_Obj') and row.get('End_Date_Obj') < today
-
-        if not (is_reg and (is_past or has_result)):
-            continue
-
+    for _, row in df_played.iterrows():
         raw_city = str(row.get('city', 'Unbekannt')).strip()
         if not raw_city or raw_city == "Unbekannt":
             continue
@@ -1224,10 +1354,12 @@ def render_city_hotspots(df, today):
                 "bronzes": 0
             }
 
+        # Genau 1 Zähler pro Turnier
         city_stats[clean_c]["count"] += 1
         if dist is not None and city_stats[clean_c]["dist"] is None:
             city_stats[clean_c]["dist"] = dist
 
+        # Medaillen erfassen
         all_p = [str(row.get(f'placement_{d}', '')) for d in ['he', 'hd', 'mx']] + [str(row.get('placement', '')), str(row.get('result', ''))]
         for p in all_p:
             p_l = p.lower()
@@ -1244,7 +1376,6 @@ def render_city_hotspots(df, today):
 
     sorted_cities = sorted(city_stats.items(), key=lambda x: x[1]["count"], reverse=True)
     max_count = sorted_cities[0][1]["count"] if sorted_cities else 1
-    total_played_count = sum(s["count"] for s in city_stats.values())
 
     bar_colors = ["#22d3ee", "#4ade80", "#f59e0b", "#c084fc", "#38bdf8"]
 
@@ -1285,7 +1416,7 @@ def render_city_hotspots(df, today):
         <span class="zeit-kpi-tag" style="border-color:#22d3ee; color:#22d3ee;">Hotspots</span>
     </div>
     <div class="zeit-hero-number">{len(city_stats)} Städte</div>
-    <div class="zeit-hero-sub">{total_played_count} gespielte Turniere nach Spielort</div>
+    <div class="zeit-hero-sub">{total_played} gespielte Turniere nach Spielort</div>
     <div style="margin-top: 14px;">
         {''.join(rows_html)}
     </div>
@@ -1743,7 +1874,6 @@ elif data is not None:
         # REITER 1: TURNIERE (DAS HERZ DER APP)
         # ==========================================
         with tab_turniere:
-            # Filter-Bereich
             with st.expander("🔍 Filter & Suche", expanded=False):
                 col_search, _ = st.columns([1, 1])
                 with col_search:
@@ -1814,7 +1944,7 @@ elif data is not None:
                         is_tomorrow = bool(start_date and not is_today and (start_date - today).days == 1)
 
                         with st.container(border=True):
-                            # AUFGESATTELTER BADGE DIREKT AUF DEM OBEREN RAHMEN (EXAKT WIE BILD 1)
+                            # 3. AUFGESATTELTER PILL-BADGE & ROTES GLOWING BORDER FÜR HEUTE
                             if is_today:
                                 st.markdown(
                                     '<div class="today-card-marker today-glow-badge-container">'
@@ -1835,7 +1965,7 @@ elif data is not None:
                                 logo_to_show = item['logo_url']
                                 if not logo_to_show or "no-photo" in logo_to_show:
                                     logo_to_show = DEFAULT_LOGO
-                                st.image(logo_to_show, width=140)
+                            st.image(logo_to_show, width=140)
                                     
                             with col_info:
                                 st.markdown(f"### {item['title']}")
@@ -1892,7 +2022,7 @@ elif data is not None:
                     st.info("Keine vergangenen Turniere gefunden.")
 
         # ==========================================
-        # REITER 2: ANALYSE & HOTSPOTS (KARUSSELL AUF MOBILE)
+        # REITER 2: ANALYSE (KARUSSELL AUF MOBILE / 2 SPALTEN AUF DESKTOP)
         # ==========================================
         with tab_analyse:
             st.markdown('<div class="carousel-hint-text">⟵ Wischen zum Wechseln (Formkurve / Austragungsorte) ⟶</div>', unsafe_allow_html=True)
@@ -1901,7 +2031,7 @@ elif data is not None:
                 st.markdown('<div class="zeit-mobile-anchor"></div>', unsafe_allow_html=True)
                 with st.container(border=True):
                     st.markdown('<div class="zeit-chart-container"></div>', unsafe_allow_html=True)
-                    render_season_chart(df)
+                    render_season_chart(df, today)
             with col_hotspot_box:
                 st.markdown('<div class="zeit-mobile-anchor"></div>', unsafe_allow_html=True)
                 with st.container(border=True):
