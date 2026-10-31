@@ -139,6 +139,142 @@ st.markdown(
         touch-action: pan-y !important;
     }
 
+    /* 1. MOBILE APP BOTTOM NAVIGATION BAR */
+    @media (max-width: 768px) {
+        div[data-baseweb="tab-list"] {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            z-index: 999999 !important;
+            background: rgba(14, 18, 26, 0.96) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+            padding: 6px 12px 18px 12px !important;
+            display: flex !important;
+            justify-content: space-around !important;
+            box-shadow: 0 -6px 25px rgba(0, 0, 0, 0.6) !important;
+            box-sizing: border-box !important;
+        }
+        div[data-baseweb="tab-list"] button {
+            flex: 1 1 50% !important;
+            text-align: center !important;
+            font-size: 0.88rem !important;
+            font-weight: 700 !important;
+            padding: 8px 0 !important;
+            border-radius: 8px !important;
+            color: #94a3b8 !important;
+            background: transparent !important;
+            border: none !important;
+        }
+        div[data-baseweb="tab-list"] button[aria-selected="true"] {
+            color: #22d3ee !important;
+            background: rgba(34, 211, 238, 0.12) !important;
+        }
+        div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] {
+            display: none !important;
+        }
+        /* Platzhalter am Seitenende, damit nichts durch die Bottom-Bar verdeckt wird */
+        .main .block-container {
+            padding-bottom: 95px !important;
+        }
+
+        /* 3. MOBILE LOGIN-ZEILE SCHMAL HALTEN (NICHT MEHR SEITENBREIT) */
+        div[data-testid="stHorizontalBlock"]:has(.compact-login-marker) {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            justify-content: flex-end !important;
+            align-items: center !important;
+            width: 100% !important;
+            margin-bottom: 8px !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.compact-login-marker) > div:first-child {
+            display: none !important; /* Versteckt den Spacer auf Mobile */
+        }
+        div[data-testid="stHorizontalBlock"]:has(.compact-login-marker) > div:last-child {
+            width: 190px !important;
+            min-width: 190px !important;
+            max-width: 190px !important;
+            margin-left: auto !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.compact-login-marker) input {
+            font-size: 0.72rem !important;
+            padding: 3px 6px !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.compact-login-marker) button {
+            font-size: 0.72rem !important;
+            padding: 3px 8px !important;
+        }
+
+        /* 2. MOBILE KARUSSELL-FUNKTION (1 KACHEL PRO BILD MIT SNAP-SCROLL) */
+        div[data-testid="stHorizontalBlock"]:has(.zeit-mobile-anchor) {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            scroll-snap-type: x mandatory !important;
+            -webkit-overflow-scrolling: touch !important;
+            gap: 12px !important;
+            padding: 4px 2px 14px 2px !important;
+            width: 100% !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.zeit-mobile-anchor)::-webkit-scrollbar {
+            display: none !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.zeit-mobile-anchor) > div[data-testid="column"] {
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
+            flex: 0 0 100% !important;
+            scroll-snap-align: start !important;
+            scroll-snap-stop: always !important;
+            box-sizing: border-box !important;
+        }
+        .carousel-hint-text {
+            display: flex !important;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.72rem;
+            color: #64748b;
+            margin-top: 2px;
+            margin-bottom: 8px;
+        }
+    }
+
+    /* DESKTOP TOP-NAVIGATION BAR */
+    @media (min-width: 769px) {
+        div[data-baseweb="tab-list"] {
+            background: rgba(18, 22, 31, 0.6) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-radius: 12px !important;
+            padding: 4px 8px !important;
+            gap: 8px !important;
+            margin-bottom: 18px !important;
+            width: fit-content !important;
+        }
+        div[data-baseweb="tab-list"] button {
+            font-size: 0.92rem !important;
+            font-weight: 700 !important;
+            padding: 7px 18px !important;
+            border-radius: 8px !important;
+            color: #94a3b8 !important;
+            border: none !important;
+        }
+        div[data-baseweb="tab-list"] button[aria-selected="true"] {
+            color: #f8fafc !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+        }
+        div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] {
+            display: none !important;
+        }
+        .carousel-hint-text {
+            display: none !important;
+        }
+    }
+
     /* EINHEITLICHE KACHELN FÜR BEIDE ANALYSEN (ZEIT-STYLE) */
     div[data-testid="stVerticalBlockBorderWrapper"]:has(.zeit-chart-container),
     div[data-testid="stVerticalBlockBorderWrapper"]:has(.zeit-hotspot-container),
@@ -147,9 +283,9 @@ st.markdown(
         background-color: #12161f !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 12px !important;
-        padding: 12px 16px !important;
+        padding: 14px 18px !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
-        min-height: 280px !important;
+        min-height: 290px !important;
         box-sizing: border-box !important;
     }
 
@@ -191,7 +327,7 @@ st.markdown(
         color: #e2e8f0;
     }
 
-    /* ZEIT-STYLE BALKEN (IDEE 1) */
+    /* ZEIT-STYLE BALKEN */
     .hotspot-row {
         margin-bottom: 8px;
     }
@@ -242,6 +378,7 @@ st.markdown(
         border-radius: 16px !important;
     }
 
+    /* 4. AUFGESATTELTER BADGE: "HEUTE SPIELTAG" */
     .today-glow-badge-container {
         display: flex;
         justify-content: center;
@@ -253,15 +390,14 @@ st.markdown(
         color: #ffffff !important;
         font-size: 0.74rem;
         font-weight: 800;
-        letter-spacing: 0.8px;
-        text-transform: uppercase;
+        letter-spacing: 0.4px;
         padding: 3px 16px;
         border-radius: 9999px;
         box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
         border: 1px solid rgba(255, 255, 255, 0.35);
     }
 
-    /* BILD 1: GANZE TURNIERKACHEL HERVORHEBEN: MORGEN (BERNSTEIN-GOLD) */
+    /* MORGEN (BERNSTEIN-GOLD) */
     div[data-testid="stVerticalBlockBorderWrapper"]:has(.tomorrow-card-marker) {
         border: 2px solid #f59e0b !important;
         background: #181d28 radial-gradient(circle at top, rgba(245, 158, 11, 0.12) 0%, rgba(24, 29, 40, 0) 75%) !important;
@@ -280,8 +416,7 @@ st.markdown(
         color: #ffffff !important;
         font-size: 0.74rem;
         font-weight: 800;
-        letter-spacing: 0.8px;
-        text-transform: uppercase;
+        letter-spacing: 0.4px;
         padding: 3px 16px;
         border-radius: 9999px;
         box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
@@ -372,20 +507,23 @@ st.markdown(
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
+# Kompakter Login-Bereich
 col_spacer, col_login = st.columns([4.2, 1.3])
+with col_spacer:
+    st.markdown('<div class="compact-login-marker"></div>', unsafe_allow_html=True)
 with col_login:
     if st.session_state['logged_in']:
-        if st.button("Abmelden", key="logout_btn"):
+        if st.button("Abmelden", key="logout_btn", use_container_width=True):
             st.session_state['logged_in'] = False
             if 'secret_login' in st.session_state:
                 st.session_state['secret_login'] = ""
             st.rerun()
     else:
-        c_pwd, c_btn = st.columns([2.5, 1], gap="small")
+        c_pwd, c_btn = st.columns([2.2, 1], gap="small")
         with c_pwd:
             admin_password = st.text_input("", type="password", label_visibility="collapsed", placeholder="Passwort", key="secret_login")
         with c_btn:
-            login_clicked = st.button("Login", key="login_submit_btn")
+            login_clicked = st.button("Login", key="login_submit_btn", use_container_width=True)
             
         entered_pwd = admin_password.strip().lower() if admin_password else ""
         expected_pwd = str(st.secrets.get("admin_password", "marco2026")).strip().lower()
@@ -1598,166 +1736,177 @@ elif data is not None:
         df_past = df[df['End_Date_Obj'] < today].copy()
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
-        # --- SCHLANKER FILTER-EXPANDER ---
-        st.write("")
-        with st.expander("🔍 Filter & Suche", expanded=False):
-            col_search, _ = st.columns([1, 1])
-            with col_search:
-                search_query = st.text_input("Suche nach Turniername, Ort, Partner", placeholder="z. B. Langenfeld, Solingen, Reiz...", key="search_filter").strip()
+        # --- HAUPT-NAVIGATION: STREAMLIT TABS (DESKTOP TOP-BAR / MOBILE GLASS-BOTTOM-BAR) ---
+        tab_turniere, tab_analyse = st.tabs(["🏸 Turniere", "📊 Analyse"])
+
+        # ==========================================
+        # REITER 1: TURNIERE (DAS HERZ DER APP)
+        # ==========================================
+        with tab_turniere:
+            # Filter-Bereich
+            with st.expander("🔍 Filter & Suche", expanded=False):
+                col_search, _ = st.columns([1, 1])
+                with col_search:
+                    search_query = st.text_input("Suche nach Turniername, Ort, Partner", placeholder="z. B. Langenfeld, Solingen, Reiz...", key="search_filter").strip()
+
+                st.write("")
+                st.markdown("**Status:**")
+                only_registered = st.checkbox("Turniere, an denen ich angemeldet bin", value=False)
+                only_available = st.checkbox("Turniere, an denen ich mich noch anmelden kann", value=False)
+
+            if only_registered or only_available:
+                def row_passes_filter(row):
+                    is_reg = bool(row.get('registered', False))
+                    is_avail = can_still_register(row, vacation_dates, occupied_dates)
+                    if only_registered and only_available:
+                        return is_reg or is_avail
+                    elif only_registered:
+                        return is_reg
+                    elif only_available:
+                        return is_avail
+                    return True
+
+                df_upcoming = df_upcoming[df_upcoming.apply(row_passes_filter, axis=1)]
+                df_past = df_past[df_past.apply(row_passes_filter, axis=1)]
+
+            if search_query:
+                query_lower = search_query.lower()
+                df_upcoming = df_upcoming[
+                    df_upcoming['title'].str.lower().str.contains(query_lower, na=False) |
+                    df_upcoming['city'].str.lower().str.contains(query_lower, na=False) |
+                    df_upcoming['notes'].str.lower().str.contains(query_lower, na=False) |
+                    df_upcoming['partner_hd'].str.lower().str.contains(query_lower, na=False) |
+                    df_upcoming['partner_mx'].str.lower().str.contains(query_lower, na=False)
+                ]
+                df_past = df_past[
+                    df_past['title'].str.lower().str.contains(query_lower, na=False) |
+                    df_past['city'].str.lower().str.contains(query_lower, na=False) |
+                    df_past['notes'].str.lower().str.contains(query_lower, na=False) |
+                    df_past['placement_he'].str.lower().str.contains(query_lower, na=False) |
+                    df_past['placement_hd'].str.lower().str.contains(query_lower, na=False) |
+                    df_past['placement_mx'].str.lower().str.contains(query_lower, na=False) |
+                    df_past['field_he'].str.lower().str.contains(query_lower, na=False) |
+                    df_past['field_hd'].str.lower().str.contains(query_lower, na=False) |
+                    df_past['field_mx'].str.lower().str.contains(query_lower, na=False) |
+                    df_past['partner_hd'].str.lower().str.contains(query_lower, na=False) |
+                    df_past['partner_mx'].str.lower().str.contains(query_lower, na=False)
+                ]
+
+            month_names = {1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni", 7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"}
+
+            # --- ANSTEHENDE TURNIERE ---
+            st.subheader(f"📅 Anstehende Turniere ({len(df_upcoming)})")
+            
+            with st.expander("Anstehende Turniere anzeigen", expanded=True):
+                if not df_upcoming.empty:
+                    current_month_str = ""
+                    for idx, item in df_upcoming.iterrows():
+                        start_date = item['Start_Date_Obj']
+                        end_date = item['End_Date_Obj']
+                        item_month_str = "Datum unbekannt" if pd.isnull(start_date) else f"{month_names[start_date.month]} {start_date.year}"
+                        
+                        if item_month_str != current_month_str:
+                            current_month_str = item_month_str
+                            st.write("")
+                            st.markdown(f"#### 📆 {current_month_str}")
+                        
+                        is_today = bool(start_date and end_date and start_date <= today <= end_date)
+                        is_tomorrow = bool(start_date and not is_today and (start_date - today).days == 1)
+
+                        with st.container(border=True):
+                            # AUFGESATTELTER BADGE DIREKT AUF DEM OBEREN RAHMEN (EXAKT WIE BILD 1)
+                            if is_today:
+                                st.markdown(
+                                    '<div class="today-card-marker today-glow-badge-container">'
+                                    '<span class="today-glow-badge">Heute Spieltag</span>'
+                                    '</div>',
+                                    unsafe_allow_html=True
+                                )
+                            elif is_tomorrow:
+                                st.markdown(
+                                    '<div class="tomorrow-card-marker tomorrow-glow-badge-container">'
+                                    '<span class="tomorrow-glow-badge">Morgen Spieltag</span>'
+                                    '</div>',
+                                    unsafe_allow_html=True
+                                )
+
+                            col_logo, col_info, col_link = st.columns([1.5, 6, 2])
+                            with col_logo:
+                                logo_to_show = item['logo_url']
+                                if not logo_to_show or "no-photo" in logo_to_show:
+                                    logo_to_show = DEFAULT_LOGO
+                                st.image(logo_to_show, width=140)
+                                    
+                            with col_info:
+                                st.markdown(f"### {item['title']}")
+                                render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today)
+                                
+                                if IS_ADMIN:
+                                    render_admin_editor(item, data, is_past=False)
+                                
+                            with col_link:
+                                st.write("")
+                                st.write("")
+                                st.link_button("Turnierseite", item['link'], use_container_width=True)
+                else:
+                    st.info("Keine anstehenden Turniere gefunden.")
 
             st.write("")
-            st.markdown("**Status:**")
-            only_registered = st.checkbox("Turniere, an denen ich angemeldet bin", value=False)
-            only_available = st.checkbox("Turniere, an denen ich mich noch anmelden kann", value=False)
+            st.write("")
 
-        if only_registered or only_available:
-            def row_passes_filter(row):
-                is_reg = bool(row.get('registered', False))
-                is_avail = can_still_register(row, vacation_dates, occupied_dates)
-                if only_registered and only_available:
-                    return is_reg or is_avail
-                elif only_registered:
-                    return is_reg
-                elif only_available:
-                    return is_avail
-                return True
+            # --- VERGANGENE TURNIERE ---
+            st.subheader(f"🕰️ Vergangene Turniere ({len(df_past)})")
 
-            df_upcoming = df_upcoming[df_upcoming.apply(row_passes_filter, axis=1)]
-            df_past = df_past[df_past.apply(row_passes_filter, axis=1)]
+            with st.expander("Vergangene Turniere anzeigen", expanded=False):
+                if not df_past.empty:
+                    current_month_str = ""
+                    for idx, item in df_past.iterrows():
+                        start_date = item['Start_Date_Obj']
+                        item_month_str = "Datum unbekannt" if pd.isnull(start_date) else f"{month_names[start_date.month]} {start_date.year}"
+                        
+                        if item_month_str != current_month_str:
+                            current_month_str = item_month_str
+                            st.write("")
+                            st.markdown(f"#### 🕰️ {current_month_str}")
+                        
+                        with st.container(border=True):
+                            col_logo, col_info, col_link = st.columns([1.5, 6, 2])
+                            with col_logo:
+                                logo_to_show = item['logo_url']
+                                if not logo_to_show or "no-photo" in logo_to_show:
+                                    logo_to_show = DEFAULT_LOGO
+                                st.image(logo_to_show, width=140)
+                                    
+                            with col_info:
+                                st.markdown(f"### {item['title']} *(Beendet)*")
+                                render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today)
+                                
+                                if IS_ADMIN:
+                                    render_admin_editor(item, data, is_past=True)
+                                
+                            with col_link:
+                                st.write("")
+                                st.write("")
+                                st.link_button("Turnierseite", item['link'], use_container_width=True)
+                else:
+                    st.info("Keine vergangenen Turniere gefunden.")
 
-        if search_query:
-            query_lower = search_query.lower()
-            df_upcoming = df_upcoming[
-                df_upcoming['title'].str.lower().str.contains(query_lower, na=False) |
-                df_upcoming['city'].str.lower().str.contains(query_lower, na=False) |
-                df_upcoming['notes'].str.lower().str.contains(query_lower, na=False) |
-                df_upcoming['partner_hd'].str.lower().str.contains(query_lower, na=False) |
-                df_upcoming['partner_mx'].str.lower().str.contains(query_lower, na=False)
-            ]
-            df_past = df_past[
-                df_past['title'].str.lower().str.contains(query_lower, na=False) |
-                df_past['city'].str.lower().str.contains(query_lower, na=False) |
-                df_past['notes'].str.lower().str.contains(query_lower, na=False) |
-                df_past['placement_he'].str.lower().str.contains(query_lower, na=False) |
-                df_past['placement_hd'].str.lower().str.contains(query_lower, na=False) |
-                df_past['placement_mx'].str.lower().str.contains(query_lower, na=False) |
-                df_past['field_he'].str.lower().str.contains(query_lower, na=False) |
-                df_past['field_hd'].str.lower().str.contains(query_lower, na=False) |
-                df_past['field_mx'].str.lower().str.contains(query_lower, na=False) |
-                df_past['partner_hd'].str.lower().str.contains(query_lower, na=False) |
-                df_past['partner_mx'].str.lower().str.contains(query_lower, na=False)
-            ]
-
-        month_names = {1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni", 7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"}
-
-        # --- 2 KACHELN NEBENEINANDER (FORMKURVE & ZEIT-HOTSPOT-BALKEN) ---
-        st.write("")
-        with st.expander("📊 Saison-Analyse 2026 (Formkurve & Austragungsorte)", expanded=False):
+        # ==========================================
+        # REITER 2: ANALYSE & HOTSPOTS (KARUSSELL AUF MOBILE)
+        # ==========================================
+        with tab_analyse:
+            st.markdown('<div class="carousel-hint-text">⟵ Wischen zum Wechseln (Formkurve / Austragungsorte) ⟶</div>', unsafe_allow_html=True)
             col_chart_box, col_hotspot_box = st.columns(2)
             with col_chart_box:
+                st.markdown('<div class="zeit-mobile-anchor"></div>', unsafe_allow_html=True)
                 with st.container(border=True):
                     st.markdown('<div class="zeit-chart-container"></div>', unsafe_allow_html=True)
                     render_season_chart(df)
             with col_hotspot_box:
+                st.markdown('<div class="zeit-mobile-anchor"></div>', unsafe_allow_html=True)
                 with st.container(border=True):
                     st.markdown('<div class="zeit-hotspot-container"></div>', unsafe_allow_html=True)
                     render_city_hotspots(df, today)
 
-        # --- ANSTEHENDE TURNIERE (DAS HERZ DER APP) ---
-        st.subheader(f"📅 Anstehende Turniere ({len(df_upcoming)})")
-        
-        with st.expander("Anstehende Turniere anzeigen", expanded=True):
-            if not df_upcoming.empty:
-                current_month_str = ""
-                for idx, item in df_upcoming.iterrows():
-                    start_date = item['Start_Date_Obj']
-                    end_date = item['End_Date_Obj']
-                    item_month_str = "Datum unbekannt" if pd.isnull(start_date) else f"{month_names[start_date.month]} {start_date.year}"
-                    
-                    if item_month_str != current_month_str:
-                        current_month_str = item_month_str
-                        st.write("")
-                        st.markdown(f"#### 📆 {current_month_str}")
-                    
-                    is_today = bool(start_date and end_date and start_date <= today <= end_date)
-                    is_tomorrow = bool(start_date and not is_today and (start_date - today).days == 1)
-
-                    with st.container(border=True):
-                        # BILD 1: AUFGESATTELTER PILL-BADGE DIREKT AUF DEM OBEREN RAHMEN
-                        if is_today:
-                            st.markdown(
-                                '<div class="today-card-marker today-glow-badge-container">'
-                                '<span class="today-glow-badge">🏸 NUR HEUTE • SPIELTAG</span>'
-                                '</div>',
-                                unsafe_allow_html=True
-                            )
-                        elif is_tomorrow:
-                            st.markdown(
-                                '<div class="tomorrow-card-marker tomorrow-glow-badge-container">'
-                                '<span class="tomorrow-glow-badge">⏳ MORGEN SPIELTAG</span>'
-                                '</div>',
-                                unsafe_allow_html=True
-                            )
-
-                        col_logo, col_info, col_link = st.columns([1.5, 6, 2])
-                        with col_logo:
-                            logo_to_show = item['logo_url']
-                            if not logo_to_show or "no-photo" in logo_to_show:
-                                logo_to_show = DEFAULT_LOGO
-                            st.image(logo_to_show, width=140)
-                                
-                        with col_info:
-                            st.markdown(f"### {item['title']}")
-                            render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today)
-                            
-                            if IS_ADMIN:
-                                render_admin_editor(item, data, is_past=False)
-                            
-                        with col_link:
-                            st.write("")
-                            st.write("")
-                            st.link_button("Turnierseite", item['link'], use_container_width=True)
-            else:
-                st.info("Keine anstehenden Turniere gefunden.")
-
-        st.write("")
-        st.write("")
-
-        # --- VERGANGENE TURNIERE ---
-        st.subheader(f"🕰️ Vergangene Turniere ({len(df_past)})")
-
-        with st.expander("Vergangene Turniere anzeigen", expanded=False):
-            if not df_past.empty:
-                current_month_str = ""
-                for idx, item in df_past.iterrows():
-                    start_date = item['Start_Date_Obj']
-                    item_month_str = "Datum unbekannt" if pd.isnull(start_date) else f"{month_names[start_date.month]} {start_date.year}"
-                    
-                    if item_month_str != current_month_str:
-                        current_month_str = item_month_str
-                        st.write("")
-                        st.markdown(f"#### 🕰️ {current_month_str}")
-                    
-                    with st.container(border=True):
-                        col_logo, col_info, col_link = st.columns([1.5, 6, 2])
-                        with col_logo:
-                            logo_to_show = item['logo_url']
-                            if not logo_to_show or "no-photo" in logo_to_show:
-                                logo_to_show = DEFAULT_LOGO
-                            st.image(logo_to_show, width=140)
-                                
-                        with col_info:
-                            st.markdown(f"### {item['title']} *(Beendet)*")
-                            render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today)
-                            
-                            if IS_ADMIN:
-                                render_admin_editor(item, data, is_past=True)
-                            
-                        with col_link:
-                            st.write("")
-                            st.write("")
-                            st.link_button("Turnierseite", item['link'], use_container_width=True)
-            else:
-                st.info("Keine vergangenen Turniere gefunden.")
     else:
         st.info("Die Datenbank ist erreichbar, enthält aber aktuell noch keine Turniere.")
