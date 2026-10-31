@@ -139,16 +139,20 @@ st.markdown(
         touch-action: pan-y !important;
     }
 
-    /* FILIGRANES ZEIT-DASHBOARD STYLING */
-    .zeit-card {
-        background-color: #12161f;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 12px;
-        padding: 14px 18px;
-        margin-bottom: 6px;
-        min-height: 250px;
-        box-sizing: border-box;
+    /* EINHEITLICHE KACHELN FÜR BEIDE ANALYSEN (ZEIT-STYLE) */
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.zeit-chart-container),
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.zeit-hotspot-container),
+    div[data-testid="stContainer"]:has(.zeit-chart-container),
+    div[data-testid="stContainer"]:has(.zeit-hotspot-container) {
+        background-color: #12161f !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 12px !important;
+        padding: 12px 16px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+        min-height: 280px !important;
+        box-sizing: border-box !important;
     }
+
     .zeit-header-title {
         font-size: 0.78rem;
         font-weight: 700;
@@ -368,7 +372,6 @@ st.markdown(
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
-# Kompakter Login-Bereich
 col_spacer, col_login = st.columns([4.2, 1.3])
 with col_login:
     if st.session_state['logged_in']:
@@ -992,7 +995,7 @@ def render_season_chart(df):
     ticktext = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"]
 
     fig.update_layout(
-        height=210,
+        height=200,
         margin=dict(l=5, r=5, t=5, b=5),
         autosize=True,
         showlegend=False,
@@ -1024,22 +1027,21 @@ def render_season_chart(df):
     )
 
     st.markdown(
-        f"""
-        <div class="zeit-card">
-            <div class="zeit-header-title">
-                <span>Formkurve 2026</span>
-                <span style="font-size:0.75rem; color:#94a3b8; font-weight:normal; text-transform:none;">
-                    <span style="color:#22d3ee;">●</span> HE &nbsp;<span style="color:#4ade80;">●</span> HD &nbsp;<span style="color:#c084fc;">●</span> MX
-                </span>
-            </div>
-            <div class="zeit-hero-number">{total_played} Turniere</div>
-            <div class="zeit-hero-sub">Gespielte Turniere im Jahresverlauf</div>
-            <div class="zeit-kpi-row" style="margin-bottom: 6px;">
-                <span class="zeit-kpi-tag" style="border-color: #f59e0b; color: #fbbf24;">🥇 {gold_cnt}x Gold</span>
-                <span class="zeit-kpi-tag" style="border-color: #94a3b8; color: #e2e8f0;">🥈 {silver_cnt}x Silber</span>
-                <span class="zeit-kpi-tag" style="border-color: #ea580c; color: #fdba74;">🥉 {bronze_cnt}x Bronze</span>
-            </div>
-        """,
+        clean_html(f"""
+        <div class="zeit-header-title">
+            <span>Formkurve 2026</span>
+            <span style="font-size:0.75rem; color:#94a3b8; font-weight:normal; text-transform:none;">
+                <span style="color:#22d3ee;">●</span> HE &nbsp;<span style="color:#4ade80;">●</span> HD &nbsp;<span style="color:#c084fc;">●</span> MX
+            </span>
+        </div>
+        <div class="zeit-hero-number">{total_played} Turniere</div>
+        <div class="zeit-hero-sub">Gespielte Turniere im Jahresverlauf</div>
+        <div class="zeit-kpi-row" style="margin-bottom: 6px;">
+            <span class="zeit-kpi-tag" style="border-color: #f59e0b; color: #fbbf24;">🥇 {gold_cnt}x Gold</span>
+            <span class="zeit-kpi-tag" style="border-color: #94a3b8; color: #e2e8f0;">🥈 {silver_cnt}x Silber</span>
+            <span class="zeit-kpi-tag" style="border-color: #ea580c; color: #fdba74;">🥉 {bronze_cnt}x Bronze</span>
+        </div>
+        """),
         unsafe_allow_html=True
     )
 
@@ -1048,7 +1050,6 @@ def render_season_chart(df):
         use_container_width=True,
         config={"displayModeBar": False, "scrollZoom": False, "doubleClick": False}
     )
-    st.markdown("</div>", unsafe_allow_html=True)
 
 
 # --- IDEE 1: HORIZONTALE ZEIT-STYLE BALKEN (AUSTAGUNGSORTE & STATISTIK) ---
@@ -1107,7 +1108,6 @@ def render_city_hotspots(df, today):
     max_count = sorted_cities[0][1]["count"] if sorted_cities else 1
     total_played_count = sum(s["count"] for s in city_stats.values())
 
-    # ZEIT-Palette: Cyan, Neon-Grün, Bernstein-Gold, Lila, Sky-Blue
     bar_colors = ["#22d3ee", "#4ade80", "#f59e0b", "#c084fc", "#38bdf8"]
 
     rows_html = []
@@ -1142,16 +1142,14 @@ def render_city_hotspots(df, today):
         """)
 
     card_html = f"""
-    <div class="zeit-card">
-        <div class="zeit-header-title">
-            <span>Austragungsorte • Ranking</span>
-            <span class="zeit-kpi-tag" style="border-color:#22d3ee; color:#22d3ee;">Hotspots</span>
-        </div>
-        <div class="zeit-hero-number">{len(city_stats)} Städte</div>
-        <div class="zeit-hero-sub">{total_played_count} gespielte Turniere nach Spielort</div>
-        <div style="margin-top: 14px;">
-            {''.join(rows_html)}
-        </div>
+    <div class="zeit-header-title">
+        <span>Austragungsorte • Ranking</span>
+        <span class="zeit-kpi-tag" style="border-color:#22d3ee; color:#22d3ee;">Hotspots</span>
+    </div>
+    <div class="zeit-hero-number">{len(city_stats)} Städte</div>
+    <div class="zeit-hero-sub">{total_played_count} gespielte Turniere nach Spielort</div>
+    <div style="margin-top: 14px;">
+        {''.join(rows_html)}
     </div>
     """
     st.markdown(clean_html(card_html), unsafe_allow_html=True)
@@ -1657,9 +1655,13 @@ elif data is not None:
         with st.expander("📊 Saison-Analyse 2026 (Formkurve & Austragungsorte)", expanded=False):
             col_chart_box, col_hotspot_box = st.columns(2)
             with col_chart_box:
-                render_season_chart(df)
+                with st.container(border=True):
+                    st.markdown('<div class="zeit-chart-container"></div>', unsafe_allow_html=True)
+                    render_season_chart(df)
             with col_hotspot_box:
-                render_city_hotspots(df, today)
+                with st.container(border=True):
+                    st.markdown('<div class="zeit-hotspot-container"></div>', unsafe_allow_html=True)
+                    render_city_hotspots(df, today)
 
         # --- ANSTEHENDE TURNIERE (DAS HERZ DER APP) ---
         st.subheader(f"📅 Anstehende Turniere ({len(df_upcoming)})")
