@@ -229,156 +229,106 @@ st.markdown(
     .js-plotly-plot .plotly, .js-plotly-plot .gl-container, .user-select-none.svg-container {
         touch-action: pan-y !important;
     }
-    
-    /* DESKTOP-BREITE BEGRENZEN: Maximal 780px zentriert */
-    div[data-testid="stExpander"]:has(.zeit-mobile-anchor) {
-        max-width: 780px !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
-    }
 
-    /* MOBIL: 1 KACHEL PRO BILD ALS HORIZONTALES KARUSSELL */
-    @media (max-width: 768px) {
-        div[data-testid="stHorizontalBlock"]:has(.zeit-mobile-anchor) {
-            display: flex !important;
-            flex-direction: row !important;
-            flex-wrap: nowrap !important;
-            overflow-x: auto !important;
-            scroll-snap-type: x mandatory !important;
-            -webkit-overflow-scrolling: touch !important;
-            gap: 10px !important;
-            padding: 2px 2px 8px 2px !important;
-        }
-        div[data-testid="stHorizontalBlock"]:has(.zeit-mobile-anchor)::-webkit-scrollbar {
-            display: none !important;
-        }
-        div[data-testid="stHorizontalBlock"]:has(.zeit-mobile-anchor) > div[data-testid="column"] {
-            width: 100% !important;
-            min-width: 100% !important;
-            max-width: 100% !important;
-            flex: 0 0 100% !important;
-            scroll-snap-align: start !important;
-            scroll-snap-stop: always !important;
-            box-sizing: border-box !important;
-        }
-        .carousel-hint-text {
-            display: flex !important;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.68rem;
-            color: #64748b;
-            margin-top: -2px;
-            margin-bottom: 6px;
-        }
-    }
-    @media (min-width: 769px) {
-        .carousel-hint-text {
-            display: none !important;
-        }
-    }
-
-    /* Filigranes ZEIT-Dashboard Styling */
+    /* FILIGRANES ZEIT-DASHBOARD STYLING (BREITER & LESBAR) */
     .zeit-card {
         background-color: #12161f;
         border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 9px;
-        padding: 7px 9px;
-        margin-bottom: 4px;
-        min-height: 74px;
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-bottom: 6px;
         box-sizing: border-box;
     }
     .zeit-header-title {
-        font-size: 0.64rem;
+        font-size: 0.78rem;
         font-weight: 700;
         color: #94a3b8;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 1px;
+        letter-spacing: 0.6px;
+        margin-bottom: 2px;
         display: flex;
         justify-content: space-between;
         align-items: center;
     }
     .zeit-hero-number {
-        font-size: 1.15rem;
+        font-size: 1.55rem;
         font-weight: 800;
         color: #f8fafc;
-        line-height: 1.05;
+        line-height: 1.1;
         margin-bottom: 2px;
     }
     .zeit-hero-sub {
-        font-size: 0.62rem;
+        font-size: 0.75rem;
         color: #64748b;
-        margin-bottom: 4px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        margin-bottom: 6px;
     }
     .zeit-kpi-row {
         display: flex;
-        gap: 3px;
-        flex-wrap: nowrap;
-        overflow-x: hidden;
+        gap: 6px;
+        flex-wrap: wrap;
     }
     .zeit-kpi-tag {
-        font-size: 0.58rem;
+        font-size: 0.72rem;
         font-weight: 700;
-        padding: 1px 4px;
-        border-radius: 3px;
+        padding: 2px 7px;
+        border-radius: 4px;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
         color: #e2e8f0;
-        white-space: nowrap;
     }
 
-    /* GANZE TURNIERKACHEL HERVORHEBEN: HEUTE (SIGNAL-ORANGE BORDER + GLOW) */
+    /* BILD 1: GANZE TURNIERKACHEL HERVORHEBEN: HEUTE (GLOWING RED BORDER + TINT) */
     div[data-testid="stVerticalBlockBorderWrapper"]:has(.today-card-marker) {
-        border: 2px solid #ea580c !important;
-        background: linear-gradient(180deg, rgba(234, 88, 12, 0.14) 0%, rgba(18, 22, 31, 0.45) 90px) !important;
-        box-shadow: 0 4px 22px rgba(234, 88, 12, 0.3) !important;
-        border-radius: 12px !important;
+        border: 2px solid #ef4444 !important;
+        background: #181d28 radial-gradient(circle at top, rgba(239, 68, 68, 0.14) 0%, rgba(24, 29, 40, 0) 75%) !important;
+        box-shadow: 0 0 22px rgba(239, 68, 68, 0.45), inset 0 0 12px rgba(239, 68, 68, 0.08) !important;
+        border-radius: 16px !important;
     }
 
-    /* ÜBERGEORDNETES BANNER ÜBER DIE GESAMTE KACHELBREITE (HEUTE) */
-    .overarching-top-banner-today {
-        background: linear-gradient(90deg, #ea580c 0%, #f97316 100%);
+    .today-glow-badge-container {
+        display: flex;
+        justify-content: center;
+        margin-top: -24px;
+        margin-bottom: 12px;
+    }
+    .today-glow-badge {
+        background-color: #ef4444;
         color: #ffffff !important;
+        font-size: 0.74rem;
         font-weight: 800;
-        font-size: 0.8rem;
         letter-spacing: 0.8px;
         text-transform: uppercase;
-        padding: 6px 14px;
-        border-radius: 8px;
-        margin-top: -4px;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        box-shadow: 0 2px 8px rgba(234, 88, 12, 0.35);
+        padding: 3px 16px;
+        border-radius: 9999px;
+        box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.35);
     }
 
-    /* GANZE TURNIERKACHEL HERVORHEBEN: MORGEN (BERNSTEIN-GOLD BORDER) */
+    /* BILD 1: GANZE TURNIERKACHEL HERVORHEBEN: MORGEN (BERNSTEIN-GOLD) */
     div[data-testid="stVerticalBlockBorderWrapper"]:has(.tomorrow-card-marker) {
-        border: 1.5px solid #d97706 !important;
-        background: linear-gradient(180deg, rgba(217, 119, 6, 0.09) 0%, rgba(18, 22, 31, 0.3) 80px) !important;
-        box-shadow: 0 3px 16px rgba(217, 119, 6, 0.22) !important;
-        border-radius: 12px !important;
+        border: 2px solid #f59e0b !important;
+        background: #181d28 radial-gradient(circle at top, rgba(245, 158, 11, 0.12) 0%, rgba(24, 29, 40, 0) 75%) !important;
+        box-shadow: 0 0 18px rgba(245, 158, 11, 0.38), inset 0 0 10px rgba(245, 158, 11, 0.06) !important;
+        border-radius: 16px !important;
     }
 
-    /* ÜBERGEORDNETES BANNER ÜBER DIE GESAMTE KACHELBREITE (MORGEN) */
-    .overarching-top-banner-tomorrow {
-        background: linear-gradient(90deg, #d97706 0%, #f59e0b 100%);
-        color: #ffffff !important;
-        font-weight: 800;
-        font-size: 0.78rem;
-        letter-spacing: 0.6px;
-        text-transform: uppercase;
-        padding: 5px 12px;
-        border-radius: 8px;
-        margin-top: -4px;
-        margin-bottom: 12px;
+    .tomorrow-glow-badge-container {
         display: flex;
-        align-items: center;
-        gap: 8px;
+        justify-content: center;
+        margin-top: -24px;
+        margin-bottom: 12px;
+    }
+    .tomorrow-glow-badge {
+        background-color: #f59e0b;
+        color: #ffffff !important;
+        font-size: 0.74rem;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        padding: 3px 16px;
+        border-radius: 9999px;
+        box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.35);
     }
 
     /* Medaillen-Badges in Disziplin-Kacheln */
@@ -465,6 +415,7 @@ st.markdown(
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
+# Kompakter Login-Bereich
 col_spacer, col_login = st.columns([4.2, 1.3])
 with col_login:
     if st.session_state['logged_in']:
@@ -776,7 +727,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             if partner_hd and partner_hd in PARTNERS_HD and PARTNERS_HD[partner_hd]:
                 hd_status_text = f"Mit <a href='{PARTNERS_HD[partner_hd]}' target='_blank'>{safe_partner_hd}</a> (Feld voll)"
             elif partner_hd:
-                hd_status_text = f"Mit {safe_partner_hd} (Feld voll)"
+                hd_status_text = f"Mit {safe_partner_hd}"
             else:
                 hd_status_text = "Ohne Partner (Feld voll)"
         else:
@@ -952,7 +903,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     st.markdown(clean_html(html_out), unsafe_allow_html=True)
 
 
-# --- INTERAKTIVE FORMKURVE (ZEIT-STYLE, SANFTE SPLINES, MIT MEDAILLEN) ---
+# --- INTERAKTIVE FORMKURVE (ZEIT-STYLE, HARMONISCHE SCHRIFTGRÖSSEN) ---
 def render_season_chart(df):
     records = []
     for _, row in df.iterrows():
@@ -1055,10 +1006,10 @@ def render_season_chart(df):
             field_str = f" • {r['field']}" if r['field'] else ""
             partner_str = f"<br>👥 Partner: <b>{r['partner']}</b>" if r['partner'] else ""
             hover_text = (
-                f"<span style='font-size:11px; font-weight:700; color:{colors[disc_name]};'>{disc_name} • {r['placement']}</span>"
+                f"<span style='font-size:12px; font-weight:700; color:{colors[disc_name]};'>{disc_name} • {r['placement']}</span>"
                 f"<span style='color:#94a3b8;'>{field_str}</span><br>"
-                f"<span style='font-size:10px; color:#f8fafc;'>🏸 {r['title']} ({r['city']})</span><br>"
-                f"<span style='font-size:9px; color:#64748b;'>📅 {r['date'].strftime('%d.%m.%Y')}</span>"
+                f"<span style='font-size:11px; color:#f8fafc;'>🏸 {r['title']} ({r['city']})</span><br>"
+                f"<span style='font-size:10px; color:#64748b;'>📅 {r['date'].strftime('%d.%m.%Y')}</span>"
                 f"{partner_str}"
             )
             hover_texts.append(hover_text)
@@ -1070,26 +1021,26 @@ def render_season_chart(df):
             name=disc_name,
             line=dict(
                 color=colors.get(disc_name, "#94a3b8"),
-                width=2.0,
+                width=2.5,
                 shape="spline",
-                smoothing=1.3
+                smoothing=1.2
             ),
             marker=dict(
-                size=6.0,
+                size=8.0,
                 symbol="circle",
                 color=colors.get(disc_name, "#94a3b8"),
-                line=dict(color="#12161f", width=1.5)
+                line=dict(color="#12161f", width=2)
             ),
             text=hover_texts,
             hoverinfo="text"
         ))
 
-    tickvals = [datetime.date(2026, m, 1) for m in [1, 3, 5, 7, 9, 11]]
-    ticktext = ["JAN", "MÄR", "MAI", "JUL", "SEP", "NOV"]
+    tickvals = [datetime.date(2026, m, 1) for m in range(1, 13)]
+    ticktext = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"]
 
     fig.update_layout(
-        height=140,
-        margin=dict(l=0, r=0, t=2, b=0),
+        height=240,
+        margin=dict(l=10, r=10, t=10, b=10),
         autosize=True,
         showlegend=False,
         yaxis=dict(
@@ -1098,7 +1049,7 @@ def render_season_chart(df):
             gridcolor="rgba(255, 255, 255, 0.06)",
             zeroline=False,
             fixedrange=True,
-            tickfont=dict(color="#94a3b8", size=7.5, family="Inter, -apple-system, sans-serif")
+            tickfont=dict(color="#94a3b8", size=10.5, family="Inter, -apple-system, sans-serif")
         ),
         xaxis=dict(
             tickmode="array",
@@ -1107,14 +1058,14 @@ def render_season_chart(df):
             gridcolor="rgba(255, 255, 255, 0.04)",
             zeroline=False,
             fixedrange=True,
-            tickfont=dict(color="#64748b", size=7.5, family="Inter, -apple-system, sans-serif")
+            tickfont=dict(color="#94a3b8", size=10, family="Inter, -apple-system, sans-serif")
         ),
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         hoverlabel=dict(
             bgcolor="#1e293b",
             bordercolor="rgba(255, 255, 255, 0.15)",
-            font_size=10.5,
+            font_size=12,
             font_family="Inter, -apple-system, sans-serif"
         )
     )
@@ -1124,16 +1075,16 @@ def render_season_chart(df):
         <div class="zeit-card">
             <div class="zeit-header-title">
                 <span>Formkurve 2026</span>
-                <span style="font-size:0.6rem; color:#94a3b8; font-weight:normal; text-transform:none;">
-                    <span style="color:#22d3ee;">●</span> HE <span style="color:#4ade80;">●</span> HD <span style="color:#c084fc;">●</span> MX
+                <span style="font-size:0.75rem; color:#94a3b8; font-weight:normal; text-transform:none;">
+                    <span style="color:#22d3ee;">●</span> Einzel &nbsp;<span style="color:#4ade80;">●</span> Doppel &nbsp;<span style="color:#c084fc;">●</span> Mixed
                 </span>
             </div>
             <div class="zeit-hero-number">{total_played} Turniere</div>
-            <div class="zeit-hero-sub">Ergebnisse im Jahresverlauf</div>
+            <div class="zeit-hero-sub">Gespielte Turniere im Jahresverlauf</div>
             <div class="zeit-kpi-row">
-                <span class="zeit-kpi-tag" style="border-color: #f59e0b; color: #fbbf24;">🥇 {gold_cnt}</span>
-                <span class="zeit-kpi-tag" style="border-color: #94a3b8; color: #e2e8f0;">🥈 {silver_cnt}</span>
-                <span class="zeit-kpi-tag" style="border-color: #ea580c; color: #fdba74;">🥉 {bronze_cnt}</span>
+                <span class="zeit-kpi-tag" style="border-color: #f59e0b; color: #fbbf24;">🥇 {gold_cnt}x Gold</span>
+                <span class="zeit-kpi-tag" style="border-color: #94a3b8; color: #e2e8f0;">🥈 {silver_cnt}x Silber</span>
+                <span class="zeit-kpi-tag" style="border-color: #ea580c; color: #fdba74;">🥉 {bronze_cnt}x Bronze</span>
             </div>
         </div>
         """,
@@ -1147,7 +1098,7 @@ def render_season_chart(df):
     )
 
 
-# --- ECHTE MINIMALISTISCHE NRW-VEKTORSILHOUETTE ---
+# --- DYNAMISCHE VEKTORKARTE: OPENFREEMAP DARK VIA MAPLIBRE GL (KEIN API-KEY, KEIN WASSERZEICHEN) ---
 def render_tournament_heatmap(df, today):
     city_counts = {}
     city_tournaments = {}
@@ -1198,10 +1149,10 @@ def render_tournament_heatmap(df, today):
         <div class="zeit-card">
             <div class="zeit-header-title">
                 <span>Spielorte • NRW</span>
-                <span class="zeit-kpi-tag" style="border-color:#38bdf8; color:#38bdf8; font-size:0.58rem; padding:0 3px;">NRW</span>
+                <span class="zeit-kpi-tag" style="border-color:#38bdf8; color:#38bdf8; font-size:0.68rem;">100 km Radius</span>
             </div>
             <div class="zeit-hero-number">{len(city_counts)} Städte</div>
-            <div class="zeit-hero-sub">Teilgenommene Orte 2026</div>
+            <div class="zeit-hero-sub">Gespielte Turnierorte 2026</div>
             <div class="zeit-kpi-row">
                 <span class="zeit-kpi-tag" style="border-color: #22d3ee; color: #22d3ee;">📍 Top: {hotspot_str}</span>
             </div>
@@ -1210,64 +1161,78 @@ def render_tournament_heatmap(df, today):
         unsafe_allow_html=True
     )
 
-    def project_nrw(lat, lon, width=170, height=138, pad_x=8, pad_y=6):
-        min_lat, max_lat = 50.32, 52.53
-        min_lon, max_lon = 5.86, 9.46
-        x = pad_x + (lon - min_lon) / (max_lon - min_lon) * (width - 2 * pad_x)
-        y = height - pad_y - (lat - min_lat) / (max_lat - min_lat) * (height - 2 * pad_y)
-        return round(x, 1), round(y, 1)
-
-    NRW_OUTLINE = [
-        (52.53, 8.65), (52.40, 9.00), (52.28, 8.95), (52.12, 9.25), (51.85, 9.42), 
-        (51.64, 9.40), (51.49, 9.15), (51.45, 8.92), (51.20, 8.65), (51.05, 8.52), 
-        (50.75, 8.12), (50.70, 7.85), (50.62, 7.22), (50.55, 6.95), (50.36, 6.45), 
-        (50.55, 6.20), (50.78, 6.02), (51.05, 5.87), (51.30, 6.18), (51.50, 6.15), 
-        (51.85, 6.05), (51.90, 6.60), (52.15, 6.95), (52.28, 7.15), (52.38, 7.75), 
-        (52.30, 7.95), (52.15, 8.25), (52.14, 8.48), (52.30, 8.55), (52.53, 8.65)
-    ]
-    nrw_pts = " ".join([f"{project_nrw(lat, lon)[0]},{project_nrw(lat, lon)[1]}" for lat, lon in NRW_OUTLINE])
-
-    RHINE_COORDS = [
-        (50.62, 7.22), (50.74, 7.10), (50.94, 6.97), (51.10, 6.88), 
-        (51.22, 6.75), (51.44, 6.74), (51.66, 6.60), (51.84, 6.05)
-    ]
-    rhine_pts = " ".join([f"{project_nrw(lat, lon)[0]},{project_nrw(lat, lon)[1]}" for lat, lon in RHINE_COORDS])
-
-    city_dots = []
+    markers_js = []
     for c, cnt in city_counts.items():
         if c == "Langenfeld":
             continue
-        c_lat, c_lon = CITY_COORDINATES[c]
-        cx, cy = project_nrw(c_lat, c_lon)
-        t_sample = " • ".join(city_tournaments[c][:2])
-        r = min(3.0 + cnt * 1.5, 6.5)
-        city_dots.append(f"""
-            <circle cx="{cx}" cy="{cy}" r="{r}" fill="#22d3ee" stroke="#0891b2" stroke-width="0.8">
-                <title>{c}: {cnt} Turnier(e)&#10;{t_sample}</title>
-            </circle>
+        lat, lon = CITY_COORDINATES[c]
+        t_sample = " • ".join(city_tournaments[c][:3])
+        safe_city = html.escape(c)
+        safe_sample = html.escape(t_sample).replace("'", "&#39;")
+        
+        popup_html = f"<b>📍 {safe_city}</b><br>{cnt} gespielte(s) Turnier(e)<br><small style='color:#94a3b8;'>{safe_sample}</small>"
+        markers_js.append(f"""
+            new maplibregl.Marker({{ color: '#22d3ee' }})
+                .setLngLat([{lon}, {lat}])
+                .setPopup(new maplibregl.Popup({{ offset: 15 }}).setHTML('{popup_html}'))
+                .addTo(map);
         """)
 
-    lx, ly = project_nrw(CITY_COORDINATES["Langenfeld"][0], CITY_COORDINATES["Langenfeld"][1])
-    langenfeld_element = f"""
-        <circle cx="{lx}" cy="{ly}" r="4.5" fill="#f59e0b" stroke="#ffffff" stroke-width="1.2">
-            <title>Langenfeld: Heimatbasis</title>
-        </circle>
-        <text x="{lx + 6}" y="{ly + 2}" fill="#fbbf24" font-size="7.5" font-weight="800" font-family="Inter, sans-serif">Langenfeld ★</text>
+    # Langenfeld Heimatbasis (Gold-Marker)
+    h_lat, h_lon = CITY_COORDINATES["Langenfeld"]
+    markers_js.append(f"""
+        new maplibregl.Marker({{ color: '#f59e0b' }})
+            .setLngLat([{h_lon}, {h_lat}])
+            .setPopup(new maplibregl.Popup({{ offset: 15 }}).setHTML('<b>🏠 Langenfeld</b><br>Heimatbasis (100 km Umkreis)'))
+            .addTo(map);
+    """)
+
+    markers_script = "\n".join(markers_js)
+
+    map_html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+        <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+        <style>
+            html, body {{ margin:0; padding:0; height:100%; background:#12161f; }}
+            #map {{ width:100%; height:240px; border-radius:10px; }}
+            .maplibregl-popup-content {{
+                background: #1e293b;
+                color: #f8fafc;
+                font-family: 'Inter', -apple-system, sans-serif;
+                font-size: 11px;
+                border-radius: 8px;
+                border: 1px solid rgba(255,255,255,0.15);
+                padding: 8px 10px;
+            }}
+            .maplibregl-popup-tip {{
+                border-top-color: #1e293b !important;
+            }}
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+        <script>
+            const map = new maplibregl.Map({{
+                container: 'map',
+                style: 'https://tiles.openfreemap.org/styles/dark',
+                center: [6.95, 51.15],
+                zoom: 8.3,
+                cooperativeGestures: true
+            }});
+            map.addControl(new maplibregl.NavigationControl({{ showCompass: false }}), 'top-right');
+            map.on('load', () => {{
+                {markers_script}
+            }});
+        </script>
+    </body>
+    </html>
     """
 
-    svg_map_html = f"""
-    <div style="background-color: #12161f; border-radius: 9px; border: 1px solid rgba(255, 255, 255, 0.08); padding: 4px; height: 140px; display: flex; align-items: center; justify-content: center; position: relative; box-sizing: border-box; overflow: hidden;">
-        <svg viewBox="0 0 170 138" style="width: 100%; height: 100%; max-height: 132px;">
-            <polygon points="{nrw_pts}" fill="#181d28" stroke="rgba(255, 255, 255, 0.22)" stroke-width="1.1" stroke-linejoin="round" />
-            <text x="160" y="18" fill="rgba(255, 255, 255, 0.12)" font-size="11" font-weight="900" font-family="Inter, sans-serif" text-anchor="end">NRW</text>
-            <polyline points="{rhine_pts}" fill="none" stroke="rgba(34, 211, 238, 0.18)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            {' '.join(city_dots)}
-            {langenfeld_element}
-        </svg>
-    </div>
-    """
-
-    st.markdown(clean_html(svg_map_html), unsafe_allow_html=True)
+    st.components.v1.html(map_html, height=245)
 
 
 # --- WIEDERVERWENDBARER ADMIN-EDITOR ---
@@ -1768,19 +1733,16 @@ elif data is not None:
 
         month_names = {1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni", 7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"}
 
-        # --- SMARTPHONE-KARUSSELL & DESKTOP 2-KACHEL-RASTER ---
+        # --- 2 KACHELN NEBENEINANDER (FORMKURVE & OPENFREEMAP DARK) ---
         st.write("")
-        with st.expander("📊 Saison-Analyse 2026 (Formkurve & Gespielte Spielorte)", expanded=True):
-            st.markdown('<div class="carousel-hint-text">⟵ 1/2 Formkurve &nbsp;|&nbsp; 2/2 NRW-Karte wischen ⟶</div>', unsafe_allow_html=True)
+        with st.expander("📊 Saison-Analyse 2026 (Formkurve & Gespielte Spielorte)", expanded=False):
             col_chart_box, col_map_box = st.columns(2)
             with col_chart_box:
-                st.markdown('<div class="zeit-mobile-anchor"></div>', unsafe_allow_html=True)
                 render_season_chart(df)
             with col_map_box:
-                st.markdown('<div class="zeit-mobile-anchor"></div>', unsafe_allow_html=True)
                 render_tournament_heatmap(df, today)
 
-        # --- ANSTEHENDE TURNIERE ---
+        # --- ANSTEHENDE TURNIERE (DAS HERZ DER APP) ---
         st.subheader(f"📅 Anstehende Turniere ({len(df_upcoming)})")
         
         with st.expander("Anstehende Turniere anzeigen", expanded=True):
@@ -1796,16 +1758,25 @@ elif data is not None:
                         st.write("")
                         st.markdown(f"#### 📆 {current_month_str}")
                     
-                    # Überprüfung: Findet das Turnier HEUTE oder MORGEN statt?
                     is_today = bool(start_date and end_date and start_date <= today <= end_date)
                     is_tomorrow = bool(start_date and not is_today and (start_date - today).days == 1)
 
                     with st.container(border=True):
-                        # GANZE KACHEL HERVORHEBEN: Marker-Divs & übergeordnetes Dach-Banner
+                        # BILD 1: AUFGESATTELTER PILL-BADGE DIREKT AUF DEM OBEREN RAHMEN
                         if is_today:
-                            st.markdown('<div class="today-card-marker overarching-top-banner-today">🏸 DIESES TURNIER FINDET HEUTE STATT</div>', unsafe_allow_html=True)
+                            st.markdown(
+                                '<div class="today-card-marker today-glow-badge-container">'
+                                '<span class="today-glow-badge">🏸 NUR HEUTE • SPIELTAG</span>'
+                                '</div>',
+                                unsafe_allow_html=True
+                            )
                         elif is_tomorrow:
-                            st.markdown('<div class="tomorrow-card-marker overarching-top-banner-tomorrow">⏳ MORGEN SPIELTAG</div>', unsafe_allow_html=True)
+                            st.markdown(
+                                '<div class="tomorrow-card-marker tomorrow-glow-badge-container">'
+                                '<span class="tomorrow-glow-badge">⏳ MORGEN SPIELTAG</span>'
+                                '</div>',
+                                unsafe_allow_html=True
+                            )
 
                         col_logo, col_info, col_link = st.columns([1.5, 6, 2])
                         with col_logo:
