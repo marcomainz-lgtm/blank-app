@@ -119,97 +119,6 @@ FIELD_OPTIONS = [
     "Sonstiges"
 ]
 
-CITY_COORDINATES = {
-    "Langenfeld": (51.1114, 6.9497),
-    "Hilden": (51.1693, 6.9328),
-    "Solingen": (51.1712, 7.0841),
-    "Düsseldorf": (51.2277, 6.7735),
-    "Wuppertal": (51.2562, 7.1508),
-    "Remscheid": (51.1798, 7.1923),
-    "Mettmann": (51.2541, 6.9765),
-    "Ratingen": (51.2964, 6.8526),
-    "Erkrath": (51.2239, 6.9142),
-    "Haan": (51.1931, 7.0125),
-    "Velbert": (51.3402, 7.0422),
-    "Heiligenhaus": (51.3256, 6.9711),
-    "Monheim am Rhein": (51.0911, 6.8906),
-    "Monheim": (51.0911, 6.8906),
-    "Leverkusen": (51.0459, 6.9856),
-    "Köln": (50.9375, 6.9603),
-    "Bonn": (50.7374, 7.0982),
-    "Bergisch Gladbach": (50.9929, 7.1293),
-    "Siegburg": (50.7997, 7.2074),
-    "Sankt Augustin": (50.7702, 7.1873),
-    "Troisdorf": (50.8167, 7.1583),
-    "Hennef": (50.7758, 7.2831),
-    "Euskirchen": (50.6606, 6.7872),
-    "Düren": (50.8022, 6.4842),
-    "Aachen": (50.7753, 6.0839),
-    "Stolberg": (50.7681, 6.2308),
-    "Eschweiler": (50.8197, 6.2625),
-    "Jülich": (50.9224, 6.3606),
-    "Mönchengladbach": (51.1911, 6.4431),
-    "Viersen": (51.2564, 6.3917),
-    "Krefeld": (51.3388, 6.5853),
-    "Neuss": (51.1982, 6.6917),
-    "Dormagen": (51.0964, 6.8397),
-    "Grevenbroich": (51.0883, 6.5878),
-    "Willich": (51.2628, 6.5494),
-    "Meerbusch": (51.2725, 6.6692),
-    "Kaarst": (51.2269, 6.6206),
-    "Kempen": (51.3653, 6.4194),
-    "Nettetal": (51.3167, 6.2833),
-    "Moers": (51.4514, 6.6286),
-    "Duisburg": (51.4344, 6.7623),
-    "Oberhausen": (51.4700, 6.8517),
-    "Mülheim an der Ruhr": (51.4272, 6.8828),
-    "Mülheim": (51.4272, 6.8828),
-    "Essen": (51.4556, 7.0116),
-    "Bottrop": (51.5239, 6.9286),
-    "Gelsenkirchen": (51.5175, 7.0858),
-    "Bochum": (51.4818, 7.2162),
-    "Herne": (51.5425, 7.2239),
-    "Recklinghausen": (51.6167, 7.2000),
-    "Gladbeck": (51.5714, 6.9911),
-    "Marl": (51.6667, 7.1167),
-    "Dorsten": (51.6603, 6.9653),
-    "Castrop-Rauxel": (51.5500, 7.3167),
-    "Dortmund": (51.5136, 7.4653),
-    "Witten": (51.4417, 7.3361),
-    "Hagen": (51.3671, 7.4633),
-    "Schwerte": (51.4417, 7.5667),
-    "Lünen": (51.6167, 7.5167),
-    "Unna": (51.5350, 7.6889),
-    "Kamen": (51.5917, 7.6639),
-    "Hamm": (51.6811, 7.8186),
-    "Iserlohn": (51.3761, 7.6958),
-    "Menden": (51.4333, 7.7833),
-    "Lüdenscheid": (51.2197, 7.6269),
-    "Arnsberg": (51.3967, 8.0644),
-    "Soest": (51.5714, 8.1067),
-    "Münster": (51.9607, 7.6261),
-    "Coesfeld": (51.9461, 7.1683),
-    "Dülmen": (51.8308, 7.2783),
-    "Borken": (51.8439, 6.8583),
-    "Bocholt": (51.8389, 6.6167),
-    "Wesel": (51.6583, 6.6167),
-    "Dinslaken": (51.5667, 6.7333),
-    "Voerde": (51.6000, 6.6833),
-    "Kleve": (51.7889, 6.1389),
-    "Emmerich": (51.8333, 6.2500),
-    "Geldern": (51.5194, 6.3319),
-    "Kevelaer": (51.5833, 6.2500),
-    "Kamp-Lintfort": (51.5000, 6.5333),
-    "Wermelskirchen": (51.1389, 7.2167),
-    "Wipperfürth": (51.1167, 7.4000),
-    "Radevormwald": (51.2000, 7.3500),
-    "Gummersbach": (51.0264, 7.5658),
-    "Wiehl": (50.9500, 7.5500),
-    "Waldbröl": (50.9000, 7.6167),
-    "Burscheid": (51.0833, 7.1167),
-    "Leichlingen": (51.1167, 7.0167)
-}
-
 # Custom CSS
 st.markdown(
     """
@@ -230,7 +139,7 @@ st.markdown(
         touch-action: pan-y !important;
     }
 
-    /* 4. EXPANDER-BORDER ENTFERNEN: Kein "Kasten im Kasten" mehr */
+    /* EXPANDER-BORDER ENTFERNEN: Kein "Kasten im Kasten" mehr auf Mobile & Desktop */
     div[data-testid="stExpander"] {
         border: none !important;
         background: transparent !important;
@@ -253,7 +162,22 @@ st.markdown(
         border: none !important;
     }
 
-    /* 1. MOBILE APP BOTTOM NAVIGATION BAR */
+    /* LOGO IMMER OBEN LINKS BÜNDIG HALTEN */
+    div[data-testid="stHorizontalBlock"] {
+        align-items: flex-start !important;
+    }
+    div[data-testid="column"]:has(div[data-testid="stImage"]) {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        align-self: flex-start !important;
+    }
+    div[data-testid="stImage"] {
+        margin-top: 4px !important;
+        margin-bottom: auto !important;
+    }
+
+    /* MOBILE APP BOTTOM NAVIGATION BAR */
     @media (max-width: 768px) {
         div[data-baseweb="tab-list"] {
             position: fixed !important;
@@ -294,7 +218,7 @@ st.markdown(
             padding-bottom: 95px !important;
         }
 
-        /* 2. LOGIN AUF MOBILE: Schlank, einzeilig, oben rechts */
+        /* LOGIN AUF MOBILE: Schlank, einzeilig, oben rechts */
         div[data-testid="stHorizontalBlock"]:has(.compact-login-marker) {
             display: flex !important;
             flex-direction: row !important;
@@ -308,9 +232,9 @@ st.markdown(
             display: none !important;
         }
         div[data-testid="stHorizontalBlock"]:has(.compact-login-marker) > div:last-child {
-            width: 220px !important;
-            min-width: 220px !important;
-            max-width: 240px !important;
+            width: 210px !important;
+            min-width: 210px !important;
+            max-width: 230px !important;
             margin-left: auto !important;
         }
 
@@ -475,11 +399,10 @@ st.markdown(
         transition: width 0.3s ease;
     }
 
-    /* 3. GANZE TURNIERKACHEL HERVORHEBEN: HEUTE (LEUCHTEND ROTE AUSSEN-BORDER + GLOW) */
-    div:has(> * > .today-card-marker),
+    /* ECHTE 4-SEITIGE ROTE AUSSEN-BORDER FÜR HEUTE */
     div[data-testid="stVerticalBlockBorderWrapper"]:has(.today-card-marker),
-    div[data-testid="stContainer"]:has(.today-card-marker) {
-        border: 2.5px solid #ef4444 !important;
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.today-card-marker) > div {
+        border: 2px solid #ef4444 !important;
         background: #181d28 radial-gradient(circle at top, rgba(239, 68, 68, 0.16) 0%, rgba(24, 29, 40, 0) 75%) !important;
         box-shadow: 0 0 22px rgba(239, 68, 68, 0.45), inset 0 0 10px rgba(239, 68, 68, 0.08) !important;
         border-radius: 14px !important;
@@ -489,7 +412,7 @@ st.markdown(
         display: flex;
         justify-content: center;
         margin-top: -24px;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
     }
     .today-glow-badge {
         background-color: #ef4444;
@@ -504,9 +427,8 @@ st.markdown(
     }
 
     /* MORGEN (BERNSTEIN-GOLD) */
-    div:has(> * > .tomorrow-card-marker),
     div[data-testid="stVerticalBlockBorderWrapper"]:has(.tomorrow-card-marker),
-    div[data-testid="stContainer"]:has(.tomorrow-card-marker) {
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.tomorrow-card-marker) > div {
         border: 2px solid #f59e0b !important;
         background: #181d28 radial-gradient(circle at top, rgba(245, 158, 11, 0.12) 0%, rgba(24, 29, 40, 0) 75%) !important;
         box-shadow: 0 0 18px rgba(245, 158, 11, 0.38), inset 0 0 10px rgba(245, 158, 11, 0.06) !important;
@@ -517,7 +439,7 @@ st.markdown(
         display: flex;
         justify-content: center;
         margin-top: -24px;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
     }
     .tomorrow-glow-badge {
         background-color: #f59e0b;
@@ -615,8 +537,8 @@ st.markdown(
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
-# Kompakter Login-Bereich (Desktop: sauber rechtsbündig, Mobile: kompakt einzeilig)
-col_spacer, col_login = st.columns([3.8, 1.8])
+# Kompakter Login-Bereich
+col_spacer, col_login = st.columns([3.8, 1.8], vertical_alignment="center")
 with col_spacer:
     st.markdown('<div class="compact-login-marker"></div>', unsafe_allow_html=True)
 with col_login:
@@ -627,7 +549,7 @@ with col_login:
                 st.session_state['secret_login'] = ""
             st.rerun()
     else:
-        c_pwd, c_btn = st.columns([1.6, 1], gap="small")
+        c_pwd, c_btn = st.columns([1.6, 1], gap="small", vertical_alignment="center")
         with c_pwd:
             admin_password = st.text_input("", type="password", label_visibility="collapsed", placeholder="Passwort", key="secret_login")
         with c_btn:
@@ -1107,11 +1029,6 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
 
 # --- HILFSFUNKTION: ECHTE GESPIELTE TURNIERE IDENTIFIZIEREN (UNIFIED DATA) ---
 def get_played_tournaments(df, today):
-    """
-    Einheitliche Logik: Ein Turnier gilt als gespielt, wenn der Nutzer gemeldet war
-    und das Turnier vergangen ist oder Ergebnisse eingetragen wurden.
-    Gibt ein dedupliziertes DataFrame nach Turnier-ID zurück!
-    """
     def is_played_row(row):
         is_reg = bool(row.get('registered', False))
         has_result = bool(
@@ -1137,10 +1054,6 @@ def render_season_chart(df, today):
     total_played = len(df_played)
 
     records = []
-    gold_cnt = 0
-    silver_cnt = 0
-    bronze_cnt = 0
-
     for _, row in df_played.iterrows():
         s_date = row.get('Start_Date_Obj')
         if pd.isnull(s_date):
@@ -1354,12 +1267,10 @@ def render_city_hotspots(df, today):
                 "bronzes": 0
             }
 
-        # Genau 1 Zähler pro Turnier
         city_stats[clean_c]["count"] += 1
         if dist is not None and city_stats[clean_c]["dist"] is None:
             city_stats[clean_c]["dist"] = dist
 
-        # Medaillen erfassen
         all_p = [str(row.get(f'placement_{d}', '')) for d in ['he', 'hd', 'mx']] + [str(row.get('placement', '')), str(row.get('result', ''))]
         for p in all_p:
             p_l = p.lower()
@@ -1867,7 +1778,7 @@ elif data is not None:
         df_past = df[df['End_Date_Obj'] < today].copy()
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
-        # --- HAUPT-NAVIGATION: STREAMLIT TABS (DESKTOP TOP-BAR / MOBILE GLASS-BOTTOM-BAR) ---
+        # --- HAUPT-NAVIGATION: TABS (DESKTOP TOP-BAR / MOBILE APP-BOTTOM-BAR) ---
         tab_turniere, tab_analyse = st.tabs(["🏸 Turniere", "📊 Analyse"])
 
         # ==========================================
@@ -1944,7 +1855,7 @@ elif data is not None:
                         is_tomorrow = bool(start_date and not is_today and (start_date - today).days == 1)
 
                         with st.container(border=True):
-                            # 3. AUFGESATTELTER PILL-BADGE & ROTES GLOWING BORDER FÜR HEUTE
+                            # AUFGESATTELTER PILL-BADGE DIREKT AUF DEM OBEREN RAHMEN
                             if is_today:
                                 st.markdown(
                                     '<div class="today-card-marker today-glow-badge-container">'
@@ -1960,12 +1871,13 @@ elif data is not None:
                                     unsafe_allow_html=True
                                 )
 
-                            col_logo, col_info, col_link = st.columns([1.5, 6, 2])
+                            # LOGO OBEN LINKS BÜNDIG DANK vertical_alignment="top"
+                            col_logo, col_info, col_link = st.columns([1.5, 6, 2], vertical_alignment="top")
                             with col_logo:
                                 logo_to_show = item['logo_url']
                                 if not logo_to_show or "no-photo" in logo_to_show:
                                     logo_to_show = DEFAULT_LOGO
-                            st.image(logo_to_show, width=140)
+                                st.image(logo_to_show, width=140)
                                     
                             with col_info:
                                 st.markdown(f"### {item['title']}")
@@ -1973,7 +1885,7 @@ elif data is not None:
                                 
                                 if IS_ADMIN:
                                     render_admin_editor(item, data, is_past=False)
-                                
+                            
                             with col_link:
                                 st.write("")
                                 st.write("")
@@ -2000,7 +1912,7 @@ elif data is not None:
                             st.markdown(f"#### 🕰️ {current_month_str}")
                         
                         with st.container(border=True):
-                            col_logo, col_info, col_link = st.columns([1.5, 6, 2])
+                            col_logo, col_info, col_link = st.columns([1.5, 6, 2], vertical_alignment="top")
                             with col_logo:
                                 logo_to_show = item['logo_url']
                                 if not logo_to_show or "no-photo" in logo_to_show:
@@ -2013,7 +1925,7 @@ elif data is not None:
                                 
                                 if IS_ADMIN:
                                     render_admin_editor(item, data, is_past=True)
-                                
+                            
                             with col_link:
                                 st.write("")
                                 st.write("")
