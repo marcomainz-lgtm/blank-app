@@ -119,97 +119,6 @@ FIELD_OPTIONS = [
     "Sonstiges"
 ]
 
-CITY_COORDINATES = {
-    "Langenfeld": (51.1114, 6.9497),
-    "Hilden": (51.1693, 6.9328),
-    "Solingen": (51.1712, 7.0841),
-    "Düsseldorf": (51.2277, 6.7735),
-    "Wuppertal": (51.2562, 7.1508),
-    "Remscheid": (51.1798, 7.1923),
-    "Mettmann": (51.2541, 6.9765),
-    "Ratingen": (51.2964, 6.8526),
-    "Erkrath": (51.2239, 6.9142),
-    "Haan": (51.1931, 7.0125),
-    "Velbert": (51.3402, 7.0422),
-    "Heiligenhaus": (51.3256, 6.9711),
-    "Monheim am Rhein": (51.0911, 6.8906),
-    "Monheim": (51.0911, 6.8906),
-    "Leverkusen": (51.0459, 6.9856),
-    "Köln": (50.9375, 6.9603),
-    "Bonn": (50.7374, 7.0982),
-    "Bergisch Gladbach": (50.9929, 7.1293),
-    "Siegburg": (50.7997, 7.2074),
-    "Sankt Augustin": (50.7702, 7.1873),
-    "Troisdorf": (50.8167, 7.1583),
-    "Hennef": (50.7758, 7.2831),
-    "Euskirchen": (50.6606, 6.7872),
-    "Düren": (50.8022, 6.4842),
-    "Aachen": (50.7753, 6.0839),
-    "Stolberg": (50.7681, 6.2308),
-    "Eschweiler": (50.8197, 6.2625),
-    "Jülich": (50.9224, 6.3606),
-    "Mönchengladbach": (51.1911, 6.4431),
-    "Viersen": (51.2564, 6.3917),
-    "Krefeld": (51.3388, 6.5853),
-    "Neuss": (51.1982, 6.6917),
-    "Dormagen": (51.0964, 6.8397),
-    "Grevenbroich": (51.0883, 6.5878),
-    "Willich": (51.2628, 6.5494),
-    "Meerbusch": (51.2725, 6.6692),
-    "Kaarst": (51.2269, 6.6206),
-    "Kempen": (51.3653, 6.4194),
-    "Nettetal": (51.3167, 6.2833),
-    "Moers": (51.4514, 6.6286),
-    "Duisburg": (51.4344, 6.7623),
-    "Oberhausen": (51.4700, 6.8517),
-    "Mülheim an der Ruhr": (51.4272, 6.8828),
-    "Mülheim": (51.4272, 6.8828),
-    "Essen": (51.4556, 7.0116),
-    "Bottrop": (51.5239, 6.9286),
-    "Gelsenkirchen": (51.5175, 7.0858),
-    "Bochum": (51.4818, 7.2162),
-    "Herne": (51.5425, 7.2239),
-    "Recklinghausen": (51.6167, 7.2000),
-    "Gladbeck": (51.5714, 6.9911),
-    "Marl": (51.6667, 7.1167),
-    "Dorsten": (51.6603, 6.9653),
-    "Castrop-Rauxel": (51.5500, 7.3167),
-    "Dortmund": (51.5136, 7.4653),
-    "Witten": (51.4417, 7.3361),
-    "Hagen": (51.3671, 7.4633),
-    "Schwerte": (51.4417, 7.5667),
-    "Lünen": (51.6167, 7.5167),
-    "Unna": (51.5350, 7.6889),
-    "Kamen": (51.5917, 7.6639),
-    "Hamm": (51.6811, 7.8186),
-    "Iserlohn": (51.3761, 7.6958),
-    "Menden": (51.4333, 7.7833),
-    "Lüdenscheid": (51.2197, 7.6269),
-    "Arnsberg": (51.3967, 8.0644),
-    "Soest": (51.5714, 8.1067),
-    "Münster": (51.9607, 7.6261),
-    "Coesfeld": (51.9461, 7.1683),
-    "Dülmen": (51.8308, 7.2783),
-    "Borken": (51.8439, 6.8583),
-    "Bocholt": (51.8389, 6.6167),
-    "Wesel": (51.6583, 6.6167),
-    "Dinslaken": (51.5667, 6.7333),
-    "Voerde": (51.6000, 6.6833),
-    "Kleve": (51.7889, 6.1389),
-    "Emmerich": (51.8333, 6.2500),
-    "Geldern": (51.5194, 6.3319),
-    "Kevelaer": (51.5833, 6.2500),
-    "Kamp-Lintfort": (51.5000, 6.5333),
-    "Wermelskirchen": (51.1389, 7.2167),
-    "Wipperfürth": (51.1167, 7.4000),
-    "Radevormwald": (51.2000, 7.3500),
-    "Gummersbach": (51.0264, 7.5658),
-    "Wiehl": (50.9500, 7.5500),
-    "Waldbröl": (50.9000, 7.6167),
-    "Burscheid": (51.0833, 7.1167),
-    "Leichlingen": (51.1167, 7.0167)
-}
-
 # Custom CSS
 st.markdown(
     """
@@ -230,13 +139,14 @@ st.markdown(
         touch-action: pan-y !important;
     }
 
-    /* FILIGRANES ZEIT-DASHBOARD STYLING (BREITER & LESBAR) */
+    /* FILIGRANES ZEIT-DASHBOARD STYLING */
     .zeit-card {
         background-color: #12161f;
         border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 10px;
-        padding: 10px 14px;
+        border-radius: 12px;
+        padding: 14px 18px;
         margin-bottom: 6px;
+        min-height: 250px;
         box-sizing: border-box;
     }
     .zeit-header-title {
@@ -245,22 +155,22 @@ st.markdown(
         color: #94a3b8;
         text-transform: uppercase;
         letter-spacing: 0.6px;
-        margin-bottom: 2px;
+        margin-bottom: 3px;
         display: flex;
         justify-content: space-between;
         align-items: center;
     }
     .zeit-hero-number {
-        font-size: 1.55rem;
+        font-size: 1.6rem;
         font-weight: 800;
         color: #f8fafc;
         line-height: 1.1;
-        margin-bottom: 2px;
+        margin-bottom: 3px;
     }
     .zeit-hero-sub {
-        font-size: 0.75rem;
+        font-size: 0.78rem;
         color: #64748b;
-        margin-bottom: 6px;
+        margin-bottom: 10px;
     }
     .zeit-kpi-row {
         display: flex;
@@ -277,11 +187,54 @@ st.markdown(
         color: #e2e8f0;
     }
 
+    /* ZEIT-STYLE BALKEN (IDEE 1) */
+    .hotspot-row {
+        margin-bottom: 8px;
+    }
+    .hotspot-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.82rem;
+        margin-bottom: 3px;
+        color: #f8fafc;
+        font-family: 'Inter', -apple-system, sans-serif;
+    }
+    .hotspot-city {
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .hotspot-dist {
+        font-size: 0.7rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+    .hotspot-count {
+        font-weight: 700;
+        font-size: 0.78rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .hotspot-bar-bg {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 4px;
+        height: 6px;
+        overflow: hidden;
+    }
+    .hotspot-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
     /* BILD 1: GANZE TURNIERKACHEL HERVORHEBEN: HEUTE (GLOWING RED BORDER + TINT) */
     div[data-testid="stVerticalBlockBorderWrapper"]:has(.today-card-marker) {
         border: 2px solid #ef4444 !important;
-        background: #181d28 radial-gradient(circle at top, rgba(239, 68, 68, 0.16) 0%, rgba(24, 29, 40, 0) 75%) !important;
-        box-shadow: 0 0 22px rgba(239, 68, 68, 0.45), inset 0 0 10px rgba(239, 68, 68, 0.08) !important;
+        background: #181d28 radial-gradient(circle at top, rgba(239, 68, 68, 0.14) 0%, rgba(24, 29, 40, 0) 75%) !important;
+        box-shadow: 0 0 22px rgba(239, 68, 68, 0.45), inset 0 0 12px rgba(239, 68, 68, 0.08) !important;
         border-radius: 16px !important;
     }
 
@@ -415,6 +368,7 @@ st.markdown(
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
+# Kompakter Login-Bereich
 col_spacer, col_login = st.columns([4.2, 1.3])
 with col_login:
     if st.session_state['logged_in']:
@@ -726,7 +680,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             if partner_hd and partner_hd in PARTNERS_HD and PARTNERS_HD[partner_hd]:
                 hd_status_text = f"Mit <a href='{PARTNERS_HD[partner_hd]}' target='_blank'>{safe_partner_hd}</a> (Feld voll)"
             elif partner_hd:
-                hd_status_text = f"Mit {safe_partner_hd} (Feld voll)"
+                hd_status_text = f"Mit {safe_partner_hd}" (Feld voll)
             else:
                 hd_status_text = "Ohne Partner (Feld voll)"
         else:
@@ -776,7 +730,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             if partner_mx and partner_mx in PARTNERS_MX and PARTNERS_MX[partner_mx]:
                 mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{safe_partner_mx}</a> (Feld voll)"
             elif partner_mx:
-                mx_status_text = f"Mit {safe_partner_mx}"
+                mx_status_text = f"Mit {safe_partner_mx}" (Feld voll)
             else:
                 mx_status_text = "Ohne Partnerin (Feld voll)"
         else:
@@ -1038,8 +992,8 @@ def render_season_chart(df):
     ticktext = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"]
 
     fig.update_layout(
-        height=240,
-        margin=dict(l=10, r=10, t=10, b=10),
+        height=210,
+        margin=dict(l=5, r=5, t=5, b=5),
         autosize=True,
         showlegend=False,
         yaxis=dict(
@@ -1048,7 +1002,7 @@ def render_season_chart(df):
             gridcolor="rgba(255, 255, 255, 0.06)",
             zeroline=False,
             fixedrange=True,
-            tickfont=dict(color="#94a3b8", size=10.5, family="Inter, -apple-system, sans-serif")
+            tickfont=dict(color="#94a3b8", size=10, family="Inter, -apple-system, sans-serif")
         ),
         xaxis=dict(
             tickmode="array",
@@ -1057,7 +1011,7 @@ def render_season_chart(df):
             gridcolor="rgba(255, 255, 255, 0.04)",
             zeroline=False,
             fixedrange=True,
-            tickfont=dict(color="#94a3b8", size=10, family="Inter, -apple-system, sans-serif")
+            tickfont=dict(color="#94a3b8", size=9.5, family="Inter, -apple-system, sans-serif")
         ),
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
@@ -1075,17 +1029,16 @@ def render_season_chart(df):
             <div class="zeit-header-title">
                 <span>Formkurve 2026</span>
                 <span style="font-size:0.75rem; color:#94a3b8; font-weight:normal; text-transform:none;">
-                    <span style="color:#22d3ee;">●</span> Einzel &nbsp;<span style="color:#4ade80;">●</span> Doppel &nbsp;<span style="color:#c084fc;">●</span> Mixed
+                    <span style="color:#22d3ee;">●</span> HE &nbsp;<span style="color:#4ade80;">●</span> HD &nbsp;<span style="color:#c084fc;">●</span> MX
                 </span>
             </div>
             <div class="zeit-hero-number">{total_played} Turniere</div>
             <div class="zeit-hero-sub">Gespielte Turniere im Jahresverlauf</div>
-            <div class="zeit-kpi-row">
+            <div class="zeit-kpi-row" style="margin-bottom: 6px;">
                 <span class="zeit-kpi-tag" style="border-color: #f59e0b; color: #fbbf24;">🥇 {gold_cnt}x Gold</span>
                 <span class="zeit-kpi-tag" style="border-color: #94a3b8; color: #e2e8f0;">🥈 {silver_cnt}x Silber</span>
                 <span class="zeit-kpi-tag" style="border-color: #ea580c; color: #fdba74;">🥉 {bronze_cnt}x Bronze</span>
             </div>
-        </div>
         """,
         unsafe_allow_html=True
     )
@@ -1095,12 +1048,12 @@ def render_season_chart(df):
         use_container_width=True,
         config={"displayModeBar": False, "scrollZoom": False, "doubleClick": False}
     )
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
-# --- DETAILREICHE INTERAKTIVE STRASSENKARTE (ESRI DARK CANVAS: 100% FREI, OHNE API-KEY, KEIN WASSERZEICHEN) ---
-def render_tournament_heatmap(df, today):
-    city_counts = {}
-    city_tournaments = {}
+# --- IDEE 1: HORIZONTALE ZEIT-STYLE BALKEN (AUSTAGUNGSORTE & STATISTIK) ---
+def render_city_hotspots(df, today):
+    city_stats = {}
 
     for _, row in df.iterrows():
         is_reg = bool(row.get('registered', False))
@@ -1116,136 +1069,98 @@ def render_tournament_heatmap(df, today):
         if not (is_reg and (is_past or has_result)):
             continue
 
-        raw_city = str(row.get('city', '')).strip()
+        raw_city = str(row.get('city', 'Unbekannt')).strip()
         if not raw_city or raw_city == "Unbekannt":
             continue
         
         clean_c = re.sub(r'^\d+\s*', '', raw_city).strip()
-        matched_city = None
-        
-        if clean_c in CITY_COORDINATES:
-            matched_city = clean_c
-        else:
-            for known_c in CITY_COORDINATES.keys():
-                if known_c.lower() in clean_c.lower() or clean_c.lower() in known_c.lower():
-                    matched_city = known_c
-                    break
+        dist = row.get('distance')
 
-        if matched_city:
-            city_counts[matched_city] = city_counts.get(matched_city, 0) + 1
-            t_title = row.get('title', 'Turnier')
-            city_tournaments.setdefault(matched_city, []).append(t_title)
+        if clean_c not in city_stats:
+            city_stats[clean_c] = {
+                "count": 0,
+                "dist": dist,
+                "golds": 0,
+                "silvers": 0,
+                "bronzes": 0
+            }
 
-    if not city_counts:
+        city_stats[clean_c]["count"] += 1
+        if dist is not None and city_stats[clean_c]["dist"] is None:
+            city_stats[clean_c]["dist"] = dist
+
+        # Medaillen in der Stadt erfassen
+        all_p = [str(row.get(f'placement_{d}', '')) for d in ['he', 'hd', 'mx']] + [str(row.get('placement', '')), str(row.get('result', ''))]
+        for p in all_p:
+            p_l = p.lower()
+            if "1." in p or "gold" in p_l:
+                city_stats[clean_c]["golds"] += 1
+            elif "2." in p or "silber" in p_l:
+                city_stats[clean_c]["silvers"] += 1
+            elif "3." in p or "bronze" in p_l:
+                city_stats[clean_c]["bronzes"] += 1
+
+    if not city_stats:
         st.info("Noch keine teilgenommenen Turniere mit Spielort erfasst.")
         return
 
-    top_cities = sorted(city_counts.items(), key=lambda x: x[1], reverse=True)[:2]
-    hotspot_str = " • ".join([f"{c} ({cnt})" for c, cnt in top_cities])
+    # Nach Häufigkeit sortieren
+    sorted_cities = sorted(city_stats.items(), key=lambda x: x[1]["count"], reverse=True)
+    max_count = sorted_cities[0][1]["count"] if sorted_cities else 1
+    total_played_count = sum(s["count"] for s in city_stats.values())
+
+    # Farbpalette wie im ZEIT-Dashboard
+    bar_colors = ["#22d3ee", "#4ade80", "#f59e0b", "#c084fc", "#38bdf8", "#fb7185"]
+
+    rows_html = []
+    for idx, (c_name, s) in enumerate(sorted_cities[:5]):
+        color = bar_colors[idx % len(bar_colors)]
+        pct = max(12, int((s["count"] / max_count) * 100))
+        
+        dist_str = f"{s['dist']} km" if s['dist'] is not None else ("Basis" if c_name == "Langenfeld" else "")
+        dist_span = f'<span class="hotspot-dist">({dist_str})</span>' if dist_str else ""
+        
+        # Medaillen-Zusammenfassung
+        medals = []
+        if s["golds"] > 0: medals.append(f"🥇 {s['golds']}")
+        if s["silvers"] > 0: medals.append(f"🥈 {s['silvers']}")
+        if s["bronzes"] > 0: medals.append(f"🥉 {s['bronzes']}")
+        medals_str = " ".join(medals)
+
+        t_word = "Turniere" if s["count"] > 1 else "Turnier"
+        count_display = f"{s['count']} {t_word}"
+        if medals_str:
+            count_display += f" &nbsp;•&nbsp; {medals_str}"
+
+        rows_html.append(f"""
+        <div class="hotspot-row">
+            <div class="hotspot-meta">
+                <span class="hotspot-city">{c_name} {dist_span}</span>
+                <span class="hotspot-count">{count_display}</span>
+            </div>
+            <div class="hotspot-bar-bg">
+                <div class="hotspot-bar-fill" style="width: {pct}%; background-color: {color};"></div>
+            </div>
+        </div>
+        """)
 
     st.markdown(
         f"""
         <div class="zeit-card">
             <div class="zeit-header-title">
-                <span>Spielorte • NRW</span>
-                <span class="zeit-kpi-tag" style="border-color:#38bdf8; color:#38bdf8; font-size:0.68rem;">100 km Radius</span>
+                <span>Austragungsorte • Ranking</span>
+                <span class="zeit-kpi-tag" style="border-color:#22d3ee; color:#22d3ee;">Hotspots</span>
             </div>
-            <div class="zeit-hero-number">{len(city_counts)} Städte</div>
-            <div class="zeit-hero-sub">Gespielte Turnierorte 2026</div>
-            <div class="zeit-kpi-row">
-                <span class="zeit-kpi-tag" style="border-color: #22d3ee; color: #22d3ee;">📍 Top: {hotspot_str}</span>
+            <div class="zeit-hero-number">{len(city_stats)} Städte</div>
+            <div class="zeit-hero-sub">{total_played_count} gespielte Turniere nach Spielort</div>
+            
+            <div style="margin-top: 14px;">
+                {''.join(rows_html)}
             </div>
         </div>
         """,
         unsafe_allow_html=True
     )
-
-    markers_js = []
-    for c, cnt in city_counts.items():
-        if c == "Langenfeld":
-            continue
-        lat, lon = CITY_COORDINATES[c]
-        t_sample = " • ".join(city_tournaments[c][:3])
-        safe_city = html.escape(c)
-        safe_sample = html.escape(t_sample).replace("'", "&#39;")
-        radius = min(6 + cnt * 3, 16)
-        
-        markers_js.append(f"""
-            L.circleMarker([{lat}, {lon}], {{
-                radius: {radius},
-                color: '#22d3ee',
-                weight: 2,
-                fillColor: '#06b6d4',
-                fillOpacity: 0.85
-            }}).addTo(map).bindPopup("<b>📍 {safe_city}</b><br>{cnt} gespielte(s) Turnier(e)<br><small style='color:#94a3b8;'>{safe_sample}</small>");
-        """)
-
-    # Langenfeld Heimatbasis (Gold-Marker)
-    h_lat, h_lon = CITY_COORDINATES["Langenfeld"]
-    markers_js.append(f"""
-        L.circleMarker([{h_lat}, {h_lon}], {{
-            radius: 8,
-            color: '#f59e0b',
-            weight: 2.5,
-            fillColor: '#fbbf24',
-            fillOpacity: 0.95
-        }}).addTo(map).bindPopup("<b>🏠 Langenfeld</b><br>Heimatbasis (100 km Umkreis)");
-    """)
-
-    markers_script = "\n".join(markers_js)
-
-    map_html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8" />
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-        <style>
-            html, body {{ margin:0; padding:0; height:100%; background:#12161f; }}
-            #map {{ width:100%; height:240px; border-radius:10px; background:#12161f; }}
-            .leaflet-popup-content-wrapper {{ background: #1e293b; color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 11px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); }}
-            .leaflet-popup-tip {{ background: #1e293b; }}
-        </style>
-    </head>
-    <body>
-        <div id="map"></div>
-        <script>
-            // Initialisierung auf Langenfeld & 100km Umkreis
-            var map = L.map('map', {{ 
-                attributionControl: false, 
-                zoomControl: true,
-                scrollWheelZoom: false,
-                touchZoom: true
-            }}).setView([51.15, 6.95], 9);
-
-            // Esri World Dark Gray Base (Dark basemap mit Straßen & Städten, 100% frei ohne API-Key)
-            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{{z}}/{{y}}/{{x}}', {{
-                maxZoom: 16
-            }}).addTo(map);
-
-            // Esri World Dark Gray Reference (Labels & administrative Grenzen)
-            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{{z}}/{{y}}/{{x}}', {{
-                maxZoom: 16
-            }}).addTo(map);
-
-            // 100 km Radiuskreis um Langenfeld
-            L.circle([{h_lat}, {h_lon}], {{
-                radius: 100000,
-                color: '#22d3ee',
-                weight: 1.5,
-                dashArray: '5, 5',
-                fillColor: '#22d3ee',
-                fillOpacity: 0.03
-            }}).addTo(map);
-
-            {markers_script}
-        </script>
-    </body>
-    </html>
-    """
-
-    st.components.v1.html(map_html, height=245)
 
 
 # --- WIEDERVERWENDBARER ADMIN-EDITOR ---
@@ -1743,14 +1658,14 @@ elif data is not None:
 
         month_names = {1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni", 7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"}
 
-        # --- 2 KACHELN NEBENEINANDER (FORMKURVE & ESRI DARK MAP MIT 100KM-RADIUS) ---
+        # --- 2 KACHELN NEBENEINANDER (FORMKURVE & ZEIT-HOTSPOT-BALKEN) ---
         st.write("")
-        with st.expander("📊 Saison-Analyse 2026 (Formkurve & Gespielte Spielorte)", expanded=False):
-            col_chart_box, col_map_box = st.columns(2)
+        with st.expander("📊 Saison-Analyse 2026 (Formkurve & Austragungsorte)", expanded=False):
+            col_chart_box, col_hotspot_box = st.columns(2)
             with col_chart_box:
                 render_season_chart(df)
-            with col_map_box:
-                render_tournament_heatmap(df, today)
+            with col_hotspot_box:
+                render_city_hotspots(df, today)
 
         # --- ANSTEHENDE TURNIERE (DAS HERZ DER APP) ---
         st.subheader(f"📅 Anstehende Turniere ({len(df_upcoming)})")
