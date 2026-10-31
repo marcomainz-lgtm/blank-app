@@ -225,34 +225,55 @@ st.markdown(
 
     .card-inner-container { font-family: 'Inter', -apple-system, sans-serif; }
     
-    /* Touch-Scroll-Fix: Verhindert Touch-Blockade am Smartphone */
+    /* Touch-Scroll-Fix */
     .js-plotly-plot .plotly, .js-plotly-plot .gl-container, .user-select-none.svg-container {
         touch-action: pan-y !important;
     }
     
-    /* DESKTOP-BREITE BEGRENZEN: Maximal 780px zentriert (analog ZEIT-Dashboard) */
+    /* DESKTOP-BREITE BEGRENZEN: Maximal 780px zentriert */
     div[data-testid="stExpander"]:has(.zeit-mobile-anchor) {
         max-width: 780px !important;
         margin-left: auto !important;
         margin-right: auto !important;
     }
 
-    /* MOBIL: 2 KACHELN NEBENEINANDER OHNE HORIZONTALES SWIPEN */
+    /* MOBIL: 1 KACHEL PRO BILD ALS HORIZONTALES KARUSSELL */
     @media (max-width: 768px) {
         div[data-testid="stHorizontalBlock"]:has(.zeit-mobile-anchor) {
             display: flex !important;
             flex-direction: row !important;
             flex-wrap: nowrap !important;
-            gap: 6px !important;
-            width: 100% !important;
-            overflow: hidden !important;
+            overflow-x: auto !important;
+            scroll-snap-type: x mandatory !important;
+            -webkit-overflow-scrolling: touch !important;
+            gap: 10px !important;
+            padding: 2px 2px 8px 2px !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.zeit-mobile-anchor)::-webkit-scrollbar {
+            display: none !important;
         }
         div[data-testid="stHorizontalBlock"]:has(.zeit-mobile-anchor) > div[data-testid="column"] {
-            width: calc(50% - 3px) !important;
-            min-width: 0 !important;
-            max-width: calc(50% - 3px) !important;
-            flex: 1 1 calc(50% - 3px) !important;
-            overflow: hidden !important;
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
+            flex: 0 0 100% !important;
+            scroll-snap-align: start !important;
+            scroll-snap-stop: always !important;
+            box-sizing: border-box !important;
+        }
+        .carousel-hint-text {
+            display: flex !important;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.68rem;
+            color: #64748b;
+            margin-top: -2px;
+            margin-bottom: 6px;
+        }
+    }
+    @media (min-width: 769px) {
+        .carousel-hint-text {
+            display: none !important;
         }
     }
 
@@ -309,36 +330,55 @@ st.markdown(
         white-space: nowrap;
     }
 
-    /* Sportlich-markante Störer */
-    .stoerer-banner-today {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: linear-gradient(135deg, #f97316, #ea580c);
-        color: #ffffff !important;
-        font-weight: 800;
-        font-size: 0.82rem;
-        padding: 5px 12px;
-        border-radius: 6px;
-        letter-spacing: 0.6px;
-        box-shadow: 0 3px 10px rgba(234, 88, 12, 0.35);
-        margin-bottom: 10px;
-        text-transform: uppercase;
+    /* GANZE TURNIERKACHEL HERVORHEBEN: HEUTE (SIGNAL-ORANGE BORDER + GLOW) */
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.today-card-marker) {
+        border: 2px solid #ea580c !important;
+        background: linear-gradient(180deg, rgba(234, 88, 12, 0.14) 0%, rgba(18, 22, 31, 0.45) 90px) !important;
+        box-shadow: 0 4px 22px rgba(234, 88, 12, 0.3) !important;
+        border-radius: 12px !important;
     }
-    .stoerer-banner-tomorrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: linear-gradient(135deg, #f59e0b, #d97706);
+
+    /* ÜBERGEORDNETES BANNER ÜBER DIE GESAMTE KACHELBREITE (HEUTE) */
+    .overarching-top-banner-today {
+        background: linear-gradient(90deg, #ea580c 0%, #f97316 100%);
         color: #ffffff !important;
         font-weight: 800;
-        font-size: 0.82rem;
-        padding: 5px 12px;
-        border-radius: 6px;
-        letter-spacing: 0.6px;
-        box-shadow: 0 3px 10px rgba(217, 119, 6, 0.3);
-        margin-bottom: 10px;
+        font-size: 0.8rem;
+        letter-spacing: 0.8px;
         text-transform: uppercase;
+        padding: 6px 14px;
+        border-radius: 8px;
+        margin-top: -4px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 8px rgba(234, 88, 12, 0.35);
+    }
+
+    /* GANZE TURNIERKACHEL HERVORHEBEN: MORGEN (BERNSTEIN-GOLD BORDER) */
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.tomorrow-card-marker) {
+        border: 1.5px solid #d97706 !important;
+        background: linear-gradient(180deg, rgba(217, 119, 6, 0.09) 0%, rgba(18, 22, 31, 0.3) 80px) !important;
+        box-shadow: 0 3px 16px rgba(217, 119, 6, 0.22) !important;
+        border-radius: 12px !important;
+    }
+
+    /* ÜBERGEORDNETES BANNER ÜBER DIE GESAMTE KACHELBREITE (MORGEN) */
+    .overarching-top-banner-tomorrow {
+        background: linear-gradient(90deg, #d97706 0%, #f59e0b 100%);
+        color: #ffffff !important;
+        font-weight: 800;
+        font-size: 0.78rem;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        padding: 5px 12px;
+        border-radius: 8px;
+        margin-top: -4px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
     /* Medaillen-Badges in Disziplin-Kacheln */
@@ -425,7 +465,6 @@ st.markdown(
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
-# Kompakter Login-Bereich
 col_spacer, col_login = st.columns([4.2, 1.3])
 with col_login:
     if st.session_state['logged_in']:
@@ -456,7 +495,6 @@ IS_ADMIN = st.session_state['logged_in']
 st.title("🏸 Badminton Turniere in der Region")
 st.write("Auf dieser Seite findet ihr alle Seniorenturniere 2026, die im Umkreis von 100 km um Langenfeld stattfinden.")
 
-# Zeitstempel aus dem Gist
 def get_last_update_str():
     if "last_update_override" in st.session_state:
         return st.session_state["last_update_override"]
@@ -642,13 +680,6 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
 
     start_date_obj = item['Start_Date_Obj']
     end_date_obj = item['End_Date_Obj']
-
-    stoerer_html = ""
-    if start_date_obj and end_date_obj:
-        if start_date_obj <= today <= end_date_obj:
-            stoerer_html = '<div class="stoerer-banner-today">🏸 HEUTE SPIELTAG!</div>'
-        elif (start_date_obj - today).days == 1:
-            stoerer_html = '<div class="stoerer-banner-tomorrow">⏳ MORGEN SPIELTAG</div>'
 
     has_he = (day_he != "Disziplin findet nicht statt")
     has_hd = (day_hd != "Disziplin findet nicht statt")
@@ -913,7 +944,6 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
 
     html_out = f"""
     <div class="card-inner-container">
-        {stoerer_html}
         {badges_html}
         {notes_html}
         {disciplines_html}
@@ -1042,7 +1072,7 @@ def render_season_chart(df):
                 color=colors.get(disc_name, "#94a3b8"),
                 width=2.0,
                 shape="spline",
-                smoothing=1.3  # Weiche, elegante Kurven
+                smoothing=1.3
             ),
             marker=dict(
                 size=6.0,
@@ -1054,7 +1084,6 @@ def render_season_chart(df):
             hoverinfo="text"
         ))
 
-    # X-Achse: Entzerrt auf Zweimonatsschritte für perfekte Lesbarkeit auf Mobile
     tickvals = [datetime.date(2026, m, 1) for m in [1, 3, 5, 7, 9, 11]]
     ticktext = ["JAN", "MÄR", "MAI", "JUL", "SEP", "NOV"]
 
@@ -1068,7 +1097,7 @@ def render_season_chart(df):
             categoryarray=y_categories,
             gridcolor="rgba(255, 255, 255, 0.06)",
             zeroline=False,
-            fixedrange=True,  # Kein Zoom-Trap beim Wischen
+            fixedrange=True,
             tickfont=dict(color="#94a3b8", size=7.5, family="Inter, -apple-system, sans-serif")
         ),
         xaxis=dict(
@@ -1077,7 +1106,7 @@ def render_season_chart(df):
             ticktext=ticktext,
             gridcolor="rgba(255, 255, 255, 0.04)",
             zeroline=False,
-            fixedrange=True,  # Kein Zoom-Trap beim Wischen
+            fixedrange=True,
             tickfont=dict(color="#64748b", size=7.5, family="Inter, -apple-system, sans-serif")
         ),
         plot_bgcolor="rgba(0,0,0,0)",
@@ -1118,7 +1147,7 @@ def render_season_chart(df):
     )
 
 
-# --- ECHTE MINIMALISTISCHE NRW-VEKTORSILHOUETTE (ZEIT-LOOK, ENTZERRT & OHNE SAT-MÜLL) ---
+# --- ECHTE MINIMALISTISCHE NRW-VEKTORSILHOUETTE ---
 def render_tournament_heatmap(df, today):
     city_counts = {}
     city_tournaments = {}
@@ -1181,7 +1210,6 @@ def render_tournament_heatmap(df, today):
         unsafe_allow_html=True
     )
 
-    # Projektion der echten NRW-Landesgrenzen auf kompaktes SVG-Canvas
     def project_nrw(lat, lon, width=170, height=138, pad_x=8, pad_y=6):
         min_lat, max_lat = 50.32, 52.53
         min_lon, max_lon = 5.86, 9.46
@@ -1189,7 +1217,6 @@ def render_tournament_heatmap(df, today):
         y = height - pad_y - (lat - min_lat) / (max_lat - min_lat) * (height - 2 * pad_y)
         return round(x, 1), round(y, 1)
 
-    # Unverkennbare Vektor-Silhouette des Landes Nordrhein-Westfalen
     NRW_OUTLINE = [
         (52.53, 8.65), (52.40, 9.00), (52.28, 8.95), (52.12, 9.25), (51.85, 9.42), 
         (51.64, 9.40), (51.49, 9.15), (51.45, 8.92), (51.20, 8.65), (51.05, 8.52), 
@@ -1200,14 +1227,12 @@ def render_tournament_heatmap(df, today):
     ]
     nrw_pts = " ".join([f"{project_nrw(lat, lon)[0]},{project_nrw(lat, lon)[1]}" for lat, lon in NRW_OUTLINE])
 
-    # Der Rhein als Orientierungsader durch NRW
     RHINE_COORDS = [
         (50.62, 7.22), (50.74, 7.10), (50.94, 6.97), (51.10, 6.88), 
         (51.22, 6.75), (51.44, 6.74), (51.66, 6.60), (51.84, 6.05)
     ]
     rhine_pts = " ".join([f"{project_nrw(lat, lon)[0]},{project_nrw(lat, lon)[1]}" for lat, lon in RHINE_COORDS])
 
-    # Gespielte Turnierorte (Neon-Cyan, kein Text-Salat)
     city_dots = []
     for c, cnt in city_counts.items():
         if c == "Langenfeld":
@@ -1222,7 +1247,6 @@ def render_tournament_heatmap(df, today):
             </circle>
         """)
 
-    # Langenfeld als goldene Basis
     lx, ly = project_nrw(CITY_COORDINATES["Langenfeld"][0], CITY_COORDINATES["Langenfeld"][1])
     langenfeld_element = f"""
         <circle cx="{lx}" cy="{ly}" r="4.5" fill="#f59e0b" stroke="#ffffff" stroke-width="1.2">
@@ -1234,15 +1258,10 @@ def render_tournament_heatmap(df, today):
     svg_map_html = f"""
     <div style="background-color: #12161f; border-radius: 9px; border: 1px solid rgba(255, 255, 255, 0.08); padding: 4px; height: 140px; display: flex; align-items: center; justify-content: center; position: relative; box-sizing: border-box; overflow: hidden;">
         <svg viewBox="0 0 170 138" style="width: 100%; height: 100%; max-height: 132px;">
-            <!-- NRW Umrissfläche -->
             <polygon points="{nrw_pts}" fill="#181d28" stroke="rgba(255, 255, 255, 0.22)" stroke-width="1.1" stroke-linejoin="round" />
-            <!-- Subtiles NRW-Wasserzeichen -->
             <text x="160" y="18" fill="rgba(255, 255, 255, 0.12)" font-size="11" font-weight="900" font-family="Inter, sans-serif" text-anchor="end">NRW</text>
-            <!-- Rhein -->
             <polyline points="{rhine_pts}" fill="none" stroke="rgba(34, 211, 238, 0.18)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            <!-- Gespielte Spielorte -->
             {' '.join(city_dots)}
-            <!-- Heimatbasis Langenfeld -->
             {langenfeld_element}
         </svg>
     </div>
@@ -1477,7 +1496,7 @@ def render_admin_editor(item, full_data, is_past=False):
                 st.rerun()
 
 
-# --- DATEN AUS DEM GIST LADEN (MIT SICHERHEITSNETZ) ---
+# --- DATEN AUS DEM GIST LADEN (MIT AUTOMATISCHER JUGEND-BEREINIGUNG) ---
 data = None
 db_error_msg = None
 
@@ -1498,6 +1517,29 @@ if db_error_msg:
     )
 elif data is not None:
     if data:
+        def is_youth_item(item):
+            t_title = str(item.get('title', '')).lower()
+            t_tags = str(item.get('tags', '')).lower()
+            u_pat = re.compile(r'^u\d+$', re.IGNORECASE)
+            
+            for t in [x.strip() for x in t_tags.split(',')]:
+                if u_pat.match(t):
+                    return True
+            if re.search(r'\b[uU]\d{1,2}\b', t_title):
+                return True
+            y_kws = ['junior', 'kids', 'küken', 'schüler', 'jugend', 'nachwuchs', 'mini-cup', 'newcomer']
+            return any(kw in t_title for kw in y_kws)
+
+        # Bereinigung: Löscht Jugendturniere dauerhaft aus der Gist-Datenbank, wenn Admin angemeldet ist
+        if IS_ADMIN:
+            clean_db = {k: v for k, v in data.items() if not is_youth_item(v)}
+            if len(clean_db) < len(data):
+                save_tournaments_data(DB_FILE, clean_db)
+                data = clean_db
+
+        # Für alle Besucher: Jugendturniere sofort ausfiltern
+        data_filtered = {k: v for k, v in data.items() if not is_youth_item(v)}
+
         # Admin-Aktionen
         if IS_ADMIN:
             col_act_upd, col_act_bck = st.columns([1, 1])
@@ -1532,7 +1574,7 @@ elif data is not None:
             with col_act_bck:
                 st.download_button(
                     label="💾 Datenbank-Backup herunterladen (JSON)",
-                    data=json.dumps(data, indent=2, ensure_ascii=False),
+                    data=json.dumps(data_filtered, indent=2, ensure_ascii=False),
                     file_name=f"badminton_backup_{datetime.date.today().strftime('%Y-%m-%d')}.json",
                     mime="application/json",
                     use_container_width=True
@@ -1545,7 +1587,7 @@ elif data is not None:
                 else:
                     st.info(f"ℹ️ {fb}")
 
-        df = pd.DataFrame(data.values())
+        df = pd.DataFrame(data_filtered.values())
         
         fallback_cols = {
             'registered': False,
@@ -1726,9 +1768,10 @@ elif data is not None:
 
         month_names = {1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni", 7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"}
 
-        # --- 2 KACHELN NEBENEINANDER (AUCH AUF DEM SMARTPHONE, OHNE HORIZONTALEN SCROLL) ---
+        # --- SMARTPHONE-KARUSSELL & DESKTOP 2-KACHEL-RASTER ---
         st.write("")
         with st.expander("📊 Saison-Analyse 2026 (Formkurve & Gespielte Spielorte)", expanded=True):
+            st.markdown('<div class="carousel-hint-text">⟵ 1/2 Formkurve &nbsp;|&nbsp; 2/2 NRW-Karte wischen ⟶</div>', unsafe_allow_html=True)
             col_chart_box, col_map_box = st.columns(2)
             with col_chart_box:
                 st.markdown('<div class="zeit-mobile-anchor"></div>', unsafe_allow_html=True)
@@ -1745,6 +1788,7 @@ elif data is not None:
                 current_month_str = ""
                 for idx, item in df_upcoming.iterrows():
                     start_date = item['Start_Date_Obj']
+                    end_date = item['End_Date_Obj']
                     item_month_str = "Datum unbekannt" if pd.isnull(start_date) else f"{month_names[start_date.month]} {start_date.year}"
                     
                     if item_month_str != current_month_str:
@@ -1752,7 +1796,17 @@ elif data is not None:
                         st.write("")
                         st.markdown(f"#### 📆 {current_month_str}")
                     
+                    # Überprüfung: Findet das Turnier HEUTE oder MORGEN statt?
+                    is_today = bool(start_date and end_date and start_date <= today <= end_date)
+                    is_tomorrow = bool(start_date and not is_today and (start_date - today).days == 1)
+
                     with st.container(border=True):
+                        # GANZE KACHEL HERVORHEBEN: Marker-Divs & übergeordnetes Dach-Banner
+                        if is_today:
+                            st.markdown('<div class="today-card-marker overarching-top-banner-today">🏸 DIESES TURNIER FINDET HEUTE STATT</div>', unsafe_allow_html=True)
+                        elif is_tomorrow:
+                            st.markdown('<div class="tomorrow-card-marker overarching-top-banner-tomorrow">⏳ MORGEN SPIELTAG</div>', unsafe_allow_html=True)
+
                         col_logo, col_info, col_link = st.columns([1.5, 6, 2])
                         with col_logo:
                             logo_to_show = item['logo_url']
