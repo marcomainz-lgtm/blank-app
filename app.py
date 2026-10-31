@@ -280,8 +280,8 @@ st.markdown(
     /* BILD 1: GANZE TURNIERKACHEL HERVORHEBEN: HEUTE (GLOWING RED BORDER + TINT) */
     div[data-testid="stVerticalBlockBorderWrapper"]:has(.today-card-marker) {
         border: 2px solid #ef4444 !important;
-        background: #181d28 radial-gradient(circle at top, rgba(239, 68, 68, 0.14) 0%, rgba(24, 29, 40, 0) 75%) !important;
-        box-shadow: 0 0 22px rgba(239, 68, 68, 0.45), inset 0 0 12px rgba(239, 68, 68, 0.08) !important;
+        background: #181d28 radial-gradient(circle at top, rgba(239, 68, 68, 0.16) 0%, rgba(24, 29, 40, 0) 75%) !important;
+        box-shadow: 0 0 22px rgba(239, 68, 68, 0.45), inset 0 0 10px rgba(239, 68, 68, 0.08) !important;
         border-radius: 16px !important;
     }
 
@@ -415,7 +415,6 @@ st.markdown(
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
-# Kompakter Login-Bereich
 col_spacer, col_login = st.columns([4.2, 1.3])
 with col_login:
     if st.session_state['logged_in']:
@@ -629,12 +628,12 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     partner_hd = item.get('partner_hd', '').strip()
     partner_mx = item.get('partner_mx', '').strip()
 
-    start_date_obj = item['Start_Date_Obj']
-    end_date_obj = item['End_Date_Obj']
-
     has_he = (day_he != "Disziplin findet nicht statt")
     has_hd = (day_hd != "Disziplin findet nicht statt")
     has_mx = (day_mx != "Disziplin findet nicht statt")
+
+    start_date_obj = item['Start_Date_Obj']
+    end_date_obj = item['End_Date_Obj']
 
     def format_day_badge(day_val, s_obj, e_obj):
         if not day_val or day_val == "-- Tag wählen --" or day_val == "TBA":
@@ -727,7 +726,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             if partner_hd and partner_hd in PARTNERS_HD and PARTNERS_HD[partner_hd]:
                 hd_status_text = f"Mit <a href='{PARTNERS_HD[partner_hd]}' target='_blank'>{safe_partner_hd}</a> (Feld voll)"
             elif partner_hd:
-                hd_status_text = f"Mit {safe_partner_hd}"
+                hd_status_text = f"Mit {safe_partner_hd} (Feld voll)"
             else:
                 hd_status_text = "Ohne Partner (Feld voll)"
         else:
@@ -1098,7 +1097,7 @@ def render_season_chart(df):
     )
 
 
-# --- DYNAMISCHE VEKTORKARTE: OPENFREEMAP DARK VIA MAPLIBRE GL (KEIN API-KEY, KEIN WASSERZEICHEN) ---
+# --- DETAILREICHE INTERAKTIVE STRASSENKARTE (ESRI DARK CANVAS: 100% FREI, OHNE API-KEY, KEIN WASSERZEICHEN) ---
 def render_tournament_heatmap(df, today):
     city_counts = {}
     city_tournaments = {}
@@ -1169,22 +1168,28 @@ def render_tournament_heatmap(df, today):
         t_sample = " • ".join(city_tournaments[c][:3])
         safe_city = html.escape(c)
         safe_sample = html.escape(t_sample).replace("'", "&#39;")
+        radius = min(6 + cnt * 3, 16)
         
-        popup_html = f"<b>📍 {safe_city}</b><br>{cnt} gespielte(s) Turnier(e)<br><small style='color:#94a3b8;'>{safe_sample}</small>"
         markers_js.append(f"""
-            new maplibregl.Marker({{ color: '#22d3ee' }})
-                .setLngLat([{lon}, {lat}])
-                .setPopup(new maplibregl.Popup({{ offset: 15 }}).setHTML('{popup_html}'))
-                .addTo(map);
+            L.circleMarker([{lat}, {lon}], {{
+                radius: {radius},
+                color: '#22d3ee',
+                weight: 2,
+                fillColor: '#06b6d4',
+                fillOpacity: 0.85
+            }}).addTo(map).bindPopup("<b>📍 {safe_city}</b><br>{cnt} gespielte(s) Turnier(e)<br><small style='color:#94a3b8;'>{safe_sample}</small>");
         """)
 
     # Langenfeld Heimatbasis (Gold-Marker)
     h_lat, h_lon = CITY_COORDINATES["Langenfeld"]
     markers_js.append(f"""
-        new maplibregl.Marker({{ color: '#f59e0b' }})
-            .setLngLat([{h_lon}, {h_lat}])
-            .setPopup(new maplibregl.Popup({{ offset: 15 }}).setHTML('<b>🏠 Langenfeld</b><br>Heimatbasis (100 km Umkreis)'))
-            .addTo(map);
+        L.circleMarker([{h_lat}, {h_lon}], {{
+            radius: 8,
+            color: '#f59e0b',
+            weight: 2.5,
+            fillColor: '#fbbf24',
+            fillOpacity: 0.95
+        }}).addTo(map).bindPopup("<b>🏠 Langenfeld</b><br>Heimatbasis (100 km Umkreis)");
     """)
 
     markers_script = "\n".join(markers_js)
@@ -1194,39 +1199,47 @@ def render_tournament_heatmap(df, today):
     <html>
     <head>
         <meta charset="utf-8" />
-        <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
-        <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <style>
             html, body {{ margin:0; padding:0; height:100%; background:#12161f; }}
-            #map {{ width:100%; height:240px; border-radius:10px; }}
-            .maplibregl-popup-content {{
-                background: #1e293b;
-                color: #f8fafc;
-                font-family: 'Inter', -apple-system, sans-serif;
-                font-size: 11px;
-                border-radius: 8px;
-                border: 1px solid rgba(255,255,255,0.15);
-                padding: 8px 10px;
-            }}
-            .maplibregl-popup-tip {{
-                border-top-color: #1e293b !important;
-            }}
+            #map {{ width:100%; height:240px; border-radius:10px; background:#12161f; }}
+            .leaflet-popup-content-wrapper {{ background: #1e293b; color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 11px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); }}
+            .leaflet-popup-tip {{ background: #1e293b; }}
         </style>
     </head>
     <body>
         <div id="map"></div>
         <script>
-            const map = new maplibregl.Map({{
-                container: 'map',
-                style: 'https://tiles.openfreemap.org/styles/dark',
-                center: [6.95, 51.15],
-                zoom: 8.3,
-                cooperativeGestures: true
-            }});
-            map.addControl(new maplibregl.NavigationControl({{ showCompass: false }}), 'top-right');
-            map.on('load', () => {{
-                {markers_script}
-            }});
+            // Initialisierung auf Langenfeld & 100km Umkreis
+            var map = L.map('map', {{ 
+                attributionControl: false, 
+                zoomControl: true,
+                scrollWheelZoom: false,
+                touchZoom: true
+            }}).setView([51.15, 6.95], 9);
+
+            // Esri World Dark Gray Base (Dark basemap mit Straßen & Städten, 100% frei ohne API-Key)
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{{z}}/{{y}}/{{x}}', {{
+                maxZoom: 16
+            }}).addTo(map);
+
+            // Esri World Dark Gray Reference (Labels & administrative Grenzen)
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{{z}}/{{y}}/{{x}}', {{
+                maxZoom: 16
+            }}).addTo(map);
+
+            // 100 km Radiuskreis um Langenfeld
+            L.circle([{h_lat}, {h_lon}], {{
+                radius: 100000,
+                color: '#22d3ee',
+                weight: 1.5,
+                dashArray: '5, 5',
+                fillColor: '#22d3ee',
+                fillOpacity: 0.03
+            }}).addTo(map);
+
+            {markers_script}
         </script>
     </body>
     </html>
@@ -1495,17 +1508,14 @@ elif data is not None:
             y_kws = ['junior', 'kids', 'küken', 'schüler', 'jugend', 'nachwuchs', 'mini-cup', 'newcomer']
             return any(kw in t_title for kw in y_kws)
 
-        # Bereinigung: Löscht Jugendturniere dauerhaft aus der Gist-Datenbank, wenn Admin angemeldet ist
         if IS_ADMIN:
             clean_db = {k: v for k, v in data.items() if not is_youth_item(v)}
             if len(clean_db) < len(data):
                 save_tournaments_data(DB_FILE, clean_db)
                 data = clean_db
 
-        # Für alle Besucher: Jugendturniere sofort ausfiltern
         data_filtered = {k: v for k, v in data.items() if not is_youth_item(v)}
 
-        # Admin-Aktionen
         if IS_ADMIN:
             col_act_upd, col_act_bck = st.columns([1, 1])
             with col_act_upd:
@@ -1733,7 +1743,7 @@ elif data is not None:
 
         month_names = {1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni", 7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"}
 
-        # --- 2 KACHELN NEBENEINANDER (FORMKURVE & OPENFREEMAP DARK) ---
+        # --- 2 KACHELN NEBENEINANDER (FORMKURVE & ESRI DARK MAP MIT 100KM-RADIUS) ---
         st.write("")
         with st.expander("📊 Saison-Analyse 2026 (Formkurve & Gespielte Spielorte)", expanded=False):
             col_chart_box, col_map_box = st.columns(2)
