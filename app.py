@@ -1089,7 +1089,6 @@ def render_city_hotspots(df, today):
         if dist is not None and city_stats[clean_c]["dist"] is None:
             city_stats[clean_c]["dist"] = dist
 
-        # Medaillen in der Stadt erfassen
         all_p = [str(row.get(f'placement_{d}', '')) for d in ['he', 'hd', 'mx']] + [str(row.get('placement', '')), str(row.get('result', ''))]
         for p in all_p:
             p_l = p.lower()
@@ -1104,63 +1103,58 @@ def render_city_hotspots(df, today):
         st.info("Noch keine teilgenommenen Turniere mit Spielort erfasst.")
         return
 
-    # Nach Häufigkeit sortieren
     sorted_cities = sorted(city_stats.items(), key=lambda x: x[1]["count"], reverse=True)
     max_count = sorted_cities[0][1]["count"] if sorted_cities else 1
     total_played_count = sum(s["count"] for s in city_stats.values())
 
-    # Farbpalette wie im ZEIT-Dashboard
-    bar_colors = ["#22d3ee", "#4ade80", "#f59e0b", "#c084fc", "#38bdf8", "#fb7185"]
+    # ZEIT-Palette: Cyan, Neon-Grün, Bernstein-Gold, Lila, Sky-Blue
+    bar_colors = ["#22d3ee", "#4ade80", "#f59e0b", "#c084fc", "#38bdf8"]
 
     rows_html = []
     for idx, (c_name, s) in enumerate(sorted_cities[:5]):
         color = bar_colors[idx % len(bar_colors)]
-        pct = max(12, int((s["count"] / max_count) * 100))
+        pct = max(15, int((s["count"] / max_count) * 100))
         
         dist_str = f"{s['dist']} km" if s['dist'] is not None else ("Basis" if c_name == "Langenfeld" else "")
-        dist_span = f'<span class="hotspot-dist">({dist_str})</span>' if dist_str else ""
+        dist_span = f'<span style="font-size:0.72rem; color:#64748b; font-weight:normal; margin-left:4px;">({dist_str})</span>' if dist_str else ""
         
-        # Medaillen-Zusammenfassung
         medals = []
-        if s["golds"] > 0: medals.append(f"🥇 {s['golds']}")
-        if s["silvers"] > 0: medals.append(f"🥈 {s['silvers']}")
-        if s["bronzes"] > 0: medals.append(f"🥉 {s['bronzes']}")
+        if s["golds"] > 0: medals.append(f"🥇{s['golds']}")
+        if s["silvers"] > 0: medals.append(f"🥈{s['silvers']}")
+        if s["bronzes"] > 0: medals.append(f"🥉{s['bronzes']}")
         medals_str = " ".join(medals)
 
         t_word = "Turniere" if s["count"] > 1 else "Turnier"
         count_display = f"{s['count']} {t_word}"
         if medals_str:
-            count_display += f" &nbsp;•&nbsp; {medals_str}"
+            count_display += f" &nbsp;<span style='font-size:0.75rem;'>• {medals_str}</span>"
 
         rows_html.append(f"""
-        <div class="hotspot-row">
-            <div class="hotspot-meta">
-                <span class="hotspot-city">{c_name} {dist_span}</span>
-                <span class="hotspot-count">{count_display}</span>
+        <div style="margin-bottom: 11px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.83rem; margin-bottom:4px; font-family:'Inter', sans-serif;">
+                <span style="font-weight:700; color:#f8fafc;">{c_name}{dist_span}</span>
+                <span style="font-weight:700; font-size:0.78rem; color:#cbd5e1;">{count_display}</span>
             </div>
-            <div class="hotspot-bar-bg">
-                <div class="hotspot-bar-fill" style="width: {pct}%; background-color: {color};"></div>
+            <div style="background:rgba(255, 255, 255, 0.07); border-radius:9999px; height:6px; overflow:hidden;">
+                <div style="width:{pct}%; background-color:{color}; height:100%; border-radius:9999px; box-shadow:0 0 8px {color}66;"></div>
             </div>
         </div>
         """)
 
-    st.markdown(
-        f"""
-        <div class="zeit-card">
-            <div class="zeit-header-title">
-                <span>Austragungsorte • Ranking</span>
-                <span class="zeit-kpi-tag" style="border-color:#22d3ee; color:#22d3ee;">Hotspots</span>
-            </div>
-            <div class="zeit-hero-number">{len(city_stats)} Städte</div>
-            <div class="zeit-hero-sub">{total_played_count} gespielte Turniere nach Spielort</div>
-            
-            <div style="margin-top: 14px;">
-                {''.join(rows_html)}
-            </div>
+    card_html = f"""
+    <div class="zeit-card">
+        <div class="zeit-header-title">
+            <span>Austragungsorte • Ranking</span>
+            <span class="zeit-kpi-tag" style="border-color:#22d3ee; color:#22d3ee;">Hotspots</span>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+        <div class="zeit-hero-number">{len(city_stats)} Städte</div>
+        <div class="zeit-hero-sub">{total_played_count} gespielte Turniere nach Spielort</div>
+        <div style="margin-top: 14px;">
+            {''.join(rows_html)}
+        </div>
+    </div>
+    """
+    st.markdown(clean_html(card_html), unsafe_allow_html=True)
 
 
 # --- WIEDERVERWENDBARER ADMIN-EDITOR ---
