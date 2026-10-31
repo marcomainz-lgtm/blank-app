@@ -680,7 +680,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             if partner_hd and partner_hd in PARTNERS_HD and PARTNERS_HD[partner_hd]:
                 hd_status_text = f"Mit <a href='{PARTNERS_HD[partner_hd]}' target='_blank'>{safe_partner_hd}</a> (Feld voll)"
             elif partner_hd:
-                hd_status_text = f"Mit {safe_partner_hd}" (Feld voll)
+                hd_status_text = f"Mit {safe_partner_hd} (Feld voll)"
             else:
                 hd_status_text = "Ohne Partner (Feld voll)"
         else:
@@ -730,13 +730,13 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             if partner_mx and partner_mx in PARTNERS_MX and PARTNERS_MX[partner_mx]:
                 mx_status_text = f"Mit <a href='{PARTNERS_MX[partner_mx]}' target='_blank'>{safe_partner_mx}</a> (Feld voll)"
             elif partner_mx:
-                mx_status_text = f"Mit {safe_partner_mx}" (Feld voll)
+                mx_status_text = f"Mit {safe_partner_mx} (Feld voll)"
             else:
                 mx_status_text = "Ohne Partnerin (Feld voll)"
         else:
             mx_status_text = "🔒 Feld voll"
-            hd_status_class = "conflict"
-            hd_class = "has-conflict"
+            mx_status_class = "conflict"
+            mx_class = "has-conflict"
     else:
         dt_mx = get_date_for_weekday(day_mx, start_date_obj, end_date_obj)
         if dt_mx and dt_mx in vacation_dates:
@@ -754,11 +754,11 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                 if reg_mx:
                     mx_status_text = f"Terminkonflikt: {c_disc} in {c_city}{p_suffix}"
                     mx_status_class = "double-booking"
-                    hd_class = "has-double-booking"
+                    mx_class = "has-double-booking"
                 else:
                     mx_status_text = f"Paralleltermin: {c_disc} in {c_city}{p_suffix}"
-                    hd_status_class = "conflict"
-                    hd_class = "has-conflict"
+                    mx_status_class = "conflict"
+                    mx_class = "has-conflict"
 
     def get_card_result_info(placement_val, field_val):
         if not placement_val or placement_val == "-- Keine Angabe --":
