@@ -119,97 +119,6 @@ FIELD_OPTIONS = [
     "Sonstiges"
 ]
 
-CITY_COORDINATES = {
-    "Langenfeld": (51.1114, 6.9497),
-    "Hilden": (51.1693, 6.9328),
-    "Solingen": (51.1712, 7.0841),
-    "Düsseldorf": (51.2277, 6.7735),
-    "Wuppertal": (51.2562, 7.1508),
-    "Remscheid": (51.1798, 7.1923),
-    "Mettmann": (51.2541, 6.9765),
-    "Ratingen": (51.2964, 6.8526),
-    "Erkrath": (51.2239, 6.9142),
-    "Haan": (51.1931, 7.0125),
-    "Velbert": (51.3402, 7.0422),
-    "Heiligenhaus": (51.3256, 6.9711),
-    "Monheim am Rhein": (51.0911, 6.8906),
-    "Monheim": (51.0911, 6.8906),
-    "Leverkusen": (51.0459, 6.9856),
-    "Köln": (50.9375, 6.9603),
-    "Bonn": (50.7374, 7.0982),
-    "Bergisch Gladbach": (50.9929, 7.1293),
-    "Siegburg": (50.7997, 7.2074),
-    "Sankt Augustin": (50.7702, 7.1873),
-    "Troisdorf": (50.8167, 7.1583),
-    "Hennef": (50.7758, 7.2831),
-    "Euskirchen": (50.6606, 6.7872),
-    "Düren": (50.8022, 6.4842),
-    "Aachen": (50.7753, 6.0839),
-    "Stolberg": (50.7681, 6.2308),
-    "Eschweiler": (50.8197, 6.2625),
-    "Jülich": (50.9224, 6.3606),
-    "Mönchengladbach": (51.1911, 6.4431),
-    "Viersen": (51.2564, 6.3917),
-    "Krefeld": (51.3388, 6.5853),
-    "Neuss": (51.1982, 6.6917),
-    "Dormagen": (51.0964, 6.8397),
-    "Grevenbroich": (51.0883, 6.5878),
-    "Willich": (51.2628, 6.5494),
-    "Meerbusch": (51.2725, 6.6692),
-    "Kaarst": (51.2269, 6.6206),
-    "Kempen": (51.3653, 6.4194),
-    "Nettetal": (51.3167, 6.2833),
-    "Moers": (51.4514, 6.6286),
-    "Duisburg": (51.4344, 6.7623),
-    "Oberhausen": (51.4700, 6.8517),
-    "Mülheim an der Ruhr": (51.4272, 6.8828),
-    "Mülheim": (51.4272, 6.8828),
-    "Essen": (51.4556, 7.0116),
-    "Bottrop": (51.5239, 6.9286),
-    "Gelsenkirchen": (51.5175, 7.0858),
-    "Bochum": (51.4818, 7.2162),
-    "Herne": (51.5425, 7.2239),
-    "Recklinghausen": (51.6167, 7.2000),
-    "Gladbeck": (51.5714, 6.9911),
-    "Marl": (51.6667, 7.1167),
-    "Dorsten": (51.6603, 6.9653),
-    "Castrop-Rauxel": (51.5500, 7.3167),
-    "Dortmund": (51.5136, 7.4653),
-    "Witten": (51.4417, 7.3361),
-    "Hagen": (51.3671, 7.4633),
-    "Schwerte": (51.4417, 7.5667),
-    "Lünen": (51.6167, 7.5167),
-    "Unna": (51.5350, 7.6889),
-    "Kamen": (51.5917, 7.6639),
-    "Hamm": (51.6811, 7.8186),
-    "Iserlohn": (51.3761, 7.6958),
-    "Menden": (51.4333, 7.7833),
-    "Lüdenscheid": (51.2197, 7.6269),
-    "Arnsberg": (51.3967, 8.0644),
-    "Soest": (51.5714, 8.1067),
-    "Münster": (51.9607, 7.6261),
-    "Coesfeld": (51.9461, 7.1683),
-    "Dülmen": (51.8308, 7.2783),
-    "Borken": (51.8439, 6.8583),
-    "Bocholt": (51.8389, 6.6167),
-    "Wesel": (51.6583, 6.6167),
-    "Dinslaken": (51.5667, 6.7333),
-    "Voerde": (51.6000, 6.6833),
-    "Kleve": (51.7889, 6.1389),
-    "Emmerich": (51.8333, 6.2500),
-    "Geldern": (51.5194, 6.3319),
-    "Kevelaer": (51.5833, 6.2500),
-    "Kamp-Lintfort": (51.5000, 6.5333),
-    "Wermelskirchen": (51.1389, 7.2167),
-    "Wipperfürth": (51.1167, 7.4000),
-    "Radevormwald": (51.2000, 7.3500),
-    "Gummersbach": (51.0264, 7.5658),
-    "Wiehl": (50.9500, 7.5500),
-    "Waldbröl": (50.9000, 7.6167),
-    "Burscheid": (51.0833, 7.1167),
-    "Leichlingen": (51.1167, 7.0167)
-}
-
 # Custom CSS
 st.markdown(
     """
@@ -225,12 +134,10 @@ st.markdown(
 
     .card-inner-container { font-family: 'Inter', -apple-system, sans-serif; }
     
-    /* Touch-Scroll-Fix */
     .js-plotly-plot .plotly, .js-plotly-plot .gl-container, .user-select-none.svg-container {
         touch-action: pan-y !important;
     }
 
-    /* 4. EXPANDER-BORDER ENTFERNEN: Kein doppelter Rahmen um Listen */
     div[data-testid="stExpander"] {
         border: none !important;
         background: transparent !important;
@@ -253,7 +160,6 @@ st.markdown(
         border: none !important;
     }
 
-    /* LOGO OBEN LINKS BÜNDIG */
     div[data-testid="stHorizontalBlock"] {
         align-items: flex-start !important;
     }
@@ -268,7 +174,6 @@ st.markdown(
         margin-bottom: auto !important;
     }
 
-    /* 2. LOGIN-LAYOUT: GARANTIERT EINZEILIG AUF MOBILE & DESKTOP */
     div[data-testid="stHorizontalBlock"]:has(.login-row-marker) {
         align-items: center !important;
         margin-bottom: 8px !important;
@@ -317,7 +222,6 @@ st.markdown(
         }
     }
 
-    /* MOBILE APP BOTTOM NAVIGATION BAR */
     @media (max-width: 768px) {
         div[data-baseweb="tab-list"] {
             position: fixed !important;
@@ -358,7 +262,6 @@ st.markdown(
             padding-bottom: 95px !important;
         }
 
-        /* MOBILE KARUSSELL-FUNKTION (1 KACHEL PRO BILD) */
         div[data-testid="stHorizontalBlock"]:has(.zeit-mobile-anchor) {
             display: flex !important;
             flex-direction: row !important;
@@ -393,7 +296,6 @@ st.markdown(
         }
     }
 
-    /* DESKTOP TOP-NAVIGATION BAR */
     @media (min-width: 769px) {
         div[data-baseweb="tab-list"] {
             background: rgba(18, 22, 31, 0.6) !important;
@@ -424,7 +326,6 @@ st.markdown(
         }
     }
 
-    /* EINHEITLICHE KACHELN FÜR BEIDE ANALYSEN (ZEIT-STYLE) */
     div[data-testid="stVerticalBlockBorderWrapper"]:has(.zeit-chart-container),
     div[data-testid="stVerticalBlockBorderWrapper"]:has(.zeit-hotspot-container),
     div[data-testid="stContainer"]:has(.zeit-chart-container),
@@ -476,7 +377,6 @@ st.markdown(
         color: #e2e8f0;
     }
 
-    /* 3. ECHTE 4-SEITIGE ROTE AUSSEN-BORDER FÜR HEUTE */
     div[data-testid="stVerticalBlockBorderWrapper"]:has(.today-card-marker) {
         border: 2.5px solid #ef4444 !important;
         background: #181d28 radial-gradient(circle at top, rgba(239, 68, 68, 0.16) 0%, rgba(24, 29, 40, 0) 75%) !important;
@@ -505,7 +405,6 @@ st.markdown(
         border: 1px solid rgba(255, 255, 255, 0.35);
     }
 
-    /* MORGEN (BERNSTEIN-GOLD) */
     div[data-testid="stVerticalBlockBorderWrapper"]:has(.tomorrow-card-marker) {
         border: 2.5px solid #f59e0b !important;
         background: #181d28 radial-gradient(circle at top, rgba(245, 158, 11, 0.12) 0%, rgba(24, 29, 40, 0) 75%) !important;
@@ -534,7 +433,6 @@ st.markdown(
         border: 1px solid rgba(255, 255, 255, 0.35);
     }
 
-    /* Medaillen-Badges in Disziplin-Kacheln */
     .discipline-result-pill {
         font-size: 0.72rem;
         font-weight: 700;
@@ -608,7 +506,6 @@ st.markdown(
 if 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
-# 2. KOMPAKTER LOGIN: Bleibt auf Mobile & Desktop einzeilig
 col_spacer, col_login = st.columns([3.8, 1.8])
 with col_spacer:
     st.markdown('<div class="login-row-marker"></div>', unsafe_allow_html=True)
@@ -639,7 +536,8 @@ with col_login:
 IS_ADMIN = st.session_state['logged_in']
 
 st.title("🏸 Badminton Turniere in der Region")
-st.write("Auf dieser Seite findet ihr alle Seniorenturniere 2026, die im Umkreis von 100 km um Langenfeld stattfinden.")
+cur_y = datetime.date.today().year
+st.write(f"Auf dieser Seite findet ihr alle Seniorenturniere {cur_y} / {cur_y + 1}, die im Umkreis von 100 km um Langenfeld stattfinden.")
 
 def get_last_update_str():
     if "last_update_override" in st.session_state:
@@ -781,7 +679,6 @@ def can_still_register(item, vacation_dates, occupied_dates):
 def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today):
     raw_city = str(item.get('city', 'Unbekannt'))
     city = html.escape(raw_city)
-    title = html.escape(str(item.get('title', 'Turnier')))
     dist = item.get('distance')
     dist_str = f"{dist} km" if dist is not None else "Keine Angabe"
     
@@ -1087,20 +984,21 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         <strong>🚗 Notiz / Fahrgemeinschaft:</strong> {html.escape(notes_val)}
     </div>
     """ if notes_val else ""
-# Automatisch gescrapte Match- & Gegner-Informationen
+
+    # Automatisch gescrapte Match- & Gegner-Informationen
     next_opp = item.get('next_opponent', '').strip()
     last_res = item.get('last_match_result', '').strip()
     
     match_info_html = ""
     if next_opp:
         match_info_html += f"""
-        <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 7px 12px; border-radius: 4px; font-size: 0.8rem; color: #15803d; margin-top: 6px;">
+        <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 7px 12px; border-radius: 4px; font-size: 0.8rem; color: #15803d; margin-top: 6px; margin-bottom: 6px;">
             <strong>⚔️ Nächstes Spiel:</strong> {html.escape(next_opp)}
         </div>
         """
     if last_res:
         match_info_html += f"""
-        <div style="background-color: #f8fafc; border-left: 4px solid #64748b; padding: 7px 12px; border-radius: 4px; font-size: 0.8rem; color: #334155; margin-top: 6px;">
+        <div style="background-color: #f8fafc; border-left: 4px solid #64748b; padding: 7px 12px; border-radius: 4px; font-size: 0.8rem; color: #334155; margin-top: 6px; margin-bottom: 6px;">
             <strong>📊 Letztes Spielergebnis:</strong> {html.escape(last_res)}
         </div>
         """
@@ -1113,22 +1011,11 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         {disciplines_html}
     </div>
     """
-    html_out = f"""
-    <div class="card-inner-container">
-        {badges_html}
-        {notes_html}
-        {disciplines_html}
-    </div>
-    """
     st.markdown(clean_html(html_out), unsafe_allow_html=True)
 
 
 # --- HILFSFUNKTION: ECHTE GESPIELTE TURNIERE IDENTIFIZIEREN (UNIFIED DATA) ---
 def get_played_tournaments(df, today):
-    """
-    Einheitliche Datenbasis: Genau 1 Eintrag pro Turnier-ID, an dem Marco
-    tatsächlich teilgenommen hat (gemeldet & vergangen/mit Ergebnis).
-    """
     def is_played_row(row):
         is_reg = bool(row.get('registered', False))
         has_result = bool(
@@ -1353,73 +1240,9 @@ def render_season_chart(df, today):
         use_container_width=True,
         config={"displayModeBar": False, "scrollZoom": False, "doubleClick": False}
     )
-tickvals = []
-ticktext = []
-month_labels = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"]
-for y in range(y_start, y_end + 1):
-    for m in range(1, 13):
-        tickvals.append(datetime.date(y, m, 1))
-        ticktext.append(f"{month_labels[m-1]} '{str(y)[2:]}")
-
-    fig.update_layout(
-        height=200,
-        margin=dict(l=5, r=5, t=5, b=5),
-        autosize=True,
-        showlegend=False,
-        yaxis=dict(
-            categoryorder="array",
-            categoryarray=y_categories,
-            gridcolor="rgba(255, 255, 255, 0.06)",
-            zeroline=False,
-            fixedrange=True,
-            tickfont=dict(color="#94a3b8", size=10, family="Inter, -apple-system, sans-serif")
-        ),
-        xaxis=dict(
-            tickmode="array",
-            tickvals=tickvals,
-            ticktext=ticktext,
-            gridcolor="rgba(255, 255, 255, 0.04)",
-            zeroline=False,
-            fixedrange=True,
-            tickfont=dict(color="#94a3b8", size=9.5, family="Inter, -apple-system, sans-serif")
-        ),
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        hoverlabel=dict(
-            bgcolor="#1e293b",
-            bordercolor="rgba(255, 255, 255, 0.15)",
-            font_size=12,
-            font_family="Inter, -apple-system, sans-serif"
-        )
-    )
-
-    st.markdown(
-        clean_html(f"""
-        <div class="zeit-header-title">
-            <span>Formkurve 2026</span>
-            <span style="font-size:0.75rem; color:#94a3b8; font-weight:normal; text-transform:none;">
-                <span style="color:#22d3ee;">●</span> HE &nbsp;<span style="color:#4ade80;">●</span> HD &nbsp;<span style="color:#c084fc;">●</span> MX
-            </span>
-        </div>
-        <div class="zeit-hero-number">{total_played} Turniere</div>
-        <div class="zeit-hero-sub">Gespielte Turniere im Jahresverlauf</div>
-        <div class="zeit-kpi-row" style="margin-bottom: 6px;">
-            <span class="zeit-kpi-tag" style="border-color: #f59e0b; color: #fbbf24;">🥇 {gold_cnt}x Gold</span>
-            <span class="zeit-kpi-tag" style="border-color: #94a3b8; color: #e2e8f0;">🥈 {silver_cnt}x Silber</span>
-            <span class="zeit-kpi-tag" style="border-color: #ea580c; color: #fdba74;">🥉 {bronze_cnt}x Bronze</span>
-        </div>
-        """),
-        unsafe_allow_html=True
-    )
-
-    st.plotly_chart(
-        fig,
-        use_container_width=True,
-        config={"displayModeBar": False, "scrollZoom": False, "doubleClick": False}
-    )
 
 
-# --- 1. HORIZONTALE ZEIT-STYLE BALKEN (ALLE STÄDTE TRANSPARENT ABGEBILDET) ---
+# --- 1. HORIZONTALE ZEIT-STYLE BALKEN ---
 def render_city_hotspots(df, today):
     df_played = get_played_tournaments(df, today)
     total_played = len(df_played)
@@ -1443,12 +1266,10 @@ def render_city_hotspots(df, today):
                 "bronzes": 0
             }
 
-        # Genau +1 pro Turnier
         city_stats[clean_c]["count"] += 1
         if dist is not None and city_stats[clean_c]["dist"] is None:
             city_stats[clean_c]["dist"] = dist
 
-        # Medaillen erfassen
         all_p = [str(row.get(f'placement_{d}', '')) for d in ['he', 'hd', 'mx']] + [str(row.get('placement', '')), str(row.get('result', ''))]
         for p in all_p:
             p_l = p.lower()
@@ -1469,7 +1290,6 @@ def render_city_hotspots(df, today):
     bar_colors = ["#22d3ee", "#4ade80", "#f59e0b", "#c084fc", "#38bdf8", "#34d399", "#a78bfa", "#f43f5e"]
 
     rows_html = []
-    # Alle Städte auflisten, damit die Summe exakt mit der Gesamtanzahl übereinstimmt!
     for idx, (c_name, s) in enumerate(sorted_cities):
         color = bar_colors[idx % len(bar_colors)]
         pct = max(12, int((s["count"] / max_count) * 100))
@@ -1607,14 +1427,12 @@ def render_admin_editor(item, full_data, is_past=False):
             else:
                 val_partner_mx = selected_mx_option
 
-        # Saisontagebuch
         st.write("")
         st.markdown("**🏆 Saisontagebuch (Platzierung & Spielklasse pro Disziplin):**")
         col_res_he, col_res_hd, col_res_mx = st.columns(3)
 
         def render_discipline_result_inputs(disc_label, disc_key):
             st.markdown(f"**{disc_label}**")
-            
             cur_p = item.get(f'placement_{disc_key}', '')
             p_idx = 0
             if cur_p in PLACEMENT_OPTIONS:
@@ -1860,7 +1678,9 @@ elif data is not None:
             'field_mx': '',
             'placement': '',
             'placement_detail': '',
-            'result': ''
+            'result': '',
+            'next_opponent': '',
+            'last_match_result': ''
         }
         for col, default in fallback_cols.items():
             if col not in df.columns:
@@ -1957,12 +1777,9 @@ elif data is not None:
         df_past = df[df['End_Date_Obj'] < today].copy()
         df_past = df_past.sort_values(by='Start_Date_Obj', ascending=False)
 
-        # --- HAUPT-NAVIGATION: TABS (DESKTOP TOP-BAR / MOBILE APP-BOTTOM-BAR) ---
+        # Tabs
         tab_turniere, tab_analyse = st.tabs(["🏸 Turniere", "📊 Analyse"])
 
-        # ==========================================
-        # REITER 1: TURNIERE (DAS HERZ DER APP)
-        # ==========================================
         with tab_turniere:
             with st.expander("🔍 Filter & Suche", expanded=False):
                 col_search, _ = st.columns([1, 1])
@@ -2014,9 +1831,8 @@ elif data is not None:
 
             month_names = {1: "Januar", 2: "Februar", 3: "März", 4: "April", 5: "Mai", 6: "Juni", 7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "Dezember"}
 
-            # --- ANSTEHENDE TURNIERE ---
+            # Anstehende Turniere
             st.subheader(f"📅 Anstehende Turniere ({len(df_upcoming)})")
-            
             with st.expander("Anstehende Turniere anzeigen", expanded=True):
                 if not df_upcoming.empty:
                     current_month_str = ""
@@ -2034,7 +1850,6 @@ elif data is not None:
                         is_tomorrow = bool(start_date and not is_today and (start_date - today).days == 1)
 
                         with st.container(border=True):
-                            # GANZHEITLICHE ROTE BORDER DANK today-card-marker & AUFGESATTELTER PILL-BADGE
                             if is_today:
                                 st.markdown(
                                     '<div class="today-card-marker today-glow-badge-container">'
@@ -2050,7 +1865,6 @@ elif data is not None:
                                     unsafe_allow_html=True
                                 )
 
-                            # vertical_alignment="top" GARANTIERT DAS LOGO OBEN LINKS
                             col_logo, col_info, col_link = st.columns([1.5, 6, 2], vertical_alignment="top")
                             with col_logo:
                                 logo_to_show = item['logo_url']
@@ -2075,9 +1889,8 @@ elif data is not None:
             st.write("")
             st.write("")
 
-            # --- VERGANGENE TURNIERE ---
+            # Vergangene Turniere
             st.subheader(f"🕰️ Vergangene Turniere ({len(df_past)})")
-
             with st.expander("Vergangene Turniere anzeigen", expanded=False):
                 if not df_past.empty:
                     current_month_str = ""
@@ -2112,9 +1925,6 @@ elif data is not None:
                 else:
                     st.info("Keine vergangenen Turniere gefunden.")
 
-        # ==========================================
-        # REITER 2: ANALYSE (MOBILE KARUSSELL / DESKTOP 2-SPALTIG)
-        # ==========================================
         with tab_analyse:
             st.markdown('<div class="carousel-hint-text">⟵ Wischen zum Wechseln (Formkurve / Austragungsorte) ⟶</div>', unsafe_allow_html=True)
             col_chart_box, col_hotspot_box = st.columns(2)
