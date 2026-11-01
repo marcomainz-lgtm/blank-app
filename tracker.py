@@ -176,7 +176,6 @@ def clean_badminton_scores(text, won):
                 valid_sets.append(f"{max(p1, p2)}:{min(p1, p2)}")
             else:
                 valid_sets.append(f"{min(p1, p2)}:{max(p1, p2)}")
-    # Badminton hat max. 3 Sätze
     return ", ".join(valid_sets[:3])
 
 
@@ -245,7 +244,7 @@ def harvest_opponent_history(session):
         except Exception as e:
             print(f"Fehler bei Liga-Erfassung: {e}")
 
-    # 2. Turnierspiele erfassen (mit strikter Duplikats- & Geisterspiel-Sperre)
+    # 2. Turnierspiele erfassen
     for t_url in PLAYER_CONFIG["tournament_profile_urls"]:
         try:
             r = session.get(t_url, headers=headers, timeout=10)
@@ -261,9 +260,8 @@ def harvest_opponent_history(session):
                             my_row = rows[0] if marco_in_r0 else rows[1]
                             opp_row = rows[1] if marco_in_r0 else rows[0]
                             
-                            # Sieger-Erkennung via 'W' oder 'L'
                             my_row_txt = ' ' + my_row.get_text(separator=' ') + ' '
-                            won = bool(' W ' in my_row_txt or 'match__row--winner' in my_row.get('class', []))
+                            won = bool(' W ' in my_row_txt or 'match__row--winner' in (my_row.get('class') or []))
                             if ' L ' in my_row_txt:
                                 won = False
                             
@@ -280,7 +278,7 @@ def harvest_opponent_history(session):
                             elif len(my_row.find_all('a')) == 1:
                                 disc = "HE"
 
-                            # Kernsätze für Duplikats-Prüfung heranziehen (z. B. '11:21, 17:21')
+                            # Kernsätze deduplizieren (z. B. '11:21, 17:21')
                             core_score = ", ".join(score_str.split(', ')[:2])
 
                             for opp in opp_links:
@@ -298,11 +296,17 @@ def harvest_opponent_history(session):
                                 })
         except Exception as e:
             print(f"Fehler bei Turnier-Erfassung: {e}")
+            
+    return history
 
 
 # --- DYNAMISCHES EVENT-, GEGNER- & NIVEAU-SCRAPING ---
 
-def check_player_subpages(session, t_id, existing_entry, opp_history):
+def check_player_subpages(session, t_id, existing_entry, opp_history=None):
+    # Absicherung gegen NoneType!
+    if not opp_history or not isinstance(opp_history, dict):
+        opp_history = {}
+        
     updates = {}
     headers = get_headers()
     
@@ -376,7 +380,6 @@ def check_player_subpages(session, t_id, existing_entry, opp_history):
                             total_wins += wins
                             total_losses += losses
                             
-                            # Letzte Satzstände kompakt zusammenfassen
                             scores_list = [m['score'] for m in matches_vs if m.get('score')]
                             last_disc = matches_vs[0]['discipline']
                             last_comp = matches_vs[0]['competition']

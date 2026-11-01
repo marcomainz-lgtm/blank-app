@@ -1,1 +1,1205 @@
-null
+{
+  "Johannes Koppers": [
+    {
+      "opponent": "Johannes Koppers",
+      "competition": "Liga",
+      "discipline": "HE",
+      "score": "17:21, 21:18, 12:21",
+      "won": false
+    }
+  ],
+  "Magnus Hubert": [
+    {
+      "opponent": "Magnus Hubert",
+      "competition": "Liga",
+      "discipline": "HD",
+      "score": "21:18, 19:21, 18:21",
+      "won": false
+    }
+  ],
+  "Martyn Okhrymenko": [
+    {
+      "opponent": "Martyn Okhrymenko",
+      "competition": "Liga",
+      "discipline": "HD",
+      "score": "21:18, 19:21, 18:21",
+      "won": false
+    }
+  ],
+  "Marcel Gutsch": [
+    {
+      "opponent": "Marcel Gutsch",
+      "competition": "Liga",
+      "discipline": "HD",
+      "score": "15:21, 11:21",
+      "won": false
+    },
+    {
+      "opponent": "Marcel Gutsch",
+      "competition": "Liga",
+      "discipline": "MX",
+      "score": "8:21, 12:21",
+      "won": false
+    },
+    {
+      "opponent": "Marcel Gutsch",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "9:21, 11:21",
+      "won": false
+    }
+  ],
+  "Dan Kai Tran": [
+    {
+      "opponent": "Dan Kai Tran",
+      "competition": "Liga",
+      "discipline": "HD",
+      "score": "15:21, 11:21",
+      "won": false
+    }
+  ],
+  "Charlotte Feisel": [
+    {
+      "opponent": "Charlotte Feisel",
+      "competition": "Liga",
+      "discipline": "MX",
+      "score": "8:21, 12:21",
+      "won": false
+    }
+  ],
+  "Jonas Mähner": [
+    {
+      "opponent": "Jonas Mähner",
+      "competition": "Liga",
+      "discipline": "HD",
+      "score": "19:21, 12:21",
+      "won": false
+    }
+  ],
+  "Benjamin Mühlenbeck": [
+    {
+      "opponent": "Benjamin Mühlenbeck",
+      "competition": "Liga",
+      "discipline": "HD",
+      "score": "19:21, 12:21",
+      "won": false
+    },
+    {
+      "opponent": "Benjamin Mühlenbeck",
+      "competition": "Liga",
+      "discipline": "HE",
+      "score": "13:21, 19:21",
+      "won": false
+    }
+  ],
+  "Marco Becker": [
+    {
+      "opponent": "Marco Becker",
+      "competition": "Liga",
+      "discipline": "HD",
+      "score": "13:21, 9:21",
+      "won": false
+    }
+  ],
+  "Kilian Birkhoven": [
+    {
+      "opponent": "Kilian Birkhoven",
+      "competition": "Liga",
+      "discipline": "HD",
+      "score": "13:21, 9:21",
+      "won": false
+    },
+    {
+      "opponent": "Kilian Birkhoven",
+      "competition": "Liga",
+      "discipline": "HE",
+      "score": "8:21, 15:21",
+      "won": false
+    }
+  ],
+  "Jens Hilder": [
+    {
+      "opponent": "Jens Hilder",
+      "competition": "Liga",
+      "discipline": "HD",
+      "score": "21:13, 21:15",
+      "won": true
+    }
+  ],
+  "Jan Thewald": [
+    {
+      "opponent": "Jan Thewald",
+      "competition": "Liga",
+      "discipline": "HD",
+      "score": "21:18, 21:16",
+      "won": true
+    }
+  ],
+  "Patrick Bogdon": [
+    {
+      "opponent": "Patrick Bogdon",
+      "competition": "Liga",
+      "discipline": "HD",
+      "score": "21:18, 21:16",
+      "won": true
+    }
+  ],
+  "Marco Mönch": [
+    {
+      "opponent": "Marco Mönch",
+      "competition": "Liga",
+      "discipline": "HE",
+      "score": "19:21, 16:21",
+      "won": false
+    }
+  ],
+  "Sergii Okhrymenko": [
+    {
+      "opponent": "Sergii Okhrymenko",
+      "competition": "Liga",
+      "discipline": "HD",
+      "score": "21:7, 21:11",
+      "won": true
+    }
+  ],
+  "Benedikt Chadaravicius": [
+    {
+      "opponent": "Benedikt Chadaravicius",
+      "competition": "Liga",
+      "discipline": "HD",
+      "score": "21:7, 21:11",
+      "won": true
+    }
+  ],
+  "Viju Joseph": [
+    {
+      "opponent": "Viju Joseph",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "15:21, 16:21",
+      "won": false
+    },
+    {
+      "opponent": "Viju Joseph",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "19:21, 12:21",
+      "won": false
+    }
+  ],
+  "Mathew Paul": [
+    {
+      "opponent": "Mathew Paul",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "15:21, 16:21",
+      "won": false
+    },
+    {
+      "opponent": "Mathew Paul",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "19:21, 12:21",
+      "won": false
+    }
+  ],
+  "Vijay Kayala": [
+    {
+      "opponent": "Vijay Kayala",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:17, 21:16",
+      "won": true
+    }
+  ],
+  "Stoyan Tsonev": [
+    {
+      "opponent": "Stoyan Tsonev",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:17, 21:16",
+      "won": true
+    }
+  ],
+  "Jeremai Hose": [
+    {
+      "opponent": "Jeremai Hose",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "20:22, 9:21",
+      "won": false
+    }
+  ],
+  "Conrad Scheidweiler": [
+    {
+      "opponent": "Conrad Scheidweiler",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "20:22, 9:21",
+      "won": false
+    }
+  ],
+  "Jannis Lisch": [
+    {
+      "opponent": "Jannis Lisch",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:15, 21:8",
+      "won": true
+    }
+  ],
+  "Linus Mikota": [
+    {
+      "opponent": "Linus Mikota",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:15, 21:8",
+      "won": true
+    }
+  ],
+  "Rene Küpper": [
+    {
+      "opponent": "Rene Küpper",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:10, 21:12",
+      "won": true
+    }
+  ],
+  "Christian Preuß": [
+    {
+      "opponent": "Christian Preuß",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:10, 21:12",
+      "won": true
+    }
+  ],
+  "Waldemar Pazer": [
+    {
+      "opponent": "Waldemar Pazer",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:8, 21:10",
+      "won": true
+    }
+  ],
+  "Artur Ratz": [
+    {
+      "opponent": "Artur Ratz",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:8, 21:10",
+      "won": true
+    }
+  ],
+  "Detlef Ballsieper": [
+    {
+      "opponent": "Detlef Ballsieper",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:7, 21:0",
+      "won": true
+    }
+  ],
+  "Frank Ludwig": [
+    {
+      "opponent": "Frank Ludwig",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:7, 21:0",
+      "won": true
+    }
+  ],
+  "Ilias Boudelal": [
+    {
+      "opponent": "Ilias Boudelal",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "17:21, 14:21",
+      "won": false
+    }
+  ],
+  "Jing-Yu Lu": [
+    {
+      "opponent": "Jing-Yu Lu",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "17:21, 14:21",
+      "won": false
+    }
+  ],
+  "Rafael Lotz": [
+    {
+      "opponent": "Rafael Lotz",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:19, 21:15",
+      "won": true
+    }
+  ],
+  "Ruben Schelenz": [
+    {
+      "opponent": "Ruben Schelenz",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:19, 21:15",
+      "won": true
+    }
+  ],
+  "Maik Brod": [
+    {
+      "opponent": "Maik Brod",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "7:21, 10:21",
+      "won": false
+    }
+  ],
+  "Yifan Xu": [
+    {
+      "opponent": "Yifan Xu",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "7:21, 10:21",
+      "won": false
+    },
+    {
+      "opponent": "Yifan Xu",
+      "competition": "Turnier",
+      "discipline": "MX",
+      "score": "14:21, 14:21",
+      "won": false
+    }
+  ],
+  "Thorben Müller": [
+    {
+      "opponent": "Thorben Müller",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "15:21, 15:21",
+      "won": false
+    }
+  ],
+  "Joris Töllner": [
+    {
+      "opponent": "Joris Töllner",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "15:21, 15:21",
+      "won": false
+    }
+  ],
+  "Armin Görg": [
+    {
+      "opponent": "Armin Görg",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "17:21, 19:21",
+      "won": false
+    }
+  ],
+  "Joshua Heinzmann": [
+    {
+      "opponent": "Joshua Heinzmann",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "17:21, 19:21",
+      "won": false
+    },
+    {
+      "opponent": "Joshua Heinzmann",
+      "competition": "Turnier",
+      "discipline": "MX",
+      "score": "8:21, 13:21",
+      "won": false
+    }
+  ],
+  "Fabian Duvenbeck": [
+    {
+      "opponent": "Fabian Duvenbeck",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:14, 22:20",
+      "won": true
+    }
+  ],
+  "Lars Fischer": [
+    {
+      "opponent": "Lars Fischer",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:14, 22:20",
+      "won": true
+    }
+  ],
+  "André Pyka": [
+    {
+      "opponent": "André Pyka",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:16, 21:17",
+      "won": true
+    }
+  ],
+  "Mark Zöllner": [
+    {
+      "opponent": "Mark Zöllner",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:16, 21:17",
+      "won": true
+    }
+  ],
+  "Marcel Göckmann": [
+    {
+      "opponent": "Marcel Göckmann",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:12, 21:17",
+      "won": true
+    },
+    {
+      "opponent": "Marcel Göckmann",
+      "competition": "Turnier",
+      "discipline": "MX",
+      "score": "14:21, 16:21",
+      "won": false
+    }
+  ],
+  "Jan Jasdauskis": [
+    {
+      "opponent": "Jan Jasdauskis",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:12, 21:17",
+      "won": true
+    }
+  ],
+  "Tim Bunzel": [
+    {
+      "opponent": "Tim Bunzel",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "10:21, 12:21",
+      "won": false
+    }
+  ],
+  "Dirk Silinski": [
+    {
+      "opponent": "Dirk Silinski",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "10:21, 12:21",
+      "won": false
+    }
+  ],
+  "Qizhong Jiang": [
+    {
+      "opponent": "Qizhong Jiang",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "15:21, 18:21",
+      "won": false
+    }
+  ],
+  "Stefan Reupert": [
+    {
+      "opponent": "Stefan Reupert",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "15:21, 18:21",
+      "won": false
+    }
+  ],
+  "Philip Ertel": [
+    {
+      "opponent": "Philip Ertel",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "6:21, 8:21",
+      "won": false
+    }
+  ],
+  "Alexander Saretzki": [
+    {
+      "opponent": "Alexander Saretzki",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "6:21, 8:21",
+      "won": false
+    }
+  ],
+  "Philip Heinrichs": [
+    {
+      "opponent": "Philip Heinrichs",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:18, 21:17",
+      "won": true
+    }
+  ],
+  "Rolf Vogt": [
+    {
+      "opponent": "Rolf Vogt",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:18, 21:17",
+      "won": true
+    }
+  ],
+  "Oliver Vogt": [
+    {
+      "opponent": "Oliver Vogt",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "9:21, 11:21",
+      "won": false
+    }
+  ],
+  "Jan Ochoba": [
+    {
+      "opponent": "Jan Ochoba",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "23:21, 21:19",
+      "won": true
+    }
+  ],
+  "Kai Schalk": [
+    {
+      "opponent": "Kai Schalk",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "23:21, 21:19",
+      "won": true
+    }
+  ],
+  "Pratheek Prakash Manangi": [
+    {
+      "opponent": "Pratheek Prakash Manangi",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "16:21, 15:21",
+      "won": false
+    }
+  ],
+  "Deepak Venkanna": [
+    {
+      "opponent": "Deepak Venkanna",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "16:21, 15:21",
+      "won": false
+    }
+  ],
+  "Noah Licht": [
+    {
+      "opponent": "Noah Licht",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "10:21, 15:21",
+      "won": false
+    }
+  ],
+  "Srinadh Vempati": [
+    {
+      "opponent": "Srinadh Vempati",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "10:21, 15:21",
+      "won": false
+    }
+  ],
+  "Lennard Jacobi": [
+    {
+      "opponent": "Lennard Jacobi",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "14:21, 13:21",
+      "won": false
+    }
+  ],
+  "Kurt Lennart Kunze": [
+    {
+      "opponent": "Kurt Lennart Kunze",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "14:21, 13:21",
+      "won": false
+    }
+  ],
+  "Laurin Verweyen": [
+    {
+      "opponent": "Laurin Verweyen",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "15:21, 13:21",
+      "won": false
+    }
+  ],
+  "Ian Wilde": [
+    {
+      "opponent": "Ian Wilde",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "15:21, 13:21",
+      "won": false
+    }
+  ],
+  "Dobrin Alexandroff": [
+    {
+      "opponent": "Dobrin Alexandroff",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "18:21, 18:21",
+      "won": false
+    }
+  ],
+  "Ralf Walterscheidt": [
+    {
+      "opponent": "Ralf Walterscheidt",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "18:21, 18:21",
+      "won": false
+    }
+  ],
+  "Nico Becker": [
+    {
+      "opponent": "Nico Becker",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "12:21, 14:21",
+      "won": false
+    }
+  ],
+  "Christopher Mayer": [
+    {
+      "opponent": "Christopher Mayer",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "12:21, 14:21",
+      "won": false
+    }
+  ],
+  "Etienne Rastoul": [
+    {
+      "opponent": "Etienne Rastoul",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:14, 21:14",
+      "won": true
+    }
+  ],
+  "Pascal Rastoul": [
+    {
+      "opponent": "Pascal Rastoul",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:14, 21:14",
+      "won": true
+    }
+  ],
+  "Claas Bruno Kaufmann": [
+    {
+      "opponent": "Claas Bruno Kaufmann",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "19:21, 24:26",
+      "won": false
+    }
+  ],
+  "Malte Henrico Renneberg": [
+    {
+      "opponent": "Malte Henrico Renneberg",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "19:21, 24:26",
+      "won": false
+    }
+  ],
+  "Michael Hansen": [
+    {
+      "opponent": "Michael Hansen",
+      "competition": "Turnier",
+      "discipline": "MX",
+      "score": "11:21, 17:21",
+      "won": false
+    },
+    {
+      "opponent": "Michael Hansen",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "13:21, 9:21",
+      "won": false
+    }
+  ],
+  "Huyen Vu Ngoc": [
+    {
+      "opponent": "Huyen Vu Ngoc",
+      "competition": "Turnier",
+      "discipline": "MX",
+      "score": "11:21, 17:21",
+      "won": false
+    }
+  ],
+  "Martin Janorschke": [
+    {
+      "opponent": "Martin Janorschke",
+      "competition": "Turnier",
+      "discipline": "MX",
+      "score": "7:21, 11:21",
+      "won": false
+    }
+  ],
+  "Britta Matuschik": [
+    {
+      "opponent": "Britta Matuschik",
+      "competition": "Turnier",
+      "discipline": "MX",
+      "score": "7:21, 11:21",
+      "won": false
+    }
+  ],
+  "Angelina Carneim": [
+    {
+      "opponent": "Angelina Carneim",
+      "competition": "Turnier",
+      "discipline": "MX",
+      "score": "14:21, 16:21",
+      "won": false
+    }
+  ],
+  "Abhinav Jain": [
+    {
+      "opponent": "Abhinav Jain",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "6:21, 11:21",
+      "won": false
+    },
+    {
+      "opponent": "Abhinav Jain",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "10:21, 16:21",
+      "won": false
+    }
+  ],
+  "Matthias Knaupp": [
+    {
+      "opponent": "Matthias Knaupp",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "21:19, 21:18",
+      "won": true
+    },
+    {
+      "opponent": "Matthias Knaupp",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:0, 21:0",
+      "won": true
+    }
+  ],
+  "Christian Kufeld": [
+    {
+      "opponent": "Christian Kufeld",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "12:21, 12:21",
+      "won": false
+    }
+  ],
+  "Sebastian Altenschmidt": [
+    {
+      "opponent": "Sebastian Altenschmidt",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "16:21, 16:21",
+      "won": false
+    },
+    {
+      "opponent": "Sebastian Altenschmidt",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "9:21, 17:21",
+      "won": false
+    }
+  ],
+  "Kam-San Choi": [
+    {
+      "opponent": "Kam-San Choi",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "13:21, 12:21",
+      "won": false
+    }
+  ],
+  "Steven Tang": [
+    {
+      "opponent": "Steven Tang",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "13:21, 12:21",
+      "won": false
+    }
+  ],
+  "Dennis Grzanna": [
+    {
+      "opponent": "Dennis Grzanna",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:13, 21:11",
+      "won": true
+    }
+  ],
+  "Eugen Lindt": [
+    {
+      "opponent": "Eugen Lindt",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:13, 21:11",
+      "won": true
+    }
+  ],
+  "Junhui Hu": [
+    {
+      "opponent": "Junhui Hu",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "11:21, 11:21",
+      "won": false
+    }
+  ],
+  "Seng Hak Ngo": [
+    {
+      "opponent": "Seng Hak Ngo",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "11:21, 11:21",
+      "won": false
+    }
+  ],
+  "Thorsten Jansen": [
+    {
+      "opponent": "Thorsten Jansen",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "11:21, 13:21",
+      "won": false
+    }
+  ],
+  "Kitti Yoosenat": [
+    {
+      "opponent": "Kitti Yoosenat",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "11:21, 13:21",
+      "won": false
+    }
+  ],
+  "Parijat Raj": [
+    {
+      "opponent": "Parijat Raj",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "10:21, 16:21",
+      "won": false
+    }
+  ],
+  "Michael Kroes": [
+    {
+      "opponent": "Michael Kroes",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:19, 24:22",
+      "won": true
+    }
+  ],
+  "Marcel Schaefers": [
+    {
+      "opponent": "Marcel Schaefers",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:19, 24:22",
+      "won": true
+    }
+  ],
+  "Nils Reichardt": [
+    {
+      "opponent": "Nils Reichardt",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "22:20, 21:11",
+      "won": true
+    }
+  ],
+  "Till Reichardt": [
+    {
+      "opponent": "Till Reichardt",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "22:20, 21:11",
+      "won": true
+    }
+  ],
+  "Rob Alamgir": [
+    {
+      "opponent": "Rob Alamgir",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "8:21, 15:21",
+      "won": false
+    }
+  ],
+  "Sharath Nattoji": [
+    {
+      "opponent": "Sharath Nattoji",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "8:21, 15:21",
+      "won": false
+    }
+  ],
+  "Patrick Gemünden": [
+    {
+      "opponent": "Patrick Gemünden",
+      "competition": "Turnier",
+      "discipline": "MX",
+      "score": "12:21, 13:21",
+      "won": false
+    }
+  ],
+  "Sara Börding": [
+    {
+      "opponent": "Sara Börding",
+      "competition": "Turnier",
+      "discipline": "MX",
+      "score": "12:21, 13:21",
+      "won": false
+    }
+  ],
+  "Martin Bauer": [
+    {
+      "opponent": "Martin Bauer",
+      "competition": "Turnier",
+      "discipline": "MX",
+      "score": "12:21, 16:21",
+      "won": false
+    }
+  ],
+  "Sandra Schönhofen": [
+    {
+      "opponent": "Sandra Schönhofen",
+      "competition": "Turnier",
+      "discipline": "MX",
+      "score": "12:21, 16:21",
+      "won": false
+    }
+  ],
+  "Marco Böning": [
+    {
+      "opponent": "Marco Böning",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "7:21, 14:21",
+      "won": false
+    },
+    {
+      "opponent": "Marco Böning",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "7:21, 7:21",
+      "won": false
+    }
+  ],
+  "Marcel Hammes": [
+    {
+      "opponent": "Marcel Hammes",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "10:21, 12:21",
+      "won": false
+    }
+  ],
+  "Jonathan Middendorf": [
+    {
+      "opponent": "Jonathan Middendorf",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "10:21, 12:21",
+      "won": false
+    }
+  ],
+  "Simon Schreiner": [
+    {
+      "opponent": "Simon Schreiner",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "5:21, 13:21",
+      "won": false
+    }
+  ],
+  "Daniel Skoczowsky": [
+    {
+      "opponent": "Daniel Skoczowsky",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "5:21, 13:21",
+      "won": false
+    }
+  ],
+  "Tim Dochtermann": [
+    {
+      "opponent": "Tim Dochtermann",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "2:21, 12:21",
+      "won": false
+    }
+  ],
+  "Christoph Mölleken": [
+    {
+      "opponent": "Christoph Mölleken",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "2:21, 12:21",
+      "won": false
+    }
+  ],
+  "Alea-Sophie Kurz": [
+    {
+      "opponent": "Alea-Sophie Kurz",
+      "competition": "Turnier",
+      "discipline": "MX",
+      "score": "8:21, 13:21",
+      "won": false
+    }
+  ],
+  "Xinru Guo": [
+    {
+      "opponent": "Xinru Guo",
+      "competition": "Turnier",
+      "discipline": "MX",
+      "score": "14:21, 14:21",
+      "won": false
+    }
+  ],
+  "Alexander Soh Lee Wei": [
+    {
+      "opponent": "Alexander Soh Lee Wei",
+      "competition": "Turnier",
+      "discipline": "MX",
+      "score": "17:21, 7:21",
+      "won": false
+    }
+  ],
+  "Jingyi Qu": [
+    {
+      "opponent": "Jingyi Qu",
+      "competition": "Turnier",
+      "discipline": "MX",
+      "score": "17:21, 7:21",
+      "won": false
+    }
+  ],
+  "Vinicius Martim": [
+    {
+      "opponent": "Vinicius Martim",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "21:0, 21:0",
+      "won": true
+    }
+  ],
+  "Oliver Krause": [
+    {
+      "opponent": "Oliver Krause",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "9:21, 11:21",
+      "won": false
+    }
+  ],
+  "Jonas Lochowicz": [
+    {
+      "opponent": "Jonas Lochowicz",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "9:21, 11:21",
+      "won": false
+    }
+  ],
+  "Sören Baudach": [
+    {
+      "opponent": "Sören Baudach",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "7:21, 7:21",
+      "won": false
+    }
+  ],
+  "Alexander Ott": [
+    {
+      "opponent": "Alexander Ott",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "7:21, 9:21",
+      "won": false
+    }
+  ],
+  "Philipp Bartoschek": [
+    {
+      "opponent": "Philipp Bartoschek",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "7:21, 8:21",
+      "won": false
+    }
+  ],
+  "Karl Olschewski": [
+    {
+      "opponent": "Karl Olschewski",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "21:13, 21:10",
+      "won": true
+    },
+    {
+      "opponent": "Karl Olschewski",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "21:13, 21:13",
+      "won": true
+    }
+  ],
+  "Max Zigman": [
+    {
+      "opponent": "Max Zigman",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "18:21, 13:21",
+      "won": false
+    }
+  ],
+  "Pascal Ziehe": [
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "17:21, 20:22",
+      "won": false
+    }
+  ],
+  "Johnny Calero Gascon": [
+    {
+      "opponent": "Johnny Calero Gascon",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "21:19, 21:15",
+      "won": true
+    }
+  ]
+}
