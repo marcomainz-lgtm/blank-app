@@ -676,75 +676,8 @@ def can_still_register(item, vacation_dates, occupied_dates):
     return False
 
 
-# Automatische Match-Infos
-    next_opp = item.get('next_opponent', '').strip()
-    last_res = item.get('last_match_result', '').strip()
-    analysis = item.get('field_analysis', {})
-    
-    match_info_html = ""
-    if next_opp:
-        match_info_html += f"""
-        <div style="background-color: rgba(34, 197, 94, 0.1); border-left: 3px solid #22c55e; padding: 6px 10px; border-radius: 4px; font-size: 0.78rem; color: #86efac; margin-top: 6px; margin-bottom: 6px;">
-            <strong>⚔️ Nächstes Spiel:</strong> {html.escape(next_opp)}
-        </div>
-        """
-    if last_res:
-        match_info_html += f"""
-        <div style="background-color: rgba(148, 163, 184, 0.08); border-left: 3px solid #64748b; padding: 6px 10px; border-radius: 4px; font-size: 0.78rem; color: #cbd5e1; margin-top: 6px; margin-bottom: 6px;">
-            <strong>📊 Letztes Spielergebnis:</strong> {html.escape(last_res)}
-        </div>
-        """
-
-    # 🎯 DEZENTES GEGNER-RADAR (NUR BEI BEDARF AUFKLAPPBAR, IM DARK-THEME)
-    radar_html = ""
-    if isinstance(analysis, dict) and analysis.get("event_name"):
-        badge_text = str(analysis.get("matchup_badge", "⚪ Unbekannt"))
-        desc = html.escape(str(analysis.get("matchup_desc", "")))
-        level = html.escape(str(analysis.get("field_level", "")))
-        known_duels = analysis.get("known_duels", [])
-        unknown_cnt = analysis.get("unknown_count", 0)
-        
-        # Hochkontrast-Farben für das Matchup-Badge im Dark Theme
-        badge_style = "background: rgba(148, 163, 184, 0.15); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1);"
-        if "günstig" in badge_text.lower():
-            badge_style = "background: rgba(34, 197, 94, 0.18); color: #4ade80; border: 1px solid #22c55e;"
-        elif "schwer" in badge_text.lower():
-            badge_style = "background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid #ef4444;"
-        elif "ausgeglichen" in badge_text.lower():
-            badge_style = "background: rgba(245, 158, 11, 0.18); color: #fde047; border: 1px solid #f59e0b;"
-
-        duels_html_list = []
-        for d in known_duels:
-            res_icon = "🟢" if d.get("wins", 0) > d.get("losses", 0) else ("🔴" if d.get("wins", 0) < d.get("losses", 0) else "🟡")
-            duels_html_list.append(
-                f"<li style='margin-bottom: 5px; font-size: 0.76rem; color: #e2e8f0;'>"
-                f"• <strong>{html.escape(str(d.get('opponent', '')))}:</strong> "
-                f"{res_icon} <strong>{d.get('wins', 0)}-{d.get('losses', 0)}</strong> Siege "
-                f"<span style='color: #94a3b8;'>({html.escape(str(d.get('detail', '')))})</span></li>"
-            )
-        if unknown_cnt > 0:
-            duels_html_list.append(f"<li style='color: #64748b; font-size: 0.74rem; margin-top: 6px;'>• {unknown_cnt} weitere Konkurrenten: ⚪ Bisher keine direkten Duelle</li>")
-            
-        duels_rendered = "".join(duels_html_list) if duels_html_list else "<li style='color:#64748b;'>Keine bisherigen Duelle verzeichnet</li>"
-
-        radar_html = f"""
-        <details style="background: #141923; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; margin-top: 8px; margin-bottom: 6px; padding: 6px 10px; cursor: pointer;">
-            <summary style="font-size: 0.76rem; font-weight: 700; color: #94a3b8; outline: none; display: flex; justify-content: space-between; align-items: center; user-select: none;">
-                <span>👥 Gegner-Radar: {html.escape(str(analysis['event_name']))}</span>
-                <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px; {badge_style}">{html.escape(badge_text)}</span>
-            </summary>
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.06); font-size: 0.76rem; color: #cbd5e1; line-height: 1.4;">
-                <div style="margin-bottom: 6px;">
-                    🎯 <strong>Matchup-Faktor:</strong> {desc}<br>
-                    📊 <strong>Feld-Status:</strong> {level}
-                </div>
-                <div style="font-weight: 700; color: #38bdf8; margin-top: 6px; margin-bottom: 4px;">⚔️ Deine Head-to-Head Historie im Feld ({len(known_duels)} bekannte Duelle):</div>
-                <ul style="list-style-type: none; padding-left: 2px; margin: 0;">
-                    {duels_rendered}
-                </ul>
-            </div>
-        </details>
-        """    raw_city = str(item.get('city', 'Unbekannt'))
+def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today):
+    raw_city = str(item.get('city', 'Unbekannt'))
     city = html.escape(raw_city)
     dist = item.get('distance')
     dist_str = f"{dist} km" if dist is not None else "Keine Angabe"
@@ -1064,55 +997,65 @@ def can_still_register(item, vacation_dates, occupied_dates):
     match_info_html = ""
     if next_opp:
         match_info_html += f"""
-        <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 7px 12px; border-radius: 4px; font-size: 0.8rem; color: #15803d; margin-top: 6px; margin-bottom: 6px;">
+        <div style="background-color: rgba(34, 197, 94, 0.1); border-left: 3px solid #22c55e; padding: 6px 10px; border-radius: 4px; font-size: 0.78rem; color: #86efac; margin-top: 6px; margin-bottom: 6px;">
             <strong>⚔️ Nächstes Spiel:</strong> {html.escape(next_opp)}
         </div>
         """
     if last_res:
         match_info_html += f"""
-        <div style="background-color: #f8fafc; border-left: 4px solid #64748b; padding: 7px 12px; border-radius: 4px; font-size: 0.8rem; color: #334155; margin-top: 6px; margin-bottom: 6px;">
+        <div style="background-color: rgba(148, 163, 184, 0.08); border-left: 3px solid #64748b; padding: 6px 10px; border-radius: 4px; font-size: 0.78rem; color: #cbd5e1; margin-top: 6px; margin-bottom: 6px;">
             <strong>📊 Letztes Spielergebnis:</strong> {html.escape(last_res)}
         </div>
         """
 
-    # Gegner-Radar & H2H-Historie
+    # 🎯 DEZENTES GEGNER-RADAR (IM DARK-THEME, NUR BEI BEDARF AUFKLAPPBAR)
     radar_html = ""
     if isinstance(analysis, dict) and analysis.get("event_name"):
-        badge = html.escape(str(analysis.get("matchup_badge", "⚪ Unbekannt")))
+        badge_text = str(analysis.get("matchup_badge", "⚪ Unbekannt"))
         desc = html.escape(str(analysis.get("matchup_desc", "")))
         level = html.escape(str(analysis.get("field_level", "")))
         known_duels = analysis.get("known_duels", [])
         unknown_cnt = analysis.get("unknown_count", 0)
         
+        badge_style = "background: rgba(148, 163, 184, 0.15); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1);"
+        if "günstig" in badge_text.lower():
+            badge_style = "background: rgba(34, 197, 94, 0.18); color: #4ade80; border: 1px solid #22c55e;"
+        elif "schwer" in badge_text.lower():
+            badge_style = "background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid #ef4444;"
+        elif "ausgeglichen" in badge_text.lower():
+            badge_style = "background: rgba(245, 158, 11, 0.18); color: #fde047; border: 1px solid #f59e0b;"
+
         duels_html_list = []
         for d in known_duels:
             res_icon = "🟢" if d.get("wins", 0) > d.get("losses", 0) else ("🔴" if d.get("wins", 0) < d.get("losses", 0) else "🟡")
             duels_html_list.append(
-                f"<li style='margin-bottom:3px;'>• <strong>{html.escape(str(d.get('opponent', '')))}:</strong> "
-                f"{res_icon} {d.get('wins', 0)}-{d.get('losses', 0)} Siege <em>({html.escape(str(d.get('detail', '')))})</em></li>"
+                f"<li style='margin-bottom: 5px; font-size: 0.76rem; color: #e2e8f0;'>"
+                f"• <strong>{html.escape(str(d.get('opponent', '')))}:</strong> "
+                f"{res_icon} <strong>{d.get('wins', 0)}-{d.get('losses', 0)}</strong> Siege "
+                f"<span style='color: #94a3b8;'>({html.escape(str(d.get('detail', '')))})</span></li>"
             )
         if unknown_cnt > 0:
-            duels_html_list.append(f"<li style='color:#64748b; margin-top:4px;'>• {unknown_cnt} weitere Konkurrenten im Feld: ⚪ Noch keine direkten Duelle verzeichnet</li>")
+            duels_html_list.append(f"<li style='color: #64748b; font-size: 0.74rem; margin-top: 6px;'>• {unknown_cnt} weitere Konkurrenten: ⚪ Bisher keine direkten Duelle</li>")
             
-        duels_rendered = "".join(duels_html_list) if duels_html_list else "<li>Keine bisherigen Duelle gegen das Feld</li>"
+        duels_rendered = "".join(duels_html_list) if duels_html_list else "<li style='color:#64748b;'>Keine bisherigen Duelle verzeichnet</li>"
 
         radar_html = f"""
-        <div style="background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 9px 12px; margin-top: 8px; margin-bottom: 8px; font-size: 0.8rem;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                <span style="font-weight:700; color:#1e293b;">👥 Gegner-Radar: {html.escape(str(analysis['event_name']))}</span>
-                <span style="font-weight:700; font-size:0.75rem;">{badge}</span>
-            </div>
-            <div style="color:#475569; margin-bottom:6px; line-height:1.35;">
-                🎯 <strong>Matchup-Faktor:</strong> {desc}<br>
-                📊 <strong>Feld-Status:</strong> {level}
-            </div>
-            <details style="cursor:pointer; color:#0f172a; font-size:0.78rem;">
-                <summary style="font-weight:600; outline:none; color:#2563eb;">⚔️ Deine Head-to-Head Historie im Feld ({len(known_duels)} bekannte Duelle)</summary>
-                <ul style="list-style-type:none; padding-left:4px; margin-top:6px; margin-bottom:2px;">
+        <details style="background: #141923; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; margin-top: 8px; margin-bottom: 6px; padding: 6px 10px; cursor: pointer;">
+            <summary style="font-size: 0.76rem; font-weight: 700; color: #94a3b8; outline: none; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+                <span>👥 Gegner-Radar: {html.escape(str(analysis['event_name']))}</span>
+                <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px; {badge_style}">{html.escape(badge_text)}</span>
+            </summary>
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.06); font-size: 0.76rem; color: #cbd5e1; line-height: 1.4;">
+                <div style="margin-bottom: 6px;">
+                    🎯 <strong>Matchup-Faktor:</strong> {desc}<br>
+                    📊 <strong>Feld-Status:</strong> {level}
+                </div>
+                <div style="font-weight: 700; color: #38bdf8; margin-top: 6px; margin-bottom: 4px;">⚔️ Deine Head-to-Head Historie im Feld ({len(known_duels)} bekannte Duelle):</div>
+                <ul style="list-style-type: none; padding-left: 2px; margin: 0;">
                     {duels_rendered}
                 </ul>
-            </details>
-        </div>
+            </div>
+        </details>
         """
 
     html_out = f"""
