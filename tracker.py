@@ -13,7 +13,6 @@ DB_FILE = "known_tournaments.json"
 
 UUID_PATTERN = re.compile(r'([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})')
 
-# DEINE SPIELER-KONFIGURATION
 PLAYER_CONFIG = {
     "first_name": "Marco",
     "last_name": "Mainz",
@@ -45,6 +44,22 @@ def get_headers():
     }
 
 
+def init_session():
+    """Initialisiert Session und überwindet die Cookie-Wall von turnier.de offiziell."""
+    session = requests.Session()
+    headers = get_headers()
+    try:
+        post_data = {
+            'ReturnUrl': '/',
+            'SettingsOpen': 'false',
+            'CookiePurposes': ['1', '2', '4', '16']
+        }
+        session.post('https://dbv.turnier.de/cookiewall/Save', data=post_data, headers=headers, timeout=8)
+    except Exception as e:
+        print(f"Hinweis Cookie-Wall Init: {e}")
+    return session
+
+
 def get_tournament_description(session, tournament_url):
     try:
         match = UUID_PATTERN.search(tournament_url)
@@ -72,9 +87,8 @@ def get_tournament_description(session, tournament_url):
 
 
 def extract_field_name(text):
-    """Ermittelt das Feld (A, B, C, D oder Sonderbezeichnungen)."""
     t_up = text.upper()
-    m_letter = re.search(r'\b([A-D])\b', t_up)
+    m_letter = re.search(r'\b([A-E])\b', t_up)
     if m_letter:
         return f"{m_letter.group(1)}-Feld"
     if "PREMIUM" in t_up:
@@ -89,106 +103,103 @@ def extract_field_name(text):
     return ""
 
 
+# --- DYNAMISCHES EVENT- & GEGNER-SCRAPING ---
+
 def check_player_subpages(session, t_id, existing_entry):
-    """
-    Prüft dynamisch alle gemeldeten Disziplinen, Partner,
-    Gegner und Ergebnisse für Marco Mainz.
-    """
     updates = {}
+    headers = get_headers()
     
-    # -----------------------------------------------------------
-    # 1. SUBSEITE: /players (Dynamische Disziplinen & Partner)
-    # -----------------------------------------------------------
-    players_url = f"https://dbv.turnier.de/tournament/{t_id}/players"
+    # 1. Konkurrenzen-Übersicht abrufen (/sport/events.aspx)
+    events_url = f"https://dbv.turnier.de/sport/events.aspx?id={t_id}"
     try:
-        r_players = session.get(players_url, headers=get_headers(), timeout=10)
-        if r_players.status_code == 200:
-            soup = BeautifulSoup(r_players.content, 'html.parser')
-            page_text = soup.get_text()
+        r_events = session.get(events_url, headers=headers, timeout=10)
+        if r_events.status_code == 200 and 'cookiewall' not in r_events.url:
+            soup_all = BeautifulSoup(r_events.content, 'html.parser')
+            event_links = soup_all.find_all('a', href=lambda h: h and 'event.aspx' in h)
             
-            # Prüfen, ob Marco Mainz überhaupt auf der Teilnehmerliste steht
-            if any(p.search(page_text) for p in PLAYER_CONFIG["patterns"]):
-                updates["registered"] = True
+            for a_el in event_links:
+                event_name = a_el.get_text().strip()
+                # Damen-Konkurrenzen überspringen
+                if event_name.startswith(('DD', 'DE', 'Damendoppel', 'Dameneinzel')):
+                    continue
                 
-                # Wir suchen gezielt nach deinem Link zur Spieler-Detailseite (/player/{ID})
-                player_detail_url = None
-                for a in soup.find_all('a', href=re.compile(r'/player/\d+', re.I)):
-                    if any(p.search(a.get_text()) for p in PLAYER_CONFIG["patterns"]):
-                        player_detail_url = urllib.parse.urljoin("https://dbv.turnier.de", a['href'])
-                        break
+                ev_href = a_el.get('href')
+                full_ev_url = urllib.parse.urljoin("https://dbv.turnier.de/sport/", ev_href)
                 
-                # Wenn persönliche Spieler-Subseite existiert, diese für 100% Genauigkeit abrufen
-                events_to_parse = []
-                if player_detail_url:
-                    r_detail = session.get(player_detail_url, headers=get_headers(), timeout=10)
-                    if r_detail.status_code == 200:
-                        detail_soup = BeautifulSoup(r_detail.content, 'html.parser')
-                        # Alle Event-Zeilen sammeln
-                        for el in detail_soup.find_all(['tr', 'li', 'div'], class_=re.compile(r'event|entry|media', re.I)):
-                            events_to_parse.append(el.get_text(separator=' '))
-                
-                # Fallback: Direkt die Zeilen der /players-Tabelle nehmen
-                if not events_to_parse:
-                    for row in soup.find_all(['tr', 'li']):
-                        row_txt = row.get_text(separator=' ')
-                        if any(p.search(row_txt) for p in PLAYER_CONFIG["patterns"]):
-                            events_to_parse.append(row_txt)
+                # Konkurrenz-Unterseite abrufen
+                r_ev = session.get(full_ev_url, headers=headers, timeout=8)
+                if r_ev.status_code == 200 and any(p.search(r_ev.text) for p in PLAYER_CONFIG["patterns"]):
+                    updates["registered"] = True
+                    field_name = extract_field_name(event_name)
+                    
+                    soup_ev = BeautifulSoup(r_ev.content, 'html.parser')
+                    
+                    # Zeile mit Marco Mainz finden
+                    for tr in soup_ev.find_all('tr'):
+                        tr_txt = tr.get_text(separator=' | ')
+                        if any(p.search(tr_txt) for p in PLAYER_CONFIG["patterns"]):
+                            # Partner isolieren (Links oder Zellen)
+                            cell_names = [a.get_text().strip() for a in tr.find_all('a') if a.get_text().strip()]
+                            if not cell_names:
+                                parts = [c.strip() for c in tr_txt.split('|') if c.strip()]
+                                ignore_w = {'starterliste', 'status', 'auslosung', 'verein', 'verband', 'club', '1', '2', '3', '4', '5'}
+                                cell_names = [p for p in parts if p.lower() not in ignore_w and len(p) > 3]
 
-                # Jetzt die gefundenen Konkurrenzen analysieren
-                full_text_block = " --- ".join(events_to_parse)
-                
-                # A) HERRENEINZEL (HE)
-                if re.search(r'\b(HE|Herreneinzel|Herren-Einzel|MS|Men[\'s\s]+Singles)\b', full_text_block, re.I):
-                    updates["reg_he"] = True
-                    # Feld bestimmen
-                    for ev in events_to_parse:
-                        if re.search(r'\b(HE|Herreneinzel|MS)\b', ev, re.I):
-                            f = extract_field_name(ev)
-                            if f: updates["field_he"] = f
-
-                # B) HERRENDOPPEL (HD)
-                if re.search(r'\b(HD|Herrendoppel|Herren-Doppel|MD|Men[\'s\s]+Doubles)\b', full_text_block, re.I):
-                    updates["reg_hd"] = True
-                    for ev in events_to_parse:
-                        if re.search(r'\b(HD|Herrendoppel|MD)\b', ev, re.I):
-                            f = extract_field_name(ev)
-                            if f: updates["field_hd"] = f
-                            # Partner suchen (oft in Klammern oder nach "mit")
-                            partner_match = re.search(r'\[(.*?)\]|\((.*?)\)|mit\s+([A-ZÄÖÜa-zäöüß\s]+)', ev)
-                            if partner_match:
-                                p_raw = partner_match.group(1) or partner_match.group(2) or partner_match.group(3)
-                                if p_raw and "Mainz" not in p_raw and len(p_raw.strip()) > 3:
-                                    updates["partner_hd"] = p_raw.strip()
-
-                # C) MIXED (MX)
-                if re.search(r'\b(MX|Mixed|Gemischt|XD|Mixed[\s]+Doubles)\b', full_text_block, re.I):
-                    updates["reg_mx"] = True
-                    for ev in events_to_parse:
-                        if re.search(r'\b(MX|Mixed|XD)\b', ev, re.I):
-                            f = extract_field_name(ev)
-                            if f: updates["field_mx"] = f
-                            # Partnerin suchen
-                            partner_match = re.search(r'\[(.*?)\]|\((.*?)\)|mit\s+([A-ZÄÖÜa-zäöüß\s]+)', ev)
-                            if partner_match:
-                                p_raw = partner_match.group(1) or partner_match.group(2) or partner_match.group(3)
-                                if p_raw and "Mainz" not in p_raw and len(p_raw.strip()) > 3:
-                                    updates["partner_mx"] = p_raw.strip()
-
+                            partner_cands = [name for name in cell_names if not any(p.search(name) for p in PLAYER_CONFIG["patterns"])]
+                            found_partner = partner_cands[0] if partner_cands else ""
+                            
+                            # Disziplin zuweisen
+                            if re.search(r'\b(HD|Herrendoppel|MD)\b', event_name, re.I):
+                                updates["reg_hd"] = True
+                                if field_name: updates["field_hd"] = field_name
+                                if found_partner: updates["partner_hd"] = found_partner
+                                
+                            elif re.search(r'\b(HE|Herreneinzel|MS)\b', event_name, re.I):
+                                updates["reg_he"] = True
+                                if field_name: updates["field_he"] = field_name
+                                
+                            elif re.search(r'\b(MX|Mixed|XD)\b', event_name, re.I):
+                                updates["reg_mx"] = True
+                                if field_name: updates["field_mx"] = field_name
+                                if found_partner: updates["partner_mx"] = found_partner
+                    
+                    # Matches / Gegner in diesem Event suchen
+                    for tr in soup_ev.find_all('tr'):
+                        tr_txt = tr.get_text(separator=' ')
+                        if any(p.search(tr_txt) for p in PLAYER_CONFIG["patterns"]):
+                            links = [a.get_text().strip() for a in tr.find_all('a') if a.get_text().strip()]
+                            cur_partner = updates.get("partner_hd") or updates.get("partner_mx") or existing_entry.get("partner_hd", "")
+                            opponents = [n for n in links if not any(p.search(n) for p in PLAYER_CONFIG["patterns"]) and n != cur_partner]
+                            
+                            score_m = re.search(r'\b\d{1,2}-\d{1,2}\b(?:\s+\d{1,2}-\d{1,2})*', tr_txt)
+                            time_m = re.search(r'\b(?:Mo|Di|Mi|Do|Fr|Sa|So)?\s*\d{1,2}\.\d{1,2}\.?\s+\d{1,2}:\d{2}\b', tr_txt)
+                            court_m = re.search(r'Court\s*\d+|Feld\s*\d+', tr_txt, re.I)
+                            
+                            opp_str = " / ".join(opponents[:2]) if opponents else "Noch offen"
+                            score_str = score_m.group(0) if score_m else ""
+                            time_str = time_m.group(0) if time_m else ""
+                            court_str = court_m.group(0) if court_m else ""
+                            
+                            if score_str:
+                                updates["last_match_result"] = f"{score_str} vs. {opp_str}"
+                            elif opp_str != "Noch offen":
+                                t_info = f" ({time_str}" if time_str else ""
+                                c_info = f", {court_str})" if (court_str and t_info) else (f" ({court_str})" if court_str else ")")
+                                suffix = f"{t_info}{c_info}" if (t_info or c_info != ")") else ""
+                                updates["next_opponent"] = f"vs. {opp_str}{suffix}"
+                                
     except Exception as e:
-        print(f"Fehler beim Prüfen von /players ({t_id}): {e}")
+        print(f"Fehler bei Konkurrenz-Prüfung ({t_id}): {e}")
 
-    # -----------------------------------------------------------
-    # 2. SUBSEITE: /winners.aspx (Treppchenplätze nach Disziplin)
-    # -----------------------------------------------------------
+    # 2. Treppchenplätze / Saisontagebuch abrufen (/sport/winners.aspx)
     winners_url = f"https://dbv.turnier.de/sport/winners.aspx?id={t_id}"
     try:
-        r_win = session.get(winners_url, headers=get_headers(), timeout=10)
-        if r_win.status_code == 200 and "Mainz" in r_win.text:
-            soup = BeautifulSoup(r_win.content, 'html.parser')
-            for table in soup.find_all('table'):
+        r_win = session.get(winners_url, headers=headers, timeout=8)
+        if r_win.status_code == 200 and any(p.search(r_win.text) for p in PLAYER_CONFIG["patterns"]):
+            soup_win = BeautifulSoup(r_win.content, 'html.parser')
+            for table in soup_win.find_all('table'):
                 t_text = table.get_text()
                 if any(p.search(t_text) for p in PLAYER_CONFIG["patterns"]):
-                    # Bestimmen, in welcher Disziplin du gewonnen hast
                     disc_key = "hd"
                     if re.search(r'\b(Einzel|HE|MS)\b', t_text, re.I):
                         disc_key = "he"
@@ -205,67 +216,7 @@ def check_player_subpages(session, t_id, existing_entry):
                             elif re.search(r'\b3\b|3/4|Semi|Dritter', row_t, re.I):
                                 updates[f"placement_{disc_key}"] = "🥉 3. Platz"
     except Exception as e:
-        print(f"Fehler beim Prüfen von /winners ({t_id}): {e}")
-
-    # -----------------------------------------------------------
-    # 3. SUBSEITE: /Matches (Gegner, Ansetzungen & Satzergebnisse)
-    # -----------------------------------------------------------
-    matches_url = f"https://dbv.turnier.de/tournament/{t_id}/Matches"
-    try:
-        r_m = session.get(matches_url, headers=get_headers(), timeout=10)
-        if r_m.status_code == 200 and "Mainz" in r_m.text:
-            soup = BeautifulSoup(r_m.content, 'html.parser')
-            matches = []
-            
-            for tr in soup.find_all('tr'):
-                tr_txt = tr.get_text(separator=' ')
-                if any(p.search(tr_txt) for p in PLAYER_CONFIG["patterns"]):
-                    links = tr.find_all('a', href=re.compile(r'player', re.I))
-                    player_names = [a.get_text().strip() for a in links if a.get_text().strip()]
-                    
-                    partner_hd = updates.get("partner_hd") or existing_entry.get("partner_hd", "")
-                    partner_mx = updates.get("partner_mx") or existing_entry.get("partner_mx", "")
-                    
-                    opponents = [
-                        p for p in player_names 
-                        if "Mainz" not in p and p != partner_hd and p != partner_mx
-                    ]
-                    opp_str = " / ".join(opponents[:2]) if opponents else "Noch offen"
-                    
-                    score_match = re.search(r'\b\d{1,2}-\d{1,2}\b(?:\s+\d{1,2}-\d{1,2})*', tr_txt)
-                    score_str = score_match.group(0) if score_match else ""
-                    
-                    time_match = re.search(r'\b(?:Mo|Di|Mi|Do|Fr|Sa|So)?\s*\d{1,2}\.\d{1,2}\.?\s+\d{1,2}:\d{2}\b', tr_txt)
-                    court_match = re.search(r'Court\s*\d+|Feld\s*\d+', tr_txt, re.I)
-                    
-                    time_str = time_match.group(0) if time_match else ""
-                    court_str = court_match.group(0) if court_match else ""
-                    
-                    matches.append({
-                        "opponents": opp_str,
-                        "score": score_str,
-                        "time": time_str,
-                        "court": court_str
-                    })
-            
-            if matches:
-                upcoming = [m for m in matches if not m["score"]]
-                completed = [m for m in matches if m["score"]]
-                
-                if upcoming:
-                    next_m = upcoming[0]
-                    t_info = f" ({next_m['time']}" if next_m['time'] else ""
-                    c_info = f", {next_m['court']})" if (next_m['court'] and t_info) else (f" ({next_m['court']})" if next_m['court'] else ")")
-                    suffix = f"{t_info}{c_info}" if (t_info or c_info != ")") else ""
-                    updates["next_opponent"] = f"vs. {next_m['opponents']}{suffix}"
-                else:
-                    updates["next_opponent"] = ""
-                    
-                if completed:
-                    last_m = completed[-1]
-                    updates["last_match_result"] = f"{last_m['score']} vs. {last_m['opponents']}"
-    except Exception as e:
-        print(f"Fehler beim Prüfen von /Matches ({t_id}): {e}")
+        print(f"Fehler bei Winners-Prüfung ({t_id}): {e}")
 
     return updates
 
@@ -285,16 +236,15 @@ def scrape_tournaments(s):
     page = 1
     max_pages = 25
 
-    # DYNAMISCHER ZEITRAUM: Aktuelles Jahr bis Ende des Folgejahres (z. B. 2026 bis 31.12.2027)
     today = datetime.date.today()
     start_filter = f"{today.year}-01-01T00:00"
     end_filter = f"{today.year + 1}-12-31T23:59"
 
     while page <= max_pages:
-        print(f"Scraping page {page} ({today.year} - {today.year + 1})...")
+        print(f"Scraping Seite {page} ({today.year} - {today.year + 1})...")
         payload = {
             "Page": str(page),
-            "TournamentExtendedFilter.SportID": "2",  # Badminton
+            "TournamentExtendedFilter.SportID": "2",
             "TournamentFilter.Q": "",
             "TournamentFilter.DateFilterType": "0",
             "TournamentFilter.StartDate": start_filter,
@@ -472,21 +422,14 @@ def check_for_updates_generator():
         known_tournaments = load_gist_file(DB_FILE)
         if not isinstance(known_tournaments, dict):
             known_tournaments = {}
-        yield f"✅ Datenbank geladen ({len(known_tournaments)} Turniere)."
+        yield f"✅ Datenbank geladen ({len(known_tournaments)} bekannte Turniere)."
     except Exception as e:
         yield f"🚨 KRITISCHER DATENBANKFEHLER: {e}"
         return
 
-    yield f"Suche nach Turnieren für {datetime.date.today().year} & {datetime.date.today().year + 1} auf turnier.de..."
-    session = requests.Session()
-    
-    for dom in ["dbv.turnier.de", ".turnier.de", "www.turnier.de"]:
-        session.cookies.set("st", "l=1031&exp=48244.9228685648&c=1", domain=dom, path="/")
-    
-    try:
-        session.get("https://dbv.turnier.de/find", headers=get_headers(), timeout=10)
-    except Exception as e:
-        yield f"Warnung Session-Cookies: {e}."
+    today = datetime.date.today()
+    yield f"Suche nach Turnieren für {today.year} & {today.year + 1} auf turnier.de..."
+    session = init_session()
     
     try:
         current_list = scrape_tournaments(session)
@@ -496,17 +439,25 @@ def check_for_updates_generator():
         return
 
     new_tournaments = []
+    found_registrations = 0
     
-    yield f"Gleiche Meldelisten, Gegner & Ergebnisse für '{PLAYER_CONFIG['first_name']} {PLAYER_CONFIG['last_name']}' ab..."
+    yield f"Gleiche Konkurrenzen, Gegner & Ergebnisse für Marco Mainz ab..."
     
     for idx, t in enumerate(current_list):
         t_id = t["id"]
         
         if t_id not in known_tournaments:
             t["description"] = get_tournament_description(session, t["link"])
-            # Subseiten prüfen
             sub_updates = check_player_subpages(session, t_id, t)
             t.update(sub_updates)
+            
+            if sub_updates.get("registered"):
+                found_registrations += 1
+                disc_info = []
+                if sub_updates.get("reg_hd"): disc_info.append(f"HD ({sub_updates.get('field_hd', '')})")
+                if sub_updates.get("reg_he"): disc_info.append(f"HE ({sub_updates.get('field_he', '')})")
+                if sub_updates.get("reg_mx"): disc_info.append(f"MX ({sub_updates.get('field_mx', '')})")
+                yield f"🎯 Treffer bei '{t['title']}': Gemeldet für {', '.join(disc_info)}!"
             
             new_tournaments.append(t)
             known_tournaments[t_id] = t
@@ -514,7 +465,6 @@ def check_for_updates_generator():
             old_t = known_tournaments[t_id]
             desc = old_t.get('description', '') or get_tournament_description(session, t["link"])
 
-            # Bestehende Metadaten aktualisieren
             old_t.update({
                 "title": t["title"],
                 "link": t["link"],
@@ -528,10 +478,17 @@ def check_for_updates_generator():
                 "description": desc
             })
             
-            # Automatische Subseiten-Synchronisation
             sub_updates = check_player_subpages(session, t_id, old_t)
+            if sub_updates.get("registered") and not old_t.get("registered"):
+                found_registrations += 1
+                disc_info = []
+                if sub_updates.get("reg_hd"): disc_info.append(f"HD ({sub_updates.get('field_hd', '')})")
+                if sub_updates.get("reg_he"): disc_info.append(f"HE ({sub_updates.get('field_he', '')})")
+                if sub_updates.get("reg_mx"): disc_info.append(f"MX ({sub_updates.get('field_mx', '')})")
+                yield f"🎯 Treffer bei '{t['title']}': Gemeldet für {', '.join(disc_info)}!"
+
             for k, val in sub_updates.items():
-                if val:  # Überschreibe nur, wenn wir echte Daten gefunden haben
+                if val:
                     old_t[k] = val
                     
             known_tournaments[t_id] = old_t
@@ -549,7 +506,7 @@ def check_for_updates_generator():
         yield f"Fertig! {len(new_tournaments)} neue(s) Turnier(e) gefunden."
         send_push_notification(new_tournaments)
     else:
-        yield "Fertig! Alle Meldungen, Gegner & Treppchenplätze synchronisiert."
+        yield f"Fertig! Alle Meldungen & Ergebnisse synchronisiert ({found_registrations} automatische Meldungen aktiv)."
 
 
 if __name__ == "__main__":
