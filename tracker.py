@@ -103,28 +103,28 @@ def extract_field_name(text):
     return ""
 
 
-# --- DYNAMISCHES EVENT- & GEGNER-SCRAPING ---
 def auto_detect_schedule_and_deadline(description_text):
     """
     Liest Spieltage (Samstag/Sonntag) und den Meldeschluss
     automatisch aus dem Ausschreibungstext aus.
     """
     detected = {}
+    if not description_text:
+        return detected
+        
     d_lower = description_text.lower()
 
-    # 1. Meldeschluss erkennen (z. B. "Meldeschluss: 15.06.2026")
     deadline_match = re.search(r'meldeschluss(?:\s*ist)?(?:\s*am)?[:\s]+(?:[a-zäöüß]+,?\s*)?(\d{1,2}\.\d{1,2}\.(?:\d{4})?)', d_lower)
     if deadline_match:
         detected["deadline"] = deadline_match.group(1)
 
-    # 2. Spieltage erkennen (Samstag / Sonntag / Freitag)
-    # A) DOPPEL (HD / DD)
+    # Doppel (HD / DD)
     if re.search(r'(?:samstag|sa\.?)[^\n\.\;]*\b(?:herrendoppel|damendoppel|doppel|hd|dd)\b', d_lower):
         detected["day_hd"] = "Samstag"
     elif re.search(r'(?:sonntag|so\.?)[^\n\.\;]*\b(?:herrendoppel|damendoppel|doppel|hd|dd)\b', d_lower):
         detected["day_hd"] = "Sonntag"
 
-    # B) MIXED (MX)
+    # Mixed (MX)
     if re.search(r'(?:samstag|sa\.?)[^\n\.\;]*\b(?:mixed|gemischt|mx)\b', d_lower):
         detected["day_mx"] = "Samstag"
     elif re.search(r'(?:sonntag|so\.?)[^\n\.\;]*\b(?:mixed|gemischt|mx)\b', d_lower):
@@ -132,18 +132,21 @@ def auto_detect_schedule_and_deadline(description_text):
     elif re.search(r'(?:freitag|fr\.?)[^\n\.\;]*\b(?:mixed|gemischt|mx)\b', d_lower):
         detected["day_mx"] = "Freitag"
 
-    # C) EINZEL (HE / DE)
+    # Einzel (HE / DE)
     if re.search(r'(?:samstag|sa\.?)[^\n\.\;]*\b(?:herreneinzel|dameneinzel|einzel|he|de)\b', d_lower):
         detected["day_he"] = "Samstag"
     elif re.search(r'(?:sonntag|so\.?)[^\n\.\;]*\b(?:herreneinzel|dameneinzel|einzel|he|de)\b', d_lower):
         detected["day_he"] = "Sonntag"
 
     return detected
+
+
+# --- DYNAMISCHES EVENT- & GEGNER-SCRAPING ---
+
 def check_player_subpages(session, t_id, existing_entry):
     updates = {}
     headers = get_headers()
     
-    # 1. Konkurrenzen-Übersicht abrufen (/sport/events.aspx)
     events_url = f"https://dbv.turnier.de/sport/events.aspx?id={t_id}"
     try:
         r_events = session.get(events_url, headers=headers, timeout=10)
@@ -153,14 +156,12 @@ def check_player_subpages(session, t_id, existing_entry):
             
             for a_el in event_links:
                 event_name = a_el.get_text().strip()
-                # Damen-Konkurrenzen überspringen
                 if event_name.startswith(('DD', 'DE', 'Damendoppel', 'Dameneinzel')):
                     continue
                 
                 ev_href = a_el.get('href')
                 full_ev_url = urllib.parse.urljoin("https://dbv.turnier.de/sport/", ev_href)
                 
-                # Konkurrenz-Unterseite abrufen
                 r_ev = session.get(full_ev_url, headers=headers, timeout=8)
                 if r_ev.status_code == 200 and any(p.search(r_ev.text) for p in PLAYER_CONFIG["patterns"]):
                     updates["registered"] = True
@@ -168,11 +169,9 @@ def check_player_subpages(session, t_id, existing_entry):
                     
                     soup_ev = BeautifulSoup(r_ev.content, 'html.parser')
                     
-                    # Zeile mit Marco Mainz finden
                     for tr in soup_ev.find_all('tr'):
                         tr_txt = tr.get_text(separator=' | ')
                         if any(p.search(tr_txt) for p in PLAYER_CONFIG["patterns"]):
-                            # Partner isolieren (Links oder Zellen)
                             cell_names = [a.get_text().strip() for a in tr.find_all('a') if a.get_text().strip()]
                             if not cell_names:
                                 parts = [c.strip() for c in tr_txt.split('|') if c.strip()]
@@ -182,7 +181,6 @@ def check_player_subpages(session, t_id, existing_entry):
                             partner_cands = [name for name in cell_names if not any(p.search(name) for p in PLAYER_CONFIG["patterns"])]
                             found_partner = partner_cands[0] if partner_cands else ""
                             
-                            # Disziplin zuweisen
                             if re.search(r'\b(HD|Herrendoppel|MD)\b', event_name, re.I):
                                 updates["reg_hd"] = True
                                 if field_name: updates["field_hd"] = field_name
@@ -197,7 +195,6 @@ def check_player_subpages(session, t_id, existing_entry):
                                 if field_name: updates["field_mx"] = field_name
                                 if found_partner: updates["partner_mx"] = found_partner
                     
-                    # Matches / Gegner in diesem Event suchen
                     for tr in soup_ev.find_all('tr'):
                         tr_txt = tr.get_text(separator=' ')
                         if any(p.search(tr_txt) for p in PLAYER_CONFIG["patterns"]):
@@ -225,7 +222,6 @@ def check_player_subpages(session, t_id, existing_entry):
     except Exception as e:
         print(f"Fehler bei Konkurrenz-Prüfung ({t_id}): {e}")
 
-    # 2. Treppchenplätze / Saisontagebuch abrufen (/sport/winners.aspx)
     winners_url = f"https://dbv.turnier.de/sport/winners.aspx?id={t_id}"
     try:
         r_win = session.get(winners_url, headers=headers, timeout=8)
@@ -398,6 +394,7 @@ def scrape_tournaments(s):
                 "placement_mx": "",
                 "field_mx": "",
                 "description": "",
+                "deadline": "",
                 "next_opponent": "",
                 "last_match_result": ""
             })
@@ -443,13 +440,7 @@ def send_push_notification(new_items):
     except Exception as e:
         print(f"Fehler beim Senden der Push-Nachricht: {e}")
 
-# Automatische Erkennung von Zeitplan & Meldeschluss aus dem Text
-if desc:
-    schedule_data = auto_detect_schedule_and_deadline(desc)
-    for key in ["day_he", "day_hd", "day_mx", "deadline"]:
-        # Nur setzen, wenn noch nicht manuell überschrieben
-        if schedule_data.get(key) and not old_t.get(key):
-            old_t[key] = schedule_data[key]
+
 def check_for_updates():
     for _ in check_for_updates_generator():
         pass
@@ -481,13 +472,21 @@ def check_for_updates_generator():
     new_tournaments = []
     found_registrations = 0
     
-    yield f"Gleiche Konkurrenzen, Gegner & Ergebnisse für Marco Mainz ab..."
+    yield f"Gleiche Konkurrenzen, Zeitpläne & Ergebnisse für Marco Mainz ab..."
     
     for idx, t in enumerate(current_list):
         t_id = t["id"]
         
         if t_id not in known_tournaments:
             t["description"] = get_tournament_description(session, t["link"])
+            
+            # Automatische Spieltage & Meldeschluss aus dem Text erkennen
+            if t["description"]:
+                sch = auto_detect_schedule_and_deadline(t["description"])
+                for k in ["day_he", "day_hd", "day_mx", "deadline"]:
+                    if sch.get(k) and not t.get(k):
+                        t[k] = sch[k]
+                        
             sub_updates = check_player_subpages(session, t_id, t)
             t.update(sub_updates)
             
@@ -518,6 +517,13 @@ def check_for_updates_generator():
                 "description": desc
             })
             
+            # Automatische Spieltage & Meldeschluss aus dem Text erkennen
+            if desc:
+                sch = auto_detect_schedule_and_deadline(desc)
+                for k in ["day_he", "day_hd", "day_mx", "deadline"]:
+                    if sch.get(k) and not old_t.get(k):
+                        old_t[k] = sch[k]
+
             sub_updates = check_player_subpages(session, t_id, old_t)
             if sub_updates.get("registered") and not old_t.get("registered"):
                 found_registrations += 1
