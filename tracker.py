@@ -162,13 +162,32 @@ def auto_detect_schedule_and_deadline(description_text):
     return detected
 
 
-# --- DAS PRÄZISE MATCH-ARCHIV (LIGA & TURNIERE) ---
+def clean_badminton_scores(text, won):
+    """
+    Filtert echte Badminton-Satzstände heraus (mind. eine Zahl 20-30).
+    Entfernt Hallennummern, Spieldauern (z.B. 40m) und Uhrzeiten.
+    """
+    raw_pairs = re.findall(r'\b(\d{1,2})\s*[-:\s]\s*(\d{1,2})\b', text)
+    valid_sets = []
+    for s1, s2 in raw_pairs:
+        p1, p2 = int(s1), int(s2)
+        if (20 <= p1 <= 30 or 20 <= p2 <= 30) and p1 != p2 and max(p1, p2) <= 30:
+            if won:
+                valid_sets.append(f"{max(p1, p2)}:{min(p1, p2)}")
+            else:
+                valid_sets.append(f"{min(p1, p2)}:{max(p1, p2)}")
+    # Badminton hat max. 3 Sätze
+    return ", ".join(valid_sets[:3])
+
+
+# --- DAS EXAKTE MATCH-ARCHIV (DEDUPLIZIERT & REIN ECHTE ERGEBNISSE) ---
 
 def harvest_opponent_history(session):
     history = {}
+    seen_matches = set()
     headers = get_headers()
     
-    # 1. Ligaspiele erfassen (mit exakter Heim/Auswärts-Erkennung)
+    # 1. Ligaspiele erfassen
     for l_url in PLAYER_CONFIG["league_urls"]:
         try:
             r = session.get(l_url, headers=headers, timeout=10)
@@ -211,6 +230,11 @@ def harvest_opponent_history(session):
                         score_str = ", ".join(formatted_sets)
                         
                         for opp in opponents:
+                            sig = (opp, disc, score_str)
+                            if sig in seen_matches:
+                                continue
+                            seen_matches.add(sig)
+                            
                             history.setdefault(opp, []).append({
                                 "opponent": opp,
                                 "competition": "Liga",
@@ -221,7 +245,7 @@ def harvest_opponent_history(session):
         except Exception as e:
             print(f"Fehler bei Liga-Erfassung: {e}")
 
-    # 2. Turnierspiele erfassen (direkt aus den .match-Containern)
+    # 2. Turnierspiele erfassen
     for t_url in PLAYER_CONFIG["tournament_profile_urls"]:
         try:
             r = session.get(t_url, headers=headers, timeout=10)
@@ -230,7 +254,6 @@ def harvest_opponent_history(session):
                 for match_box in soup.find_all(class_=re.compile(r'\bmatch\b')):
                     txt = match_box.get_text(separator=' ')
                     if any(p.search(txt) for p in PLAYER_CONFIG["patterns"]):
-                        # Exakt die beiden match__row Zeilen filtern (ohne wrapper)
                         rows = [el for el in match_box.find_all('div') if el.get('class') and 'match__row' in el.get('class') and 'match__row-wrapper' not in el.get('class') and 'match__row-title' not in el.get('class')]
                         if len(rows) >= 2:
                             r0_txt = rows[0].get_text(separator=' ')
@@ -238,28 +261,14 @@ def harvest_opponent_history(session):
                             my_row = rows[0] if marco_in_r0 else rows[1]
                             opp_row = rows[1] if marco_in_r0 else rows[0]
                             
-                            # Sieger-Erkennung via 'W' oder 'L'
                             my_row_txt = ' ' + my_row.get_text(separator=' ') + ' '
                             won = bool(' W ' in my_row_txt or 'match__row--winner' in my_row.get('class', []))
                             if ' L ' in my_row_txt:
                                 won = False
                             
-                            # Gegner extrahieren
                             opp_links = [a.get_text().strip() for a in opp_row.find_all('a') if is_real_player_name(a.get_text().strip())]
-                            
-                            # Sätze extrahieren
-                            score_m = re.findall(r'(\d{1,2})\s+(\d{1,2})', txt)
-                            set_scores = []
-                            for s1, s2 in score_m:
-                                pts1, pts2 = int(s1), int(s2)
-                                if pts1 >= 11 or pts2 >= 11:
-                                    if won:
-                                        set_scores.append(f"{max(pts1, pts2)}:{min(pts1, pts2)}")
-                                    else:
-                                        set_scores.append(f"{min(pts1, pts2)}:{max(pts1, pts2)}")
-                            score_str = ", ".join(set_scores) if set_scores else ""
+                            score_str = clean_badminton_scores(txt, won)
 
-                            # Disziplin ermitteln
                             disc = "HD"
                             if any(k in txt.lower() for k in ['vanessa', 'joppien', 'thea', 'sommer', 'mixed', 'mx']):
                                 disc = "MX"
@@ -267,6 +276,11 @@ def harvest_opponent_history(session):
                                 disc = "HE"
 
                             for opp in opp_links:
+                                sig = (opp, disc, score_str)
+                                if sig in seen_matches:
+                                    continue
+                                seen_matches.add(sig)
+                                
                                 history.setdefault(opp, []).append({
                                     "opponent": opp,
                                     "competition": "Turnier",
@@ -329,7 +343,7 @@ def check_player_subpages(session, t_id, existing_entry, opp_history):
                                 if field_name: updates["field_mx"] = field_name
                                 if found_partner: updates["partner_mx"] = found_partner
 
-                    # 2. ALLE GEMELDETEN GEGNER IM FELD ERFASSEN
+                    # 2. ECHTE GEGNER IM FELD ERFASSEN
                     all_field_players = []
                     seeds_count = 0
                     for tr in soup_ev.find_all('tr'):
@@ -356,8 +370,13 @@ def check_player_subpages(session, t_id, existing_entry, opp_history):
                             total_wins += wins
                             total_losses += losses
                             
-                            last_m = matches_vs[0]
-                            detail_str = f"{last_m['score']} ({last_m['discipline']}, {last_m['competition']})" if last_m['score'] else f"{last_m['discipline']}, {last_m['competition']}"
+                            # Letzte Satzstände kompakt zusammenfassen
+                            scores_list = [m['score'] for m in matches_vs if m.get('score')]
+                            last_disc = matches_vs[0]['discipline']
+                            last_comp = matches_vs[0]['competition']
+                            score_preview = "; ".join(scores_list[:2]) if scores_list else ""
+                            detail_str = f"{score_preview} ({last_disc}, {last_comp})" if score_preview else f"{last_disc}, {last_comp}"
+                            
                             known_duels.append({
                                 "opponent": opp,
                                 "wins": wins,
