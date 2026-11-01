@@ -245,7 +245,7 @@ def harvest_opponent_history(session):
         except Exception as e:
             print(f"Fehler bei Liga-Erfassung: {e}")
 
-    # 2. Turnierspiele erfassen
+    # 2. Turnierspiele erfassen (mit strikter Duplikats- & Geisterspiel-Sperre)
     for t_url in PLAYER_CONFIG["tournament_profile_urls"]:
         try:
             r = session.get(t_url, headers=headers, timeout=10)
@@ -261,6 +261,7 @@ def harvest_opponent_history(session):
                             my_row = rows[0] if marco_in_r0 else rows[1]
                             opp_row = rows[1] if marco_in_r0 else rows[0]
                             
+                            # Sieger-Erkennung via 'W' oder 'L'
                             my_row_txt = ' ' + my_row.get_text(separator=' ') + ' '
                             won = bool(' W ' in my_row_txt or 'match__row--winner' in my_row.get('class', []))
                             if ' L ' in my_row_txt:
@@ -269,14 +270,21 @@ def harvest_opponent_history(session):
                             opp_links = [a.get_text().strip() for a in opp_row.find_all('a') if is_real_player_name(a.get_text().strip())]
                             score_str = clean_badminton_scores(txt, won)
 
+                            # Geisterspiele ohne Sätze ignorieren!
+                            if not score_str or len(score_str.split(':')) < 2:
+                                continue
+
                             disc = "HD"
                             if any(k in txt.lower() for k in ['vanessa', 'joppien', 'thea', 'sommer', 'mixed', 'mx']):
                                 disc = "MX"
                             elif len(my_row.find_all('a')) == 1:
                                 disc = "HE"
 
+                            # Kernsätze für Duplikats-Prüfung heranziehen (z. B. '11:21, 17:21')
+                            core_score = ", ".join(score_str.split(', ')[:2])
+
                             for opp in opp_links:
-                                sig = (opp, disc, score_str)
+                                sig = (opp, disc, core_score)
                                 if sig in seen_matches:
                                     continue
                                 seen_matches.add(sig)
@@ -285,13 +293,11 @@ def harvest_opponent_history(session):
                                     "opponent": opp,
                                     "competition": "Turnier",
                                     "discipline": disc,
-                                    "score": score_str,
+                                    "score": core_score,
                                     "won": won
                                 })
         except Exception as e:
             print(f"Fehler bei Turnier-Erfassung: {e}")
-            
-    return history
 
 
 # --- DYNAMISCHES EVENT-, GEGNER- & NIVEAU-SCRAPING ---
