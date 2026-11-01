@@ -1148,7 +1148,7 @@ def get_played_tournaments(df, today):
     return df_played
 
 
-# --- INTERAKTIVE FORMKURVE (ZEIT-STYLE, HARMONISCHE SCHRIFTGRÖSSEN) ---
+# --- INTERAKTIVE FORMKURVE (ZEIT-STYLE, MULTI-YEAR SUPPORT) ---
 def render_season_chart(df, today):
     df_played = get_played_tournaments(df, today)
     total_played = len(df_played)
@@ -1282,11 +1282,77 @@ def render_season_chart(df, today):
             hoverinfo="text"
         ))
 
-min_date = df_chart["date"].min()
-max_date = df_chart["date"].max()
-y_start = min_date.year if pd.notnull(min_date) else datetime.date.today().year
-y_end = max_date.year if pd.notnull(max_date) else y_start + 1
+    # Dynamische X-Achse (unterstützt 2026, 2027 etc. automatisch)
+    min_date = df_chart["date"].min()
+    max_date = df_chart["date"].max()
+    y_start = min_date.year if pd.notnull(min_date) else datetime.date.today().year
+    y_end = max_date.year if pd.notnull(max_date) else y_start + 1
 
+    tickvals = []
+    ticktext = []
+    month_labels = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"]
+    for y in range(y_start, y_end + 1):
+        for m in range(1, 13):
+            tickvals.append(datetime.date(y, m, 1))
+            ticktext.append(f"{month_labels[m-1]} '{str(y)[2:]}")
+
+    fig.update_layout(
+        height=200,
+        margin=dict(l=5, r=5, t=5, b=5),
+        autosize=True,
+        showlegend=False,
+        yaxis=dict(
+            categoryorder="array",
+            categoryarray=y_categories,
+            gridcolor="rgba(255, 255, 255, 0.06)",
+            zeroline=False,
+            fixedrange=True,
+            tickfont=dict(color="#94a3b8", size=10, family="Inter, -apple-system, sans-serif")
+        ),
+        xaxis=dict(
+            tickmode="array",
+            tickvals=tickvals,
+            ticktext=ticktext,
+            gridcolor="rgba(255, 255, 255, 0.04)",
+            zeroline=False,
+            fixedrange=True,
+            tickfont=dict(color="#94a3b8", size=9.5, family="Inter, -apple-system, sans-serif")
+        ),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        hoverlabel=dict(
+            bgcolor="#1e293b",
+            bordercolor="rgba(255, 255, 255, 0.15)",
+            font_size=12,
+            font_family="Inter, -apple-system, sans-serif"
+        )
+    )
+
+    header_year_str = f"{y_start}" if y_start == y_end else f"{y_start}/{y_end}"
+    st.markdown(
+        clean_html(f"""
+        <div class="zeit-header-title">
+            <span>Formkurve {header_year_str}</span>
+            <span style="font-size:0.75rem; color:#94a3b8; font-weight:normal; text-transform:none;">
+                <span style="color:#22d3ee;">●</span> HE &nbsp;<span style="color:#4ade80;">●</span> HD &nbsp;<span style="color:#c084fc;">●</span> MX
+            </span>
+        </div>
+        <div class="zeit-hero-number">{total_played} Turniere</div>
+        <div class="zeit-hero-sub">Gespielte Turniere im Jahresverlauf</div>
+        <div class="zeit-kpi-row" style="margin-bottom: 6px;">
+            <span class="zeit-kpi-tag" style="border-color: #f59e0b; color: #fbbf24;">🥇 {gold_cnt}x Gold</span>
+            <span class="zeit-kpi-tag" style="border-color: #94a3b8; color: #e2e8f0;">🥈 {silver_cnt}x Silber</span>
+            <span class="zeit-kpi-tag" style="border-color: #ea580c; color: #fdba74;">🥉 {bronze_cnt}x Bronze</span>
+        </div>
+        """),
+        unsafe_allow_html=True
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True,
+        config={"displayModeBar": False, "scrollZoom": False, "doubleClick": False}
+    )
 tickvals = []
 ticktext = []
 month_labels = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"]
