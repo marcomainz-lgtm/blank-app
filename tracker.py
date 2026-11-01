@@ -104,7 +104,41 @@ def extract_field_name(text):
 
 
 # --- DYNAMISCHES EVENT- & GEGNER-SCRAPING ---
+def auto_detect_schedule_and_deadline(description_text):
+    """
+    Liest Spieltage (Samstag/Sonntag) und den Meldeschluss
+    automatisch aus dem Ausschreibungstext aus.
+    """
+    detected = {}
+    d_lower = description_text.lower()
 
+    # 1. Meldeschluss erkennen (z. B. "Meldeschluss: 15.06.2026")
+    deadline_match = re.search(r'meldeschluss(?:\s*ist)?(?:\s*am)?[:\s]+(?:[a-zäöüß]+,?\s*)?(\d{1,2}\.\d{1,2}\.(?:\d{4})?)', d_lower)
+    if deadline_match:
+        detected["deadline"] = deadline_match.group(1)
+
+    # 2. Spieltage erkennen (Samstag / Sonntag / Freitag)
+    # A) DOPPEL (HD / DD)
+    if re.search(r'(?:samstag|sa\.?)[^\n\.\;]*\b(?:herrendoppel|damendoppel|doppel|hd|dd)\b', d_lower):
+        detected["day_hd"] = "Samstag"
+    elif re.search(r'(?:sonntag|so\.?)[^\n\.\;]*\b(?:herrendoppel|damendoppel|doppel|hd|dd)\b', d_lower):
+        detected["day_hd"] = "Sonntag"
+
+    # B) MIXED (MX)
+    if re.search(r'(?:samstag|sa\.?)[^\n\.\;]*\b(?:mixed|gemischt|mx)\b', d_lower):
+        detected["day_mx"] = "Samstag"
+    elif re.search(r'(?:sonntag|so\.?)[^\n\.\;]*\b(?:mixed|gemischt|mx)\b', d_lower):
+        detected["day_mx"] = "Sonntag"
+    elif re.search(r'(?:freitag|fr\.?)[^\n\.\;]*\b(?:mixed|gemischt|mx)\b', d_lower):
+        detected["day_mx"] = "Freitag"
+
+    # C) EINZEL (HE / DE)
+    if re.search(r'(?:samstag|sa\.?)[^\n\.\;]*\b(?:herreneinzel|dameneinzel|einzel|he|de)\b', d_lower):
+        detected["day_he"] = "Samstag"
+    elif re.search(r'(?:sonntag|so\.?)[^\n\.\;]*\b(?:herreneinzel|dameneinzel|einzel|he|de)\b', d_lower):
+        detected["day_he"] = "Sonntag"
+
+    return detected
 def check_player_subpages(session, t_id, existing_entry):
     updates = {}
     headers = get_headers()
@@ -409,7 +443,13 @@ def send_push_notification(new_items):
     except Exception as e:
         print(f"Fehler beim Senden der Push-Nachricht: {e}")
 
-
+# Automatische Erkennung von Zeitplan & Meldeschluss aus dem Text
+if desc:
+    schedule_data = auto_detect_schedule_and_deadline(desc)
+    for key in ["day_he", "day_hd", "day_mx", "deadline"]:
+        # Nur setzen, wenn noch nicht manuell überschrieben
+        if schedule_data.get(key) and not old_t.get(key):
+            old_t[key] = schedule_data[key]
 def check_for_updates():
     for _ in check_for_updates_generator():
         pass

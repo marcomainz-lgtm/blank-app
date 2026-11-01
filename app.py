@@ -1334,8 +1334,114 @@ def render_city_hotspots(df, today):
     st.markdown(clean_html(card_html), unsafe_allow_html=True)
 
 
-# --- WIEDERVERWENDBARER ADMIN-EDITOR ---
+# --- SCHLANKER & AUFGERÄUMTER ADMIN-EDITOR ---
 def render_admin_editor(item, full_data, is_past=False):
+    st.write("---")
+    t_id = item['id']
+    prefix = "past_" if is_past else ""
+    
+    # 1. Ausschreibungstext (zugeklappt)
+    desc_text = item.get('description', '').strip()
+    if desc_text:
+        with st.expander("📝 Ausschreibungstext von turnier.de anzeigen", expanded=False):
+            st.write(desc_text)
+
+    # 2. DAS WESENTLICHE: Persönliche Notiz & Fahrgemeinschaft
+    with st.form(key=f"note_form_{prefix}{t_id}"):
+        col_note_in, col_note_btn = st.columns([4, 1.2], vertical_alignment="bottom")
+        with col_note_in:
+            val_notes = st.text_input(
+                "🚗 Persönliche Notiz / Fahrgemeinschaft", 
+                value=item.get('notes', ''), 
+                placeholder="z. B. Treffpunkt mit Pascal 08:30 Uhr, 15 € Startgeld bar", 
+                key=f"note_{prefix}{t_id}"
+            ).strip()
+        with col_note_btn:
+            save_note = st.form_submit_button("💾 Notiz speichern", use_container_width=True)
+            
+        if save_note:
+            if val_notes != item.get('notes', ''):
+                full_data[t_id]['notes'] = val_notes
+                save_tournaments_data(DB_FILE, full_data)
+                st.toast("Notiz gespeichert!", icon="💾")
+                st.rerun()
+
+    # 3. ZUGEKLAPPT: Manuelle Korrektur / Überschreibung (nur für Ausnahmefälle)
+    with st.expander("🛠️ Manuelle Überschreibung / Korrektur (Optional)", expanded=False):
+        st.caption("ℹ️ Der Scraper synchronisiert Meldungen, Partner, Spieltage und Ergebnisse automatisch von turnier.de. Hier kannst du bei Bedarf manuell eingreifen.")
+        
+        start_date_obj = item['Start_Date_Obj']
+        end_date_obj = item['End_Date_Obj']
+        day_options = get_tournament_day_options(start_date_obj, end_date_obj)
+
+        with st.form(key=f"override_form_{prefix}{t_id}"):
+            st.markdown("**Zeitplan & Feldkapazitäten manuell:**")
+            col_d_he, col_d_hd, col_d_mx = st.columns(3)
+            with col_d_he:
+                he_idx = next((i for i, opt in enumerate(day_options) if opt == item.get('day_he', '')), 0)
+                val_day_he = st.selectbox("Tag Einzel", options=day_options, index=he_idx, key=f"d_he_{prefix}{t_id}")
+                val_full_he = st.checkbox("Feld voll (HE)", value=bool(item.get('full_he', False)), key=f"f_he_{prefix}{t_id}")
+            with col_d_hd:
+                hd_idx = next((i for i, opt in enumerate(day_options) if opt == item.get('day_hd', '')), 0)
+                val_day_hd = st.selectbox("Tag Doppel", options=day_options, index=hd_idx, key=f"d_hd_{prefix}{t_id}")
+                val_full_hd = st.checkbox("Feld voll (HD)", value=bool(item.get('full_hd', False)), key=f"f_hd_{prefix}{t_id}")
+            with col_d_mx:
+                mx_idx = next((i for i, opt in enumerate(day_options) if opt == item.get('day_mx', '')), 0)
+                val_day_mx = st.selectbox("Tag Mixed", options=day_options, index=mx_idx, key=f"d_mx_{prefix}{t_id}")
+                val_full_mx = st.checkbox("Feld voll (MX)", value=bool(item.get('full_mx', False)), key=f"f_mx_{prefix}{t_id}")
+
+            st.write("")
+            st.markdown("**Meldestatus & Partner manuell:**")
+            col_m_he, col_m_hd, col_m_mx = st.columns(3)
+            with col_m_he:
+                val_he = st.checkbox("Meldung Einzel", value=bool(item.get('reg_he', False)), key=f"he_{prefix}{t_id}")
+            with col_m_hd:
+                val_hd = st.checkbox("Meldung Doppel", value=bool(item.get('reg_hd', False)), key=f"hd_{prefix}{t_id}")
+                val_p_hd = st.text_input("Partner HD", value=item.get('partner_hd', ''), placeholder="z. B. Pascal Ziehe", key=f"p_hd_{prefix}{t_id}").strip()
+            with col_m_mx:
+                val_mx = st.checkbox("Meldung Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_{prefix}{t_id}")
+                val_p_mx = st.text_input("Partnerin MX", value=item.get('partner_mx', ''), placeholder="z. B. Vanessa Joppien", key=f"p_mx_{prefix}{t_id}").strip()
+
+            st.write("")
+            st.markdown("**Saisontagebuch manuell:**")
+            col_s_he, col_s_hd, col_s_mx = st.columns(3)
+            with col_s_he:
+                p_he_idx = PLACEMENT_OPTIONS.index(item['placement_he']) if item.get('placement_he') in PLACEMENT_OPTIONS else 0
+                val_p_he = st.selectbox("Platz Einzel", PLACEMENT_OPTIONS, index=p_he_idx, key=f"p_he_{prefix}{t_id}")
+                val_f_he = st.selectbox("Feld Einzel", FIELD_OPTIONS, index=FIELD_OPTIONS.index(item['field_he']) if item.get('field_he') in FIELD_OPTIONS else 0, key=f"f_he_sel_{prefix}{t_id}")
+            with col_s_hd:
+                p_hd_idx = PLACEMENT_OPTIONS.index(item['placement_hd']) if item.get('placement_hd') in PLACEMENT_OPTIONS else 0
+                val_p_hd = st.selectbox("Platz Doppel", PLACEMENT_OPTIONS, index=p_hd_idx, key=f"p_hd_{prefix}{t_id}")
+                val_f_hd = st.selectbox("Feld Doppel", FIELD_OPTIONS, index=FIELD_OPTIONS.index(item['field_hd']) if item.get('field_hd') in FIELD_OPTIONS else 0, key=f"f_hd_sel_{prefix}{t_id}")
+            with col_s_mx:
+                p_mx_idx = PLACEMENT_OPTIONS.index(item['placement_mx']) if item.get('placement_mx') in PLACEMENT_OPTIONS else 0
+                val_p_mx = st.selectbox("Platz Mixed", PLACEMENT_OPTIONS, index=p_mx_idx, key=f"p_mx_{prefix}{t_id}")
+                val_f_mx = st.selectbox("Feld Mixed", FIELD_OPTIONS, index=FIELD_OPTIONS.index(item['field_mx']) if item.get('field_mx') in FIELD_OPTIONS else 0, key=f"f_mx_sel_{prefix}{t_id}")
+
+            save_override = st.form_submit_button("💾 Manuelle Korrekturen speichern", use_container_width=True)
+            if save_override:
+                full_data[t_id]['registered'] = (val_he or val_hd or val_mx)
+                full_data[t_id]['reg_he'] = val_he
+                full_data[t_id]['reg_hd'] = val_hd
+                full_data[t_id]['reg_mx'] = val_mx
+                full_data[t_id]['full_he'] = val_full_he
+                full_data[t_id]['full_hd'] = val_full_hd
+                full_data[t_id]['full_mx'] = val_full_mx
+                full_data[t_id]['partner_hd'] = val_p_hd
+                full_data[t_id]['partner_mx'] = val_p_mx
+                full_data[t_id]['day_he'] = val_day_he if val_day_he != "-- Tag wählen --" else ""
+                full_data[t_id]['day_hd'] = val_day_hd if val_day_hd != "-- Tag wählen --" else ""
+                full_data[t_id]['day_mx'] = val_day_mx if val_day_mx != "-- Tag wählen --" else ""
+                full_data[t_id]['placement_he'] = val_p_he if val_p_he != "-- Keine Angabe --" else ""
+                full_data[t_id]['field_he'] = val_f_he if val_f_he != "-- Feld wählen --" else ""
+                full_data[t_id]['placement_hd'] = val_p_hd if val_p_hd != "-- Keine Angabe --" else ""
+                full_data[t_id]['field_hd'] = val_f_hd if val_f_hd != "-- Feld wählen --" else ""
+                full_data[t_id]['placement_mx'] = val_p_mx if val_p_mx != "-- Keine Angabe --" else ""
+                full_data[t_id]['field_mx'] = val_f_mx if val_f_mx != "-- Feld wählen --" else ""
+                
+                save_tournaments_data(DB_FILE, full_data)
+                st.success("Korrekturen erfolgreich gespeichert!")
+                st.rerun()
     st.write("---")
     desc_text = item.get('description', '').strip()
     if desc_text:
