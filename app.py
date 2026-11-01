@@ -676,63 +676,8 @@ def can_still_register(item, vacation_dates, occupied_dates):
     return False
 
 
-# Automatisch gescrapte Match- & Gegner-Informationen
-    next_opp = item.get('next_opponent', '').strip()
-    last_res = item.get('last_match_result', '').strip()
-    analysis = item.get('field_analysis', {})
-    
-    match_info_html = ""
-    if next_opp:
-        match_info_html += f"""
-        <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 7px 12px; border-radius: 4px; font-size: 0.8rem; color: #15803d; margin-top: 6px; margin-bottom: 6px;">
-            <strong>⚔️ Nächstes Spiel:</strong> {html.escape(next_opp)}
-        </div>
-        """
-    if last_res:
-        match_info_html += f"""
-        <div style="background-color: #f8fafc; border-left: 4px solid #64748b; padding: 7px 12px; border-radius: 4px; font-size: 0.8rem; color: #334155; margin-top: 6px; margin-bottom: 6px;">
-            <strong>📊 Letztes Spielergebnis:</strong> {html.escape(last_res)}
-        </div>
-        """
-
-    # 🎯 NEU: GEGNER-RADAR & H2H-ANALYSE FÜR DEIN FELD
-    if analysis and analysis.get("event_name"):
-        badge = analysis.get("matchup_badge", "⚪ Unbekannt")
-        desc = analysis.get("matchup_desc", "")
-        level = analysis.get("field_level", "")
-        known_duels = analysis.get("known_duels", [])
-        unknown_cnt = analysis.get("unknown_count", 0)
-        
-        duels_html_list = []
-        for d in known_duels:
-            res_icon = "🟢" if d["wins"] > d["losses"] else ("🔴" if d["wins"] < d["losses"] else "🟡")
-            duels_html_list.append(
-                f"<li style='margin-bottom:3px;'>• <strong>{html.escape(d['opponent'])}:</strong> "
-                f"{res_icon} {d['wins']}-{d['losses']} Siege <em>({html.escape(d['detail'])})</em></li>"
-            )
-        if unknown_cnt > 0:
-            duels_html_list.append(f"<li style='color:#64748b; margin-top:4px;'>• {unknown_cnt} weitere Konkurrenten im Feld: ⚪ Noch keine direkten Duelle verzeichnet</li>")
-            
-        duels_rendered = "".join(duels_html_list) if duels_html_list else "<li>Keine bisherigen Duelle gegen das Feld</li>"
-
-        match_info_html += f"""
-        <div style="background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 9px 12px; margin-top: 8px; margin-bottom: 8px; font-size: 0.8rem;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                <span style="font-weight:700; color:#1e293b;">👥 Gegner-Radar: {html.escape(analysis['event_name'])}</span>
-                <span style="font-weight:700; font-size:0.75rem;">{badge}</span>
-            </div>
-            <div style="color:#475569; margin-bottom:6px; line-height:1.35;">
-                🎯 <strong>Matchup-Faktor:</strong> {html.escape(desc)}<br>
-                📊 <strong>Feld-Status:</strong> {html.escape(level)}
-            </div>
-            <details style="cursor:pointer; color:#0f172a; font-size:0.78rem;">
-                <summary style="font-weight:600; outline:none; color:#2563eb;">⚔️ Deine Head-to-Head Historie im Feld ({len(known_duels)} bekannte Duelle)</summary>
-                <ul style="list-style-type:none; padding-left:4px; margin-top:6px; margin-bottom:2px;">
-                    {duels_rendered}
-                </ul>
-            </details>
-        </div>
-        """    raw_city = str(item.get('city', 'Unbekannt'))
+def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today):
+    raw_city = str(item.get('city', 'Unbekannt'))
     city = html.escape(raw_city)
     dist = item.get('distance')
     dist_str = f"{dist} km" if dist is not None else "Keine Angabe"
@@ -809,7 +754,6 @@ def can_still_register(item, vacation_dates, occupied_dates):
     day_class_hd = "tba-day" if display_day_hd == "TBA" else ""
     day_class_mx = "tba-day" if display_day_mx == "TBA" else ""
 
-    # Deadline Badge (falls vorhanden)
     deadline_str = item.get('deadline', '').strip()
     deadline_badge = f'<span class="meta-badge dist-badge">⏰ Meldeschluss: {html.escape(deadline_str)}</span>' if deadline_str else ""
 
@@ -1045,8 +989,10 @@ def can_still_register(item, vacation_dates, occupied_dates):
     </div>
     """ if notes_val else ""
 
+    # Automatische Match-Infos
     next_opp = item.get('next_opponent', '').strip()
     last_res = item.get('last_match_result', '').strip()
+    analysis = item.get('field_analysis', {})
     
     match_info_html = ""
     if next_opp:
@@ -1062,11 +1008,52 @@ def can_still_register(item, vacation_dates, occupied_dates):
         </div>
         """
 
+    # Gegner-Radar & H2H-Historie
+    radar_html = ""
+    if isinstance(analysis, dict) and analysis.get("event_name"):
+        badge = html.escape(str(analysis.get("matchup_badge", "⚪ Unbekannt")))
+        desc = html.escape(str(analysis.get("matchup_desc", "")))
+        level = html.escape(str(analysis.get("field_level", "")))
+        known_duels = analysis.get("known_duels", [])
+        unknown_cnt = analysis.get("unknown_count", 0)
+        
+        duels_html_list = []
+        for d in known_duels:
+            res_icon = "🟢" if d.get("wins", 0) > d.get("losses", 0) else ("🔴" if d.get("wins", 0) < d.get("losses", 0) else "🟡")
+            duels_html_list.append(
+                f"<li style='margin-bottom:3px;'>• <strong>{html.escape(str(d.get('opponent', '')))}:</strong> "
+                f"{res_icon} {d.get('wins', 0)}-{d.get('losses', 0)} Siege <em>({html.escape(str(d.get('detail', '')))})</em></li>"
+            )
+        if unknown_cnt > 0:
+            duels_html_list.append(f"<li style='color:#64748b; margin-top:4px;'>• {unknown_cnt} weitere Konkurrenten im Feld: ⚪ Noch keine direkten Duelle verzeichnet</li>")
+            
+        duels_rendered = "".join(duels_html_list) if duels_html_list else "<li>Keine bisherigen Duelle gegen das Feld</li>"
+
+        radar_html = f"""
+        <div style="background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 9px 12px; margin-top: 8px; margin-bottom: 8px; font-size: 0.8rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <span style="font-weight:700; color:#1e293b;">👥 Gegner-Radar: {html.escape(str(analysis['event_name']))}</span>
+                <span style="font-weight:700; font-size:0.75rem;">{badge}</span>
+            </div>
+            <div style="color:#475569; margin-bottom:6px; line-height:1.35;">
+                🎯 <strong>Matchup-Faktor:</strong> {desc}<br>
+                📊 <strong>Feld-Status:</strong> {level}
+            </div>
+            <details style="cursor:pointer; color:#0f172a; font-size:0.78rem;">
+                <summary style="font-weight:600; outline:none; color:#2563eb;">⚔️ Deine Head-to-Head Historie im Feld ({len(known_duels)} bekannte Duelle)</summary>
+                <ul style="list-style-type:none; padding-left:4px; margin-top:6px; margin-bottom:2px;">
+                    {duels_rendered}
+                </ul>
+            </details>
+        </div>
+        """
+
     html_out = f"""
     <div class="card-inner-container">
         {badges_html}
         {notes_html}
         {match_info_html}
+        {radar_html}
         {disciplines_html}
     </div>
     """
@@ -1300,7 +1287,7 @@ def render_season_chart(df, today):
     )
 
 
-# --- 1. HORIZONTALE ZEIT-STYLE BALKEN ---
+# --- HORIZONTALE ZEIT-STYLE BALKEN ---
 def render_city_hotspots(df, today):
     df_played = get_played_tournaments(df, today)
     total_played = len(df_played)
@@ -1398,13 +1385,12 @@ def render_admin_editor(item, full_data, is_past=False):
     t_id = item['id']
     prefix = "past_" if is_past else ""
     
-    # 1. Ausschreibungstext (zugeklappt)
     desc_text = item.get('description', '').strip()
     if desc_text:
         with st.expander("📝 Ausschreibungstext von turnier.de anzeigen", expanded=False):
             st.write(desc_text)
 
-    # 2. DAS WESENTLICHE: Persönliche Notiz & Fahrgemeinschaft
+    # Nur die persönliche Notiz ist direkt sichtbar
     with st.form(key=f"note_form_{prefix}{t_id}"):
         col_note_in, col_note_btn = st.columns([4, 1.2], vertical_alignment="bottom")
         with col_note_in:
@@ -1424,7 +1410,7 @@ def render_admin_editor(item, full_data, is_past=False):
                 st.toast("Notiz gespeichert!", icon="💾")
                 st.rerun()
 
-    # 3. ZUGEKLAPPT: Manuelle Korrektur / Überschreibung (nur für Sonderfälle)
+    # Zugeklappter Override für Sonderfälle mit 100% eindeutigen Schlüsseln
     with st.expander("🛠️ Manuelle Überschreibung / Korrektur (Optional)", expanded=False):
         st.caption("ℹ️ Der Scraper synchronisiert Meldungen, Partner, Spieltage und Ergebnisse automatisch von turnier.de. Hier kannst du bei Bedarf manuell eingreifen.")
         
@@ -1452,13 +1438,13 @@ def render_admin_editor(item, full_data, is_past=False):
             st.markdown("**Meldestatus & Partner manuell:**")
             col_m_he, col_m_hd, col_m_mx = st.columns(3)
             with col_m_he:
-                val_he = st.checkbox("Meldung Einzel", value=bool(item.get('reg_he', False)), key=f"he_{prefix}{t_id}")
+                val_he = st.checkbox("Meldung Einzel", value=bool(item.get('reg_he', False)), key=f"reg_he_{prefix}{t_id}")
             with col_m_hd:
-                val_hd = st.checkbox("Meldung Doppel", value=bool(item.get('reg_hd', False)), key=f"hd_{prefix}{t_id}")
-                val_partner_hd = st.text_input("Partner HD", value=item.get('partner_hd', ''), placeholder="z. B. Pascal Ziehe", key=f"override_p_hd_{prefix}{t_id}").strip()
+                val_hd = st.checkbox("Meldung Doppel", value=bool(item.get('reg_hd', False)), key=f"reg_hd_{prefix}{t_id}")
+                val_partner_hd = st.text_input("Partner HD", value=item.get('partner_hd', ''), placeholder="z. B. Pascal Ziehe", key=f"override_partner_hd_{prefix}{t_id}").strip()
             with col_m_mx:
-                val_mx = st.checkbox("Meldung Mixed", value=bool(item.get('reg_mx', False)), key=f"mx_{prefix}{t_id}")
-                val_partner_mx = st.text_input("Partnerin MX", value=item.get('partner_mx', ''), placeholder="z. B. Vanessa Joppien", key=f"override_p_mx_{prefix}{t_id}").strip()
+                val_mx = st.checkbox("Meldung Mixed", value=bool(item.get('reg_mx', False)), key=f"reg_mx_{prefix}{t_id}")
+                val_partner_mx = st.text_input("Partnerin MX", value=item.get('partner_mx', ''), placeholder="z. B. Vanessa Joppien", key=f"override_partner_mx_{prefix}{t_id}").strip()
 
             st.write("")
             st.markdown("**Saisontagebuch manuell:**")
@@ -1625,7 +1611,8 @@ elif data is not None:
             'result': '',
             'deadline': '',
             'next_opponent': '',
-            'last_match_result': ''
+            'last_match_result': '',
+            'field_analysis': {}
         }
         for col, default in fallback_cols.items():
             if col not in df.columns:
