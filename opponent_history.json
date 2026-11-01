@@ -1,3741 +1,2930 @@
 {
-    "O19-S1 – O19-S1-KK – (194) Kreisklasse Süd 1": [
-        {
-            "opponent": "O19-S1 – O19-S1-KK – (194) Kreisklasse Süd 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "17:21",
-            "won": false
-        },
-        {
-            "opponent": "O19-S1 – O19-S1-KK – (194) Kreisklasse Süd 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "18:21",
-            "won": false
-        },
-        {
-            "opponent": "O19-S1 – O19-S1-KK – (194) Kreisklasse Süd 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:0",
-            "won": false
-        },
-        {
-            "opponent": "O19-S1 – O19-S1-KK – (194) Kreisklasse Süd 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:15",
-            "won": false
-        },
-        {
-            "opponent": "O19-S1 – O19-S1-KK – (194) Kreisklasse Süd 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "MX",
-            "score": "21:8",
-            "won": false
-        },
-        {
-            "opponent": "O19-S1 – O19-S1-KK – (194) Kreisklasse Süd 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "21:13",
-            "won": false
-        },
-        {
-            "opponent": "O19-S1 – O19-S1-KK – (194) Kreisklasse Süd 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:8",
-            "won": false
-        },
-        {
-            "opponent": "O19-S1 – O19-S1-KK – (194) Kreisklasse Süd 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "13:21",
-            "won": true
-        },
-        {
-            "opponent": "O19-S1 – O19-S1-KK – (194) Kreisklasse Süd 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:19",
-            "won": false
-        },
-        {
-            "opponent": "O19-S1 – O19-S1-KK – (194) Kreisklasse Süd 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "18:21",
-            "won": true
-        },
-        {
-            "opponent": "O19-S1 – O19-S1-KK – (194) Kreisklasse Süd 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:19",
-            "won": false
-        },
-        {
-            "opponent": "O19-S1 – O19-S1-KK – (194) Kreisklasse Süd 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:7",
-            "won": true
-        }
-    ],
-    "FC Langenfeld 6": [
-        {
-            "opponent": "FC Langenfeld 6",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "17:21",
-            "won": false
-        },
-        {
-            "opponent": "FC Langenfeld 6",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "18:21",
-            "won": false
-        },
-        {
-            "opponent": "FC Langenfeld 6",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:0",
-            "won": false
-        },
-        {
-            "opponent": "FC Langenfeld 6",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:15",
-            "won": false
-        },
-        {
-            "opponent": "FC Langenfeld 6",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "MX",
-            "score": "21:8",
-            "won": false
-        }
-    ],
-    "OSC Düsseldorf 6": [
-        {
-            "opponent": "OSC Düsseldorf 6",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "17:21",
-            "won": false
-        }
-    ],
-    "Johannes Koppers": [
-        {
-            "opponent": "Johannes Koppers",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "17:21",
-            "won": false
-        }
-    ],
-    "Export Calendar": [
-        {
-            "opponent": "Export Calendar",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "17:21",
-            "won": false
-        },
-        {
-            "opponent": "Export Calendar",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "18:21",
-            "won": false
-        },
-        {
-            "opponent": "Export Calendar",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:0",
-            "won": false
-        },
-        {
-            "opponent": "Export Calendar",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:15",
-            "won": false
-        },
-        {
-            "opponent": "Export Calendar",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "MX",
-            "score": "21:8",
-            "won": false
-        },
-        {
-            "opponent": "Export Calendar",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "19:21",
-            "won": false
-        },
-        {
-            "opponent": "Export Calendar",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "13:21",
-            "won": false
-        },
-        {
-            "opponent": "Export Calendar",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "21:13",
-            "won": false
-        },
-        {
-            "opponent": "Export Calendar",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:8",
-            "won": false
-        },
-        {
-            "opponent": "Export Calendar",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "13:21",
-            "won": true
-        },
-        {
-            "opponent": "Export Calendar",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:19",
-            "won": false
-        },
-        {
-            "opponent": "Export Calendar",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "18:21",
-            "won": true
-        },
-        {
-            "opponent": "Export Calendar",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:19",
-            "won": false
-        },
-        {
-            "opponent": "Export Calendar",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:7",
-            "won": true
-        }
-    ],
-    "Vohwinkeler STV 1": [
-        {
-            "opponent": "Vohwinkeler STV 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "18:21",
-            "won": false
-        },
-        {
-            "opponent": "Vohwinkeler STV 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:7",
-            "won": true
-        }
-    ],
-    "Magnus Hubert": [
-        {
-            "opponent": "Magnus Hubert",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "18:21",
-            "won": false
-        }
-    ],
-    "Martyn Okhrymenko": [
-        {
-            "opponent": "Martyn Okhrymenko",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "18:21",
-            "won": false
-        }
-    ],
-    "Pascal Ziehe": [
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "18:21",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:0",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:15",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "18:21",
-            "won": true
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:7",
-            "won": true
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "13:20",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "13:20",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "13:20",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "5:8",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "5:8",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "5:8",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "5:8",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Ziehe",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "TV Hösel 1": [
-        {
-            "opponent": "TV Hösel 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:0",
-            "won": false
-        }
-    ],
-    "TSV Hochdahl 1": [
-        {
-            "opponent": "TSV Hochdahl 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:15",
-            "won": false
-        },
-        {
-            "opponent": "TSV Hochdahl 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "MX",
-            "score": "21:8",
-            "won": false
-        },
-        {
-            "opponent": "TSV Hochdahl 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "21:13",
-            "won": false
-        },
-        {
-            "opponent": "TSV Hochdahl 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:8",
-            "won": false
-        }
-    ],
-    "Marcel Gutsch": [
-        {
-            "opponent": "Marcel Gutsch",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:15",
-            "won": false
-        },
-        {
-            "opponent": "Marcel Gutsch",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "MX",
-            "score": "21:8",
-            "won": false
-        },
-        {
-            "opponent": "Marcel Gutsch",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Marcel Gutsch",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Dan Kai Tran": [
-        {
-            "opponent": "Dan Kai Tran",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:15",
-            "won": false
-        }
-    ],
-    "Charlotte Feisel": [
-        {
-            "opponent": "Charlotte Feisel",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "MX",
-            "score": "21:8",
-            "won": false
-        }
-    ],
-    "Vanessa Joppien": [
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "MX",
-            "score": "21:8",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vanessa Joppien",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "O19-S1 – O19-S1-KL – (100) Kreisliga Süd 1": [
-        {
-            "opponent": "O19-S1 – O19-S1-KL – (100) Kreisliga Süd 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "19:21",
-            "won": false
-        },
-        {
-            "opponent": "O19-S1 – O19-S1-KL – (100) Kreisliga Süd 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "13:21",
-            "won": false
-        }
-    ],
-    "FC Langenfeld 5": [
-        {
-            "opponent": "FC Langenfeld 5",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "19:21",
-            "won": false
-        },
-        {
-            "opponent": "FC Langenfeld 5",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "13:21",
-            "won": false
-        },
-        {
-            "opponent": "FC Langenfeld 5",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "21:13",
-            "won": false
-        },
-        {
-            "opponent": "FC Langenfeld 5",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:8",
-            "won": false
-        },
-        {
-            "opponent": "FC Langenfeld 5",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "13:21",
-            "won": true
-        },
-        {
-            "opponent": "FC Langenfeld 5",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:19",
-            "won": false
-        },
-        {
-            "opponent": "FC Langenfeld 5",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "18:21",
-            "won": true
-        },
-        {
-            "opponent": "FC Langenfeld 5",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:19",
-            "won": false
-        },
-        {
-            "opponent": "FC Langenfeld 5",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:7",
-            "won": true
-        }
-    ],
-    "Vinicius Martim": [
-        {
-            "opponent": "Vinicius Martim",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "19:21",
-            "won": false
-        },
-        {
-            "opponent": "Vinicius Martim",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "13:21",
-            "won": true
-        },
-        {
-            "opponent": "Vinicius Martim",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "5:8",
-            "won": false
-        },
-        {
-            "opponent": "Vinicius Martim",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "BC Burg 3": [
-        {
-            "opponent": "BC Burg 3",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "19:21",
-            "won": false
-        },
-        {
-            "opponent": "BC Burg 3",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "13:21",
-            "won": false
-        }
-    ],
-    "Jonas Mähner": [
-        {
-            "opponent": "Jonas Mähner",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "19:21",
-            "won": false
-        }
-    ],
-    "Benjamin Mühlenbeck": [
-        {
-            "opponent": "Benjamin Mühlenbeck",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "19:21",
-            "won": false
-        },
-        {
-            "opponent": "Benjamin Mühlenbeck",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "13:21",
-            "won": false
-        }
-    ],
-    "Marco Becker": [
-        {
-            "opponent": "Marco Becker",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "21:13",
-            "won": false
-        }
-    ],
-    "Kilian Birkhoven": [
-        {
-            "opponent": "Kilian Birkhoven",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "21:13",
-            "won": false
-        },
-        {
-            "opponent": "Kilian Birkhoven",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:8",
-            "won": false
-        }
-    ],
-    "Lucas Mertin": [
-        {
-            "opponent": "Lucas Mertin",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "21:13",
-            "won": false
-        }
-    ],
-    "OSC Düsseldorf 5": [
-        {
-            "opponent": "OSC Düsseldorf 5",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "13:21",
-            "won": true
-        },
-        {
-            "opponent": "OSC Düsseldorf 5",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:19",
-            "won": false
-        }
-    ],
-    "Leon de Groot": [
-        {
-            "opponent": "Leon de Groot",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "13:21",
-            "won": true
-        },
-        {
-            "opponent": "Leon de Groot",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:19",
-            "won": false
-        },
-        {
-            "opponent": "Leon de Groot",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Leon de Groot",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Jens Hilder": [
-        {
-            "opponent": "Jens Hilder",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HD",
-            "score": "13:21",
-            "won": true
-        }
-    ],
-    "SG Zons 1": [
-        {
-            "opponent": "SG Zons 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "18:21",
-            "won": true
-        },
-        {
-            "opponent": "SG Zons 1",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:19",
-            "won": false
-        }
-    ],
-    "Jan Thewald": [
-        {
-            "opponent": "Jan Thewald",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "18:21",
-            "won": true
-        }
-    ],
-    "Patrick Bogdon": [
-        {
-            "opponent": "Patrick Bogdon",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "18:21",
-            "won": true
-        }
-    ],
-    "Marco Mönch": [
-        {
-            "opponent": "Marco Mönch",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:19",
-            "won": false
-        }
-    ],
-    "Sergii Okhrymenko": [
-        {
-            "opponent": "Sergii Okhrymenko",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:7",
-            "won": true
-        }
-    ],
-    "Benedikt Chadaravicius": [
-        {
-            "opponent": "Benedikt Chadaravicius",
-            "competition": "Meisterschaft (Liga)",
-            "discipline": "HE",
-            "score": "21:7",
-            "won": true
-        }
-    ],
-    "Niederrhein Cup (O19 NRW) 2026": [
-        {
-            "opponent": "Niederrhein Cup (O19 NRW) 2026",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Gruppe B": [
-        {
-            "opponent": "Gruppe B",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Gruppe B",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Gruppe B",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Gruppe B",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Viju Joseph": [
-        {
-            "opponent": "Viju Joseph",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Viju Joseph",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Viju Joseph",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Viju Joseph",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Mathew Paul": [
-        {
-            "opponent": "Mathew Paul",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Mathew Paul",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Mathew Paul",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Mathew Paul",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Vijay Kayala": [
-        {
-            "opponent": "Vijay Kayala",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Vijay Kayala",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Stoyan Tsonev": [
-        {
-            "opponent": "Stoyan Tsonev",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Stoyan Tsonev",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Jeremai Hose": [
-        {
-            "opponent": "Jeremai Hose",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Jeremai Hose",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Conrad Scheidweiler": [
-        {
-            "opponent": "Conrad Scheidweiler",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Conrad Scheidweiler",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Sauerland-Cup 2026": [
-        {
-            "opponent": "Sauerland-Cup 2026",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "HD C": [
-        {
-            "opponent": "HD C",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "HD C",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Jannis Lisch": [
-        {
-            "opponent": "Jannis Lisch",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Jannis Lisch",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Linus Mikota": [
-        {
-            "opponent": "Linus Mikota",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Linus Mikota",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Rene Küpper": [
-        {
-            "opponent": "Rene Küpper",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Rene Küpper",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Christian Preuß": [
-        {
-            "opponent": "Christian Preuß",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Christian Preuß",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Waldemar Pazer": [
-        {
-            "opponent": "Waldemar Pazer",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Waldemar Pazer",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Artur Ratz": [
-        {
-            "opponent": "Artur Ratz",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Artur Ratz",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Detlef Ballsieper": [
-        {
-            "opponent": "Detlef Ballsieper",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Detlef Ballsieper",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Frank Ludwig": [
-        {
-            "opponent": "Frank Ludwig",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Frank Ludwig",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Offene Düsseldorfer Stadtmeisterschaft 2026": [
-        {
-            "opponent": "Offene Düsseldorfer Stadtmeisterschaft 2026",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Gruppe A": [
-        {
-            "opponent": "Gruppe A",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Gruppe A",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Gruppe A",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Gruppe A",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Gruppe A",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "5:8",
-            "won": false
-        }
-    ],
-    "Ilias Boudelal": [
-        {
-            "opponent": "Ilias Boudelal",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Ilias Boudelal",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Jing-Yu Lu": [
-        {
-            "opponent": "Jing-Yu Lu",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Jing-Yu Lu",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Rafael Lotz": [
-        {
-            "opponent": "Rafael Lotz",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Rafael Lotz",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Ruben Schelenz": [
-        {
-            "opponent": "Ruben Schelenz",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Ruben Schelenz",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Maik Brod": [
-        {
-            "opponent": "Maik Brod",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Maik Brod",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Yifan Xu": [
-        {
-            "opponent": "Yifan Xu",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Yifan Xu",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Yifan Xu",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Yifan Xu",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "10. Brühler Warm Cup (NRW O19) 2026": [
-        {
-            "opponent": "10. Brühler Warm Cup (NRW O19) 2026",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Thorben Müller": [
-        {
-            "opponent": "Thorben Müller",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Thorben Müller",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Joris Töllner": [
-        {
-            "opponent": "Joris Töllner",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Joris Töllner",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Armin Görg": [
-        {
-            "opponent": "Armin Görg",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Armin Görg",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Joshua Heinzmann": [
-        {
-            "opponent": "Joshua Heinzmann",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Joshua Heinzmann",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Joshua Heinzmann",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Joshua Heinzmann",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Fabian Duvenbeck": [
-        {
-            "opponent": "Fabian Duvenbeck",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Fabian Duvenbeck",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Lars Fischer": [
-        {
-            "opponent": "Lars Fischer",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Lars Fischer",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "FCL MatchforGood (O19 NRW) 2026": [
-        {
-            "opponent": "FCL MatchforGood (O19 NRW) 2026",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Robert Reiz": [
-        {
-            "opponent": "Robert Reiz",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Robert Reiz",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Robert Reiz",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Robert Reiz",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Robert Reiz",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Robert Reiz",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Robert Reiz",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Robert Reiz",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "André Pyka": [
-        {
-            "opponent": "André Pyka",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "André Pyka",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Mark Zöllner": [
-        {
-            "opponent": "Mark Zöllner",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Mark Zöllner",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Marcel Göckmann": [
-        {
-            "opponent": "Marcel Göckmann",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Marcel Göckmann",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Marcel Göckmann",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Marcel Göckmann",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Jan Jasdauskis": [
-        {
-            "opponent": "Jan Jasdauskis",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Jan Jasdauskis",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Tim Bunzel": [
-        {
-            "opponent": "Tim Bunzel",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Tim Bunzel",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Dirk Silinski": [
-        {
-            "opponent": "Dirk Silinski",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Dirk Silinski",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Qizhong Jiang": [
-        {
-            "opponent": "Qizhong Jiang",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Qizhong Jiang",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Stefan Reupert": [
-        {
-            "opponent": "Stefan Reupert",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Stefan Reupert",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "15. Willicher Badminton Cup (NRW O19) 2026": [
-        {
-            "opponent": "15. Willicher Badminton Cup (NRW O19) 2026",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "HD-C": [
-        {
-            "opponent": "HD-C",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Philip Ertel": [
-        {
-            "opponent": "Philip Ertel",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Philip Ertel",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Alexander Saretzki": [
-        {
-            "opponent": "Alexander Saretzki",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Alexander Saretzki",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Philip Heinrichs": [
-        {
-            "opponent": "Philip Heinrichs",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Philip Heinrichs",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Rolf Vogt": [
-        {
-            "opponent": "Rolf Vogt",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Rolf Vogt",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Oliver Vogt": [
-        {
-            "opponent": "Oliver Vogt",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Oliver Vogt",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Jan Ochoba": [
-        {
-            "opponent": "Jan Ochoba",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Jan Ochoba",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Kai Schalk": [
-        {
-            "opponent": "Kai Schalk",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Kai Schalk",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "2. Bochumer Sommer Cup (O19 NRW) 2026": [
-        {
-            "opponent": "2. Bochumer Sommer Cup (O19 NRW) 2026",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Pratheek Prakash Manangi": [
-        {
-            "opponent": "Pratheek Prakash Manangi",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pratheek Prakash Manangi",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Deepak Venkanna": [
-        {
-            "opponent": "Deepak Venkanna",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Deepak Venkanna",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Noah Licht": [
-        {
-            "opponent": "Noah Licht",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Noah Licht",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Srinadh Vempati": [
-        {
-            "opponent": "Srinadh Vempati",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Srinadh Vempati",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "4. Refrather KSK-Cup (NRW O19) 2026": [
-        {
-            "opponent": "4. Refrather KSK-Cup (NRW O19) 2026",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Gruppe C": [
-        {
-            "opponent": "Gruppe C",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Gruppe C",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Lennard Jacobi": [
-        {
-            "opponent": "Lennard Jacobi",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Lennard Jacobi",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Kurt Lennart Kunze": [
-        {
-            "opponent": "Kurt Lennart Kunze",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Kurt Lennart Kunze",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Laurin Verweyen": [
-        {
-            "opponent": "Laurin Verweyen",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Laurin Verweyen",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Ian Wilde": [
-        {
-            "opponent": "Ian Wilde",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Ian Wilde",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Dobrin Alexandroff": [
-        {
-            "opponent": "Dobrin Alexandroff",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Dobrin Alexandroff",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Ralf Walterscheidt": [
-        {
-            "opponent": "Ralf Walterscheidt",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Ralf Walterscheidt",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "2. VfL Trinkhallen Cup (NRW O19) 2026": [
-        {
-            "opponent": "2. VfL Trinkhallen Cup (NRW O19) 2026",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Gruppe D": [
-        {
-            "opponent": "Gruppe D",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Gruppe D",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Nico Becker": [
-        {
-            "opponent": "Nico Becker",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Nico Becker",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Christopher Mayer": [
-        {
-            "opponent": "Christopher Mayer",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Christopher Mayer",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Etienne Rastoul": [
-        {
-            "opponent": "Etienne Rastoul",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Etienne Rastoul",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Pascal Rastoul": [
-        {
-            "opponent": "Pascal Rastoul",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Pascal Rastoul",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Claas Bruno Kaufmann": [
-        {
-            "opponent": "Claas Bruno Kaufmann",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Claas Bruno Kaufmann",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Malte Henrico Renneberg": [
-        {
-            "opponent": "Malte Henrico Renneberg",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Malte Henrico Renneberg",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "3. Mixed/Einzel-RLT O19 NRW-Bezirk Süd 1 2025-2026": [
-        {
-            "opponent": "3. Mixed/Einzel-RLT O19 NRW-Bezirk Süd 1 2025-2026",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "A-Feld": [
-        {
-            "opponent": "A-Feld",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "A-Feld",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Michael Hansen": [
-        {
-            "opponent": "Michael Hansen",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Michael Hansen",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Michael Hansen",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Michael Hansen",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Michael Hansen",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Michael Hansen",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Huyen Vu Ngoc": [
-        {
-            "opponent": "Huyen Vu Ngoc",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Huyen Vu Ngoc",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Huyen Vu Ngoc",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Huyen Vu Ngoc",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Martin Janorschke": [
-        {
-            "opponent": "Martin Janorschke",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Martin Janorschke",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Britta Matuschik": [
-        {
-            "opponent": "Britta Matuschik",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Britta Matuschik",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Angelina Carneim": [
-        {
-            "opponent": "Angelina Carneim",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Angelina Carneim",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "B-Feld": [
-        {
-            "opponent": "B-Feld",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Abhinav Jain": [
-        {
-            "opponent": "Abhinav Jain",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Abhinav Jain",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Abhinav Jain",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Abhinav Jain",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Matthias Knaupp": [
-        {
-            "opponent": "Matthias Knaupp",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Matthias Knaupp",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Matthias Knaupp",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Matthias Knaupp",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Matthias Knaupp",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Matthias Knaupp",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Matthias Knaupp",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Matthias Knaupp",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Matthias Knaupp",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "5:8",
-            "won": false
-        },
-        {
-            "opponent": "Matthias Knaupp",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Christian Kufeld": [
-        {
-            "opponent": "Christian Kufeld",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Christian Kufeld",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Sebastian Altenschmidt": [
-        {
-            "opponent": "Sebastian Altenschmidt",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Sebastian Altenschmidt",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Sebastian Altenschmidt",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Sebastian Altenschmidt",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "3. Viersener Saison-Abschlussturnier (NRW O19) 2026": [
-        {
-            "opponent": "3. Viersener Saison-Abschlussturnier (NRW O19) 2026",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Kam-San Choi": [
-        {
-            "opponent": "Kam-San Choi",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Kam-San Choi",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Steven Tang": [
-        {
-            "opponent": "Steven Tang",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Steven Tang",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Dennis Grzanna": [
-        {
-            "opponent": "Dennis Grzanna",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Dennis Grzanna",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Eugen Lindt": [
-        {
-            "opponent": "Eugen Lindt",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Eugen Lindt",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Offene Duisburger Stadtmeisterschaften (NRW O19) 2026": [
-        {
-            "opponent": "Offene Duisburger Stadtmeisterschaften (NRW O19) 2026",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Junhui Hu": [
-        {
-            "opponent": "Junhui Hu",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Junhui Hu",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Seng Hak Ngo": [
-        {
-            "opponent": "Seng Hak Ngo",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Seng Hak Ngo",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Thorsten Jansen": [
-        {
-            "opponent": "Thorsten Jansen",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Thorsten Jansen",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Kitti Yoosenat": [
-        {
-            "opponent": "Kitti Yoosenat",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Kitti Yoosenat",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Parijat Raj": [
-        {
-            "opponent": "Parijat Raj",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Parijat Raj",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "OSC Düsseldorf Neujahrsturnier (O19 NRW) 2026": [
-        {
-            "opponent": "OSC Düsseldorf Neujahrsturnier (O19 NRW) 2026",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Michael Kroes": [
-        {
-            "opponent": "Michael Kroes",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Michael Kroes",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Marcel Schaefers": [
-        {
-            "opponent": "Marcel Schaefers",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Marcel Schaefers",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Nils Reichardt": [
-        {
-            "opponent": "Nils Reichardt",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Nils Reichardt",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Till Reichardt": [
-        {
-            "opponent": "Till Reichardt",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Till Reichardt",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Rob Alamgir": [
-        {
-            "opponent": "Rob Alamgir",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Rob Alamgir",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Sharath Nattoji": [
-        {
-            "opponent": "Sharath Nattoji",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Sharath Nattoji",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Patrick Gemünden": [
-        {
-            "opponent": "Patrick Gemünden",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Patrick Gemünden",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Sara Börding": [
-        {
-            "opponent": "Sara Börding",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Sara Börding",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Martin Bauer": [
-        {
-            "opponent": "Martin Bauer",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Martin Bauer",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Sandra Schönhofen": [
-        {
-            "opponent": "Sandra Schönhofen",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Sandra Schönhofen",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "2. Einzel-RLT O19 NRW-Bezirk Süd 1 2025-26": [
-        {
-            "opponent": "2. Einzel-RLT O19 NRW-Bezirk Süd 1 2025-26",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Marco Böning": [
-        {
-            "opponent": "Marco Böning",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Marco Böning",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Marco Böning",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "5:8",
-            "won": false
-        },
-        {
-            "opponent": "Marco Böning",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "BM+KM O19 NRW-Bezirk Süd 1 2025": [
-        {
-            "opponent": "BM+KM O19 NRW-Bezirk Süd 1 2025",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "13:20",
-            "won": false
-        }
-    ],
-    "Position 13-20": [
-        {
-            "opponent": "Position 13-20",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "13:20",
-            "won": false
-        }
-    ],
-    "Marcel Hammes": [
-        {
-            "opponent": "Marcel Hammes",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "13:20",
-            "won": false
-        },
-        {
-            "opponent": "Marcel Hammes",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Jonathan Middendorf": [
-        {
-            "opponent": "Jonathan Middendorf",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "13:20",
-            "won": false
-        },
-        {
-            "opponent": "Jonathan Middendorf",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Gruppe F": [
-        {
-            "opponent": "Gruppe F",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "13:20",
-            "won": false
-        }
-    ],
-    "Simon Schreiner": [
-        {
-            "opponent": "Simon Schreiner",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "13:20",
-            "won": false
-        },
-        {
-            "opponent": "Simon Schreiner",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Daniel Skoczowsky": [
-        {
-            "opponent": "Daniel Skoczowsky",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "13:20",
-            "won": false
-        },
-        {
-            "opponent": "Daniel Skoczowsky",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Tim Dochtermann": [
-        {
-            "opponent": "Tim Dochtermann",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "13:20",
-            "won": false
-        },
-        {
-            "opponent": "Tim Dochtermann",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Christoph Mölleken": [
-        {
-            "opponent": "Christoph Mölleken",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "13:20",
-            "won": false
-        },
-        {
-            "opponent": "Christoph Mölleken",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Niederrhein Cup O19 (NRW) 2025": [
-        {
-            "opponent": "Niederrhein Cup O19 (NRW) 2025",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Alea-Sophie Kurz": [
-        {
-            "opponent": "Alea-Sophie Kurz",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Alea-Sophie Kurz",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Xinru Guo": [
-        {
-            "opponent": "Xinru Guo",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Xinru Guo",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Alexander Soh Lee Wei": [
-        {
-            "opponent": "Alexander Soh Lee Wei",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Alexander Soh Lee Wei",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Jingyi Qu": [
-        {
-            "opponent": "Jingyi Qu",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Jingyi Qu",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "3. Doppel-RLT O19 NRW-Bezirk Süd 1 2024-25": [
-        {
-            "opponent": "3. Doppel-RLT O19 NRW-Bezirk Süd 1 2024-25",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "5:8",
-            "won": false
-        }
-    ],
-    "Position 5-8": [
-        {
-            "opponent": "Position 5-8",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "5:8",
-            "won": false
-        }
-    ],
-    "Andreas Neugebauer": [
-        {
-            "opponent": "Andreas Neugebauer",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "5:8",
-            "won": false
-        },
-        {
-            "opponent": "Andreas Neugebauer",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Michael Paulig": [
-        {
-            "opponent": "Michael Paulig",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "5:8",
-            "won": false
-        },
-        {
-            "opponent": "Michael Paulig",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Oliver Krause": [
-        {
-            "opponent": "Oliver Krause",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "5:8",
-            "won": false
-        },
-        {
-            "opponent": "Oliver Krause",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Jonas Lochowicz": [
-        {
-            "opponent": "Jonas Lochowicz",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "5:8",
-            "won": false
-        },
-        {
-            "opponent": "Jonas Lochowicz",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Sören Baudach": [
-        {
-            "opponent": "Sören Baudach",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "5:8",
-            "won": false
-        },
-        {
-            "opponent": "Sören Baudach",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "3. Einzel-RLT O19 NRW-Bezirk Süd 1 2024-25": [
-        {
-            "opponent": "3. Einzel-RLT O19 NRW-Bezirk Süd 1 2024-25",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "HE Bez A": [
-        {
-            "opponent": "HE Bez A",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Alexander Ott": [
-        {
-            "opponent": "Alexander Ott",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Alexander Ott",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Philipp Bartoschek": [
-        {
-            "opponent": "Philipp Bartoschek",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Philipp Bartoschek",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Karl Olschewski": [
-        {
-            "opponent": "Karl Olschewski",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Karl Olschewski",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Karl Olschewski",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Karl Olschewski",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "2. Mixed/Einzel-RLT O19 NRW-Bezirk Süd 1 2024-25": [
-        {
-            "opponent": "2. Mixed/Einzel-RLT O19 NRW-Bezirk Süd 1 2024-25",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "HE Bez C": [
-        {
-            "opponent": "HE Bez C",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Max Zigman": [
-        {
-            "opponent": "Max Zigman",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Max Zigman",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ],
-    "Johnny Calero Gascon": [
-        {
-            "opponent": "Johnny Calero Gascon",
-            "competition": "Turnier",
-            "discipline": "HE",
-            "score": "",
-            "won": false
-        },
-        {
-            "opponent": "Johnny Calero Gascon",
-            "competition": "Turnier",
-            "discipline": "HD",
-            "score": "",
-            "won": false
-        }
-    ]
+  "Johannes Koppers": [
+    {
+      "opponent": "Johannes Koppers",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "17:21",
+      "won": false
+    }
+  ],
+  "Magnus Hubert": [
+    {
+      "opponent": "Magnus Hubert",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "18:21",
+      "won": false
+    }
+  ],
+  "Martyn Okhrymenko": [
+    {
+      "opponent": "Martyn Okhrymenko",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "18:21",
+      "won": false
+    }
+  ],
+  "Pascal Ziehe": [
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "18:21",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "21:0",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "21:15",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "18:21",
+      "won": true
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "21:7",
+      "won": true
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "13:20",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "13:20",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "13:20",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "5:8",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "5:8",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "5:8",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "5:8",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Ziehe",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Marcel Gutsch": [
+    {
+      "opponent": "Marcel Gutsch",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "21:15",
+      "won": false
+    },
+    {
+      "opponent": "Marcel Gutsch",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "MX",
+      "score": "21:8",
+      "won": false
+    },
+    {
+      "opponent": "Marcel Gutsch",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Marcel Gutsch",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Dan Kai Tran": [
+    {
+      "opponent": "Dan Kai Tran",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "21:15",
+      "won": false
+    }
+  ],
+  "Charlotte Feisel": [
+    {
+      "opponent": "Charlotte Feisel",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "MX",
+      "score": "21:8",
+      "won": false
+    }
+  ],
+  "Vanessa Joppien": [
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "MX",
+      "score": "21:8",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vanessa Joppien",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Vinicius Martim": [
+    {
+      "opponent": "Vinicius Martim",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HD",
+      "score": "19:21",
+      "won": false
+    },
+    {
+      "opponent": "Vinicius Martim",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HD",
+      "score": "13:21",
+      "won": true
+    },
+    {
+      "opponent": "Vinicius Martim",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "5:8",
+      "won": false
+    },
+    {
+      "opponent": "Vinicius Martim",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Jonas Mähner": [
+    {
+      "opponent": "Jonas Mähner",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HD",
+      "score": "19:21",
+      "won": false
+    }
+  ],
+  "Benjamin Mühlenbeck": [
+    {
+      "opponent": "Benjamin Mühlenbeck",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HD",
+      "score": "19:21",
+      "won": false
+    },
+    {
+      "opponent": "Benjamin Mühlenbeck",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "13:21",
+      "won": false
+    }
+  ],
+  "Marco Becker": [
+    {
+      "opponent": "Marco Becker",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HD",
+      "score": "21:13",
+      "won": false
+    }
+  ],
+  "Kilian Birkhoven": [
+    {
+      "opponent": "Kilian Birkhoven",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HD",
+      "score": "21:13",
+      "won": false
+    },
+    {
+      "opponent": "Kilian Birkhoven",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "21:8",
+      "won": false
+    }
+  ],
+  "Lucas Mertin": [
+    {
+      "opponent": "Lucas Mertin",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HD",
+      "score": "21:13",
+      "won": false
+    }
+  ],
+  "Jens Hilder": [
+    {
+      "opponent": "Jens Hilder",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HD",
+      "score": "13:21",
+      "won": true
+    }
+  ],
+  "Jan Thewald": [
+    {
+      "opponent": "Jan Thewald",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "18:21",
+      "won": true
+    }
+  ],
+  "Patrick Bogdon": [
+    {
+      "opponent": "Patrick Bogdon",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "18:21",
+      "won": true
+    }
+  ],
+  "Marco Mönch": [
+    {
+      "opponent": "Marco Mönch",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "21:19",
+      "won": false
+    }
+  ],
+  "Sergii Okhrymenko": [
+    {
+      "opponent": "Sergii Okhrymenko",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "21:7",
+      "won": true
+    }
+  ],
+  "Benedikt Chadaravicius": [
+    {
+      "opponent": "Benedikt Chadaravicius",
+      "competition": "Meisterschaft (Liga)",
+      "discipline": "HE",
+      "score": "21:7",
+      "won": true
+    }
+  ],
+  "Viju Joseph": [
+    {
+      "opponent": "Viju Joseph",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Viju Joseph",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Viju Joseph",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Viju Joseph",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Mathew Paul": [
+    {
+      "opponent": "Mathew Paul",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Mathew Paul",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Mathew Paul",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Mathew Paul",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Vijay Kayala": [
+    {
+      "opponent": "Vijay Kayala",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Vijay Kayala",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Stoyan Tsonev": [
+    {
+      "opponent": "Stoyan Tsonev",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Stoyan Tsonev",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Jeremai Hose": [
+    {
+      "opponent": "Jeremai Hose",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Jeremai Hose",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Conrad Scheidweiler": [
+    {
+      "opponent": "Conrad Scheidweiler",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Conrad Scheidweiler",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Jannis Lisch": [
+    {
+      "opponent": "Jannis Lisch",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Jannis Lisch",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Linus Mikota": [
+    {
+      "opponent": "Linus Mikota",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Linus Mikota",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Rene Küpper": [
+    {
+      "opponent": "Rene Küpper",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Rene Küpper",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Christian Preuß": [
+    {
+      "opponent": "Christian Preuß",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Christian Preuß",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Waldemar Pazer": [
+    {
+      "opponent": "Waldemar Pazer",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Waldemar Pazer",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Artur Ratz": [
+    {
+      "opponent": "Artur Ratz",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Artur Ratz",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Detlef Ballsieper": [
+    {
+      "opponent": "Detlef Ballsieper",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Detlef Ballsieper",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Frank Ludwig": [
+    {
+      "opponent": "Frank Ludwig",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Frank Ludwig",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Ilias Boudelal": [
+    {
+      "opponent": "Ilias Boudelal",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Ilias Boudelal",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Jing-Yu Lu": [
+    {
+      "opponent": "Jing-Yu Lu",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Jing-Yu Lu",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Rafael Lotz": [
+    {
+      "opponent": "Rafael Lotz",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Rafael Lotz",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Ruben Schelenz": [
+    {
+      "opponent": "Ruben Schelenz",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Ruben Schelenz",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Maik Brod": [
+    {
+      "opponent": "Maik Brod",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Maik Brod",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Yifan Xu": [
+    {
+      "opponent": "Yifan Xu",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Yifan Xu",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Yifan Xu",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Yifan Xu",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Thorben Müller": [
+    {
+      "opponent": "Thorben Müller",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Thorben Müller",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Joris Töllner": [
+    {
+      "opponent": "Joris Töllner",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Joris Töllner",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Armin Görg": [
+    {
+      "opponent": "Armin Görg",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Armin Görg",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Joshua Heinzmann": [
+    {
+      "opponent": "Joshua Heinzmann",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Joshua Heinzmann",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Joshua Heinzmann",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Joshua Heinzmann",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Fabian Duvenbeck": [
+    {
+      "opponent": "Fabian Duvenbeck",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Fabian Duvenbeck",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Lars Fischer": [
+    {
+      "opponent": "Lars Fischer",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Lars Fischer",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Robert Reiz": [
+    {
+      "opponent": "Robert Reiz",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Robert Reiz",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Robert Reiz",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Robert Reiz",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Robert Reiz",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Robert Reiz",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Robert Reiz",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Robert Reiz",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "André Pyka": [
+    {
+      "opponent": "André Pyka",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "André Pyka",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Mark Zöllner": [
+    {
+      "opponent": "Mark Zöllner",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Mark Zöllner",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Marcel Göckmann": [
+    {
+      "opponent": "Marcel Göckmann",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Marcel Göckmann",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Marcel Göckmann",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Marcel Göckmann",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Jan Jasdauskis": [
+    {
+      "opponent": "Jan Jasdauskis",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Jan Jasdauskis",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Tim Bunzel": [
+    {
+      "opponent": "Tim Bunzel",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Tim Bunzel",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Dirk Silinski": [
+    {
+      "opponent": "Dirk Silinski",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Dirk Silinski",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Qizhong Jiang": [
+    {
+      "opponent": "Qizhong Jiang",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Qizhong Jiang",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Stefan Reupert": [
+    {
+      "opponent": "Stefan Reupert",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Stefan Reupert",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Philip Ertel": [
+    {
+      "opponent": "Philip Ertel",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Philip Ertel",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Alexander Saretzki": [
+    {
+      "opponent": "Alexander Saretzki",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Alexander Saretzki",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Philip Heinrichs": [
+    {
+      "opponent": "Philip Heinrichs",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Philip Heinrichs",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Rolf Vogt": [
+    {
+      "opponent": "Rolf Vogt",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Rolf Vogt",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Oliver Vogt": [
+    {
+      "opponent": "Oliver Vogt",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Oliver Vogt",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Jan Ochoba": [
+    {
+      "opponent": "Jan Ochoba",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Jan Ochoba",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Kai Schalk": [
+    {
+      "opponent": "Kai Schalk",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Kai Schalk",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Pratheek Prakash Manangi": [
+    {
+      "opponent": "Pratheek Prakash Manangi",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pratheek Prakash Manangi",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Deepak Venkanna": [
+    {
+      "opponent": "Deepak Venkanna",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Deepak Venkanna",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Noah Licht": [
+    {
+      "opponent": "Noah Licht",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Noah Licht",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Srinadh Vempati": [
+    {
+      "opponent": "Srinadh Vempati",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Srinadh Vempati",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Lennard Jacobi": [
+    {
+      "opponent": "Lennard Jacobi",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Lennard Jacobi",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Kurt Lennart Kunze": [
+    {
+      "opponent": "Kurt Lennart Kunze",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Kurt Lennart Kunze",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Laurin Verweyen": [
+    {
+      "opponent": "Laurin Verweyen",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Laurin Verweyen",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Ian Wilde": [
+    {
+      "opponent": "Ian Wilde",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Ian Wilde",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Dobrin Alexandroff": [
+    {
+      "opponent": "Dobrin Alexandroff",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Dobrin Alexandroff",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Ralf Walterscheidt": [
+    {
+      "opponent": "Ralf Walterscheidt",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Ralf Walterscheidt",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Nico Becker": [
+    {
+      "opponent": "Nico Becker",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Nico Becker",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Christopher Mayer": [
+    {
+      "opponent": "Christopher Mayer",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Christopher Mayer",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Etienne Rastoul": [
+    {
+      "opponent": "Etienne Rastoul",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Etienne Rastoul",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Pascal Rastoul": [
+    {
+      "opponent": "Pascal Rastoul",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Pascal Rastoul",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Claas Bruno Kaufmann": [
+    {
+      "opponent": "Claas Bruno Kaufmann",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Claas Bruno Kaufmann",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Malte Henrico Renneberg": [
+    {
+      "opponent": "Malte Henrico Renneberg",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Malte Henrico Renneberg",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Michael Hansen": [
+    {
+      "opponent": "Michael Hansen",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Michael Hansen",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Michael Hansen",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Michael Hansen",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Michael Hansen",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Michael Hansen",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Huyen Vu Ngoc": [
+    {
+      "opponent": "Huyen Vu Ngoc",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Huyen Vu Ngoc",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Huyen Vu Ngoc",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Huyen Vu Ngoc",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Martin Janorschke": [
+    {
+      "opponent": "Martin Janorschke",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Martin Janorschke",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Britta Matuschik": [
+    {
+      "opponent": "Britta Matuschik",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Britta Matuschik",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Angelina Carneim": [
+    {
+      "opponent": "Angelina Carneim",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Angelina Carneim",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Abhinav Jain": [
+    {
+      "opponent": "Abhinav Jain",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Abhinav Jain",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Abhinav Jain",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Abhinav Jain",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Matthias Knaupp": [
+    {
+      "opponent": "Matthias Knaupp",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Matthias Knaupp",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Matthias Knaupp",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Matthias Knaupp",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Matthias Knaupp",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Matthias Knaupp",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Matthias Knaupp",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Matthias Knaupp",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Matthias Knaupp",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "5:8",
+      "won": false
+    },
+    {
+      "opponent": "Matthias Knaupp",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Christian Kufeld": [
+    {
+      "opponent": "Christian Kufeld",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Christian Kufeld",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Sebastian Altenschmidt": [
+    {
+      "opponent": "Sebastian Altenschmidt",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Sebastian Altenschmidt",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Sebastian Altenschmidt",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Sebastian Altenschmidt",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Kam-San Choi": [
+    {
+      "opponent": "Kam-San Choi",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Kam-San Choi",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Steven Tang": [
+    {
+      "opponent": "Steven Tang",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Steven Tang",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Dennis Grzanna": [
+    {
+      "opponent": "Dennis Grzanna",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Dennis Grzanna",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Eugen Lindt": [
+    {
+      "opponent": "Eugen Lindt",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Eugen Lindt",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Junhui Hu": [
+    {
+      "opponent": "Junhui Hu",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Junhui Hu",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Seng Hak Ngo": [
+    {
+      "opponent": "Seng Hak Ngo",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Seng Hak Ngo",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Thorsten Jansen": [
+    {
+      "opponent": "Thorsten Jansen",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Thorsten Jansen",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Kitti Yoosenat": [
+    {
+      "opponent": "Kitti Yoosenat",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Kitti Yoosenat",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Parijat Raj": [
+    {
+      "opponent": "Parijat Raj",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Parijat Raj",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Michael Kroes": [
+    {
+      "opponent": "Michael Kroes",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Michael Kroes",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Marcel Schaefers": [
+    {
+      "opponent": "Marcel Schaefers",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Marcel Schaefers",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Nils Reichardt": [
+    {
+      "opponent": "Nils Reichardt",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Nils Reichardt",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Till Reichardt": [
+    {
+      "opponent": "Till Reichardt",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Till Reichardt",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Rob Alamgir": [
+    {
+      "opponent": "Rob Alamgir",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Rob Alamgir",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Sharath Nattoji": [
+    {
+      "opponent": "Sharath Nattoji",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Sharath Nattoji",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Patrick Gemünden": [
+    {
+      "opponent": "Patrick Gemünden",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Patrick Gemünden",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Sara Börding": [
+    {
+      "opponent": "Sara Börding",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Sara Börding",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Martin Bauer": [
+    {
+      "opponent": "Martin Bauer",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Martin Bauer",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Sandra Schönhofen": [
+    {
+      "opponent": "Sandra Schönhofen",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Sandra Schönhofen",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Marco Böning": [
+    {
+      "opponent": "Marco Böning",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Marco Böning",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Marco Böning",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "5:8",
+      "won": false
+    },
+    {
+      "opponent": "Marco Böning",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Marcel Hammes": [
+    {
+      "opponent": "Marcel Hammes",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "13:20",
+      "won": false
+    },
+    {
+      "opponent": "Marcel Hammes",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Jonathan Middendorf": [
+    {
+      "opponent": "Jonathan Middendorf",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "13:20",
+      "won": false
+    },
+    {
+      "opponent": "Jonathan Middendorf",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Simon Schreiner": [
+    {
+      "opponent": "Simon Schreiner",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "13:20",
+      "won": false
+    },
+    {
+      "opponent": "Simon Schreiner",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Daniel Skoczowsky": [
+    {
+      "opponent": "Daniel Skoczowsky",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "13:20",
+      "won": false
+    },
+    {
+      "opponent": "Daniel Skoczowsky",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Tim Dochtermann": [
+    {
+      "opponent": "Tim Dochtermann",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "13:20",
+      "won": false
+    },
+    {
+      "opponent": "Tim Dochtermann",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Christoph Mölleken": [
+    {
+      "opponent": "Christoph Mölleken",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "13:20",
+      "won": false
+    },
+    {
+      "opponent": "Christoph Mölleken",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Alea-Sophie Kurz": [
+    {
+      "opponent": "Alea-Sophie Kurz",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Alea-Sophie Kurz",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Xinru Guo": [
+    {
+      "opponent": "Xinru Guo",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Xinru Guo",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Alexander Soh Lee Wei": [
+    {
+      "opponent": "Alexander Soh Lee Wei",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Alexander Soh Lee Wei",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Jingyi Qu": [
+    {
+      "opponent": "Jingyi Qu",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Jingyi Qu",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Andreas Neugebauer": [
+    {
+      "opponent": "Andreas Neugebauer",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "5:8",
+      "won": false
+    },
+    {
+      "opponent": "Andreas Neugebauer",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Michael Paulig": [
+    {
+      "opponent": "Michael Paulig",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "5:8",
+      "won": false
+    },
+    {
+      "opponent": "Michael Paulig",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Oliver Krause": [
+    {
+      "opponent": "Oliver Krause",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "5:8",
+      "won": false
+    },
+    {
+      "opponent": "Oliver Krause",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Jonas Lochowicz": [
+    {
+      "opponent": "Jonas Lochowicz",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "5:8",
+      "won": false
+    },
+    {
+      "opponent": "Jonas Lochowicz",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Sören Baudach": [
+    {
+      "opponent": "Sören Baudach",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "5:8",
+      "won": false
+    },
+    {
+      "opponent": "Sören Baudach",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Alexander Ott": [
+    {
+      "opponent": "Alexander Ott",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Alexander Ott",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Philipp Bartoschek": [
+    {
+      "opponent": "Philipp Bartoschek",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Philipp Bartoschek",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Karl Olschewski": [
+    {
+      "opponent": "Karl Olschewski",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Karl Olschewski",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Karl Olschewski",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Karl Olschewski",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Max Zigman": [
+    {
+      "opponent": "Max Zigman",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Max Zigman",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ],
+  "Johnny Calero Gascon": [
+    {
+      "opponent": "Johnny Calero Gascon",
+      "competition": "Turnier",
+      "discipline": "HE",
+      "score": "",
+      "won": false
+    },
+    {
+      "opponent": "Johnny Calero Gascon",
+      "competition": "Turnier",
+      "discipline": "HD",
+      "score": "",
+      "won": false
+    }
+  ]
 }
