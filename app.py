@@ -1087,7 +1087,32 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         <strong>🚗 Notiz / Fahrgemeinschaft:</strong> {html.escape(notes_val)}
     </div>
     """ if notes_val else ""
+# Automatisch gescrapte Match- & Gegner-Informationen
+    next_opp = item.get('next_opponent', '').strip()
+    last_res = item.get('last_match_result', '').strip()
+    
+    match_info_html = ""
+    if next_opp:
+        match_info_html += f"""
+        <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 7px 12px; border-radius: 4px; font-size: 0.8rem; color: #15803d; margin-top: 6px;">
+            <strong>⚔️ Nächstes Spiel:</strong> {html.escape(next_opp)}
+        </div>
+        """
+    if last_res:
+        match_info_html += f"""
+        <div style="background-color: #f8fafc; border-left: 4px solid #64748b; padding: 7px 12px; border-radius: 4px; font-size: 0.8rem; color: #334155; margin-top: 6px;">
+            <strong>📊 Letztes Spielergebnis:</strong> {html.escape(last_res)}
+        </div>
+        """
 
+    html_out = f"""
+    <div class="card-inner-container">
+        {badges_html}
+        {notes_html}
+        {match_info_html}
+        {disciplines_html}
+    </div>
+    """
     html_out = f"""
     <div class="card-inner-container">
         {badges_html}
@@ -1257,8 +1282,18 @@ def render_season_chart(df, today):
             hoverinfo="text"
         ))
 
-    tickvals = [datetime.date(2026, m, 1) for m in range(1, 13)]
-    ticktext = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"]
+min_date = df_chart["date"].min()
+max_date = df_chart["date"].max()
+y_start = min_date.year if pd.notnull(min_date) else datetime.date.today().year
+y_end = max_date.year if pd.notnull(max_date) else y_start + 1
+
+tickvals = []
+ticktext = []
+month_labels = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"]
+for y in range(y_start, y_end + 1):
+    for m in range(1, 13):
+        tickvals.append(datetime.date(y, m, 1))
+        ticktext.append(f"{month_labels[m-1]} '{str(y)[2:]}")
 
     fig.update_layout(
         height=200,
