@@ -17,18 +17,19 @@ UUID_PATTERN = re.compile(r'([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-
 PLAYER_CONFIG = {
     "first_name": "Marco",
     "last_name": "Mainz",
-    "member_id": "01-166428",
     "club": "FC Langenfeld",
+    "member_id": "01-166428",
     "patterns": [
         re.compile(r'\bMarco\s+Mainz\b', re.IGNORECASE),
         re.compile(r'\bMainz[,\s]+Marco\b', re.IGNORECASE)
     ],
-    # Offizielle Head-2-Head Statistikseite von turnier.de
-    "h2h_url": "https://dbv.turnier.de/head-2-head?OrganizationCode=E3B0DC28-EDDE-426A-9DD9-600D26DCF680&T1P1MemberID=01-166428",
-    # Ligaspiele
     "league_urls": [
         "https://dbv.turnier.de/sport/league/player?id=925D6245-1FA1-496D-9810-1439487E5801&player=18943",
         "https://dbv.turnier.de/sport/league/player?id=066F2F48-EF43-47A8-999F-A2021BE81D09&player=21844"
+    ],
+    "tournament_profile_urls": [
+        "https://dbv.turnier.de/player-profile/68c830e9-afd8-4adb-bb6a-22a84a98a64b/tournaments",
+        "https://dbv.turnier.de/player-profile/68c830e9-afd8-4adb-bb6a-22a84a98a64b/tournaments/2025"
     ]
 }
 
@@ -37,12 +38,11 @@ IGNORE_OPPONENT_WORDS = {
     'club', 'team', 'punkte', 'setzplatz', 'seed', 'court', 'feld', 'runde',
     'hd', 'he', 'mx', 'dd', 'de', 'herrendoppel', 'herreneinzel', 'mixed',
     'damendoppel', 'dameneinzel', 'turnier', 'meisterschaft', 'liga', 'bezirksklasse',
-    'kreisliga', 'bezirksliga', 'landesliga', 'verbandsliga', 'nrw', 'export calendar'
+    'kreisliga', 'bezirksliga', 'landesliga', 'verbandsliga', 'nrw', 'export calendar', 'h2h'
 }
 
 
 def is_real_player_name(name):
-    """Filtert Gruppen, Auslosungs-Bezeichnungen und ungültige Namen aus."""
     if not name or len(name) < 4:
         return False
     n_low = name.lower()
@@ -162,37 +162,13 @@ def auto_detect_schedule_and_deadline(description_text):
     return detected
 
 
-# --- HISTORIE-HARVESTER: OFFmetadata + PRÄZISER LIGA-PARSER ---
+# --- DAS PRÄZISE MATCH-ARCHIV (LIGA & TURNIERE) ---
 
 def harvest_opponent_history(session):
     history = {}
     headers = get_headers()
     
-    # 1. Offizielle Head-to-Head Übersichtsseite von turnier.de auslesen
-    try:
-        r_h2h = session.get(PLAYER_CONFIG["h2h_url"], headers=headers, timeout=10)
-        if r_h2h.status_code == 200:
-            soup = BeautifulSoup(r_h2h.content, 'html.parser')
-            for tr in soup.find_all(['tr', 'li', 'div']):
-                txt = tr.get_text(separator=' | ')
-                score_match = re.search(r'\b(\d+)\s*-\s*(\d+)\b', txt)
-                if score_match:
-                    p_links = tr.find_all('a', href=re.compile(r'player', re.I))
-                    for a in p_links:
-                        opp_name = a.get_text().strip()
-                        if is_real_player_name(opp_name):
-                            wins = int(score_match.group(1))
-                            losses = int(score_match.group(2))
-                            history[opp_name] = {
-                                "opponent": opp_name,
-                                "wins": wins,
-                                "losses": losses,
-                                "detail": f"{wins}-{losses} Gesamtbilanz auf turnier.de"
-                            }
-    except Exception as e:
-        print(f"Hinweis beim Laden der offiziellen H2H-Seite: {e}")
-
-    # 2. Präzise Ligaspiele auslesen (mit Team-Erkennung & echtem Satzverhältnis)
+    # 1. Ligaspiele erfassen (mit exakter Heim/Auswärts-Erkennung)
     for l_url in PLAYER_CONFIG["league_urls"]:
         try:
             r = session.get(l_url, headers=headers, timeout=10)
@@ -202,58 +178,105 @@ def harvest_opponent_history(session):
                     tds = tr.find_all('td')
                     if len(tds) >= 7:
                         match_code = tds[1].get_text().strip().upper()
-                        team1_text = tds[3].get_text()
-                        team2_text = tds[5].get_text()
+                        t1_text = tds[3].get_text(separator=' ')
+                        t2_text = tds[5].get_text(separator=' ')
                         score_text = tds[6].get_text().strip()
                         
-                        # Disziplin ermitteln
-                        disc = "HD"
-                        if "HE" in match_code or "EINZEL" in match_code: disc = "HE"
-                        elif "GD" in match_code or "MX" in match_code or "MIXED" in match_code: disc = "MX"
-                        
-                        # Prüfen, in welchem Team Marco Mainz war
-                        in_team1 = any(p.search(team1_text) for p in PLAYER_CONFIG["patterns"])
-                        in_team2 = any(p.search(team2_text) for p in PLAYER_CONFIG["patterns"])
-                        
-                        if not in_team1 and not in_team2:
+                        in_t1 = any(p.search(t1_text) for p in PLAYER_CONFIG["patterns"])
+                        in_t2 = any(p.search(t2_text) for p in PLAYER_CONFIG["patterns"])
+                        if not in_t1 and not in_t2:
                             continue
                             
-                        opp_td = tds[5] if in_team1 else tds[3]
-                        opp_links = opp_td.find_all('a', href=re.compile(r'player', re.I))
-                        opponents = [a.get_text().strip() for a in opp_links if is_real_player_name(a.get_text().strip())]
+                        disc = "HD"
+                        if any(k in match_code for k in ['HE', 'EINZEL']): disc = "HE"
+                        elif any(k in match_code for k in ['GD', 'MX', 'MIXED']): disc = "MX"
                         
-                        # Satzausgang berechnen
+                        opp_td = tds[3] if in_t2 else tds[5]
+                        opp_links = [a.get_text().strip() for a in opp_td.find_all('a') if 'player.aspx' in a.get('href', '').lower()]
+                        opponents = [n for n in opp_links if is_real_player_name(n)]
+                        
                         set_pairs = re.findall(r'(\d{1,2})\s*-\s*(\d{1,2})', score_text)
                         my_sets = 0
                         opp_sets = 0
                         formatted_sets = []
-                        
                         for s1, s2 in set_pairs:
-                            pts_team1, pts_team2 = int(s1), int(s2)
-                            my_pts = pts_team1 if in_team1 else pts_team2
-                            opp_pts = pts_team2 if in_team1 else pts_team1
-                            
+                            pts_t1, pts_t2 = int(s1), int(s2)
+                            my_pts = pts_t2 if in_t2 else pts_t1
+                            opp_pts = pts_t1 if in_t2 else pts_t2
                             if my_pts > opp_pts: my_sets += 1
                             else: opp_sets += 1
                             formatted_sets.append(f"{my_pts}:{opp_pts}")
                             
                         won = (my_sets > opp_sets)
-                        final_score_str = ", ".join(formatted_sets)
+                        score_str = ", ".join(formatted_sets)
                         
                         for opp in opponents:
-                            # Wenn bereits aus H2H bekannt, mit exaktem Satzergebnis anreichern
-                            if opp in history:
-                                history[opp]["detail"] = f"{final_score_str} ({disc}, Liga)"
-                            else:
-                                history[opp] = {
-                                    "opponent": opp,
-                                    "wins": 1 if won else 0,
-                                    "losses": 0 if won else 1,
-                                    "detail": f"{final_score_str} ({disc}, Liga)"
-                                }
+                            history.setdefault(opp, []).append({
+                                "opponent": opp,
+                                "competition": "Liga",
+                                "discipline": disc,
+                                "score": score_str,
+                                "won": won
+                            })
         except Exception as e:
             print(f"Fehler bei Liga-Erfassung: {e}")
 
+    # 2. Turnierspiele erfassen (direkt aus den .match-Containern)
+    for t_url in PLAYER_CONFIG["tournament_profile_urls"]:
+        try:
+            r = session.get(t_url, headers=headers, timeout=10)
+            if r.status_code == 200:
+                soup = BeautifulSoup(r.content, 'html.parser')
+                for match_box in soup.find_all(class_=re.compile(r'\bmatch\b')):
+                    txt = match_box.get_text(separator=' ')
+                    if any(p.search(txt) for p in PLAYER_CONFIG["patterns"]):
+                        # Exakt die beiden match__row Zeilen filtern (ohne wrapper)
+                        rows = [el for el in match_box.find_all('div') if el.get('class') and 'match__row' in el.get('class') and 'match__row-wrapper' not in el.get('class') and 'match__row-title' not in el.get('class')]
+                        if len(rows) >= 2:
+                            r0_txt = rows[0].get_text(separator=' ')
+                            marco_in_r0 = any(p.search(r0_txt) for p in PLAYER_CONFIG["patterns"])
+                            my_row = rows[0] if marco_in_r0 else rows[1]
+                            opp_row = rows[1] if marco_in_r0 else rows[0]
+                            
+                            # Sieger-Erkennung via 'W' oder 'L'
+                            my_row_txt = ' ' + my_row.get_text(separator=' ') + ' '
+                            won = bool(' W ' in my_row_txt or 'match__row--winner' in my_row.get('class', []))
+                            if ' L ' in my_row_txt:
+                                won = False
+                            
+                            # Gegner extrahieren
+                            opp_links = [a.get_text().strip() for a in opp_row.find_all('a') if is_real_player_name(a.get_text().strip())]
+                            
+                            # Sätze extrahieren
+                            score_m = re.findall(r'(\d{1,2})\s+(\d{1,2})', txt)
+                            set_scores = []
+                            for s1, s2 in score_m:
+                                pts1, pts2 = int(s1), int(s2)
+                                if pts1 >= 11 or pts2 >= 11:
+                                    if won:
+                                        set_scores.append(f"{max(pts1, pts2)}:{min(pts1, pts2)}")
+                                    else:
+                                        set_scores.append(f"{min(pts1, pts2)}:{max(pts1, pts2)}")
+                            score_str = ", ".join(set_scores) if set_scores else ""
+
+                            # Disziplin ermitteln
+                            disc = "HD"
+                            if any(k in txt.lower() for k in ['vanessa', 'joppien', 'thea', 'sommer', 'mixed', 'mx']):
+                                disc = "MX"
+                            elif len(my_row.find_all('a')) == 1:
+                                disc = "HE"
+
+                            for opp in opp_links:
+                                history.setdefault(opp, []).append({
+                                    "opponent": opp,
+                                    "competition": "Turnier",
+                                    "discipline": disc,
+                                    "score": score_str,
+                                    "won": won
+                                })
+        except Exception as e:
+            print(f"Fehler bei Turnier-Erfassung: {e}")
+            
     return history
 
 
@@ -306,7 +329,7 @@ def check_player_subpages(session, t_id, existing_entry, opp_history):
                                 if field_name: updates["field_mx"] = field_name
                                 if found_partner: updates["partner_mx"] = found_partner
 
-                    # 2. NUR ECHTE GEGNER IM FELD ERFASSEN
+                    # 2. ALLE GEMELDETEN GEGNER IM FELD ERFASSEN
                     all_field_players = []
                     seeds_count = 0
                     for tr in soup_ev.find_all('tr'):
@@ -327,17 +350,19 @@ def check_player_subpages(session, t_id, existing_entry, opp_history):
                     
                     for opp in all_field_players:
                         if opp in opp_history:
-                            opp_stat = opp_history[opp]
-                            wins = opp_stat["wins"]
-                            losses = opp_stat["losses"]
+                            matches_vs = opp_history[opp]
+                            wins = sum(1 for m in matches_vs if m["won"])
+                            losses = len(matches_vs) - wins
                             total_wins += wins
                             total_losses += losses
                             
+                            last_m = matches_vs[0]
+                            detail_str = f"{last_m['score']} ({last_m['discipline']}, {last_m['competition']})" if last_m['score'] else f"{last_m['discipline']}, {last_m['competition']}"
                             known_duels.append({
                                 "opponent": opp,
                                 "wins": wins,
                                 "losses": losses,
-                                "detail": opp_stat["detail"]
+                                "detail": detail_str
                             })
 
                     # Matchup-Faktor
@@ -631,13 +656,13 @@ def check_for_updates_generator():
 
     session = init_session()
     
-    yield "Lade offizielle H2H-Statistiken & Ligaspiele für Marco Mainz..."
+    yield "Lade persönliche Match-Historie (Liga & Turniere) für Marco Mainz..."
     try:
         opp_history = harvest_opponent_history(session)
         save_gist_file(OPPONENTS_FILE, opp_history)
         with open(OPPONENTS_FILE, 'w') as f:
             json.dump(opp_history, f, indent=2, ensure_ascii=False)
-        yield f"🎯 Match-Archiv aktiv: {len(opp_history)} offizielle Konkurrenten erfasst!"
+        yield f"🎯 Match-Archiv aktiv: {len(opp_history)} verschiedene Konkurrenten erfasst!"
     except Exception as e:
         yield f"Hinweis Match-Archiv: {e}. Nutze bestehende Daten."
         try:
