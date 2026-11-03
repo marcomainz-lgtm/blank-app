@@ -1019,23 +1019,23 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         team_rows = []
         for t in teams:
             danger_color = "#38bdf8"
-            if "👑" in t['danger_badge']: danger_color = "#fbbf24"
-            elif "🔴" in t['danger_badge']: danger_color = "#f87171"
-            elif "🟢" in t['danger_badge']: danger_color = "#4ade80"
-            elif "🟡" in t['danger_badge']: danger_color = "#fde047"
+            if "👑" in t.get('danger_badge', t.get('danger', '⚪ Unbekannt')): danger_color = "#fbbf24"
+            elif "🔴" in t.get('danger_badge', t.get('danger', '⚪ Unbekannt')): danger_color = "#f87171"
+            elif "🟢" in t.get('danger_badge', t.get('danger', '⚪ Unbekannt')): danger_color = "#4ade80"
+            elif "🟡" in t.get('danger_badge', t.get('danger', '⚪ Unbekannt')): danger_color = "#fde047"
             
-            seed_disp = f"<strong>[{html.escape(t['seed'])}]</strong>" if t['seed'] else "-"
-            h2h_disp = f"<strong style='color:#e2e8f0;'>{html.escape(t['h2h_str'])}</strong>" if t['h2h_str'] != "-" else "<span style='color:#64748b;'>-</span>"
+            seed_disp = f"<strong>[{html.escape(t.get('seed', ''))}]</strong>" if t.get('seed', '') else "-"
+            h2h_disp = f"<strong style='color:#e2e8f0;'>{html.escape(t.get('h2h_str', '-'))}</strong>" if t.get('h2h_str', '-') != "-" else "<span style='color:#64748b;'>-</span>"
             
             team_rows.append(f"""
             <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.06); font-size: 0.84rem;">
-                <td style="padding: 7px 8px; font-weight: 700; color: #f8fafc;">{html.escape(t['names'])}</td>
-                <td style="padding: 7px 8px; color: #94a3b8;">{html.escape(t['club'])}</td>
+                <td style="padding: 7px 8px; font-weight: 700; color: #f8fafc;">{html.escape(t.get('names', 'Unbekannt'))}</td>
+                <td style="padding: 7px 8px; color: #94a3b8;">{html.escape(t.get('club', '-'))}</td>
                 <td style="padding: 7px 8px; color: #cbd5e1; text-align: center;">{seed_disp}</td>
                 <td style="padding: 7px 8px; color: #cbd5e1; text-align: center;">{h2h_disp}</td>
                 <td style="padding: 7px 8px; color: {danger_color}; font-weight: 700;">
-                    {html.escape(t['danger_badge'])} 
-                    <span style="font-size:0.75rem; color:#94a3b8; font-weight:normal; margin-left:4px;">({html.escape(t['reason'])})</span>
+                    {html.escape(t.get('danger_badge', t.get('danger', '⚪ Unbekannt')))} 
+                    <span style="font-size:0.75rem; color:#94a3b8; font-weight:normal; margin-left:4px;">({html.escape(t.get('reason', ''))})</span>
                 </td>
             </tr>
             """)
