@@ -1,3 +1,4 @@
+python
 import streamlit as st
 import pandas as pd
 import json
@@ -313,10 +314,6 @@ st.markdown(
             border-radius: 8px !important;
             color: #94a3b8 !important;
             border: none !important;
-        }
-        div[data-baseweb="tab-list"] button[aria-selected="true"] {
-            color: #f8fafc !important;
-            background: rgba(255, 255, 255, 0.08) !important;
         }
         div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] {
             display: none !important;
@@ -676,7 +673,54 @@ def can_still_register(item, vacation_dates, occupied_dates):
     return False
 
 
-def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today):
+# --- MODAL-DIALOG FÜR GEGNER-SCOUTING (POP-UP) ---
+dialog_decorator = getattr(st, "dialog", getattr(st, "experimental_dialog", None))
+
+if dialog_decorator:
+    @dialog_decorator("👥 Gegner-Scouting & Teilnehmerfeld")
+    def show_scouting_modal(t_title, analysis):
+        ev_name = analysis.get("event_name", "Konkurrenz")
+        teams = analysis.get("teams", [])
+        seeds_count = analysis.get("seeds_count", 0)
+        matchup_badge = analysis.get("matchup_badge", "⚪ Unbekannt")
+        matchup_desc = analysis.get("matchup_desc", "")
+        
+        st.markdown(f"### {t_title}")
+        st.markdown(f"**Disziplin:** `{ev_name}` &nbsp;•&nbsp; **Gemeldete Teams:** `{len(teams)}` &nbsp;•&nbsp; **Gesetzte Favoriten:** `{seeds_count}`")
+        
+        st.markdown("---")
+        st.markdown(f"**🎯 Dein Matchup-Status:** **{matchup_badge}** ({matchup_desc})")
+        
+        # Bekannte H2H Duelle hervorheben
+        known_duels = analysis.get("known_duels", [])
+        if known_duels:
+            st.markdown("#### ⚔️ Deine bisherigen Duelle im Feld:")
+            for d in known_duels:
+                icon = "🟢" if d["wins"] > d["losses"] else ("🔴" if d["wins"] < d["losses"] else "🟡")
+                st.markdown(f"- {icon} **{d['opponent']}**: **{d['wins']}-{d['losses']} Siege** *({d['detail']})*")
+            st.write("")
+
+        # Vollständige Ampel-Übersicht aller gemeldeten Teams
+        st.markdown("#### 📋 Alle gemeldeten Teams (Scouting-Ampel):")
+        
+        col_hdr1, col_hdr2, col_hdr3 = st.columns([4, 3, 2.5])
+        with col_hdr1: st.caption("**Paarung / Spieler**")
+        with col_hdr2: st.caption("**Verein**")
+        with col_hdr3: st.caption("**Einstufung / Setzplatz**")
+        
+        for team in teams:
+            c1, c2, c3 = st.columns([4, 3, 2.5])
+            with c1:
+                st.markdown(f"**{team['names']}**")
+            with c2:
+                st.write(team['club'] if team['club'] else "-")
+            with c3:
+                seed_tag = f" `[{team['seed']}]`" if team['seed'] else ""
+                st.markdown(f"{team['danger']}{seed_tag}")
+            st.divider()
+
+
+def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today, is_past=False):
     raw_city = str(item.get('city', 'Unbekannt'))
     city = html.escape(raw_city)
     dist = item.get('distance')
@@ -847,7 +891,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                 if reg_hd:
                     hd_status_text = f"Terminkonflikt: {c_disc} in {c_city}{p_suffix}"
                     hd_status_class = "double-booking"
-                    hd_class = "has-double-booking"
+                    he_class = "has-double-booking"
                 else:
                     hd_status_text = f"Paralleltermin: {c_disc} in {c_city}{p_suffix}"
                     hd_status_class = "conflict"
@@ -989,73 +1033,44 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     </div>
     """ if notes_val else ""
 
-    # Automatische Match-Infos
     next_opp = item.get('next_opponent', '').strip()
     last_res = item.get('last_match_result', '').strip()
-    analysis = item.get('field_analysis', {})
     
     match_info_html = ""
     if next_opp:
         match_info_html += f"""
-        <div style="background-color: rgba(34, 197, 94, 0.1); border-left: 3px solid #22c55e; padding: 6px 10px; border-radius: 4px; font-size: 0.78rem; color: #86efac; margin-top: 6px; margin-bottom: 6px;">
+        <div style="background-color: rgba(34, 197, 94, 0.1); border-left: 3px solid #22c55e; padding: 6px 10px; border-radius: 4px; font-size: 0.85rem; color: #86efac; margin-top: 6px; margin-bottom: 6px;">
             <strong>⚔️ Nächstes Spiel:</strong> {html.escape(next_opp)}
         </div>
         """
     if last_res:
         match_info_html += f"""
-        <div style="background-color: rgba(148, 163, 184, 0.08); border-left: 3px solid #64748b; padding: 6px 10px; border-radius: 4px; font-size: 0.78rem; color: #cbd5e1; margin-top: 6px; margin-bottom: 6px;">
+        <div style="background-color: rgba(148, 163, 184, 0.08); border-left: 3px solid #64748b; padding: 6px 10px; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1; margin-top: 6px; margin-bottom: 6px;">
             <strong>📊 Letztes Spielergebnis:</strong> {html.escape(last_res)}
         </div>
         """
 
-    # 🎯 DEZENTES GEGNER-RADAR (IM DARK-THEME, NUR BEI BEDARF AUFKLAPPBAR)
-    radar_html = ""
+    # --- KOMPAKTE, LESBARE RADAR-ZEILE AUF DER KACHEL (OHNE REDUNDANZEN) ---
+    analysis = item.get('field_analysis', {})
+    scouting_trigger_html = ""
+    
     if isinstance(analysis, dict) and analysis.get("event_name"):
-        badge_text = str(analysis.get("matchup_badge", "⚪ Unbekannt"))
-        desc = html.escape(str(analysis.get("matchup_desc", "")))
-        level = html.escape(str(analysis.get("field_level", "")))
-        known_duels = analysis.get("known_duels", [])
-        unknown_cnt = analysis.get("unknown_count", 0)
+        ev_name = html.escape(str(analysis.get('event_name', '')))
+        t_count = analysis.get("teams_count", len(analysis.get("teams", [])))
+        badge = analysis.get("matchup_badge", "⚪ Unbekannt")
+        s_desc = analysis.get("seed_desc", "")
+        h2h_cnt = len(analysis.get("known_duels", []))
         
-        badge_style = "background: rgba(148, 163, 184, 0.15); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1);"
-        if "günstig" in badge_text.lower():
-            badge_style = "background: rgba(34, 197, 94, 0.18); color: #4ade80; border: 1px solid #22c55e;"
-        elif "schwer" in badge_text.lower():
-            badge_style = "background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid #ef4444;"
-        elif "ausgeglichen" in badge_text.lower():
-            badge_style = "background: rgba(245, 158, 11, 0.18); color: #fde047; border: 1px solid #f59e0b;"
-
-        duels_html_list = []
-        for d in known_duels:
-            res_icon = "🟢" if d.get("wins", 0) > d.get("losses", 0) else ("🔴" if d.get("wins", 0) < d.get("losses", 0) else "🟡")
-            duels_html_list.append(
-                f"<li style='margin-bottom: 5px; font-size: 0.76rem; color: #e2e8f0;'>"
-                f"• <strong>{html.escape(str(d.get('opponent', '')))}:</strong> "
-                f"{res_icon} <strong>{d.get('wins', 0)}-{d.get('losses', 0)}</strong> Siege "
-                f"<span style='color: #94a3b8;'>({html.escape(str(d.get('detail', '')))})</span></li>"
-            )
-        if unknown_cnt > 0:
-            duels_html_list.append(f"<li style='color: #64748b; font-size: 0.74rem; margin-top: 6px;'>• {unknown_cnt} weitere Konkurrenten: ⚪ Bisher keine direkten Duelle</li>")
-            
-        duels_rendered = "".join(duels_html_list) if duels_html_list else "<li style='color:#64748b;'>Keine bisherigen Duelle verzeichnet</li>"
-
-        radar_html = f"""
-        <details style="background: #141923; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; margin-top: 8px; margin-bottom: 6px; padding: 6px 10px; cursor: pointer;">
-            <summary style="font-size: 0.76rem; font-weight: 700; color: #94a3b8; outline: none; display: flex; justify-content: space-between; align-items: center; user-select: none;">
-                <span>👥 Gegner-Radar: {html.escape(str(analysis['event_name']))}</span>
-                <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px; {badge_style}">{html.escape(badge_text)}</span>
-            </summary>
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.06); font-size: 0.76rem; color: #cbd5e1; line-height: 1.4;">
-                <div style="margin-bottom: 6px;">
-                    🎯 <strong>Matchup-Faktor:</strong> {desc}<br>
-                    📊 <strong>Feld-Status:</strong> {level}
-                </div>
-                <div style="font-weight: 700; color: #38bdf8; margin-top: 6px; margin-bottom: 4px;">⚔️ Deine Head-to-Head Historie im Feld ({len(known_duels)} bekannte Duelle):</div>
-                <ul style="list-style-type: none; padding-left: 2px; margin: 0;">
-                    {duels_rendered}
-                </ul>
+        h2h_brief = f"{h2h_cnt} bekannte Duelle" if h2h_cnt > 0 else "⚪ Keine bisherigen Duelle"
+        
+        scouting_trigger_html = f"""
+        <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 8px 12px; margin-top: 8px; margin-bottom: 4px; font-size: 0.86rem; color: #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+            <div>
+                👥 <strong>Feld: {ev_name}</strong> ({t_count} Teams) &nbsp;•&nbsp; 
+                <span style="color:#94a3b8;">{html.escape(s_desc)}</span> &nbsp;•&nbsp; 
+                <strong>{html.escape(h2h_brief)}</strong>
             </div>
-        </details>
+        </div>
         """
 
     html_out = f"""
@@ -1063,11 +1078,17 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         {badges_html}
         {notes_html}
         {match_info_html}
-        {radar_html}
+        {scouting_trigger_html}
         {disciplines_html}
     </div>
     """
     st.markdown(clean_html(html_out), unsafe_allow_html=True)
+    
+    # Button zum Öffnen des Modal-Fensters
+    if isinstance(analysis, dict) and analysis.get("event_name") and dialog_decorator:
+        prefix = "past_" if is_past else ""
+        if st.button(f"🔍 Gegner-Scouting & Teilnehmerfeld ({analysis.get('event_name')})", key=f"btn_scout_{prefix}{item['id']}", use_container_width=True):
+            show_scouting_modal(item.get('title', 'Turnier'), analysis)
 
 
 # --- HILFSFUNKTION: ECHTE GESPIELTE TURNIERE IDENTIFIZIEREN (UNIFIED DATA) ---
@@ -1400,7 +1421,6 @@ def render_admin_editor(item, full_data, is_past=False):
         with st.expander("📝 Ausschreibungstext von turnier.de anzeigen", expanded=False):
             st.write(desc_text)
 
-    # Nur die persönliche Notiz ist direkt sichtbar
     with st.form(key=f"note_form_{prefix}{t_id}"):
         col_note_in, col_note_btn = st.columns([4, 1.2], vertical_alignment="bottom")
         with col_note_in:
@@ -1420,7 +1440,6 @@ def render_admin_editor(item, full_data, is_past=False):
                 st.toast("Notiz gespeichert!", icon="💾")
                 st.rerun()
 
-    # Zugeklappter Override für Sonderfälle mit 100% eindeutigen Schlüsseln
     with st.expander("🛠️ Manuelle Überschreibung / Korrektur (Optional)", expanded=False):
         st.caption("ℹ️ Der Scraper synchronisiert Meldungen, Partner, Spieltage und Ergebnisse automatisch von turnier.de. Hier kannst du bei Bedarf manuell eingreifen.")
         
@@ -1815,7 +1834,7 @@ elif data is not None:
                                     
                             with col_info:
                                 st.markdown(f"### {item['title']}")
-                                render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today)
+                                render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today, is_past=False)
                                 
                                 if IS_ADMIN:
                                     render_admin_editor(item, data, is_past=False)
@@ -1837,6 +1856,7 @@ elif data is not None:
                     current_month_str = ""
                     for idx, item in df_past.iterrows():
                         start_date = item['Start_Date_Obj']
+                        end_date = item['End_Date_Obj']
                         item_month_str = "Datum unbekannt" if pd.isnull(start_date) else f"{month_names[start_date.month]} {start_date.year}"
                         
                         if item_month_str != current_month_str:
@@ -1854,7 +1874,7 @@ elif data is not None:
                                     
                             with col_info:
                                 st.markdown(f"### {item['title']} *(Beendet)*")
-                                render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today)
+                                render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today, is_past=True)
                                 
                                 if IS_ADMIN:
                                     render_admin_editor(item, data, is_past=True)
