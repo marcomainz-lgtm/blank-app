@@ -2,8 +2,9 @@
   "Johannes Koppers": [
     {
       "opponent": "Johannes Koppers",
-      "competition": "Liga",
+      "competition": "Liga (Kreisklasse)",
       "discipline": "HE",
+      "league_tier": "Kreisklasse",
       "score": "17:21, 21:18, 12:21",
       "won": false
     }
@@ -11,8 +12,9 @@
   "Magnus Hubert": [
     {
       "opponent": "Magnus Hubert",
-      "competition": "Liga",
+      "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
+      "league_tier": "Kreisklasse",
       "score": "21:18, 19:21, 18:21",
       "won": false
     }
@@ -20,8 +22,9 @@
   "Martyn Okhrymenko": [
     {
       "opponent": "Martyn Okhrymenko",
-      "competition": "Liga",
+      "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
+      "league_tier": "Kreisklasse",
       "score": "21:18, 19:21, 18:21",
       "won": false
     }
@@ -29,15 +32,17 @@
   "Marcel Gutsch": [
     {
       "opponent": "Marcel Gutsch",
-      "competition": "Liga",
+      "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
+      "league_tier": "Kreisklasse",
       "score": "15:21, 11:21",
       "won": false
     },
     {
       "opponent": "Marcel Gutsch",
-      "competition": "Liga",
+      "competition": "Liga (Kreisklasse)",
       "discipline": "MX",
+      "league_tier": "Kreisklasse",
       "score": "8:21, 12:21",
       "won": false
     },
@@ -45,6 +50,7 @@
       "opponent": "Marcel Gutsch",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "9:21, 11:21",
       "won": false
     }
@@ -52,8 +58,9 @@
   "Dan Kai Tran": [
     {
       "opponent": "Dan Kai Tran",
-      "competition": "Liga",
+      "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
+      "league_tier": "Kreisklasse",
       "score": "15:21, 11:21",
       "won": false
     }
@@ -61,8 +68,9 @@
   "Charlotte Feisel": [
     {
       "opponent": "Charlotte Feisel",
-      "competition": "Liga",
+      "competition": "Liga (Kreisklasse)",
       "discipline": "MX",
+      "league_tier": "Kreisklasse",
       "score": "8:21, 12:21",
       "won": false
     }
@@ -70,8 +78,9 @@
   "Jonas Mähner": [
     {
       "opponent": "Jonas Mähner",
-      "competition": "Liga",
+      "competition": "Liga (Kreisliga)",
       "discipline": "HD",
+      "league_tier": "Kreisliga",
       "score": "19:21, 12:21",
       "won": false
     }
@@ -79,15 +88,17 @@
   "Benjamin Mühlenbeck": [
     {
       "opponent": "Benjamin Mühlenbeck",
-      "competition": "Liga",
+      "competition": "Liga (Kreisliga)",
       "discipline": "HD",
+      "league_tier": "Kreisliga",
       "score": "19:21, 12:21",
       "won": false
     },
     {
       "opponent": "Benjamin Mühlenbeck",
-      "competition": "Liga",
+      "competition": "Liga (Kreisliga)",
       "discipline": "HE",
+      "league_tier": "Kreisliga",
       "score": "13:21, 19:21",
       "won": false
     }
@@ -95,8 +106,9 @@
   "Marco Becker": [
     {
       "opponent": "Marco Becker",
-      "competition": "Liga",
+      "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
+      "league_tier": "Kreisklasse",
       "score": "13:21, 9:21",
       "won": false
     }
@@ -104,15 +116,17 @@
   "Kilian Birkhoven": [
     {
       "opponent": "Kilian Birkhoven",
-      "competition": "Liga",
+      "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
+      "league_tier": "Kreisklasse",
       "score": "13:21, 9:21",
       "won": false
     },
     {
       "opponent": "Kilian Birkhoven",
-      "competition": "Liga",
+      "competition": "Liga (Kreisklasse)",
       "discipline": "HE",
+      "league_tier": "Kreisklasse",
       "score": "8:21, 15:21",
       "won": false
     }
@@ -120,8 +134,9 @@
   "Jens Hilder": [
     {
       "opponent": "Jens Hilder",
-      "competition": "Liga",
+      "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
+      "league_tier": "Kreisklasse",
       "score": "21:13, 21:15",
       "won": true
     }
@@ -129,8 +144,9 @@
   "Marco Mönch": [
     {
       "opponent": "Marco Mönch",
-      "competition": "Liga",
+      "competition": "Liga (Kreisklasse)",
       "discipline": "HE",
+      "league_tier": "Kreisklasse",
       "score": "19:21, 16:21",
       "won": false
     }
@@ -138,8 +154,9 @@
   "Jan Thewald": [
     {
       "opponent": "Jan Thewald",
-      "competition": "Liga",
+      "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
+      "league_tier": "Kreisklasse",
       "score": "21:18, 21:16",
       "won": true
     }
@@ -147,8 +164,9 @@
   "Patrick Bogdon": [
     {
       "opponent": "Patrick Bogdon",
-      "competition": "Liga",
+      "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
+      "league_tier": "Kreisklasse",
       "score": "21:18, 21:16",
       "won": true
     }
@@ -156,8 +174,9 @@
   "Sergii Okhrymenko": [
     {
       "opponent": "Sergii Okhrymenko",
-      "competition": "Liga",
+      "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
+      "league_tier": "Kreisklasse",
       "score": "21:7, 21:11",
       "won": true
     }
@@ -165,8 +184,9 @@
   "Benedikt Chadaravicius": [
     {
       "opponent": "Benedikt Chadaravicius",
-      "competition": "Liga",
+      "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
+      "league_tier": "Kreisklasse",
       "score": "21:7, 21:11",
       "won": true
     }
@@ -176,6 +196,7 @@
       "opponent": "Viju Joseph",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "15:21, 16:21",
       "won": false
     },
@@ -183,6 +204,7 @@
       "opponent": "Viju Joseph",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "19:21, 12:21",
       "won": false
     }
@@ -192,6 +214,7 @@
       "opponent": "Mathew Paul",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "15:21, 16:21",
       "won": false
     },
@@ -199,6 +222,7 @@
       "opponent": "Mathew Paul",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "19:21, 12:21",
       "won": false
     }
@@ -208,6 +232,7 @@
       "opponent": "Vijay Kayala",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:17, 21:16",
       "won": true
     }
@@ -217,6 +242,7 @@
       "opponent": "Stoyan Tsonev",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:17, 21:16",
       "won": true
     }
@@ -226,6 +252,7 @@
       "opponent": "Jeremai Hose",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "20:22, 9:21",
       "won": false
     }
@@ -235,6 +262,7 @@
       "opponent": "Conrad Scheidweiler",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "20:22, 9:21",
       "won": false
     }
@@ -244,6 +272,7 @@
       "opponent": "Jannis Lisch",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:15, 21:8",
       "won": true
     }
@@ -253,6 +282,7 @@
       "opponent": "Linus Mikota",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:15, 21:8",
       "won": true
     }
@@ -262,6 +292,7 @@
       "opponent": "Rene Küpper",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:10, 21:12",
       "won": true
     }
@@ -271,6 +302,7 @@
       "opponent": "Christian Preuß",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:10, 21:12",
       "won": true
     }
@@ -280,6 +312,7 @@
       "opponent": "Waldemar Pazer",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:8, 21:10",
       "won": true
     }
@@ -289,6 +322,7 @@
       "opponent": "Artur Ratz",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:8, 21:10",
       "won": true
     }
@@ -298,6 +332,7 @@
       "opponent": "Detlef Ballsieper",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:7, 21:0",
       "won": true
     }
@@ -307,6 +342,7 @@
       "opponent": "Frank Ludwig",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:7, 21:0",
       "won": true
     }
@@ -316,6 +352,7 @@
       "opponent": "Ilias Boudelal",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "17:21, 14:21",
       "won": false
     }
@@ -325,6 +362,7 @@
       "opponent": "Jing-Yu Lu",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "17:21, 14:21",
       "won": false
     }
@@ -334,6 +372,7 @@
       "opponent": "Rafael Lotz",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:19, 21:15",
       "won": true
     }
@@ -343,6 +382,7 @@
       "opponent": "Ruben Schelenz",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:19, 21:15",
       "won": true
     }
@@ -352,6 +392,7 @@
       "opponent": "Maik Brod",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "7:21, 10:21",
       "won": false
     }
@@ -361,6 +402,7 @@
       "opponent": "Yifan Xu",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "7:21, 10:21",
       "won": false
     },
@@ -368,6 +410,7 @@
       "opponent": "Yifan Xu",
       "competition": "Turnier",
       "discipline": "MX",
+      "league_tier": "",
       "score": "14:21, 14:21",
       "won": false
     }
@@ -377,6 +420,7 @@
       "opponent": "Thorben Müller",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "15:21, 15:21",
       "won": false
     }
@@ -386,6 +430,7 @@
       "opponent": "Joris Töllner",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "15:21, 15:21",
       "won": false
     }
@@ -395,6 +440,7 @@
       "opponent": "Armin Görg",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "17:21, 19:21",
       "won": false
     }
@@ -404,6 +450,7 @@
       "opponent": "Joshua Heinzmann",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "17:21, 19:21",
       "won": false
     },
@@ -411,6 +458,7 @@
       "opponent": "Joshua Heinzmann",
       "competition": "Turnier",
       "discipline": "MX",
+      "league_tier": "",
       "score": "8:21, 13:21",
       "won": false
     }
@@ -420,6 +468,7 @@
       "opponent": "Fabian Duvenbeck",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:14, 22:20",
       "won": true
     }
@@ -429,6 +478,7 @@
       "opponent": "Lars Fischer",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:14, 22:20",
       "won": true
     }
@@ -438,6 +488,7 @@
       "opponent": "André Pyka",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:16, 21:17",
       "won": true
     }
@@ -447,6 +498,7 @@
       "opponent": "Mark Zöllner",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:16, 21:17",
       "won": true
     }
@@ -456,6 +508,7 @@
       "opponent": "Marcel Göckmann",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:12, 21:17",
       "won": true
     },
@@ -463,6 +516,7 @@
       "opponent": "Marcel Göckmann",
       "competition": "Turnier",
       "discipline": "MX",
+      "league_tier": "",
       "score": "14:21, 16:21",
       "won": false
     }
@@ -472,6 +526,7 @@
       "opponent": "Jan Jasdauskis",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:12, 21:17",
       "won": true
     }
@@ -481,6 +536,7 @@
       "opponent": "Tim Bunzel",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "10:21, 12:21",
       "won": false
     }
@@ -490,6 +546,7 @@
       "opponent": "Dirk Silinski",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "10:21, 12:21",
       "won": false
     }
@@ -499,6 +556,7 @@
       "opponent": "Qizhong Jiang",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "15:21, 18:21",
       "won": false
     }
@@ -508,6 +566,7 @@
       "opponent": "Stefan Reupert",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "15:21, 18:21",
       "won": false
     }
@@ -517,6 +576,7 @@
       "opponent": "Philip Ertel",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "6:21, 8:21",
       "won": false
     }
@@ -526,6 +586,7 @@
       "opponent": "Alexander Saretzki",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "6:21, 8:21",
       "won": false
     }
@@ -535,6 +596,7 @@
       "opponent": "Philip Heinrichs",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:18, 21:17",
       "won": true
     }
@@ -544,6 +606,7 @@
       "opponent": "Rolf Vogt",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:18, 21:17",
       "won": true
     }
@@ -553,6 +616,7 @@
       "opponent": "Oliver Vogt",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "9:21, 11:21",
       "won": false
     }
@@ -562,6 +626,7 @@
       "opponent": "Jan Ochoba",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "23:21, 21:19",
       "won": true
     }
@@ -571,6 +636,7 @@
       "opponent": "Kai Schalk",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "23:21, 21:19",
       "won": true
     }
@@ -580,6 +646,7 @@
       "opponent": "Pratheek Prakash Manangi",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "16:21, 15:21",
       "won": false
     }
@@ -589,6 +656,7 @@
       "opponent": "Deepak Venkanna",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "16:21, 15:21",
       "won": false
     }
@@ -598,6 +666,7 @@
       "opponent": "Noah Licht",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "10:21, 15:21",
       "won": false
     }
@@ -607,6 +676,7 @@
       "opponent": "Srinadh Vempati",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "10:21, 15:21",
       "won": false
     }
@@ -616,6 +686,7 @@
       "opponent": "Lennard Jacobi",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "14:21, 13:21",
       "won": false
     }
@@ -625,6 +696,7 @@
       "opponent": "Kurt Lennart Kunze",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "14:21, 13:21",
       "won": false
     }
@@ -634,6 +706,7 @@
       "opponent": "Laurin Verweyen",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "15:21, 13:21",
       "won": false
     }
@@ -643,6 +716,7 @@
       "opponent": "Ian Wilde",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "15:21, 13:21",
       "won": false
     }
@@ -652,6 +726,7 @@
       "opponent": "Dobrin Alexandroff",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "18:21, 18:21",
       "won": false
     }
@@ -661,6 +736,7 @@
       "opponent": "Ralf Walterscheidt",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "18:21, 18:21",
       "won": false
     }
@@ -670,6 +746,7 @@
       "opponent": "Nico Becker",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "12:21, 14:21",
       "won": false
     }
@@ -679,6 +756,7 @@
       "opponent": "Christopher Mayer",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "12:21, 14:21",
       "won": false
     }
@@ -688,6 +766,7 @@
       "opponent": "Etienne Rastoul",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:14, 21:14",
       "won": true
     }
@@ -697,6 +776,7 @@
       "opponent": "Pascal Rastoul",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:14, 21:14",
       "won": true
     }
@@ -706,6 +786,7 @@
       "opponent": "Claas Bruno Kaufmann",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "19:21, 24:26",
       "won": false
     }
@@ -715,6 +796,7 @@
       "opponent": "Malte Henrico Renneberg",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "19:21, 24:26",
       "won": false
     }
@@ -724,6 +806,7 @@
       "opponent": "Michael Hansen",
       "competition": "Turnier",
       "discipline": "MX",
+      "league_tier": "",
       "score": "11:21, 17:21",
       "won": false
     },
@@ -731,6 +814,7 @@
       "opponent": "Michael Hansen",
       "competition": "Turnier",
       "discipline": "HE",
+      "league_tier": "",
       "score": "13:21, 9:21",
       "won": false
     }
@@ -740,6 +824,7 @@
       "opponent": "Huyen Vu Ngoc",
       "competition": "Turnier",
       "discipline": "MX",
+      "league_tier": "",
       "score": "11:21, 17:21",
       "won": false
     }
@@ -749,6 +834,7 @@
       "opponent": "Martin Janorschke",
       "competition": "Turnier",
       "discipline": "MX",
+      "league_tier": "",
       "score": "7:21, 11:21",
       "won": false
     }
@@ -758,6 +844,7 @@
       "opponent": "Britta Matuschik",
       "competition": "Turnier",
       "discipline": "MX",
+      "league_tier": "",
       "score": "7:21, 11:21",
       "won": false
     }
@@ -767,6 +854,7 @@
       "opponent": "Angelina Carneim",
       "competition": "Turnier",
       "discipline": "MX",
+      "league_tier": "",
       "score": "14:21, 16:21",
       "won": false
     }
@@ -776,6 +864,7 @@
       "opponent": "Abhinav Jain",
       "competition": "Turnier",
       "discipline": "HE",
+      "league_tier": "",
       "score": "6:21, 11:21",
       "won": false
     },
@@ -783,6 +872,7 @@
       "opponent": "Abhinav Jain",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "10:21, 16:21",
       "won": false
     }
@@ -792,6 +882,7 @@
       "opponent": "Matthias Knaupp",
       "competition": "Turnier",
       "discipline": "HE",
+      "league_tier": "",
       "score": "21:19, 21:18",
       "won": true
     },
@@ -799,6 +890,7 @@
       "opponent": "Matthias Knaupp",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:0, 21:0",
       "won": true
     }
@@ -808,6 +900,7 @@
       "opponent": "Christian Kufeld",
       "competition": "Turnier",
       "discipline": "HE",
+      "league_tier": "",
       "score": "12:21, 12:21",
       "won": false
     }
@@ -817,6 +910,7 @@
       "opponent": "Sebastian Altenschmidt",
       "competition": "Turnier",
       "discipline": "HE",
+      "league_tier": "",
       "score": "16:21, 16:21",
       "won": false
     },
@@ -824,6 +918,7 @@
       "opponent": "Sebastian Altenschmidt",
       "competition": "Turnier",
       "discipline": "HE",
+      "league_tier": "",
       "score": "9:21, 17:21",
       "won": false
     }
@@ -833,6 +928,7 @@
       "opponent": "Kam-San Choi",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "13:21, 12:21",
       "won": false
     }
@@ -842,6 +938,7 @@
       "opponent": "Steven Tang",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "13:21, 12:21",
       "won": false
     }
@@ -851,6 +948,7 @@
       "opponent": "Dennis Grzanna",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:13, 21:11",
       "won": true
     }
@@ -860,6 +958,7 @@
       "opponent": "Eugen Lindt",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:13, 21:11",
       "won": true
     }
@@ -869,6 +968,7 @@
       "opponent": "Junhui Hu",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "11:21, 11:21",
       "won": false
     }
@@ -878,6 +978,7 @@
       "opponent": "Seng Hak Ngo",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "11:21, 11:21",
       "won": false
     }
@@ -887,6 +988,7 @@
       "opponent": "Thorsten Jansen",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "11:21, 13:21",
       "won": false
     }
@@ -896,6 +998,7 @@
       "opponent": "Kitti Yoosenat",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "11:21, 13:21",
       "won": false
     }
@@ -905,6 +1008,7 @@
       "opponent": "Parijat Raj",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "10:21, 16:21",
       "won": false
     }
@@ -914,6 +1018,7 @@
       "opponent": "Michael Kroes",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:19, 24:22",
       "won": true
     }
@@ -923,6 +1028,7 @@
       "opponent": "Marcel Schaefers",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:19, 24:22",
       "won": true
     }
@@ -932,6 +1038,7 @@
       "opponent": "Nils Reichardt",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "22:20, 21:11",
       "won": true
     }
@@ -941,6 +1048,7 @@
       "opponent": "Till Reichardt",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "22:20, 21:11",
       "won": true
     }
@@ -950,6 +1058,7 @@
       "opponent": "Rob Alamgir",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "8:21, 15:21",
       "won": false
     }
@@ -959,6 +1068,7 @@
       "opponent": "Sharath Nattoji",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "8:21, 15:21",
       "won": false
     }
@@ -968,6 +1078,7 @@
       "opponent": "Patrick Gemünden",
       "competition": "Turnier",
       "discipline": "MX",
+      "league_tier": "",
       "score": "12:21, 13:21",
       "won": false
     }
@@ -977,6 +1088,7 @@
       "opponent": "Sara Börding",
       "competition": "Turnier",
       "discipline": "MX",
+      "league_tier": "",
       "score": "12:21, 13:21",
       "won": false
     }
@@ -986,6 +1098,7 @@
       "opponent": "Martin Bauer",
       "competition": "Turnier",
       "discipline": "MX",
+      "league_tier": "",
       "score": "12:21, 16:21",
       "won": false
     }
@@ -995,6 +1108,7 @@
       "opponent": "Sandra Schönhofen",
       "competition": "Turnier",
       "discipline": "MX",
+      "league_tier": "",
       "score": "12:21, 16:21",
       "won": false
     }
@@ -1004,6 +1118,7 @@
       "opponent": "Marco Böning",
       "competition": "Turnier",
       "discipline": "HE",
+      "league_tier": "",
       "score": "7:21, 14:21",
       "won": false
     },
@@ -1011,6 +1126,7 @@
       "opponent": "Marco Böning",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "7:21, 7:21",
       "won": false
     }
@@ -1020,6 +1136,7 @@
       "opponent": "Marcel Hammes",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "10:21, 12:21",
       "won": false
     }
@@ -1029,6 +1146,7 @@
       "opponent": "Jonathan Middendorf",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "10:21, 12:21",
       "won": false
     }
@@ -1038,6 +1156,7 @@
       "opponent": "Simon Schreiner",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "5:21, 13:21",
       "won": false
     }
@@ -1047,6 +1166,7 @@
       "opponent": "Daniel Skoczowsky",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "5:21, 13:21",
       "won": false
     }
@@ -1056,6 +1176,7 @@
       "opponent": "Tim Dochtermann",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "2:21, 12:21",
       "won": false
     }
@@ -1065,6 +1186,7 @@
       "opponent": "Christoph Mölleken",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "2:21, 12:21",
       "won": false
     }
@@ -1074,6 +1196,7 @@
       "opponent": "Alea-Sophie Kurz",
       "competition": "Turnier",
       "discipline": "MX",
+      "league_tier": "",
       "score": "8:21, 13:21",
       "won": false
     }
@@ -1083,6 +1206,7 @@
       "opponent": "Xinru Guo",
       "competition": "Turnier",
       "discipline": "MX",
+      "league_tier": "",
       "score": "14:21, 14:21",
       "won": false
     }
@@ -1092,6 +1216,7 @@
       "opponent": "Alexander Soh Lee Wei",
       "competition": "Turnier",
       "discipline": "MX",
+      "league_tier": "",
       "score": "17:21, 7:21",
       "won": false
     }
@@ -1101,6 +1226,7 @@
       "opponent": "Jingyi Qu",
       "competition": "Turnier",
       "discipline": "MX",
+      "league_tier": "",
       "score": "17:21, 7:21",
       "won": false
     }
@@ -1110,6 +1236,7 @@
       "opponent": "Vinicius Martim",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "21:0, 21:0",
       "won": true
     }
@@ -1119,6 +1246,7 @@
       "opponent": "Oliver Krause",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "9:21, 11:21",
       "won": false
     }
@@ -1128,6 +1256,7 @@
       "opponent": "Jonas Lochowicz",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "9:21, 11:21",
       "won": false
     }
@@ -1137,6 +1266,7 @@
       "opponent": "Sören Baudach",
       "competition": "Turnier",
       "discipline": "HD",
+      "league_tier": "",
       "score": "7:21, 7:21",
       "won": false
     }
@@ -1146,6 +1276,7 @@
       "opponent": "Alexander Ott",
       "competition": "Turnier",
       "discipline": "HE",
+      "league_tier": "",
       "score": "7:21, 9:21",
       "won": false
     }
@@ -1155,6 +1286,7 @@
       "opponent": "Philipp Bartoschek",
       "competition": "Turnier",
       "discipline": "HE",
+      "league_tier": "",
       "score": "7:21, 8:21",
       "won": false
     }
@@ -1164,6 +1296,7 @@
       "opponent": "Karl Olschewski",
       "competition": "Turnier",
       "discipline": "HE",
+      "league_tier": "",
       "score": "21:13, 21:10",
       "won": true
     },
@@ -1171,6 +1304,7 @@
       "opponent": "Karl Olschewski",
       "competition": "Turnier",
       "discipline": "HE",
+      "league_tier": "",
       "score": "21:13, 21:13",
       "won": true
     }
@@ -1180,6 +1314,7 @@
       "opponent": "Max Zigman",
       "competition": "Turnier",
       "discipline": "HE",
+      "league_tier": "",
       "score": "18:21, 13:21",
       "won": false
     }
@@ -1189,6 +1324,7 @@
       "opponent": "Pascal Ziehe",
       "competition": "Turnier",
       "discipline": "HE",
+      "league_tier": "",
       "score": "17:21, 20:22",
       "won": false
     }
@@ -1198,6 +1334,7 @@
       "opponent": "Johnny Calero Gascon",
       "competition": "Turnier",
       "discipline": "HE",
+      "league_tier": "",
       "score": "21:19, 21:15",
       "won": true
     }
