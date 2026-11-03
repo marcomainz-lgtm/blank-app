@@ -1001,7 +1001,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         </div>
         """
 
-    # --- EINHEITLICHES DESKTOP-SCOUTING-MODUL ---
+    # --- EINHEITLICHES DESKTOP-SCOUTING-MODUL (6 SPALTEN, AUF VOLLER BREITE) ---
     analysis = item.get('field_analysis', {})
     scouting_html = ""
     
@@ -1012,13 +1012,14 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         h2h_cnt = len(analysis.get("known_duels", []))
         teams = analysis.get("teams", [])
         
-        h2h_badge_text = f"{h2h_cnt} Duelle bekannt" if h2h_cnt > 0 else "Keine bisherigen Duelle"
+        h2h_badge_text = f"{h2h_cnt} Duelle bekannt" if h2h_cnt > 0 else "Keine Vorbegegnungen"
         
         # HTML-Tabelle aller Teams
         team_rows = []
         for t in teams:
-            d_badge = str(t.get('danger_badge') or t.get('danger') or "⚪ Ungesetzt")
-            danger_color = "#38bdf8"
+            d_badge = str(t.get('danger_badge') or t.get('danger') or "⚪ Unbeschriebenes Blatt")
+            
+            danger_color = "#94a3b8"
             if "👑" in d_badge: danger_color = "#fbbf24"
             elif "🔴" in d_badge: danger_color = "#f87171"
             elif "🟢" in d_badge: danger_color = "#4ade80"
@@ -1026,6 +1027,10 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             
             seed_val = str(t.get('seed', '')).strip()
             seed_disp = f"<strong>[{html.escape(seed_val)}]</strong>" if seed_val else "-"
+            
+            opp_rec = str(t.get('record', '-')).strip()
+            rec_disp = f"<span style='color:#e2e8f0; font-weight:600;'>{html.escape(opp_rec)}</span>" if opp_rec != "-" else "<span style='color:#64748b;'>-</span>"
+            
             h2h_val = str(t.get('h2h_str', '-')).strip()
             h2h_disp = f"<strong style='color:#e2e8f0;'>{html.escape(h2h_val)}</strong>" if h2h_val != "-" else "<span style='color:#64748b;'>-</span>"
             
@@ -1034,6 +1039,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                 <td style="padding: 8px 10px; font-weight: 700; color: #f8fafc;">{html.escape(str(t.get('names', 'Unbekannt')))}</td>
                 <td style="padding: 8px 10px; color: #94a3b8;">{html.escape(str(t.get('club', '-')))}</td>
                 <td style="padding: 8px 10px; color: #cbd5e1; text-align: center;">{seed_disp}</td>
+                <td style="padding: 8px 10px; color: #cbd5e1; text-align: center;">{rec_disp}</td>
                 <td style="padding: 8px 10px; color: #cbd5e1; text-align: center;">{h2h_disp}</td>
                 <td style="padding: 8px 10px; color: {danger_color}; font-weight: 700;">
                     {html.escape(d_badge)}
@@ -1041,7 +1047,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             </tr>
             """)
             
-        teams_tbody = "".join(team_rows) if team_rows else "<tr><td colspan='5' style='padding:8px; color:#64748b;'>Keine Teams erfasst</td></tr>"
+        teams_tbody = "".join(team_rows) if team_rows else "<tr><td colspan='6' style='padding:8px; color:#64748b;'>Keine Teams erfasst</td></tr>"
 
         scouting_html = f"""
         <details style="background: #141923; border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 8px; margin-top: 10px; margin-bottom: 8px; padding: 7px 12px; cursor: pointer;">
@@ -1061,6 +1067,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                             <th style="padding: 6px 10px;">Paarung / Spieler</th>
                             <th style="padding: 6px 10px;">Verein</th>
                             <th style="padding: 6px 10px; text-align: center;">Setzplatz</th>
+                            <th style="padding: 6px 10px; text-align: center;">Gegner-Bilanz</th>
                             <th style="padding: 6px 10px; text-align: center;">H2H gegen dich</th>
                             <th style="padding: 6px 10px;">Einstufung</th>
                         </tr>

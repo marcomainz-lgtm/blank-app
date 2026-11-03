@@ -38,17 +38,27 @@ IGNORE_OPPONENT_WORDS = {
     'club', 'team', 'punkte', 'setzplatz', 'seed', 'court', 'feld', 'runde',
     'hd', 'he', 'mx', 'dd', 'de', 'herrendoppel', 'herreneinzel', 'mixed',
     'damendoppel', 'dameneinzel', 'turnier', 'meisterschaft', 'liga', 'bezirksklasse',
-    'kreisliga', 'bezirksliga', 'landesliga', 'verbandsliga', 'nrw', 'export calendar', 'h2h'
+    'kreisliga', 'bezirksliga', 'landesliga', 'verbandsliga', 'nrw', 'export calendar', 'h2h',
+    'playoff', 'nachrückerliste'
 }
 
 
+def clean_player_name(raw_name):
+    """Entfernt Länderkürzel wie [GER], [IND] und bereinigt Whitespace."""
+    if not raw_name:
+        return ""
+    name = re.sub(r'\[[A-Za-z]{2,4}\]\s*', '', raw_name).strip()
+    return name
+
+
 def is_real_player_name(name):
-    if not name or len(name) < 4:
+    c_name = clean_player_name(name)
+    if not c_name or len(c_name) < 4:
         return False
-    n_low = name.lower()
+    n_low = c_name.lower()
     if any(re.search(rf'\b{w}\b', n_low) for w in IGNORE_OPPONENT_WORDS):
         return False
-    if any(p.search(name) for p in PLAYER_CONFIG["patterns"]):
+    if any(p.search(c_name) for p in PLAYER_CONFIG["patterns"]):
         return False
     return True
 
@@ -205,9 +215,15 @@ def harvest_opponent_history(session):
                         elif any(k in match_code for k in ['GD', 'MX', 'MIXED']): disc = "MX"
                         
                         opp_td = tds[3] if in_t2 else tds[5]
-                        opp_links = [a.get_text().strip() for a in opp_td.find_all('a') if 'player.aspx' in a.get('href', '').lower()]
+                        opp_links = [clean_player_name(a.get_text().strip()) for a in opp_td.find_all('a') if 'player.aspx' in a.get('href', '').lower()]
                         opponents = [n for n in opp_links if is_real_player_name(n)]
                         
+                        # Verein des gegnerischen Teams aus dem Link ziehen
+                        opp_team_name = ""
+                        tm_link = opp_td.find('a', href=re.compile(r'team', re.I))
+                        if tm_link:
+                            opp_team_name = re.sub(r'\s*\d+$', '', tm_link.get_text().strip())
+
                         set_pairs = re.findall(r'(\d{1,2})\s*-\s*(\d{1,2})', score_text)
                         my_sets = 0
                         opp_sets = 0
@@ -223,7 +239,6 @@ def harvest_opponent_history(session):
                         won = (my_sets > opp_sets)
                         score_str = ", ".join(formatted_sets)
                         
-                        # Liga-Stufe ermitteln (Bezirksklasse, Kreisliga etc.)
                         l_tier = "Kreisklasse"
                         if "bezirksliga" in league_name.lower(): l_tier = "Bezirksliga"
                         elif "bezirksklasse" in league_name.lower(): l_tier = "Bezirksklasse"
@@ -241,6 +256,7 @@ def harvest_opponent_history(session):
                                 "competition": f"Liga ({l_tier})",
                                 "discipline": disc,
                                 "league_tier": l_tier,
+                                "club": opp_team_name,
                                 "score": score_str,
                                 "won": won
                             })
@@ -268,7 +284,7 @@ def harvest_opponent_history(session):
                             if ' L ' in my_row_txt:
                                 won = False
                             
-                            opp_links = [a.get_text().strip() for a in opp_row.find_all('a') if is_real_player_name(a.get_text().strip())]
+                            opp_links = [clean_player_name(a.get_text().strip()) for a in opp_row.find_all('a') if is_real_player_name(a.get_text().strip())]
                             score_str = clean_badminton_scores(txt, won)
 
                             if not score_str or len(score_str.split(':')) < 2:
@@ -293,6 +309,7 @@ def harvest_opponent_history(session):
                                     "competition": "Turnier",
                                     "discipline": disc,
                                     "league_tier": "",
+                                    "club": "",
                                     "score": core_score,
                                     "won": won
                                 })
@@ -302,7 +319,7 @@ def harvest_opponent_history(session):
     return history
 
 
-# --- GEWICHTETES SCOUTING- & AMPEL-MODELL ---
+# --- DYNAMISCHES EVENT-, GEGNER- & NIVEAU-SCRAPING ---
 
 def check_player_subpages(session, t_id, existing_entry, opp_history=None):
     if not opp_history or not isinstance(opp_history, dict):
@@ -336,7 +353,7 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None):
                     for tr in soup_ev.find_all('tr'):
                         tr_txt = tr.get_text(separator=' | ')
                         if any(p.search(tr_txt) for p in PLAYER_CONFIG["patterns"]):
-                            p_links = [a.get_text().strip() for a in tr.find_all('a', href=re.compile(r'player', re.I))]
+                            p_links = [clean_player_name(a.get_text().strip()) for a in tr.find_all('a', href=re.compile(r'player', re.I))]
                             partner_cands = [n for n in p_links if is_real_player_name(n)]
                             found_partner = partner_cands[0] if partner_cands else ""
                             
@@ -354,54 +371,73 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None):
                                 if field_name: updates["field_mx"] = field_name
                                 if found_partner: updates["partner_mx"] = found_partner
 
-                    # 2. ALLE GEMELDETEN TEAMS ERFASSEN & GEWICHTETEN SCORE BERECHNEN
+                    # 2. AUSSCHLIESSLICH DIE ECHTE STARTERLISTE AUSLESEN (Keine Playoff-Duplikate!)
+                    tables = soup_ev.find_all('table')
+                    target_table = None
+                    for tbl in tables:
+                        h_txt = tbl.get_text().lower()
+                        if 'spieler' in h_txt:
+                            target_table = tbl
+                            break
+                    if not target_table and len(tables) >= 2:
+                        target_table = tables[1]
+                    elif not target_table and tables:
+                        target_table = tables[0]
+
                     raw_teams = []
+                    seen_team_keys = set()
                     seeds_count = 0
-                    all_field_opponents = []
 
-                    for tr in soup_ev.find_all('tr'):
-                        t_txt = tr.get_text(separator=' | ')
-                        p_links = [a.get_text().strip() for a in tr.find_all('a', href=re.compile(r'player', re.I))]
-                        player_names = [pl for pl in p_links if is_real_player_name(pl) or any(p.search(pl) for p in PLAYER_CONFIG["patterns"])]
-                        
-                        if not player_names:
-                            continue
-                            
-                        is_my_team = any(any(p.search(pl) for p in PLAYER_CONFIG["patterns"]) for pl in player_names)
-                        
-                        seed_m = re.search(r'\[(\d+(?:/\d+)?)\]', t_txt)
-                        seed_str = seed_m.group(1) if seed_m else ""
-                        if seed_str:
-                            seeds_count += 1
-                            
-                        parts = [p.strip() for p in t_txt.split('|') if p.strip()]
-                        club_candidates = [p for p in parts if len(p) > 3 and not re.search(r'\[|\b(?:starterliste|status)\b', p, re.I) and p not in player_names]
-                        team_club = club_candidates[0] if club_candidates else ""
-
-                        team_opponents = [pl for pl in player_names if not any(p.search(pl) for p in PLAYER_CONFIG["patterns"]) and pl != updates.get("partner_hd") and pl != updates.get("partner_mx")]
-                        for opp in team_opponents:
-                            if opp not in all_field_opponents:
-                                all_field_opponents.append(opp)
+                    if target_table:
+                        for tr in target_table.find_all('tr'):
+                            tds = tr.find_all('td')
+                            if len(tds) >= 2:
+                                status_txt = tds[0].get_text().strip().lower()
                                 
-                        if not is_my_team and team_opponents:
-                            raw_teams.append({
-                                "players": team_opponents,
-                                "names": " / ".join(team_opponents),
-                                "club": team_club,
-                                "seed": seed_str
-                            })
+                                # STRIKTER FILTER: Nur echte Starterliste!
+                                if 'starterliste' not in status_txt:
+                                    continue
+                                
+                                p_links = [clean_player_name(a.get_text().strip()) for a in tds[1].find_all('a', href=re.compile(r'player', re.I))]
+                                player_names = [pl for pl in p_links if is_real_player_name(pl) or any(p.search(pl) for p in PLAYER_CONFIG["patterns"])]
+                                
+                                if not player_names:
+                                    continue
+                                    
+                                team_key = tuple(sorted(player_names))
+                                if team_key in seen_team_keys:
+                                    continue
+                                seen_team_keys.add(team_key)
+                                
+                                is_my_team = any(any(p.search(pl) for p in PLAYER_CONFIG["patterns"]) for pl in player_names)
+                                
+                                seed_str = ""
+                                if len(tds) >= 3:
+                                    seed_raw = tds[2].get_text().strip()
+                                    seed_str = re.sub(r'\[|\]', '', seed_raw).strip()
+                                if seed_str:
+                                    seeds_count += 1
 
-                    # --- GEWICHTETES SCORING-MODELL PRO TEAM ---
+                                team_opponents = [pl for pl in player_names if not any(p.search(pl) for p in PLAYER_CONFIG["patterns"]) and pl != updates.get("partner_hd") and pl != updates.get("partner_mx")]
+                                
+                                if not is_my_team and team_opponents:
+                                    raw_teams.append({
+                                        "players": team_opponents,
+                                        "names": " / ".join(team_opponents),
+                                        "seed": seed_str
+                                    })
+
+                    # 3. GEWICHTETES SCORING (GENAU 1 TOP-FAVORIT 👑)
                     scored_teams = []
                     overall_h2h_wins = 0
                     overall_h2h_losses = 0
                     known_duels_summary = []
 
                     for t_item in raw_teams:
-                        score = 25  # Basiswert
-                        reasons = []
+                        score = 20
                         h2h_matches = []
                         detected_leagues = set()
+                        detected_clubs = set()
 
                         for opp in t_item["players"]:
                             if opp in opp_history:
@@ -409,8 +445,10 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None):
                                     h2h_matches.append(m)
                                     if m.get("league_tier"):
                                         detected_leagues.add(m["league_tier"])
+                                    if m.get("club"):
+                                        detected_clubs.add(m["club"])
 
-                        # A) FAKTOR 1: H2H GEGEN MARCO (Höchste Gewichtung: max. ±40 Pkt)
+                        # H2H Einfluss (Höchste Prio: bis zu ±40 Pkt)
                         team_wins = sum(1 for m in h2h_matches if m["won"])
                         team_losses = len(h2h_matches) - team_wins
                         overall_h2h_wins += team_wins
@@ -433,91 +471,63 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None):
 
                             if team_losses > team_wins:
                                 score += 35
-                                reasons.append(f"Angstgegner ({team_wins}S / {team_losses}N)")
                             elif team_wins > team_losses:
-                                score -= 20
-                                reasons.append(f"Bisher im Vorteil ({team_wins}S / {team_losses}N)")
+                                score -= 25
                             else:
                                 score += 5
-                                reasons.append(f"Ausgeglichen ({team_wins}S / {team_losses}N)")
 
-                        # B) FAKTOR 2: SETZPLATZ & ERFOLGE (Gewichtung: max. 30 Pkt)
+                        # Setzplatz (bis zu +30 Pkt)
                         if t_item["seed"] == "1":
                             score += 30
-                            reasons.append("Top-Favorit (Gesetzt [1])")
                         elif t_item["seed"] == "2":
                             score += 24
-                            reasons.append("Gesetzt [2]")
                         elif t_item["seed"] in ["3", "4", "3/4"]:
                             score += 18
-                            reasons.append(f"Gesetzt [{t_item['seed']}]")
                         elif t_item["seed"]:
                             score += 10
-                            reasons.append(f"Gesetzt [{t_item['seed']}]")
 
-                        # C) FAKTOR 3: LIGA / SPIELKLASSE (Gewichtung: max. 20 Pkt)
-                        league_str = ", ".join(detected_leagues) if detected_leagues else ""
-                        if any("landesliga" in l.lower() for l in detected_leagues):
-                            score += 20
-                            reasons.append("Liga: Landesliga")
-                        elif any("bezirksliga" in l.lower() for l in detected_leagues):
-                            score += 16
-                            reasons.append("Liga: Bezirksliga")
-                        elif any("bezirksklasse" in l.lower() for l in detected_leagues):
-                            score += 12
-                            reasons.append("Liga: Bezirksklasse")
-                        elif any("kreisliga" in l.lower() for l in detected_leagues):
-                            score += 6
-                            reasons.append("Liga: Kreisliga")
+                        # Liga-Niveau (bis zu +20 Pkt)
+                        if any("landesliga" in l.lower() for l in detected_leagues): score += 20
+                        elif any("bezirksliga" in l.lower() for l in detected_leagues): score += 16
+                        elif any("bezirksklasse" in l.lower() for l in detected_leagues): score += 12
+                        elif any("kreisliga" in l.lower() for l in detected_leagues): score += 6
 
-                        # Score begrenzen
                         final_score = max(5, min(99, score))
-                        reason_text = " • ".join(reasons) if reasons else "Ungesetzt • Keine Vorbegegnungen"
+                        club_str = ", ".join(detected_clubs) if detected_clubs else "-"
+
+                        # Gegner-Bilanz (W-L) aus den erfassten Spielen
+                        total_opp_matches = len(h2h_matches)
+                        opp_record_str = f"{team_losses}-{team_wins}" if total_opp_matches > 0 else "-"
 
                         scored_teams.append({
                             "names": t_item["names"],
-                            "club": t_item["club"] or "-",
+                            "club": club_str,
                             "seed": t_item["seed"],
-                            "league": league_str or "-",
+                            "record": opp_record_str,
                             "h2h_str": h2h_str or "-",
                             "threat_score": final_score,
-                            "reason": reason_text,
-                            "danger_badge": ""  # Wird nach Sortierung gesetzt
+                            "has_h2h_loss": (team_losses > team_wins),
+                            "has_h2h_win": (team_wins > team_losses),
+                            "danger_badge": ""
                         })
 
-                    # Teams nach Stärke sortieren
+                    # Teams nach Score sortieren
                     scored_teams.sort(key=lambda x: x["threat_score"], reverse=True)
 
-                    # Einstufungen vergeben: GENAU EIN TOP-FAVORIT!
+                    # TRENNSCHARFE EINSTUFUNG: GENAU 1 TOP-FAVORIT!
                     for idx, st_team in enumerate(scored_teams):
-                        if idx == 0 and (st_team["threat_score"] >= 50 or st_team["seed"] == "1"):
+                        if idx == 0 and (st_team["threat_score"] >= 45 or st_team["seed"] in ["1", "2"]):
                             st_team["danger_badge"] = "👑 Top-Favorit"
-                        elif st_team["threat_score"] >= 55:
-                            st_team["danger_badge"] = "🔴 Gefährlich"
-                        elif st_team["threat_score"] >= 40:
-                            st_team["danger_badge"] = "🟡 Ausgeglichen"
-                        elif "Bisher im Vorteil" in st_team["reason"]:
-                            st_team["danger_badge"] = "🟢 Gute Chance"
-                        elif st_team["threat_score"] < 40:
-                            st_team["danger_badge"] = "🟢 Machbar"
+                        elif st_team["has_h2h_loss"]:
+                            st_team["danger_badge"] = "🔴 Angstgegner"
+                        elif st_team["has_h2h_win"]:
+                            st_team["danger_badge"] = "🟢 Bisher geschlagen"
+                        elif st_team["threat_score"] >= 35 or st_team["seed"]:
+                            st_team["danger_badge"] = "🟡 Offenes Duell"
                         else:
-                            st_team["danger_badge"] = "⚪ Unbekannt"
+                            st_team["danger_badge"] = "⚪ Unbeschriebenes Blatt"
 
-                    # Matchup-Zusammenfassung
-                    if not known_duels_summary:
-                        matchup_badge = "⚪ Unbekanntes Feld"
-                        matchup_desc = "Noch keine bisherigen Duelle"
-                    elif overall_h2h_wins > overall_h2h_losses:
-                        matchup_badge = "🟢 Günstig"
-                        matchup_desc = f"{overall_h2h_wins} Siege / {overall_h2h_losses} Niederlagen"
-                    elif overall_h2h_wins == overall_h2h_losses:
-                        matchup_badge = "🟡 Ausgeglichen"
-                        matchup_desc = f"{overall_h2h_wins} Siege / {overall_h2h_losses} Niederlagen"
-                    else:
-                        matchup_badge = "🔴 Schwer"
-                        matchup_desc = f"{overall_h2h_wins} Siege / {overall_h2h_losses} Niederlagen"
-
-                    top_fav_name = scored_teams[0]["names"] if scored_teams else "Offen"
+                    top_fav_name = scored_teams[0]["names"] if (scored_teams and "👑" in scored_teams[0]["danger_badge"]) else "Ausgeglichen"
                     teams_total = len(scored_teams) + (1 if updates.get("registered") else 0)
 
                     updates["field_analysis"] = {
@@ -525,8 +535,6 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None):
                         "teams_count": teams_total,
                         "seeds_count": seeds_count,
                         "top_favorite": top_fav_name,
-                        "matchup_badge": matchup_badge,
-                        "matchup_desc": matchup_desc,
                         "known_duels": known_duels_summary,
                         "teams": scored_teams
                     }
@@ -535,7 +543,7 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None):
                     for tr in soup_ev.find_all('tr'):
                         tr_txt = tr.get_text(separator=' ')
                         if any(p.search(tr_txt) for p in PLAYER_CONFIG["patterns"]):
-                            p_links = [a.get_text().strip() for a in tr.find_all('a', href=re.compile(r'player', re.I))]
+                            p_links = [clean_player_name(a.get_text().strip()) for a in tr.find_all('a', href=re.compile(r'player', re.I))]
                             cur_partner = updates.get("partner_hd") or updates.get("partner_mx") or existing_entry.get("partner_hd", "")
                             opponents = [n for n in p_links if is_real_player_name(n) and n != cur_partner]
                             

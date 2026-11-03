@@ -5,6 +5,7 @@
       "competition": "Liga (Kreisklasse)",
       "discipline": "HE",
       "league_tier": "Kreisklasse",
+      "club": "OSC Düsseldorf",
       "score": "17:21, 21:18, 12:21",
       "won": false
     }
@@ -15,6 +16,7 @@
       "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
       "league_tier": "Kreisklasse",
+      "club": "Vohwinkeler STV",
       "score": "21:18, 19:21, 18:21",
       "won": false
     }
@@ -25,6 +27,7 @@
       "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
       "league_tier": "Kreisklasse",
+      "club": "Vohwinkeler STV",
       "score": "21:18, 19:21, 18:21",
       "won": false
     }
@@ -35,6 +38,7 @@
       "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
       "league_tier": "Kreisklasse",
+      "club": "TSV Hochdahl",
       "score": "15:21, 11:21",
       "won": false
     },
@@ -43,6 +47,7 @@
       "competition": "Liga (Kreisklasse)",
       "discipline": "MX",
       "league_tier": "Kreisklasse",
+      "club": "TSV Hochdahl",
       "score": "8:21, 12:21",
       "won": false
     },
@@ -51,6 +56,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "9:21, 11:21",
       "won": false
     }
@@ -61,6 +67,7 @@
       "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
       "league_tier": "Kreisklasse",
+      "club": "TSV Hochdahl",
       "score": "15:21, 11:21",
       "won": false
     }
@@ -71,6 +78,7 @@
       "competition": "Liga (Kreisklasse)",
       "discipline": "MX",
       "league_tier": "Kreisklasse",
+      "club": "TSV Hochdahl",
       "score": "8:21, 12:21",
       "won": false
     }
@@ -81,6 +89,7 @@
       "competition": "Liga (Kreisliga)",
       "discipline": "HD",
       "league_tier": "Kreisliga",
+      "club": "BC Burg",
       "score": "19:21, 12:21",
       "won": false
     }
@@ -91,6 +100,7 @@
       "competition": "Liga (Kreisliga)",
       "discipline": "HD",
       "league_tier": "Kreisliga",
+      "club": "BC Burg",
       "score": "19:21, 12:21",
       "won": false
     },
@@ -99,6 +109,7 @@
       "competition": "Liga (Kreisliga)",
       "discipline": "HE",
       "league_tier": "Kreisliga",
+      "club": "BC Burg",
       "score": "13:21, 19:21",
       "won": false
     }
@@ -109,6 +120,7 @@
       "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
       "league_tier": "Kreisklasse",
+      "club": "TSV Hochdahl",
       "score": "13:21, 9:21",
       "won": false
     }
@@ -119,6 +131,7 @@
       "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
       "league_tier": "Kreisklasse",
+      "club": "TSV Hochdahl",
       "score": "13:21, 9:21",
       "won": false
     },
@@ -127,6 +140,7 @@
       "competition": "Liga (Kreisklasse)",
       "discipline": "HE",
       "league_tier": "Kreisklasse",
+      "club": "TSV Hochdahl",
       "score": "8:21, 15:21",
       "won": false
     }
@@ -137,6 +151,7 @@
       "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
       "league_tier": "Kreisklasse",
+      "club": "OSC Düsseldorf",
       "score": "21:13, 21:15",
       "won": true
     }
@@ -147,6 +162,7 @@
       "competition": "Liga (Kreisklasse)",
       "discipline": "HE",
       "league_tier": "Kreisklasse",
+      "club": "SG Zons",
       "score": "19:21, 16:21",
       "won": false
     }
@@ -157,6 +173,7 @@
       "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
       "league_tier": "Kreisklasse",
+      "club": "SG Zons",
       "score": "21:18, 21:16",
       "won": true
     }
@@ -167,6 +184,7 @@
       "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
       "league_tier": "Kreisklasse",
+      "club": "SG Zons",
       "score": "21:18, 21:16",
       "won": true
     }
@@ -177,6 +195,7 @@
       "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
       "league_tier": "Kreisklasse",
+      "club": "Vohwinkeler STV",
       "score": "21:7, 21:11",
       "won": true
     }
@@ -187,6 +206,7 @@
       "competition": "Liga (Kreisklasse)",
       "discipline": "HD",
       "league_tier": "Kreisklasse",
+      "club": "Vohwinkeler STV",
       "score": "21:7, 21:11",
       "won": true
     }
@@ -197,6 +217,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "15:21, 16:21",
       "won": false
     },
@@ -205,6 +226,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "19:21, 12:21",
       "won": false
     }
@@ -215,6 +237,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "15:21, 16:21",
       "won": false
     },
@@ -223,6 +246,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "19:21, 12:21",
       "won": false
     }
@@ -233,6 +257,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:17, 21:16",
       "won": true
     }
@@ -243,6 +268,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:17, 21:16",
       "won": true
     }
@@ -253,6 +279,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "20:22, 9:21",
       "won": false
     }
@@ -263,6 +290,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "20:22, 9:21",
       "won": false
     }
@@ -273,6 +301,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:15, 21:8",
       "won": true
     }
@@ -283,6 +312,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:15, 21:8",
       "won": true
     }
@@ -293,6 +323,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:10, 21:12",
       "won": true
     }
@@ -303,6 +334,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:10, 21:12",
       "won": true
     }
@@ -313,6 +345,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:8, 21:10",
       "won": true
     }
@@ -323,6 +356,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:8, 21:10",
       "won": true
     }
@@ -333,6 +367,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:7, 21:0",
       "won": true
     }
@@ -343,6 +378,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:7, 21:0",
       "won": true
     }
@@ -353,6 +389,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "17:21, 14:21",
       "won": false
     }
@@ -363,6 +400,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "17:21, 14:21",
       "won": false
     }
@@ -373,6 +411,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:19, 21:15",
       "won": true
     }
@@ -383,6 +422,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:19, 21:15",
       "won": true
     }
@@ -393,6 +433,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "7:21, 10:21",
       "won": false
     }
@@ -403,6 +444,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "7:21, 10:21",
       "won": false
     },
@@ -411,6 +453,7 @@
       "competition": "Turnier",
       "discipline": "MX",
       "league_tier": "",
+      "club": "",
       "score": "14:21, 14:21",
       "won": false
     }
@@ -421,6 +464,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "15:21, 15:21",
       "won": false
     }
@@ -431,6 +475,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "15:21, 15:21",
       "won": false
     }
@@ -441,6 +486,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "17:21, 19:21",
       "won": false
     }
@@ -451,6 +497,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "17:21, 19:21",
       "won": false
     },
@@ -459,6 +506,7 @@
       "competition": "Turnier",
       "discipline": "MX",
       "league_tier": "",
+      "club": "",
       "score": "8:21, 13:21",
       "won": false
     }
@@ -469,6 +517,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:14, 22:20",
       "won": true
     }
@@ -479,6 +528,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:14, 22:20",
       "won": true
     }
@@ -489,6 +539,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:16, 21:17",
       "won": true
     }
@@ -499,6 +550,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:16, 21:17",
       "won": true
     }
@@ -509,6 +561,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:12, 21:17",
       "won": true
     },
@@ -517,6 +570,7 @@
       "competition": "Turnier",
       "discipline": "MX",
       "league_tier": "",
+      "club": "",
       "score": "14:21, 16:21",
       "won": false
     }
@@ -527,6 +581,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:12, 21:17",
       "won": true
     }
@@ -537,6 +592,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "10:21, 12:21",
       "won": false
     }
@@ -547,6 +603,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "10:21, 12:21",
       "won": false
     }
@@ -557,6 +614,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "15:21, 18:21",
       "won": false
     }
@@ -567,6 +625,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "15:21, 18:21",
       "won": false
     }
@@ -577,6 +636,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "6:21, 8:21",
       "won": false
     }
@@ -587,6 +647,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "6:21, 8:21",
       "won": false
     }
@@ -597,6 +658,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:18, 21:17",
       "won": true
     }
@@ -607,6 +669,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:18, 21:17",
       "won": true
     }
@@ -617,6 +680,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "9:21, 11:21",
       "won": false
     }
@@ -627,6 +691,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "23:21, 21:19",
       "won": true
     }
@@ -637,6 +702,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "23:21, 21:19",
       "won": true
     }
@@ -647,6 +713,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "16:21, 15:21",
       "won": false
     }
@@ -657,6 +724,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "16:21, 15:21",
       "won": false
     }
@@ -667,6 +735,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "10:21, 15:21",
       "won": false
     }
@@ -677,6 +746,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "10:21, 15:21",
       "won": false
     }
@@ -687,6 +757,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "14:21, 13:21",
       "won": false
     }
@@ -697,6 +768,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "14:21, 13:21",
       "won": false
     }
@@ -707,6 +779,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "15:21, 13:21",
       "won": false
     }
@@ -717,6 +790,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "15:21, 13:21",
       "won": false
     }
@@ -727,6 +801,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "18:21, 18:21",
       "won": false
     }
@@ -737,6 +812,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "18:21, 18:21",
       "won": false
     }
@@ -747,6 +823,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "12:21, 14:21",
       "won": false
     }
@@ -757,6 +834,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "12:21, 14:21",
       "won": false
     }
@@ -767,6 +845,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:14, 21:14",
       "won": true
     }
@@ -777,6 +856,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:14, 21:14",
       "won": true
     }
@@ -787,6 +867,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "19:21, 24:26",
       "won": false
     }
@@ -797,6 +878,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "19:21, 24:26",
       "won": false
     }
@@ -807,6 +889,7 @@
       "competition": "Turnier",
       "discipline": "MX",
       "league_tier": "",
+      "club": "",
       "score": "11:21, 17:21",
       "won": false
     },
@@ -815,6 +898,7 @@
       "competition": "Turnier",
       "discipline": "HE",
       "league_tier": "",
+      "club": "",
       "score": "13:21, 9:21",
       "won": false
     }
@@ -825,6 +909,7 @@
       "competition": "Turnier",
       "discipline": "MX",
       "league_tier": "",
+      "club": "",
       "score": "11:21, 17:21",
       "won": false
     }
@@ -835,6 +920,7 @@
       "competition": "Turnier",
       "discipline": "MX",
       "league_tier": "",
+      "club": "",
       "score": "7:21, 11:21",
       "won": false
     }
@@ -845,6 +931,7 @@
       "competition": "Turnier",
       "discipline": "MX",
       "league_tier": "",
+      "club": "",
       "score": "7:21, 11:21",
       "won": false
     }
@@ -855,6 +942,7 @@
       "competition": "Turnier",
       "discipline": "MX",
       "league_tier": "",
+      "club": "",
       "score": "14:21, 16:21",
       "won": false
     }
@@ -865,6 +953,7 @@
       "competition": "Turnier",
       "discipline": "HE",
       "league_tier": "",
+      "club": "",
       "score": "6:21, 11:21",
       "won": false
     },
@@ -873,6 +962,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "10:21, 16:21",
       "won": false
     }
@@ -883,6 +973,7 @@
       "competition": "Turnier",
       "discipline": "HE",
       "league_tier": "",
+      "club": "",
       "score": "21:19, 21:18",
       "won": true
     },
@@ -891,6 +982,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:0, 21:0",
       "won": true
     }
@@ -901,6 +993,7 @@
       "competition": "Turnier",
       "discipline": "HE",
       "league_tier": "",
+      "club": "",
       "score": "12:21, 12:21",
       "won": false
     }
@@ -911,6 +1004,7 @@
       "competition": "Turnier",
       "discipline": "HE",
       "league_tier": "",
+      "club": "",
       "score": "16:21, 16:21",
       "won": false
     },
@@ -919,6 +1013,7 @@
       "competition": "Turnier",
       "discipline": "HE",
       "league_tier": "",
+      "club": "",
       "score": "9:21, 17:21",
       "won": false
     }
@@ -929,6 +1024,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "13:21, 12:21",
       "won": false
     }
@@ -939,6 +1035,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "13:21, 12:21",
       "won": false
     }
@@ -949,6 +1046,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:13, 21:11",
       "won": true
     }
@@ -959,6 +1057,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:13, 21:11",
       "won": true
     }
@@ -969,6 +1068,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "11:21, 11:21",
       "won": false
     }
@@ -979,6 +1079,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "11:21, 11:21",
       "won": false
     }
@@ -989,6 +1090,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "11:21, 13:21",
       "won": false
     }
@@ -999,6 +1101,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "11:21, 13:21",
       "won": false
     }
@@ -1009,6 +1112,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "10:21, 16:21",
       "won": false
     }
@@ -1019,6 +1123,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:19, 24:22",
       "won": true
     }
@@ -1029,6 +1134,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:19, 24:22",
       "won": true
     }
@@ -1039,6 +1145,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "22:20, 21:11",
       "won": true
     }
@@ -1049,6 +1156,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "22:20, 21:11",
       "won": true
     }
@@ -1059,6 +1167,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "8:21, 15:21",
       "won": false
     }
@@ -1069,6 +1178,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "8:21, 15:21",
       "won": false
     }
@@ -1079,6 +1189,7 @@
       "competition": "Turnier",
       "discipline": "MX",
       "league_tier": "",
+      "club": "",
       "score": "12:21, 13:21",
       "won": false
     }
@@ -1089,6 +1200,7 @@
       "competition": "Turnier",
       "discipline": "MX",
       "league_tier": "",
+      "club": "",
       "score": "12:21, 13:21",
       "won": false
     }
@@ -1099,6 +1211,7 @@
       "competition": "Turnier",
       "discipline": "MX",
       "league_tier": "",
+      "club": "",
       "score": "12:21, 16:21",
       "won": false
     }
@@ -1109,6 +1222,7 @@
       "competition": "Turnier",
       "discipline": "MX",
       "league_tier": "",
+      "club": "",
       "score": "12:21, 16:21",
       "won": false
     }
@@ -1119,6 +1233,7 @@
       "competition": "Turnier",
       "discipline": "HE",
       "league_tier": "",
+      "club": "",
       "score": "7:21, 14:21",
       "won": false
     },
@@ -1127,6 +1242,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "7:21, 7:21",
       "won": false
     }
@@ -1137,6 +1253,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "10:21, 12:21",
       "won": false
     }
@@ -1147,6 +1264,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "10:21, 12:21",
       "won": false
     }
@@ -1157,6 +1275,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "5:21, 13:21",
       "won": false
     }
@@ -1167,6 +1286,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "5:21, 13:21",
       "won": false
     }
@@ -1177,6 +1297,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "2:21, 12:21",
       "won": false
     }
@@ -1187,6 +1308,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "2:21, 12:21",
       "won": false
     }
@@ -1197,6 +1319,7 @@
       "competition": "Turnier",
       "discipline": "MX",
       "league_tier": "",
+      "club": "",
       "score": "8:21, 13:21",
       "won": false
     }
@@ -1207,6 +1330,7 @@
       "competition": "Turnier",
       "discipline": "MX",
       "league_tier": "",
+      "club": "",
       "score": "14:21, 14:21",
       "won": false
     }
@@ -1217,6 +1341,7 @@
       "competition": "Turnier",
       "discipline": "MX",
       "league_tier": "",
+      "club": "",
       "score": "17:21, 7:21",
       "won": false
     }
@@ -1227,6 +1352,7 @@
       "competition": "Turnier",
       "discipline": "MX",
       "league_tier": "",
+      "club": "",
       "score": "17:21, 7:21",
       "won": false
     }
@@ -1237,6 +1363,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "21:0, 21:0",
       "won": true
     }
@@ -1247,6 +1374,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "9:21, 11:21",
       "won": false
     }
@@ -1257,6 +1385,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "9:21, 11:21",
       "won": false
     }
@@ -1267,6 +1396,7 @@
       "competition": "Turnier",
       "discipline": "HD",
       "league_tier": "",
+      "club": "",
       "score": "7:21, 7:21",
       "won": false
     }
@@ -1277,6 +1407,7 @@
       "competition": "Turnier",
       "discipline": "HE",
       "league_tier": "",
+      "club": "",
       "score": "7:21, 9:21",
       "won": false
     }
@@ -1287,6 +1418,7 @@
       "competition": "Turnier",
       "discipline": "HE",
       "league_tier": "",
+      "club": "",
       "score": "7:21, 8:21",
       "won": false
     }
@@ -1297,6 +1429,7 @@
       "competition": "Turnier",
       "discipline": "HE",
       "league_tier": "",
+      "club": "",
       "score": "21:13, 21:10",
       "won": true
     },
@@ -1305,6 +1438,7 @@
       "competition": "Turnier",
       "discipline": "HE",
       "league_tier": "",
+      "club": "",
       "score": "21:13, 21:13",
       "won": true
     }
@@ -1315,6 +1449,7 @@
       "competition": "Turnier",
       "discipline": "HE",
       "league_tier": "",
+      "club": "",
       "score": "18:21, 13:21",
       "won": false
     }
@@ -1325,6 +1460,7 @@
       "competition": "Turnier",
       "discipline": "HE",
       "league_tier": "",
+      "club": "",
       "score": "17:21, 20:22",
       "won": false
     }
@@ -1335,6 +1471,7 @@
       "competition": "Turnier",
       "discipline": "HE",
       "league_tier": "",
+      "club": "",
       "score": "21:19, 21:15",
       "won": true
     }
