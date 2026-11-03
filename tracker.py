@@ -190,6 +190,7 @@ def harvest_opponent_history(session):
                     tds = tr.find_all('td')
                     if len(tds) >= 7:
                         match_code = tds[1].get_text().strip().upper()
+                        league_name = tds[2].get_text().strip()
                         t1_text = tds[3].get_text(separator=' ')
                         t2_text = tds[5].get_text(separator=' ')
                         score_text = tds[6].get_text().strip()
@@ -222,6 +223,13 @@ def harvest_opponent_history(session):
                         won = (my_sets > opp_sets)
                         score_str = ", ".join(formatted_sets)
                         
+                        # Liga-Stufe ermitteln (Bezirksklasse, Kreisliga etc.)
+                        l_tier = "Kreisklasse"
+                        if "bezirksliga" in league_name.lower(): l_tier = "Bezirksliga"
+                        elif "bezirksklasse" in league_name.lower(): l_tier = "Bezirksklasse"
+                        elif "kreisliga" in league_name.lower(): l_tier = "Kreisliga"
+                        elif "landesliga" in league_name.lower(): l_tier = "Landesliga"
+
                         for opp in opponents:
                             sig = (opp, disc, score_str)
                             if sig in seen_matches:
@@ -230,8 +238,9 @@ def harvest_opponent_history(session):
                             
                             history.setdefault(opp, []).append({
                                 "opponent": opp,
-                                "competition": "Liga",
+                                "competition": f"Liga ({l_tier})",
                                 "discipline": disc,
+                                "league_tier": l_tier,
                                 "score": score_str,
                                 "won": won
                             })
@@ -283,6 +292,7 @@ def harvest_opponent_history(session):
                                     "opponent": opp,
                                     "competition": "Turnier",
                                     "discipline": disc,
+                                    "league_tier": "",
                                     "score": core_score,
                                     "won": won
                                 })
@@ -291,6 +301,8 @@ def harvest_opponent_history(session):
             
     return history
 
+
+# --- GEWICHTETES SCOUTING- & AMPEL-MODELL ---
 
 def check_player_subpages(session, t_id, existing_entry, opp_history=None):
     if not opp_history or not isinstance(opp_history, dict):
@@ -342,16 +354,13 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None):
                                 if field_name: updates["field_mx"] = field_name
                                 if found_partner: updates["partner_mx"] = found_partner
 
-                    # 2. TEILNEHMER-SCOUTING & AMPEL-SYSTEM PRO TEAM
-                    teams = []
+                    # 2. ALLE GEMELDETEN TEAMS ERFASSEN & GEWICHTETEN SCORE BERECHNEN
+                    raw_teams = []
                     seeds_count = 0
-                    known_duels = []
-                    total_wins = 0
-                    total_losses = 0
+                    all_field_opponents = []
 
                     for tr in soup_ev.find_all('tr'):
                         t_txt = tr.get_text(separator=' | ')
-                        # Echte Starterzeilen haben meist Spieler-Links
                         p_links = [a.get_text().strip() for a in tr.find_all('a', href=re.compile(r'player', re.I))]
                         player_names = [pl for pl in p_links if is_real_player_name(pl) or any(p.search(pl) for p in PLAYER_CONFIG["patterns"])]
                         
@@ -360,94 +369,166 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None):
                             
                         is_my_team = any(any(p.search(pl) for p in PLAYER_CONFIG["patterns"]) for pl in player_names)
                         
-                        # Setzplatz ermitteln ([1], [2], [3/4] etc.)
                         seed_m = re.search(r'\[(\d+(?:/\d+)?)\]', t_txt)
                         seed_str = seed_m.group(1) if seed_m else ""
                         if seed_str:
                             seeds_count += 1
                             
-                        # Verein ermitteln (aus Textteilen)
                         parts = [p.strip() for p in t_txt.split('|') if p.strip()]
                         club_candidates = [p for p in parts if len(p) > 3 and not re.search(r'\[|\b(?:starterliste|status)\b', p, re.I) and p not in player_names]
                         team_club = club_candidates[0] if club_candidates else ""
 
-                        # H2H gegen dieses Team prüfen
                         team_opponents = [pl for pl in player_names if not any(p.search(pl) for p in PLAYER_CONFIG["patterns"]) and pl != updates.get("partner_hd") and pl != updates.get("partner_mx")]
-                        
-                        team_h2h = []
-                        team_danger = "⚪ Neu"
-                        
                         for opp in team_opponents:
-                            if opp in opp_history:
-                                matches_vs = opp_history[opp]
-                                wins = sum(1 for m in matches_vs if m["won"])
-                                losses = len(matches_vs) - wins
-                                total_wins += wins
-                                total_losses += losses
+                            if opp not in all_field_opponents:
+                                all_field_opponents.append(opp)
                                 
-                                scores_list = [m['score'] for m in matches_vs if m.get('score')]
-                                last_disc = matches_vs[0]['discipline']
-                                last_comp = matches_vs[0]['competition']
-                                score_preview = "; ".join(scores_list[:2]) if scores_list else ""
-                                detail_str = f"{score_preview} ({last_disc}, {last_comp})" if score_preview else f"{last_disc}, {last_comp}"
-                                
-                                h2h_item = {
-                                    "opponent": opp,
-                                    "wins": wins,
-                                    "losses": losses,
-                                    "detail": detail_str
-                                }
-                                team_h2h.append(h2h_item)
-                                if h2h_item not in known_duels:
-                                    known_duels.append(h2h_item)
-
-                        # Ampel-Einstufung für das gegnerische Team
-                        if not is_my_team:
-                            if seed_str in ['1', '2', '3', '4', '3/4'] or any(d['losses'] > d['wins'] for d in team_h2h):
-                                team_danger = "🔴 Top-Favorit"
-                            elif any(d['wins'] > d['losses'] for d in team_h2h):
-                                team_danger = "🟢 Gute Chance"
-                            elif any(d['wins'] == d['losses'] for d in team_h2h):
-                                team_danger = "🟡 Ausgeglichen"
-                            elif seed_str:
-                                team_danger = "🔴 Gesetztes Team"
-                            else:
-                                team_danger = "⚪ Ungesetzt / Neu"
-                                
-                            teams.append({
-                                "names": " / ".join(player_names),
+                        if not is_my_team and team_opponents:
+                            raw_teams.append({
+                                "players": team_opponents,
+                                "names": " / ".join(team_opponents),
                                 "club": team_club,
-                                "seed": seed_str,
-                                "danger": team_danger,
-                                "h2h": team_h2h
+                                "seed": seed_str
                             })
 
-                    # Matchup-Zusammenfassung (ohne Text-Wiederholungen!)
-                    if not known_duels:
-                        matchup_badge = "⚪ Unbekanntes Feld"
-                        matchup_desc = "Bisher keine direkten Duelle"
-                    elif total_wins > total_losses:
-                        matchup_badge = "🟢 Günstiges Feld"
-                        matchup_desc = f"{total_wins}S / {total_losses}N gegen {len(known_duels)} Konkurrenten"
-                    elif total_wins == total_losses:
-                        matchup_badge = "🟡 Ausgeglichen"
-                        matchup_desc = f"{total_wins}S / {total_losses}N gegen {len(known_duels)} Konkurrenten"
-                    else:
-                        matchup_badge = "🔴 Schweres Pflaster"
-                        matchup_desc = f"{total_wins}S / {total_losses}N gegen {len(known_duels)} Konkurrenten"
+                    # --- GEWICHTETES SCORING-MODELL PRO TEAM ---
+                    scored_teams = []
+                    overall_h2h_wins = 0
+                    overall_h2h_losses = 0
+                    known_duels_summary = []
 
-                    teams_count = len(teams) + (1 if updates.get("registered") else 0)
-                    seed_desc = f"{seeds_count} gesetzte Favoriten" if seeds_count > 0 else "Keine Setzplätze vergeben"
+                    for t_item in raw_teams:
+                        score = 25  # Basiswert
+                        reasons = []
+                        h2h_matches = []
+                        detected_leagues = set()
+
+                        for opp in t_item["players"]:
+                            if opp in opp_history:
+                                for m in opp_history[opp]:
+                                    h2h_matches.append(m)
+                                    if m.get("league_tier"):
+                                        detected_leagues.add(m["league_tier"])
+
+                        # A) FAKTOR 1: H2H GEGEN MARCO (Höchste Gewichtung: max. ±40 Pkt)
+                        team_wins = sum(1 for m in h2h_matches if m["won"])
+                        team_losses = len(h2h_matches) - team_wins
+                        overall_h2h_wins += team_wins
+                        overall_h2h_losses += team_losses
+
+                        h2h_str = ""
+                        if len(h2h_matches) > 0:
+                            last_m = h2h_matches[0]
+                            score_disp = f" ({last_m['score']})" if last_m.get('score') else ""
+                            h2h_str = f"{team_wins}-{team_losses}{score_disp}"
+                            
+                            h2h_item_summary = {
+                                "opponent": t_item["names"],
+                                "wins": team_wins,
+                                "losses": team_losses,
+                                "detail": f"{last_m.get('score', '')} ({last_m.get('discipline', '')}, {last_m.get('competition', '')})"
+                            }
+                            if h2h_item_summary not in known_duels_summary:
+                                known_duels_summary.append(h2h_item_summary)
+
+                            if team_losses > team_wins:
+                                score += 35
+                                reasons.append(f"Angstgegner ({team_wins}S / {team_losses}N)")
+                            elif team_wins > team_losses:
+                                score -= 20
+                                reasons.append(f"Bisher im Vorteil ({team_wins}S / {team_losses}N)")
+                            else:
+                                score += 5
+                                reasons.append(f"Ausgeglichen ({team_wins}S / {team_losses}N)")
+
+                        # B) FAKTOR 2: SETZPLATZ & ERFOLGE (Gewichtung: max. 30 Pkt)
+                        if t_item["seed"] == "1":
+                            score += 30
+                            reasons.append("Top-Favorit (Gesetzt [1])")
+                        elif t_item["seed"] == "2":
+                            score += 24
+                            reasons.append("Gesetzt [2]")
+                        elif t_item["seed"] in ["3", "4", "3/4"]:
+                            score += 18
+                            reasons.append(f"Gesetzt [{t_item['seed']}]")
+                        elif t_item["seed"]:
+                            score += 10
+                            reasons.append(f"Gesetzt [{t_item['seed']}]")
+
+                        # C) FAKTOR 3: LIGA / SPIELKLASSE (Gewichtung: max. 20 Pkt)
+                        league_str = ", ".join(detected_leagues) if detected_leagues else ""
+                        if any("landesliga" in l.lower() for l in detected_leagues):
+                            score += 20
+                            reasons.append("Liga: Landesliga")
+                        elif any("bezirksliga" in l.lower() for l in detected_leagues):
+                            score += 16
+                            reasons.append("Liga: Bezirksliga")
+                        elif any("bezirksklasse" in l.lower() for l in detected_leagues):
+                            score += 12
+                            reasons.append("Liga: Bezirksklasse")
+                        elif any("kreisliga" in l.lower() for l in detected_leagues):
+                            score += 6
+                            reasons.append("Liga: Kreisliga")
+
+                        # Score begrenzen
+                        final_score = max(5, min(99, score))
+                        reason_text = " • ".join(reasons) if reasons else "Ungesetzt • Keine Vorbegegnungen"
+
+                        scored_teams.append({
+                            "names": t_item["names"],
+                            "club": t_item["club"] or "-",
+                            "seed": t_item["seed"],
+                            "league": league_str or "-",
+                            "h2h_str": h2h_str or "-",
+                            "threat_score": final_score,
+                            "reason": reason_text,
+                            "danger_badge": ""  # Wird nach Sortierung gesetzt
+                        })
+
+                    # Teams nach Stärke sortieren
+                    scored_teams.sort(key=lambda x: x["threat_score"], reverse=True)
+
+                    # Einstufungen vergeben: GENAU EIN TOP-FAVORIT!
+                    for idx, st_team in enumerate(scored_teams):
+                        if idx == 0 and (st_team["threat_score"] >= 50 or st_team["seed"] == "1"):
+                            st_team["danger_badge"] = "👑 Top-Favorit"
+                        elif st_team["threat_score"] >= 55:
+                            st_team["danger_badge"] = "🔴 Gefährlich"
+                        elif st_team["threat_score"] >= 40:
+                            st_team["danger_badge"] = "🟡 Ausgeglichen"
+                        elif "Bisher im Vorteil" in st_team["reason"]:
+                            st_team["danger_badge"] = "🟢 Gute Chance"
+                        elif st_team["threat_score"] < 40:
+                            st_team["danger_badge"] = "🟢 Machbar"
+                        else:
+                            st_team["danger_badge"] = "⚪ Unbekannt"
+
+                    # Matchup-Zusammenfassung
+                    if not known_duels_summary:
+                        matchup_badge = "⚪ Unbekanntes Feld"
+                        matchup_desc = "Noch keine bisherigen Duelle"
+                    elif overall_h2h_wins > overall_h2h_losses:
+                        matchup_badge = "🟢 Günstig"
+                        matchup_desc = f"{overall_h2h_wins} Siege / {overall_h2h_losses} Niederlagen"
+                    elif overall_h2h_wins == overall_h2h_losses:
+                        matchup_badge = "🟡 Ausgeglichen"
+                        matchup_desc = f"{overall_h2h_wins} Siege / {overall_h2h_losses} Niederlagen"
+                    else:
+                        matchup_badge = "🔴 Schwer"
+                        matchup_desc = f"{overall_h2h_wins} Siege / {overall_h2h_losses} Niederlagen"
+
+                    top_fav_name = scored_teams[0]["names"] if scored_teams else "Offen"
+                    teams_total = len(scored_teams) + (1 if updates.get("registered") else 0)
 
                     updates["field_analysis"] = {
                         "event_name": event_name,
-                        "teams_count": teams_count,
+                        "teams_count": teams_total,
                         "seeds_count": seeds_count,
-                        "seed_desc": seed_desc,
+                        "top_favorite": top_fav_name,
                         "matchup_badge": matchup_badge,
                         "matchup_desc": matchup_desc,
-                        "known_duels": known_duels,
-                        "teams": teams
+                        "known_duels": known_duels_summary,
+                        "teams": scored_teams
                     }
 
                     # Nächstes / Letztes Spiel
@@ -805,7 +886,6 @@ def check_for_updates_generator():
                     
             known_tournaments[t_id] = old_t
 
-    # Auch bereits in der DB gemeldete Turniere (wie Niederrhein Cup) mit frischem H2H versorgen
     for t_id, t_item in known_tournaments.items():
         if t_item.get('registered'):
             sub_up = check_player_subpages(session, t_id, t_item, opp_history)

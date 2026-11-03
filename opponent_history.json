@@ -126,6 +126,15 @@
       "won": true
     }
   ],
+  "Marco Mönch": [
+    {
+      "opponent": "Marco Mönch",
+      "competition": "Liga",
+      "discipline": "HE",
+      "score": "19:21, 16:21",
+      "won": false
+    }
+  ],
   "Jan Thewald": [
     {
       "opponent": "Jan Thewald",
@@ -142,15 +151,6 @@
       "discipline": "HD",
       "score": "21:18, 21:16",
       "won": true
-    }
-  ],
-  "Marco Mönch": [
-    {
-      "opponent": "Marco Mönch",
-      "competition": "Liga",
-      "discipline": "HE",
-      "score": "19:21, 16:21",
-      "won": false
     }
   ],
   "Sergii Okhrymenko": [

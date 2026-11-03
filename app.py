@@ -672,53 +672,6 @@ def can_still_register(item, vacation_dates, occupied_dates):
     return False
 
 
-# --- MODAL-DIALOG FÜR GEGNER-SCOUTING (POP-UP) ---
-dialog_decorator = getattr(st, "dialog", getattr(st, "experimental_dialog", None))
-
-if dialog_decorator:
-    @dialog_decorator("👥 Gegner-Scouting & Teilnehmerfeld")
-    def show_scouting_modal(t_title, analysis):
-        ev_name = analysis.get("event_name", "Konkurrenz")
-        teams = analysis.get("teams", [])
-        seeds_count = analysis.get("seeds_count", 0)
-        matchup_badge = analysis.get("matchup_badge", "⚪ Unbekannt")
-        matchup_desc = analysis.get("matchup_desc", "")
-        
-        st.markdown(f"### {t_title}")
-        st.markdown(f"**Disziplin:** `{ev_name}` &nbsp;•&nbsp; **Gemeldete Teams:** `{len(teams)}` &nbsp;•&nbsp; **Gesetzte Favoriten:** `{seeds_count}`")
-        
-        st.markdown("---")
-        st.markdown(f"**🎯 Dein Matchup-Status:** **{matchup_badge}** ({matchup_desc})")
-        
-        # Bekannte H2H Duelle hervorheben
-        known_duels = analysis.get("known_duels", [])
-        if known_duels:
-            st.markdown("#### ⚔️ Deine bisherigen Duelle im Feld:")
-            for d in known_duels:
-                icon = "🟢" if d["wins"] > d["losses"] else ("🔴" if d["wins"] < d["losses"] else "🟡")
-                st.markdown(f"- {icon} **{d['opponent']}**: **{d['wins']}-{d['losses']} Siege** *({d['detail']})*")
-            st.write("")
-
-        # Vollständige Ampel-Übersicht aller gemeldeten Teams
-        st.markdown("#### 📋 Alle gemeldeten Teams (Scouting-Ampel):")
-        
-        col_hdr1, col_hdr2, col_hdr3 = st.columns([4, 3, 2.5])
-        with col_hdr1: st.caption("**Paarung / Spieler**")
-        with col_hdr2: st.caption("**Verein**")
-        with col_hdr3: st.caption("**Einstufung / Setzplatz**")
-        
-        for team in teams:
-            c1, c2, c3 = st.columns([4, 3, 2.5])
-            with c1:
-                st.markdown(f"**{team['names']}**")
-            with c2:
-                st.write(team['club'] if team['club'] else "-")
-            with c3:
-                seed_tag = f" `[{team['seed']}]`" if team['seed'] else ""
-                st.markdown(f"{team['danger']}{seed_tag}")
-            st.divider()
-
-
 def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation_notes, today, is_past=False):
     raw_city = str(item.get('city', 'Unbekannt'))
     city = html.escape(raw_city)
@@ -922,7 +875,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         else:
             mx_status_text = "🔒 Feld voll"
             mx_status_class = "conflict"
-            mx_class = "has-conflict"
+            hd_class = "has-conflict"
     else:
         dt_mx = get_date_for_weekday(day_mx, start_date_obj, end_date_obj)
         if dt_mx and dt_mx in vacation_dates:
@@ -1049,27 +1002,74 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         </div>
         """
 
-    # --- KOMPAKTE, LESBARE RADAR-ZEILE AUF DER KACHEL (OHNE REDUNDANZEN) ---
+    # --- EINHEITLICHES, BREITES SCOUTING-MODUL (DIREKT AUFKLAPPBAR AUF VOLLER BREITE) ---
     analysis = item.get('field_analysis', {})
-    scouting_trigger_html = ""
+    scouting_html = ""
     
     if isinstance(analysis, dict) and analysis.get("event_name"):
         ev_name = html.escape(str(analysis.get('event_name', '')))
         t_count = analysis.get("teams_count", len(analysis.get("teams", [])))
-        badge = analysis.get("matchup_badge", "⚪ Unbekannt")
-        s_desc = analysis.get("seed_desc", "")
+        top_fav = html.escape(str(analysis.get("top_favorite", "Offen")))
         h2h_cnt = len(analysis.get("known_duels", []))
+        teams = analysis.get("teams", [])
         
-        h2h_brief = f"{h2h_cnt} bekannte Duelle" if h2h_cnt > 0 else "⚪ Keine bisherigen Duelle"
+        h2h_badge_text = f"{h2h_cnt} Duelle bekannt" if h2h_cnt > 0 else "Keine Vorbegegnungen"
         
-        scouting_trigger_html = f"""
-        <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 8px 12px; margin-top: 8px; margin-bottom: 4px; font-size: 0.86rem; color: #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-            <div>
-                👥 <strong>Feld: {ev_name}</strong> ({t_count} Teams) &nbsp;•&nbsp; 
-                <span style="color:#94a3b8;">{html.escape(s_desc)}</span> &nbsp;•&nbsp; 
-                <strong>{html.escape(h2h_brief)}</strong>
+        # HTML-Tabelle aller Teams
+        team_rows = []
+        for t in teams:
+            danger_color = "#38bdf8"
+            if "👑" in t['danger_badge']: danger_color = "#fbbf24"
+            elif "🔴" in t['danger_badge']: danger_color = "#f87171"
+            elif "🟢" in t['danger_badge']: danger_color = "#4ade80"
+            elif "🟡" in t['danger_badge']: danger_color = "#fde047"
+            
+            seed_disp = f"<strong>[{html.escape(t['seed'])}]</strong>" if t['seed'] else "-"
+            h2h_disp = f"<strong style='color:#e2e8f0;'>{html.escape(t['h2h_str'])}</strong>" if t['h2h_str'] != "-" else "<span style='color:#64748b;'>-</span>"
+            
+            team_rows.append(f"""
+            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.06); font-size: 0.84rem;">
+                <td style="padding: 7px 8px; font-weight: 700; color: #f8fafc;">{html.escape(t['names'])}</td>
+                <td style="padding: 7px 8px; color: #94a3b8;">{html.escape(t['club'])}</td>
+                <td style="padding: 7px 8px; color: #cbd5e1; text-align: center;">{seed_disp}</td>
+                <td style="padding: 7px 8px; color: #cbd5e1; text-align: center;">{h2h_disp}</td>
+                <td style="padding: 7px 8px; color: {danger_color}; font-weight: 700;">
+                    {html.escape(t['danger_badge'])} 
+                    <span style="font-size:0.75rem; color:#94a3b8; font-weight:normal; margin-left:4px;">({html.escape(t['reason'])})</span>
+                </td>
+            </tr>
+            """)
+            
+        teams_tbody = "".join(team_rows) if team_rows else "<tr><td colspan='5' style='padding:8px; color:#64748b;'>Keine Teams erfasst</td></tr>"
+
+        scouting_html = f"""
+        <details style="background: #141923; border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 8px; margin-top: 10px; margin-bottom: 8px; padding: 7px 12px; cursor: pointer;">
+            <summary style="font-size: 0.88rem; font-weight: 700; color: #f8fafc; outline: none; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+                <div>
+                    👥 <strong>Gegner-Scouting: {ev_name}</strong> ({t_count} Teams) &nbsp;•&nbsp; 
+                    <span style="color: #fbbf24; font-weight: 600;">👑 Favorit: {top_fav}</span> &nbsp;•&nbsp; 
+                    <span style="color: #94a3b8; font-weight: 500;">🎯 {h2h_badge_text}</span>
+                </div>
+                <div style="font-size: 0.78rem; color: #38bdf8; font-weight: 600;">Scouting-Tabelle öffnen ▾</div>
+            </summary>
+            
+            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08); overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: 'Inter', sans-serif;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.12); font-size: 0.78rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px;">
+                            <th style="padding: 6px 8px;">Paarung / Spieler</th>
+                            <th style="padding: 6px 8px;">Verein</th>
+                            <th style="padding: 6px 8px; text-align: center;">Setzplatz</th>
+                            <th style="padding: 6px 8px; text-align: center;">H2H gegen dich</th>
+                            <th style="padding: 6px 8px;">Einstufung & Begründung</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {teams_tbody}
+                    </tbody>
+                </table>
             </div>
-        </div>
+        </details>
         """
 
     html_out = f"""
@@ -1077,17 +1077,11 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         {badges_html}
         {notes_html}
         {match_info_html}
-        {scouting_trigger_html}
+        {scouting_html}
         {disciplines_html}
     </div>
     """
     st.markdown(clean_html(html_out), unsafe_allow_html=True)
-    
-    # Button zum Öffnen des Modal-Fensters
-    if isinstance(analysis, dict) and analysis.get("event_name") and dialog_decorator:
-        prefix = "past_" if is_past else ""
-        if st.button(f"🔍 Gegner-Scouting & Teilnehmerfeld ({analysis.get('event_name')})", key=f"btn_scout_{prefix}{item['id']}", use_container_width=True):
-            show_scouting_modal(item.get('title', 'Turnier'), analysis)
 
 
 # --- HILFSFUNKTION: ECHTE GESPIELTE TURNIERE IDENTIFIZIEREN (UNIFIED DATA) ---
@@ -1727,7 +1721,7 @@ elif data is not None:
                         })
 
         try:
-            today = datetime.datetime.now(ZoneInfo("Europe/Berlin")).date()
+            today = datetime.date.today()
         except Exception:
             today = datetime.date.today()
 
