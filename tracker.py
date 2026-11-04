@@ -667,8 +667,20 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                             "danger_badge": team_badge
                         })
 
-                    # Teams nach Score sortieren
-                    scored_teams.sort(key=lambda x: x["threat_score"], reverse=True)
+                    # Teams nach Score und Karriere-Siegen sortieren (Hansen mit 298 Siegen zieht auf Platz 1)
+                    def get_team_sorting_weight(team_item):
+                        score = team_item.get("threat_score", 0)
+                        career_wins = 0
+                        for p in team_item.get("players_info", []):
+                            rec = p.get("record", "0:0")
+                            if ":" in rec:
+                                try:
+                                    career_wins += int(rec.split(":")[0])
+                                except ValueError:
+                                    pass
+                        return (score + career_wins, career_wins)
+
+                    scored_teams.sort(key=get_team_sorting_weight, reverse=True)
 
                     # GENAU 1 TOP-FAVORIT!
                     if scored_teams and (scored_teams[0]["threat_score"] >= 45 or scored_teams[0]["seed"] in ["1", "2"]):
