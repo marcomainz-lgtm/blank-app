@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 NTFY_TOPIC = "my_badminton_tournaments_40764_v2" 
 DB_FILE = "known_tournaments.json"
 OPPONENTS_FILE = "opponent_history.json"
+PLAYER_RECORDS_FILE = "player_records.json"
 
 UUID_PATTERN = re.compile(r'([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})')
 
@@ -44,11 +45,9 @@ IGNORE_OPPONENT_WORDS = {
 
 
 def clean_player_name(raw_name):
-    """Entfernt Länderkürzel wie [GER], [IND] und bereinigt Whitespace."""
     if not raw_name:
         return ""
-    name = re.sub(r'\[[A-Za-z]{2,4}\]\s*', '', raw_name).strip()
-    return name
+    return re.sub(r'\[[A-Za-z]{2,4}\]\s*', '', raw_name).strip()
 
 
 def is_real_player_name(name):
@@ -185,6 +184,56 @@ def clean_badminton_scores(text, won):
     return ", ".join(valid_sets[:3])
 
 
+# --- SPIELER-KARRIERE-BILANZ AUS PROFIL AUSLESEN (z.B. 298:253) ---
+
+def fetch_player_career_record(session, player_name, profile_url=None, cache=None):
+    if cache is None:
+        cache = {}
+        
+    c_name = clean_player_name(player_name)
+    if c_name in cache and cache[c_name]:
+        return cache[c_name]
+
+    # Spezifische bekannte Profile direkt zuordnen
+    known_profiles = {
+        "Michael Hansen": "https://dbv.turnier.de/player-profile/E3A6AB74-B6AB-4D7D-9F06-D0C75DCCA67C",
+        "Marco Mainz": "https://dbv.turnier.de/player-profile/68c830e9-afd8-4adb-bb6a-22a84a98a64b"
+    }
+
+    url_to_fetch = profile_url or known_profiles.get(c_name)
+
+    # Falls keine URL vorliegt: Auf turnier.de nach dem Spieler suchen
+    if not url_to_fetch:
+        try:
+            search_url = f"https://dbv.turnier.de/find/player/DoSearch?PlayerFilter.Q={urllib.parse.quote(c_name)}"
+            r_s = session.get(search_url, headers=get_headers(), timeout=8)
+            if r_s.status_code == 200:
+                soup_s = BeautifulSoup(r_s.content, 'html.parser')
+                for a in soup_s.find_all('a', href=re.compile(r'/player-profile/[0-9a-fA-F-]+', re.I)):
+                    if c_name.lower() in a.get_text().lower():
+                        url_to_fetch = urllib.parse.urljoin("https://dbv.turnier.de", a['href'])
+                        break
+        except Exception:
+            pass
+
+    if url_to_fetch:
+        try:
+            r = session.get(url_to_fetch, headers=get_headers(), timeout=8)
+            if r.status_code == 200:
+                # Erste "Karriere X / Y" Zeile abgreifen (Gesamtbilanz)
+                m = re.search(r'Karriere[^\d]*?(\d+)\s*/\s*(\d+)', r.text, re.I)
+                if m:
+                    res_str = f"{m.group(1)}:{m.group(2)}"
+                    cache[c_name] = res_str
+                    return res_str
+        except Exception:
+            pass
+
+    return "-"
+
+
+# --- MATCH-ARCHIV FÜR H2H ---
+
 def harvest_opponent_history(session):
     history = {}
     seen_matches = set()
@@ -218,7 +267,6 @@ def harvest_opponent_history(session):
                         opp_links = [clean_player_name(a.get_text().strip()) for a in opp_td.find_all('a') if 'player.aspx' in a.get('href', '').lower()]
                         opponents = [n for n in opp_links if is_real_player_name(n)]
                         
-                        # Verein des gegnerischen Teams aus dem Link ziehen
                         opp_team_name = ""
                         tm_link = opp_td.find('a', href=re.compile(r'team', re.I))
                         if tm_link:
@@ -321,9 +369,11 @@ def harvest_opponent_history(session):
 
 # --- DYNAMISCHES EVENT-, GEGNER- & NIVEAU-SCRAPING ---
 
-def check_player_subpages(session, t_id, existing_entry, opp_history=None):
+def check_player_subpages(session, t_id, existing_entry, opp_history=None, player_records=None):
     if not opp_history or not isinstance(opp_history, dict):
         opp_history = {}
+    if player_records is None:
+        player_records = {}
         
     updates = {}
     headers = get_headers()
@@ -371,7 +421,7 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None):
                                 if field_name: updates["field_mx"] = field_name
                                 if found_partner: updates["partner_mx"] = found_partner
 
-                    # 2. AUSSCHLIESSLICH DIE ECHTE STARTERLISTE AUSLESEN (Keine Playoff-Duplikate!)
+                    # 2. AUSSCHLIESSLICH ECHTE STARTERLISTE AUSLESEN (Keine Playoff-Duplikate!)
                     tables = soup_ev.find_all('table')
                     target_table = None
                     for tbl in tables:
@@ -394,7 +444,7 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None):
                             if len(tds) >= 2:
                                 status_txt = tds[0].get_text().strip().lower()
                                 
-                                # STRIKTER FILTER: Nur echte Starterliste!
+                                # STRIKT: Nur die Zeilen der Starterliste!
                                 if 'starterliste' not in status_txt:
                                     continue
                                 
@@ -495,15 +545,20 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None):
                         final_score = max(5, min(99, score))
                         club_str = ", ".join(detected_clubs) if detected_clubs else "-"
 
-                        # Gegner-Bilanz (W-L) aus den erfassten Spielen
-                        total_opp_matches = len(h2h_matches)
-                        opp_record_str = f"{team_losses}-{team_wins}" if total_opp_matches > 0 else "-"
+                        # Gegner-Bilanz (W-L) aus dem Profil abrufen (z. B. 298:253)
+                        opp_records = []
+                        for opp in t_item["players"]:
+                            rec = fetch_player_career_record(session, opp, cache=player_records)
+                            if rec and rec != "-":
+                                opp_records.append(rec)
+                                
+                        career_record_str = " / ".join(opp_records) if opp_records else "-"
 
                         scored_teams.append({
                             "names": t_item["names"],
                             "club": club_str,
                             "seed": t_item["seed"],
-                            "record": opp_record_str,
+                            "record": career_record_str,
                             "h2h_str": h2h_str or "-",
                             "threat_score": final_score,
                             "has_h2h_loss": (team_losses > team_wins),
@@ -816,6 +871,12 @@ def check_for_updates_generator():
         except Exception:
             opp_history = {}
 
+    # Player-Records Cache laden
+    try:
+        player_records = load_gist_file(PLAYER_RECORDS_FILE) or {}
+    except Exception:
+        player_records = {}
+
     today = datetime.date.today()
     yield f"Suche nach Turnieren für {today.year} & {today.year + 1} auf turnier.de..."
     
@@ -843,7 +904,7 @@ def check_for_updates_generator():
                     if sch.get(k) and not t.get(k):
                         t[k] = sch[k]
                         
-            sub_updates = check_player_subpages(session, t_id, t, opp_history)
+            sub_updates = check_player_subpages(session, t_id, t, opp_history, player_records)
             t.update(sub_updates)
             
             if sub_updates.get("registered"):
@@ -879,7 +940,7 @@ def check_for_updates_generator():
                     if sch.get(k) and not old_t.get(k):
                         old_t[k] = sch[k]
 
-            sub_updates = check_player_subpages(session, t_id, old_t, opp_history)
+            sub_updates = check_player_subpages(session, t_id, old_t, opp_history, player_records)
             if sub_updates.get("registered") and not old_t.get("registered"):
                 found_registrations += 1
                 disc_info = []
@@ -896,13 +957,14 @@ def check_for_updates_generator():
 
     for t_id, t_item in known_tournaments.items():
         if t_item.get('registered'):
-            sub_up = check_player_subpages(session, t_id, t_item, opp_history)
+            sub_up = check_player_subpages(session, t_id, t_item, opp_history, player_records)
             for k, val in sub_up.items():
                 if val:
                     t_item[k] = val
 
     try:
         save_gist_file(DB_FILE, known_tournaments)
+        save_gist_file(PLAYER_RECORDS_FILE, player_records)
         now_str = datetime.datetime.now(ZoneInfo("Europe/Berlin")).strftime("%d.%m.%Y um %H:%M Uhr")
         save_gist_file("last_update.json", {"timestamp": now_str})
         yield "💾 Änderungen erfolgreich in GitHub Gist gespeichert."
