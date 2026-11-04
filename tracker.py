@@ -20,6 +20,7 @@ PLAYER_CONFIG = {
     "last_name": "Mainz",
     "club": "FC Langenfeld",
     "member_id": "01-166428",
+    "org_code": "E3B0DC28-EDDE-426A-9DD9-600D26DCF680",
     "patterns": [
         re.compile(r'\bMarco\s+Mainz\b', re.IGNORECASE),
         re.compile(r'\bMainz[,\s]+Marco\b', re.IGNORECASE)
@@ -184,7 +185,7 @@ def clean_badminton_scores(text, won):
     return ", ".join(valid_sets[:3])
 
 
-# --- DIREKTER PROFIL-PFAD: BILANZ & VEREIN AUS DEM ECHTEN PROFIL ---
+# --- DIREKTER PROFIL-PFAD: BILANZ, VEREIN & LINKS AUSLESEN ---
 
 def fetch_player_profile_details(session, player_name, tournament_id=None, tournament_player_id=None, cache=None):
     if cache is None:
@@ -201,7 +202,7 @@ def fetch_player_profile_details(session, player_name, tournament_id=None, tourn
 
     profile_url = known_profiles.get(c_name)
 
-    # 1. Direkter Klickpfad: Turnier-Spielerkarte -> Link /player/{OrgCode}/{Base64ID}
+    # 1. Klickpfad: Turnier-Spielerkarte -> Link /player/{OrgCode}/{Base64ID}
     if not profile_url and tournament_id and tournament_player_id:
         try:
             t_p_url = f"https://dbv.turnier.de/tournament/{tournament_id}/player/{tournament_player_id}"
@@ -214,7 +215,7 @@ def fetch_player_profile_details(session, player_name, tournament_id=None, tourn
         except Exception:
             pass
 
-    # 2. Fallback: Suche per POST (Query + SportID: 2)
+    # 2. Fallback: Suche per POST
     if not profile_url:
         try:
             search_url = "https://dbv.turnier.de/find/player/DoSearch"
@@ -234,24 +235,35 @@ def fetch_player_profile_details(session, player_name, tournament_id=None, tourn
 
     record_str = "0:0"
     club_name = "-"
+    club_url = ""
+    member_id = ""
     detected_tier = ""
 
     if profile_url:
         try:
             r = session.get(profile_url, headers=get_headers(), timeout=8)
             if r.status_code == 200:
-                # 1. Karriere-Bilanz abgreifen
+                # Echte finale Redirect-URL sichern
+                profile_url = r.url
+
+                # Mitgliedsnummer / Passnummer auslesen (z. B. 01-164149)
+                m_mem = re.search(r'\((\d{2}-\d{4,8})\)', r.text)
+                if m_mem:
+                    member_id = m_mem.group(1)
+
+                # Karriere-Bilanz abgreifen
                 m = re.search(r'Karriere[^\d]*?(\d+)\s*/\s*(\d+)', r.text, re.I)
                 if m:
                     record_str = f"{m.group(1)}:{m.group(2)}"
 
                 soup_p = BeautifulSoup(r.content, 'html.parser')
                 
-                # 2. Verein aus dem Profil ziehen (z.B. Ligen oder Team-Links)
+                # Verein & Vereins-Link finden
                 for a in soup_p.find_all('a', href=re.compile(r'/club/|/team/|club\.aspx|team\.aspx', re.I)):
                     c_txt = a.get_text().strip()
                     if len(c_txt) > 3 and not re.search(r'ausrichter|suche|find|deutschland|verband', c_txt, re.I):
                         club_name = re.sub(r'\s*\d+$', '', c_txt).strip()
+                        club_url = urllib.parse.urljoin("https://dbv.turnier.de", a['href'])
                         break
                 
                 if club_name == "-":
@@ -261,7 +273,7 @@ def fetch_player_profile_details(session, player_name, tournament_id=None, tourn
                             club_name = re.sub(r'\s*\d+$', '', t).strip()
                             break
 
-                # 3. Liga-Level
+                # Liga-Level
                 txt_low = r.text.lower()
                 if "landesliga" in txt_low: detected_tier = "Landesliga"
                 elif "bezirksliga" in txt_low: detected_tier = "Bezirksliga"
@@ -274,6 +286,9 @@ def fetch_player_profile_details(session, player_name, tournament_id=None, tourn
     details = {
         "record": record_str,
         "club": club_name if club_name else "-",
+        "club_url": club_url,
+        "profile_url": profile_url or "",
+        "member_id": member_id,
         "league_tier": detected_tier
     }
     cache[c_name] = details
@@ -415,7 +430,7 @@ def harvest_opponent_history(session):
     return history
 
 
-# --- EINSTUFUNGS-LOGIK NACH DEINEN EXAKTEN KRITERIEN ---
+# --- EINSTUFUNGS-LOGIK PRO EINZELNEM SPIELER ---
 
 def evaluate_single_player(details, h2h_matches):
     # 1. H2H PRIORITÄT (Höchste Gewichtung)
@@ -448,11 +463,9 @@ def evaluate_single_player(details, h2h_matches):
 
     total_games = w_val + l_val
 
-    # Ligabezug: Ab Bezirksklasse tendenziell "Wird schwer"
     if tier in ["Bezirksklasse", "Bezirksliga", "Landesliga", "Verbandsliga"]:
         return "🔴 Wird schwer", 70
 
-    # Win-Loss Verhältnis
     if total_games >= 30:
         win_ratio = w_val / total_games if total_games > 0 else 0
         if win_ratio > 0.55:
@@ -525,7 +538,7 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                                 if field_name: updates["field_mx"] = field_name
                                 if found_partner: updates["partner_mx"] = found_partner
 
-                    # 2. AUSSCHLIESSLICH ECHTE STARTERLISTE AUSLESEN (Keine Playoff-Duplikate!)
+                    # 2. AUSSCHLIESSLICH ECHTE STARTERLISTE AUSLESEN
                     tables = soup_ev.find_all('table')
                     target_table = None
                     for tbl in tables:
@@ -551,7 +564,6 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                                 if 'starterliste' not in status_txt:
                                     continue
                                 
-                                # Links zu player.aspx?id=...&player={p_id}
                                 p_tags = tds[1].find_all('a', href=re.compile(r'player', re.I))
                                 team_players_raw = []
                                 for a in p_tags:
@@ -587,7 +599,7 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                                         "seed": seed_str
                                     })
 
-                    # 3. DETAILS, LIGA & PROFILE PRO SPIELER ERMITTELN
+                    # 3. DETAILS, PROFILE & H2H PRO SPIELER ERMITTELN
                     scored_teams = []
                     overall_h2h_wins = 0
                     overall_h2h_losses = 0
@@ -595,15 +607,15 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
 
                     for t_item in raw_teams:
                         players_info = []
-                        team_h2h_matches = []
                         team_evals = []
                         max_player_score = 0
+                        team_has_loss = False
+                        team_has_win = False
 
                         for p_obj in t_item["opponents"]:
                             p_name = p_obj["name"]
                             p_pid = p_obj["pid"]
                             
-                            # Profil-Details über den direkten Klickpfad holen!
                             p_details = fetch_player_profile_details(
                                 session, 
                                 p_name, 
@@ -612,9 +624,24 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                                 cache=player_records
                             )
                             
+                            # Individuelle H2H-Bilanz dieses Spielers gegen Marco
                             p_h2h = opp_history.get(p_name, [])
-                            for m in p_h2h:
-                                team_h2h_matches.append(m)
+                            p_w = sum(1 for m in p_h2h if m["won"])
+                            p_l = len(p_h2h) - p_w
+                            overall_h2h_wins += p_w
+                            overall_h2h_losses += p_l
+                            
+                            if p_l > 0: team_has_loss = True
+                            if p_w > 0: team_has_win = True
+
+                            # Saubere H2H-Zahl (ohne Satzklammern!)
+                            p_h2h_str = f"{p_w}-{p_l}" if len(p_h2h) > 0 else "-"
+
+                            # Direkter H2H-Vergleichslink
+                            h2h_link = ""
+                            opp_mid = p_details.get("member_id", "")
+                            if opp_mid and PLAYER_CONFIG.get("member_id"):
+                                h2h_link = f"https://dbv.turnier.de/head-2-head?OrganizationCode={PLAYER_CONFIG['org_code']}&T1P1MemberID={opp_mid}&T2P1MemberID={PLAYER_CONFIG['member_id']}"
 
                             badge, p_score = evaluate_single_player(p_details, p_h2h)
                             team_evals.append((badge, p_score))
@@ -630,27 +657,12 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
 
                             players_info.append({
                                 "name": p_name,
+                                "profile_url": p_details.get("profile_url", ""),
                                 "club": club_found,
-                                "record": p_details.get("record", "0:0")
-                            })
-
-                        t_wins = sum(1 for m in team_h2h_matches if m["won"])
-                        t_losses = len(team_h2h_matches) - t_wins
-                        overall_h2h_wins += t_wins
-                        overall_h2h_losses += t_losses
-
-                        h2h_str = "-"
-                        if len(team_h2h_matches) > 0:
-                            last_m = team_h2h_matches[0]
-                            sc = f" ({last_m['score']})" if last_m.get('score') else ""
-                            h2h_str = f"{t_wins}-{t_losses}{sc}"
-                            
-                            summary_opp_name = " / ".join([p["name"] for p in t_item["opponents"]])
-                            known_duels_summary.append({
-                                "opponent": summary_opp_name,
-                                "wins": t_wins,
-                                "losses": t_losses,
-                                "detail": f"{last_m.get('score', '')} ({last_m.get('discipline', '')}, {last_m.get('competition', '')})"
+                                "club_url": p_details.get("club_url", ""),
+                                "record": p_details.get("record", "0:0"),
+                                "h2h_str": p_h2h_str,
+                                "h2h_link": h2h_link
                             })
 
                         # Setzplatz-Bonus
@@ -659,7 +671,7 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                         elif t_item["seed"] == "2": team_final_score += 25
                         elif t_item["seed"] in ["3", "4", "3/4"]: team_final_score += 18
 
-                        # Karriere-Siege als Tiebreaker (z.B. Hansen 298 Siege)
+                        # Karriere-Siege als Tiebreaker
                         for p in players_info:
                             rec = p.get("record", "0:0")
                             if ":" in rec:
@@ -669,14 +681,14 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                                 except ValueError:
                                     pass
 
-                        # KONSERVATIVE KOMBINATION
+                        # KONSERVATIVE KOMBINATION FÜR DAS TEAM
                         badges_in_team = [e[0] for e in team_evals]
                         
-                        if t_losses > 0 and t_wins == 0:
+                        if team_has_loss and not team_has_win:
                             team_badge = "🔴 Wird schwer"
-                        elif t_wins > 0 and t_losses == 0:
+                        elif team_has_win and not team_has_loss:
                             team_badge = "🟢 Pflichtsieg"
-                        elif t_wins >= 1:
+                        elif team_has_win and team_has_loss:
                             team_badge = "🟡 Schlagbar"
                         elif "🔴 Wird schwer" in badges_in_team:
                             team_badge = "🔴 Wird schwer"
@@ -690,12 +702,11 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                         scored_teams.append({
                             "players_info": players_info,
                             "seed": t_item["seed"],
-                            "h2h_str": h2h_str,
                             "threat_score": team_final_score,
                             "danger_badge": team_badge
                         })
 
-                    # Sortierung: Höchster Score & Karriere-Siege an die Spitze
+                    # Sortierung: Höchster Score an die Spitze
                     def get_team_sorting_weight(team_item):
                         score = team_item.get("threat_score", 0)
                         career_wins = 0
@@ -717,12 +728,29 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                     top_fav_name = " / ".join([p["name"] for p in scored_teams[0]["players_info"]]) if scored_teams and "👑" in scored_teams[0]["danger_badge"] else "Ausgeglichen"
                     teams_total = len(scored_teams) + (1 if updates.get("registered") else 0)
 
+                    # Zusammenfassung
+                    h2h_known_count = sum(1 for t in scored_teams if any(p["h2h_str"] != "-" for p in t["players_info"]))
+                    if h2h_known_count == 0:
+                        matchup_badge = "⚪ Unbekanntes Feld"
+                        matchup_desc = "Noch keine bisherigen Duelle"
+                    elif overall_h2h_wins > overall_h2h_losses:
+                        matchup_badge = "🟢 Günstig"
+                        matchup_desc = f"{overall_h2h_wins} Siege / {overall_h2h_losses} Niederlagen"
+                    elif overall_h2h_wins == overall_h2h_losses:
+                        matchup_badge = "🟡 Ausgeglichen"
+                        matchup_desc = f"{overall_h2h_wins} Siege / {overall_h2h_losses} Niederlagen"
+                    else:
+                        matchup_badge = "🔴 Schwer"
+                        matchup_desc = f"{overall_h2h_wins} Siege / {overall_h2h_losses} Niederlagen"
+
                     updates["field_analysis"] = {
                         "event_name": event_name,
                         "teams_count": teams_total,
                         "seeds_count": seeds_count,
                         "top_favorite": top_fav_name,
-                        "known_duels": known_duels_summary,
+                        "h2h_known_count": h2h_known_count,
+                        "matchup_badge": matchup_badge,
+                        "matchup_desc": matchup_desc,
                         "teams": scored_teams
                     }
 

@@ -1001,7 +1001,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         </div>
         """
 
-    # --- EINHEITLICHES DESKTOP-SCOUTING-MODUL IM 2-ZEILEN EXCEL-STIL ---
+    # --- EINHEITLICHES DESKTOP-SCOUTING-MODUL (VOLL VERLINKT & INDIVIDUELLE H2H-ZEILEN) ---
     analysis = item.get('field_analysis', {})
     scouting_html = ""
     
@@ -1009,14 +1009,14 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         ev_name = html.escape(str(analysis.get('event_name', '')))
         t_count = analysis.get("teams_count", len(analysis.get("teams", [])))
         top_fav = html.escape(str(analysis.get("top_favorite", "Ausgeglichen")))
-        h2h_cnt = len(analysis.get("known_duels", []))
+        h2h_cnt = analysis.get("h2h_known_count", len(analysis.get("known_duels", [])))
         teams = analysis.get("teams", [])
         
         h2h_badge_text = f"{h2h_cnt} Duelle bekannt" if h2h_cnt > 0 else "Keine Vorbegegnungen"
         
         team_rows = []
         for t in teams:
-            d_badge = str(t.get('danger_badge') or t.get('danger') or "⚪ Unbekannt")
+            d_badge = str(t.get('danger_badge') or "⚪ Unbekannt")
             
             danger_color = "#94a3b8"
             if "👑" in d_badge: danger_color = "#fbbf24"
@@ -1027,53 +1027,54 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             seed_val = str(t.get('seed', '')).strip()
             seed_disp = f"<strong>[{html.escape(seed_val)}]</strong>" if seed_val else "-"
             
-            h2h_val = str(t.get('h2h_str', '-')).strip()
-            h2h_disp = f"<strong style='color:#e2e8f0;'>{html.escape(h2h_val)}</strong>" if h2h_val != "-" else "<span style='color:#64748b;'>-</span>"
-            
             p_list = t.get("players_info", [])
             rowspan = max(len(p_list), 1)
 
-            # Wenn Spieler-Details vorhanden sind (2 Zeilen wie verbundene Zellen)
             if p_list:
                 for idx, p in enumerate(p_list):
-                    rec_disp = str(p.get("record", "0:0"))
-                    club_disp = html.escape(str(p.get("club", "-")))
+                    p_name = html.escape(str(p.get("name", "Unbekannt")))
+                    p_url = p.get("profile_url", "")
+                    name_disp = f"<a href='{p_url}' target='_blank' style='color:#f8fafc; text-decoration:underline;'>{p_name}</a>" if p_url else f"<span style='color:#f8fafc;'>{p_name}</span>"
                     
+                    club_txt = html.escape(str(p.get("club", "-")))
+                    c_url = p.get("club_url", "")
+                    club_disp = f"<a href='{c_url}' target='_blank' style='color:#94a3b8; text-decoration:underline;'>{club_txt}</a>" if c_url else f"<span style='color:#94a3b8;'>{club_txt}</span>"
+
+                    rec_disp = html.escape(str(p.get("record", "0:0")))
+                    
+                    # Individuelle H2H dieses Spielers (ohne Satzklammern!)
+                    h2h_str = str(p.get("h2h_str", "-")).strip()
+                    h2h_link = p.get("h2h_link", "")
+                    if h2h_str != "-":
+                        if h2h_link:
+                            h2h_disp = f"<a href='{h2h_link}' target='_blank' style='color:#38bdf8; font-weight:700; text-decoration:underline;' title='Direkten Vergleich auf turnier.de öffnen'>{html.escape(h2h_str)}</a>"
+                        else:
+                            h2h_disp = f"<strong style='color:#e2e8f0;'>{html.escape(h2h_str)}</strong>"
+                    else:
+                        h2h_disp = "<span style='color:#64748b;'>-</span>"
+
                     if idx == 0:
-                        # Erste Zeile des Teams (mit rowspan für Team-Attribute)
                         team_rows.append(f"""
                         <tr style="border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.85rem;">
-                            <td style="padding: 7px 10px; font-weight: 700; color: #f8fafc;">{html.escape(p['name'])}</td>
-                            <td style="padding: 7px 10px; color: #94a3b8;">{club_disp}</td>
+                            <td style="padding: 7px 10px; font-weight: 700;">{name_disp}</td>
+                            <td style="padding: 7px 10px;">{club_disp}</td>
                             <td style="padding: 7px 10px; color: #cbd5e1; text-align: center;">{rec_disp}</td>
+                            <td style="padding: 7px 10px; text-align: center;">{h2h_disp}</td>
                             <td rowspan="{rowspan}" style="padding: 7px 10px; color: #cbd5e1; text-align: center; border-left: 1px solid rgba(255, 255, 255, 0.04); vertical-align: middle;">{seed_disp}</td>
-                            <td rowspan="{rowspan}" style="padding: 7px 10px; text-align: center; border-left: 1px solid rgba(255, 255, 255, 0.04); vertical-align: middle;">{h2h_disp}</td>
                             <td rowspan="{rowspan}" style="padding: 7px 10px; color: {danger_color}; font-weight: 700; border-left: 1px solid rgba(255, 255, 255, 0.04); vertical-align: middle;">
                                 {html.escape(d_badge)}
                             </td>
                         </tr>
                         """)
                     else:
-                        # Zweite Zeile (Partner)
                         team_rows.append(f"""
                         <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.85rem;">
-                            <td style="padding: 7px 10px; font-weight: 700; color: #f8fafc;">{html.escape(p['name'])}</td>
-                            <td style="padding: 7px 10px; color: #94a3b8;">{club_disp}</td>
+                            <td style="padding: 7px 10px; font-weight: 700;">{name_disp}</td>
+                            <td style="padding: 7px 10px;">{club_disp}</td>
                             <td style="padding: 7px 10px; color: #cbd5e1; text-align: center;">{rec_disp}</td>
+                            <td style="padding: 7px 10px; text-align: center;">{h2h_disp}</td>
                         </tr>
                         """)
-            else:
-                # Fallback für Teams ohne getrennte Spielerliste
-                team_rows.append(f"""
-                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.85rem;">
-                    <td style="padding: 8px 10px; font-weight: 700; color: #f8fafc;">{html.escape(str(t.get('names', 'Unbekannt')))}</td>
-                    <td style="padding: 8px 10px; color: #94a3b8;">-</td>
-                    <td style="padding: 8px 10px; color: #cbd5e1; text-align: center;">0:0</td>
-                    <td style="padding: 8px 10px; color: #cbd5e1; text-align: center;">{seed_disp}</td>
-                    <td style="padding: 8px 10px; color: #cbd5e1; text-align: center;">{h2h_disp}</td>
-                    <td style="padding: 8px 10px; color: {danger_color}; font-weight: 700;">{html.escape(d_badge)}</td>
-                </tr>
-                """)
             
         teams_tbody = "".join(team_rows) if team_rows else "<tr><td colspan='6' style='padding:8px; color:#64748b;'>Keine Teams erfasst</td></tr>"
 
@@ -1094,9 +1095,9 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                         <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.12); font-size: 0.78rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px;">
                             <th style="padding: 6px 10px;">Spieler</th>
                             <th style="padding: 6px 10px;">Verein</th>
-                            <th style="padding: 6px 10px; text-align: center;">Gegner-Bilanz</th>
-                            <th style="padding: 6px 10px; text-align: center;">Setzplatz</th>
+                            <th style="padding: 6px 10px; text-align: center;">Karriere (W:L)</th>
                             <th style="padding: 6px 10px; text-align: center;">H2H gegen dich</th>
+                            <th style="padding: 6px 10px; text-align: center;">Setzplatz</th>
                             <th style="padding: 6px 10px;">Einstufung (Team)</th>
                         </tr>
                     </thead>
@@ -1757,7 +1758,7 @@ elif data is not None:
                         })
 
         try:
-            today = datetime.datetime.now(ZoneInfo("Europe/Berlin")).date()
+            today = datetime.date.today()
         except Exception:
             today = datetime.date.today()
 
