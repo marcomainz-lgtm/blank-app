@@ -122,6 +122,12 @@ FIELD_OPTIONS = [
 st.markdown(
     """
     <style>
+    /* Viewport-Overflow auf Mobile rigoros verhindern */
+    html, body, [data-testid="stAppViewContainer"] {
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+    }
+
     button[data-testid="stTextInput-VisibilityButton"] { display: none !important; }
     .status-tag-static, details.status-tag { display: inline-block; background-color: #f8fafc; border-radius: 6px; margin-bottom: 12px; font-size: 0.85em; line-height: 1.4; user-select: none; }
     .status-tag-static { padding: 5px 10px; font-weight: bold; }
@@ -173,9 +179,12 @@ st.markdown(
         margin-bottom: auto !important;
     }
 
+    /* RESPONSIVER LOGIN-BLOCK (KEIN OVERFLOW MEHR) */
     div[data-testid="stHorizontalBlock"]:has(.login-row-marker) {
         align-items: center !important;
         margin-bottom: 8px !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
     }
     @media (max-width: 768px) {
         div[data-testid="stHorizontalBlock"]:has(.login-row-marker) {
@@ -184,13 +193,14 @@ st.markdown(
             flex-wrap: nowrap !important;
             justify-content: flex-end !important;
             width: 100% !important;
+            box-sizing: border-box !important;
         }
         div[data-testid="stHorizontalBlock"]:has(.login-row-marker) > div[data-testid="column"]:first-child {
             display: none !important;
         }
         div[data-testid="stHorizontalBlock"]:has(.login-row-marker) > div[data-testid="column"]:last-child {
-            width: auto !important;
-            max-width: 100% !important;
+            width: 100% !important;
+            max-width: 220px !important;
             margin-left: auto !important;
         }
         div[data-testid="stHorizontalBlock"]:has(.login-row-marker) div[data-testid="stHorizontalBlock"] {
@@ -198,26 +208,30 @@ st.markdown(
             flex-direction: row !important;
             flex-wrap: nowrap !important;
             align-items: center !important;
-            gap: 6px !important;
+            gap: 4px !important;
+            width: 100% !important;
         }
         div[data-testid="stHorizontalBlock"]:has(.login-row-marker) div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child {
-            width: 120px !important;
-            min-width: 100px !important;
+            flex: 1 1 65% !important;
+            min-width: 0 !important;
         }
         div[data-testid="stHorizontalBlock"]:has(.login-row-marker) div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child {
-            width: 75px !important;
-            min-width: 70px !important;
+            flex: 0 0 65px !important;
+            min-width: 60px !important;
         }
         div[data-testid="stHorizontalBlock"]:has(.login-row-marker) input {
             font-size: 0.78rem !important;
-            padding: 4px 8px !important;
-            height: 34px !important;
+            padding: 3px 6px !important;
+            height: 32px !important;
+            box-sizing: border-box !important;
         }
         div[data-testid="stHorizontalBlock"]:has(.login-row-marker) button {
             font-size: 0.78rem !important;
-            padding: 4px 8px !important;
-            height: 34px !important;
+            padding: 3px 6px !important;
+            height: 32px !important;
+            width: 100% !important;
             white-space: nowrap !important;
+            box-sizing: border-box !important;
         }
     }
 
@@ -259,6 +273,8 @@ st.markdown(
         }
         .main .block-container {
             padding-bottom: 95px !important;
+            max-width: 100% !important;
+            overflow-x: hidden !important;
         }
 
         div[data-testid="stHorizontalBlock"]:has(.zeit-mobile-anchor) {
@@ -1001,21 +1017,17 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         </div>
         """
 
-    # --- EINHEITLICHES DESKTOP-SCOUTING-MODUL (VOLL VERLINKT & INDIVIDUELLE H2H-ZEILEN) ---
+    # --- MINIMALISTISCHE HEADLINE & OPTISCH VERBUNDENE DOPPELZEILEN ---
     analysis = item.get('field_analysis', {})
     scouting_html = ""
     
     if isinstance(analysis, dict) and analysis.get("event_name"):
         ev_name = html.escape(str(analysis.get('event_name', '')))
         t_count = analysis.get("teams_count", len(analysis.get("teams", [])))
-        top_fav = html.escape(str(analysis.get("top_favorite", "Ausgeglichen")))
-        h2h_cnt = analysis.get("h2h_known_count", len(analysis.get("known_duels", [])))
         teams = analysis.get("teams", [])
         
-        h2h_badge_text = f"{h2h_cnt} Duelle bekannt" if h2h_cnt > 0 else "Keine Vorbegegnungen"
-        
         team_rows = []
-        for t in teams:
+        for team_idx, t in enumerate(teams):
             d_badge = str(t.get('danger_badge') or "⚪ Unbekannt")
             
             danger_color = "#94a3b8"
@@ -1030,11 +1042,17 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             p_list = t.get("players_info", [])
             rowspan = max(len(p_list), 1)
 
+            # Zusammenhängender Team-Hintergrund (dezentes Zebra-Muster pro Paarung)
+            bg_color = "rgba(255, 255, 255, 0.02)" if team_idx % 2 == 0 else "rgba(255, 255, 255, 0.04)"
+
             if p_list:
                 for idx, p in enumerate(p_list):
                     p_name = html.escape(str(p.get("name", "Unbekannt")))
                     p_url = p.get("profile_url", "")
-                    name_disp = f"<a href='{p_url}' target='_blank' style='color:#f8fafc; text-decoration:underline;'>{p_name}</a>" if p_url else f"<span style='color:#f8fafc;'>{p_name}</span>"
+                    
+                    # Zweiter Partner erhält Verbinder ↳ für sofortige visuelle Zuordnung
+                    prefix_icon = "" if idx == 0 else "<span style='color:#64748b; margin-right:4px;'>↳</span>"
+                    name_disp = f"{prefix_icon}<a href='{p_url}' target='_blank' style='color:#f8fafc; text-decoration:underline;'>{p_name}</a>" if p_url else f"{prefix_icon}<span style='color:#f8fafc;'>{p_name}</span>"
                     
                     club_txt = html.escape(str(p.get("club", "-")))
                     c_url = p.get("club_url", "")
@@ -1042,33 +1060,35 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
 
                     rec_disp = html.escape(str(p.get("record", "0:0")))
                     
-                    # Individuelle H2H dieses Spielers (ohne Satzklammern!)
+                    # Individuelle H2H-Zahl (anklickbar zu turnier.de)
                     h2h_str = str(p.get("h2h_str", "-")).strip()
                     h2h_link = p.get("h2h_link", "")
                     if h2h_str != "-":
                         if h2h_link:
-                            h2h_disp = f"<a href='{h2h_link}' target='_blank' style='color:#38bdf8; font-weight:700; text-decoration:underline;' title='Direkten Vergleich auf turnier.de öffnen'>{html.escape(h2h_str)}</a>"
+                            h2h_disp = f"<a href='{h2h_link}' target='_blank' style='color:#38bdf8; font-weight:700; text-decoration:underline;' title='Offiziellen direkten Vergleich öffnen'>{html.escape(h2h_str)}</a>"
                         else:
                             h2h_disp = f"<strong style='color:#e2e8f0;'>{html.escape(h2h_str)}</strong>"
                     else:
                         h2h_disp = "<span style='color:#64748b;'>-</span>"
 
                     if idx == 0:
+                        # Obere Zeile des Teams: dicke Abgrenzung nach oben
                         team_rows.append(f"""
-                        <tr style="border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.85rem;">
+                        <tr style="background: {bg_color}; border-top: 1.5px solid rgba(255, 255, 255, 0.12); font-size: 0.85rem;">
                             <td style="padding: 7px 10px; font-weight: 700;">{name_disp}</td>
                             <td style="padding: 7px 10px;">{club_disp}</td>
                             <td style="padding: 7px 10px; color: #cbd5e1; text-align: center;">{rec_disp}</td>
                             <td style="padding: 7px 10px; text-align: center;">{h2h_disp}</td>
-                            <td rowspan="{rowspan}" style="padding: 7px 10px; color: #cbd5e1; text-align: center; border-left: 1px solid rgba(255, 255, 255, 0.04); vertical-align: middle;">{seed_disp}</td>
-                            <td rowspan="{rowspan}" style="padding: 7px 10px; color: {danger_color}; font-weight: 700; border-left: 1px solid rgba(255, 255, 255, 0.04); vertical-align: middle;">
+                            <td rowspan="{rowspan}" style="padding: 7px 10px; color: #cbd5e1; text-align: center; border-left: 1px solid rgba(255, 255, 255, 0.06); vertical-align: middle;">{seed_disp}</td>
+                            <td rowspan="{rowspan}" style="padding: 7px 10px; color: {danger_color}; font-weight: 700; border-left: 1px solid rgba(255, 255, 255, 0.06); vertical-align: middle;">
                                 {html.escape(d_badge)}
                             </td>
                         </tr>
                         """)
                     else:
+                        # Untere Zeile (Partner): Keine harte Trennlinie nach oben, nahtlos verbunden
                         team_rows.append(f"""
-                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.85rem;">
+                        <tr style="background: {bg_color}; border-top: 1px dashed rgba(255, 255, 255, 0.03); border-bottom: 1.5px solid rgba(255, 255, 255, 0.12); font-size: 0.85rem;">
                             <td style="padding: 7px 10px; font-weight: 700;">{name_disp}</td>
                             <td style="padding: 7px 10px;">{club_disp}</td>
                             <td style="padding: 7px 10px; color: #cbd5e1; text-align: center;">{rec_disp}</td>
@@ -1078,21 +1098,18 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             
         teams_tbody = "".join(team_rows) if team_rows else "<tr><td colspan='6' style='padding:8px; color:#64748b;'>Keine Teams erfasst</td></tr>"
 
+        # Cleane Headline ohne Emoticons, ohne CTA-Text, schlichter Pfeil ganz rechts
         scouting_html = f"""
-        <details style="background: #141923; border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 8px; margin-top: 10px; margin-bottom: 8px; padding: 7px 12px; cursor: pointer;">
-            <summary style="font-size: 0.88rem; font-weight: 700; color: #f8fafc; outline: none; display: flex; justify-content: space-between; align-items: center; user-select: none;">
-                <div>
-                    👥 <strong>Gegner-Scouting: {ev_name}</strong> ({t_count} Teams) &nbsp;•&nbsp; 
-                    <span style="color: #fbbf24; font-weight: 600;">👑 Top-Favorit: {top_fav}</span> &nbsp;•&nbsp; 
-                    <span style="color: #94a3b8; font-weight: 500;">🎯 {h2h_badge_text}</span>
-                </div>
-                <div style="font-size: 0.78rem; color: #38bdf8; font-weight: 600;">Scouting-Tabelle öffnen ▾</div>
+        <details style="background: #141923; border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 8px; margin-top: 10px; margin-bottom: 8px; padding: 8px 12px; cursor: pointer;">
+            <summary style="font-size: 0.88rem; font-weight: 700; color: #cbd5e1; outline: none; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+                <span>Gegner-Scouting: {ev_name} ({t_count} Teams)</span>
+                <span style="font-size: 0.88rem; color: #cbd5e1; font-weight: 700;">▾</span>
             </summary>
             
             <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08); overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: 'Inter', sans-serif;">
                     <thead>
-                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.12); font-size: 0.78rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px;">
+                        <tr style="border-bottom: 1.5px solid rgba(255, 255, 255, 0.15); font-size: 0.78rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px;">
                             <th style="padding: 6px 10px;">Spieler</th>
                             <th style="padding: 6px 10px;">Verein</th>
                             <th style="padding: 6px 10px; text-align: center;">Karriere (W:L)</th>
@@ -1455,9 +1472,9 @@ def render_admin_editor(item, full_data, is_past=False):
         col_note_in, col_note_btn = st.columns([4, 1.2], vertical_alignment="bottom")
         with col_note_in:
             val_notes = st.text_input(
-                "🚗 Persönliche Notiz / Fahrgemeinschaft", 
+                "Notizen", 
                 value=item.get('notes', ''), 
-                placeholder="z. B. Treffpunkt mit Pascal 08:30 Uhr, 15 € Startgeld bar", 
+                placeholder="z. B. 09:00 Meldeschluss", 
                 key=f"note_{prefix}{t_id}"
             ).strip()
         with col_note_btn:
@@ -1758,7 +1775,7 @@ elif data is not None:
                         })
 
         try:
-            today = datetime.date.today()
+            today = datetime.datetime.now(ZoneInfo("Europe/Berlin")).date()
         except Exception:
             today = datetime.date.today()
 
