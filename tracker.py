@@ -201,21 +201,32 @@ def fetch_player_profile_details(session, player_name, cache=None):
 
     url_to_fetch = known_profiles.get(c_name)
 
-    # Offizielle Spielersuche per POST (Query + SportID: 2)
+    # Offizielle Spielersuche per POST (Query + SportID: 2) mit Fallback auf Nachnamen
     if not url_to_fetch:
-        try:
-            search_url = "https://dbv.turnier.de/find/player/DoSearch"
-            post_headers = {**get_headers(), 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'https://dbv.turnier.de/find/player'}
-            payload = {'Query': c_name, 'SportID': '2', 'Page': '1'}
-            r_s = session.post(search_url, data=payload, headers=post_headers, timeout=8)
-            if r_s.status_code == 200:
-                soup_s = BeautifulSoup(r_s.content, 'html.parser')
-                for a in soup_s.find_all('a', href=re.compile(r'/player-profile/[0-9a-fA-F-]+', re.I)):
-                    if c_name.lower() in a.get_text().lower():
-                        url_to_fetch = urllib.parse.urljoin("https://dbv.turnier.de", a['href'])
-                        break
-        except Exception:
-            pass
+        queries_to_try = [c_name]
+        parts = c_name.split()
+        if len(parts) >= 2:
+            queries_to_try.append(parts[-1]) # Nur Nachname
+            
+        search_url = "https://dbv.turnier.de/find/player/DoSearch"
+        post_headers = {**get_headers(), 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'https://dbv.turnier.de/find/player'}
+        
+        for q in queries_to_try:
+            try:
+                payload = {'Query': q, 'SportID': '2', 'Page': '1'}
+                r_s = session.post(search_url, data=payload, headers=post_headers, timeout=8)
+                if r_s.status_code == 200:
+                    soup_s = BeautifulSoup(r_s.content, 'html.parser')
+                    for a in soup_s.find_all('a', href=re.compile(r'/player-profile/[0-9a-fA-F-]+', re.I)):
+                        a_txt = a.get_text().lower()
+                        # Prüfen, ob Vor- und Nachname im Trefferlink vorkommen
+                        if all(p.lower() in a_txt for p in parts):
+                            url_to_fetch = urllib.parse.urljoin("https://dbv.turnier.de", a['href'])
+                            break
+                if url_to_fetch:
+                    break
+            except Exception:
+                pass
 
     record_str = "0:0"
     club_name = "-"
