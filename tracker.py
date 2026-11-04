@@ -184,7 +184,7 @@ def clean_badminton_scores(text, won):
     return ", ".join(valid_sets[:3])
 
 
-# --- SPIELER-BILANZ & VEREIN AUS PROFIL/LIGA AUSLESEN ---
+# --- SPIELER-BILANZ & VEREIN AUS ECHTEM PROFILE/SUCHE AUSLESEN ---
 
 def fetch_player_profile_details(session, player_name, cache=None):
     if cache is None:
@@ -201,10 +201,13 @@ def fetch_player_profile_details(session, player_name, cache=None):
 
     url_to_fetch = known_profiles.get(c_name)
 
+    # Offizielle Spielersuche per POST (Query + SportID: 2)
     if not url_to_fetch:
         try:
-            search_url = f"https://dbv.turnier.de/find/player/DoSearch?PlayerFilter.Q={urllib.parse.quote(c_name)}"
-            r_s = session.get(search_url, headers=get_headers(), timeout=8)
+            search_url = "https://dbv.turnier.de/find/player/DoSearch"
+            post_headers = {**get_headers(), 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'https://dbv.turnier.de/find/player'}
+            payload = {'Query': c_name, 'SportID': '2', 'Page': '1'}
+            r_s = session.post(search_url, data=payload, headers=post_headers, timeout=8)
             if r_s.status_code == 200:
                 soup_s = BeautifulSoup(r_s.content, 'html.parser')
                 for a in soup_s.find_all('a', href=re.compile(r'/player-profile/[0-9a-fA-F-]+', re.I)):
@@ -228,10 +231,10 @@ def fetch_player_profile_details(session, player_name, cache=None):
                 if m:
                     record_str = f"{m.group(1)}:{m.group(2)}"
 
-                # 2. Verein aus dem Profiltext / Header ziehen
+                # 2. Verein aus dem Profil ziehen
                 for c_el in soup_p.find_all(['span', 'div', 'p', 'h3'], class_=re.compile(r'club|subtitle|media__sub', re.I)):
                     c_txt = c_el.get_text().strip()
-                    if len(c_txt) > 3 and not re.search(r'karriere|verband|points', c_txt, re.I):
+                    if len(c_txt) > 3 and not re.search(r'karriere|verband|points|deutschland', c_txt, re.I):
                         club_name = re.sub(r'\[.*?\]', '', c_txt).strip()
                         break
 
@@ -389,32 +392,27 @@ def harvest_opponent_history(session):
     return history
 
 
-# --- EINSTUFUNGS-LOGIK PRO EINZELNEM GEGNER ---
+# --- EINSTUFUNGS-LOGIK NACH DEINEN EXAKTEN KRITERIEN ---
 
 def evaluate_single_player(details, h2h_matches):
-    """
-    Berechnet die Einstufung für EINEN Spieler nach deiner exakten Logik:
-    1. H2H (Höchste Prio)
-    2. Liga (ab Bezirksklasse tendenziell schwer)
-    3. Win-Loss Verhältnis & Erfahrung
-    """
-    # 1. H2H Priorität
+    # 1. H2H PRIORITÄT (Höchste Gewichtung)
     if len(h2h_matches) > 0:
         h2h_wins = sum(1 for m in h2h_matches if m["won"])
         h2h_losses = len(h2h_matches) - h2h_wins
-        if h2h_wins > h2h_losses:
+        if h2h_wins > h2h_losses and h2h_losses == 0:
             return "🟢 Pflichtsieg", 20
+        elif h2h_wins > h2h_losses:
+            return "🟢 Pflichtsieg", 25
         elif h2h_wins >= 1:
-            # Ein einziger H2H-Sieg reicht, um "Wird schwer" zu "Schlagbar" zu machen!
+            # Ein einziger H2H-Sieg reicht, um "Wird schwer" zu "Schlagbar" abzumildern!
             return "🟡 Schlagbar", 45
         elif h2h_losses > 0:
             return "🔴 Wird schwer", 75
 
-    # 2. Kein H2H vorliegend
+    # 2. KEIN H2H VORHANDEN
     rec_str = details.get("record", "0:0")
     tier = details.get("league_tier", "")
 
-    # Record 0:0 -> Unbekannt
     if rec_str in ["0:0", "-", ""]:
         return "⚪ Unbekannt", 10
 
@@ -432,7 +430,7 @@ def evaluate_single_player(details, h2h_matches):
     if tier in ["Bezirksklasse", "Bezirksliga", "Landesliga", "Verbandsliga"]:
         return "🔴 Wird schwer", 70
 
-    # Win-Loss Verhältnis (wichtiger als Spieleanzahl)
+    # Win-Loss Verhältnis
     if total_games >= 30:
         win_ratio = w_val / total_games if total_games > 0 else 0
         if win_ratio > 0.55:
@@ -444,7 +442,7 @@ def evaluate_single_player(details, h2h_matches):
             else:
                 return "🟢 Pflichtsieg", 25
     else:
-        # Unter 30 Spiele: Macht den Gegner eher einfacher/unerfahrener
+        # Unter 30 Spiele gesamt
         if w_val > l_val and w_val >= 15:
             return "🟡 Schlagbar", 45
         else:
@@ -530,7 +528,7 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                             if len(tds) >= 2:
                                 status_txt = tds[0].get_text().strip().lower()
                                 
-                                # STRIKT: Nur Zeilen der Starterliste!
+                                # STRIKT: Nur die Zeilen der Starterliste!
                                 if 'starterliste' not in status_txt:
                                     continue
                                 
@@ -562,7 +560,7 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                                         "seed": seed_str
                                     })
 
-                    # 3. KONSERVATIVE EINSTUFUNG & PROFIL-DETAILS PRO SPIELER
+                    # 3. DETAILS, LIGA & PROFILE PRO SPIELER ERMITTELN
                     scored_teams = []
                     overall_h2h_wins = 0
                     overall_h2h_losses = 0
@@ -574,8 +572,8 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                         team_evals = []
                         max_player_score = 0
 
-                        # Daten für jeden Partner einzeln ziehen
                         for p_name in t_item["players"]:
+                            # Vereins- und Karriere-Details ziehen
                             p_details = fetch_player_profile_details(session, p_name, cache=player_records)
                             
                             # H2H gegen diesen Spieler
@@ -588,9 +586,17 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                             if p_score > max_player_score:
                                 max_player_score = p_score
 
+                            # Falls Verein noch '-' ist: Prüfen, ob wir ihn aus Liga-Duellen kennen
+                            club_found = p_details.get("club", "-")
+                            if club_found in ["-", ""]:
+                                for m in p_h2h:
+                                    if m.get("club"):
+                                        club_found = m["club"]
+                                        break
+
                             players_info.append({
                                 "name": p_name,
-                                "club": p_details.get("club", "-"),
+                                "club": club_found,
                                 "record": p_details.get("record", "0:0")
                             })
 
@@ -616,18 +622,28 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
 
                         # Setzplatz-Bonus
                         team_final_score = max_player_score
-                        if t_item["seed"] == "1": team_final_score += 25
-                        elif t_item["seed"] == "2": team_final_score += 20
-                        elif t_item["seed"] in ["3", "4", "3/4"]: team_final_score += 15
+                        if t_item["seed"] == "1": team_final_score += 30
+                        elif t_item["seed"] == "2": team_final_score += 24
+                        elif t_item["seed"] in ["3", "4", "3/4"]: team_final_score += 18
 
-                        # KONSERVATIVE KOMBINATION (Die härtere Kategorie sticht!)
-                        # Prioritäts-Reihenfolge: 🔴 Wird schwer > 🟡 Schlagbar > 🟢 Pflichtsieg > ⚪ Unbekannt
+                        # KONSERVATIVE KOMBINATION NACH DEINER PRIORITÄT:
+                        # 1. Negative H2H -> 🔴 Wird schwer
+                        # 2. H2H hat mind. 1 Sieg bei sonst Niederlagen / ausgeglichen -> 🟡 Schlagbar
+                        # 3. Reine H2H-Siege -> 🟢 Pflichtsieg
+                        # 4. Kein H2H: härtere Kategorie des stärkeren Partners sticht
                         badges_in_team = [e[0] for e in team_evals]
-                        if "🔴 Wird schwer" in badges_in_team or t_losses > t_wins:
+                        
+                        if t_losses > 0 and t_wins == 0:
                             team_badge = "🔴 Wird schwer"
-                        elif "🟡 Schlagbar" in badges_in_team or t_wins >= 1:
+                        elif t_wins > 0 and t_losses == 0:
+                            team_badge = "🟢 Pflichtsieg"
+                        elif t_wins >= 1:
                             team_badge = "🟡 Schlagbar"
-                        elif "🟢 Pflichtsieg" in badges_in_team or t_wins > t_losses:
+                        elif "🔴 Wird schwer" in badges_in_team:
+                            team_badge = "🔴 Wird schwer"
+                        elif "🟡 Schlagbar" in badges_in_team:
+                            team_badge = "🟡 Schlagbar"
+                        elif "🟢 Pflichtsieg" in badges_in_team:
                             team_badge = "🟢 Pflichtsieg"
                         else:
                             team_badge = "⚪ Unbekannt"
@@ -644,25 +660,11 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                     scored_teams.sort(key=lambda x: x["threat_score"], reverse=True)
 
                     # GENAU 1 TOP-FAVORIT!
-                    if scored_teams and (scored_teams[0]["threat_score"] >= 50 or scored_teams[0]["seed"] in ["1", "2"]):
+                    if scored_teams and (scored_teams[0]["threat_score"] >= 45 or scored_teams[0]["seed"] in ["1", "2"]):
                         scored_teams[0]["danger_badge"] = "👑 Top-Favorit"
 
                     top_fav_name = " / ".join([p["name"] for p in scored_teams[0]["players_info"]]) if scored_teams and "👑" in scored_teams[0]["danger_badge"] else "Ausgeglichen"
                     teams_total = len(scored_teams) + (1 if updates.get("registered") else 0)
-
-                    # Matchup-Zusammenfassung
-                    if not known_duels_summary:
-                        matchup_badge = "⚪ Unbekanntes Feld"
-                        matchup_desc = "Noch keine bisherigen Duelle"
-                    elif overall_h2h_wins > overall_h2h_losses:
-                        matchup_badge = "🟢 Günstig"
-                        matchup_desc = f"{overall_h2h_wins} Siege / {overall_h2h_losses} Niederlagen"
-                    elif overall_h2h_wins == overall_h2h_losses:
-                        matchup_badge = "🟡 Ausgeglichen"
-                        matchup_desc = f"{overall_h2h_wins} Siege / {overall_h2h_losses} Niederlagen"
-                    else:
-                        matchup_badge = "🔴 Schwer"
-                        matchup_desc = f"{overall_h2h_wins} Siege / {overall_h2h_losses} Niederlagen"
 
                     updates["field_analysis"] = {
                         "event_name": event_name,
