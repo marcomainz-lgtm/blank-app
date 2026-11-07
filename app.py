@@ -17,6 +17,7 @@ def clean_html(html_str: str) -> str:
 # --- HILFSFUNKTIONEN FÜR DIE URLAUBS-DATENBANK MIT CACHING ---
 VACATION_FILE = "vacations.json"
 LAST_UPDATE_FILE = "last_update.json"
+OPPONENTS_FILE = "opponent_history.json"
 
 @st.cache_data(ttl=60)
 def load_vacations():
@@ -55,6 +56,22 @@ def load_tournaments_data(db_file):
 def save_tournaments_data(db_file, data):
     save_gist_file(db_file, data)
     st.cache_data.clear()
+
+@st.cache_data(ttl=60)
+def load_opponents_data():
+    try:
+        res = load_gist_file(OPPONENTS_FILE)
+        if isinstance(res, dict):
+            return res
+    except Exception:
+        pass
+    if os.path.exists(OPPONENTS_FILE):
+        try:
+            with open(OPPONENTS_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
 
 
 # --- SICHERER IMPORT MIT AUTOMATISCHEM FALLBACK ---
@@ -122,7 +139,6 @@ FIELD_OPTIONS = [
 st.markdown(
     """
     <style>
-    /* Viewport-Overflow auf Mobile rigoros verhindern */
     html, body, [data-testid="stAppViewContainer"] {
         max-width: 100vw !important;
         overflow-x: hidden !important;
@@ -179,7 +195,6 @@ st.markdown(
         margin-bottom: auto !important;
     }
 
-    /* RESPONSIVER LOGIN-BLOCK (KEIN OVERFLOW MEHR) */
     div[data-testid="stHorizontalBlock"]:has(.login-row-marker) {
         align-items: center !important;
         margin-bottom: 8px !important;
@@ -339,8 +354,10 @@ st.markdown(
 
     div[data-testid="stVerticalBlockBorderWrapper"]:has(.zeit-chart-container),
     div[data-testid="stVerticalBlockBorderWrapper"]:has(.zeit-hotspot-container),
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.zeit-opponents-container),
     div[data-testid="stContainer"]:has(.zeit-chart-container),
-    div[data-testid="stContainer"]:has(.zeit-hotspot-container) {
+    div[data-testid="stContainer"]:has(.zeit-hotspot-container),
+    div[data-testid="stContainer"]:has(.zeit-opponents-container) {
         background-color: #12161f !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 12px !important;
@@ -492,7 +509,7 @@ st.markdown(
     .discipline-card.has-conflict .discipline-day { background-color: #cbd5e1 !important; color: #1e293b !important; }
     .discipline-card.has-conflict .discipline-status { color: #1e293b !important; font-weight: 600; }
 
-    .discipline-card.has-double-booking { border: 2.5px solid #ef4444 !important; background-color: #fef2f2 !important; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15) !important; opacity: 1 !important; }
+    .discipline-card.has-double-booking { border: 2.5px solid #ef4444 !important; background-color: #fef2f2 !important; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25) !important; opacity: 1 !important; }
     .discipline-card.has-double-booking .discipline-title { color: #991b1b !important; }
     .discipline-card.has-double-booking .discipline-day { background-color: #fee2e2 !important; color: #991b1b !important; }
     .discipline-card.has-double-booking .discipline-status { color: #dc2626 !important; font-weight: bold; }
@@ -778,7 +795,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
     </div>
     """
 
-    # Einzel
+    # --- EINZEL ---
     he_class = "active-registered" if reg_he else ""
     he_status_class = "registered" if reg_he else ""
     he_status_text = "Gemeldet" if reg_he else "Nicht gemeldet"
@@ -814,7 +831,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                     he_status_class = "conflict"
                     he_class = "has-conflict"
     
-    # Doppel
+    # --- DOPPEL (MIT SAUBEREN BUGFIXES FÜR STATUS-KLASSEN) ---
     hd_class = "active-registered" if reg_hd else ""
     hd_status_class = "registered" if reg_hd else ""
     hd_icon = "👥"
@@ -858,13 +875,13 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
                 if reg_hd:
                     hd_status_text = f"Terminkonflikt: {c_disc} in {c_city}{p_suffix}"
                     hd_status_class = "double-booking"
-                    he_class = "has-double-booking"
+                    hd_class = "has-double-booking"
                 else:
                     hd_status_text = f"Paralleltermin: {c_disc} in {c_city}{p_suffix}"
                     hd_status_class = "conflict"
                     hd_class = "has-conflict"
 
-    # Mixed
+    # --- MIXED (MIT SAUBEREN BUGFIXES FÜR STATUS-KLASSEN) ---
     mx_class = "active-registered" if reg_mx else ""
     mx_status_class = "registered" if reg_mx else ""
     mx_icon = "👥"
@@ -890,7 +907,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         else:
             mx_status_text = "🔒 Feld voll"
             mx_status_class = "conflict"
-            hd_class = "has-conflict"
+            mx_class = "has-conflict"
     else:
         dt_mx = get_date_for_weekday(day_mx, start_date_obj, end_date_obj)
         if dt_mx and dt_mx in vacation_dates:
@@ -1017,7 +1034,7 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         </div>
         """
 
-    # --- MINIMALISTISCHE HEADLINE & OPTISCH VERBUNDENE DOPPELZEILEN ---
+    # --- GEGNER-SCOUTING: MOBIL-OPTIMIERT & KOMPAKT (OHNE PFEILE, SPIELER+VEREIN IN EINER ZELLE) ---
     analysis = item.get('field_analysis', {})
     scouting_html = ""
     
@@ -1029,9 +1046,11 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
         team_rows = []
         for team_idx, t in enumerate(teams):
             d_badge = str(t.get('danger_badge') or "⚪ Unbekannt")
+            is_mine = bool(t.get('is_my_team', False))
             
             danger_color = "#94a3b8"
-            if "👑" in d_badge: danger_color = "#fbbf24"
+            if is_mine: danger_color = "#38bdf8"
+            elif "👑" in d_badge: danger_color = "#fbbf24"
             elif "🔴" in d_badge: danger_color = "#f87171"
             elif "🟢" in d_badge: danger_color = "#4ade80"
             elif "🟡" in d_badge: danger_color = "#fde047"
@@ -1042,63 +1061,64 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             p_list = t.get("players_info", [])
             rowspan = max(len(p_list), 1)
 
-            # Zusammenhängender Team-Hintergrund (dezentes Zebra-Muster pro Paarung)
-            bg_color = "rgba(255, 255, 255, 0.02)" if team_idx % 2 == 0 else "rgba(255, 255, 255, 0.04)"
+            # Eigene Paarung hervorheben oder abwechselndes Zeilenmuster
+            if is_mine:
+                bg_color = "rgba(56, 189, 248, 0.08)"
+                border_accent = "border-left: 3px solid #38bdf8;"
+            else:
+                bg_color = "rgba(255, 255, 255, 0.02)" if team_idx % 2 == 0 else "rgba(255, 255, 255, 0.04)"
+                border_accent = ""
 
             if p_list:
                 for idx, p in enumerate(p_list):
                     p_name = html.escape(str(p.get("name", "Unbekannt")))
                     p_url = p.get("profile_url", "")
+                    is_me = p.get("is_me", False)
                     
-                    # Zweiter Partner erhält Verbinder ↳ für sofortige visuelle Zuordnung
-                    prefix_icon = "" if idx == 0 else "<span style='color:#64748b; margin-right:4px;'>↳</span>"
-                    name_disp = f"{prefix_icon}<a href='{p_url}' target='_blank' style='color:#f8fafc; text-decoration:underline;'>{p_name}</a>" if p_url else f"{prefix_icon}<span style='color:#f8fafc;'>{p_name}</span>"
+                    me_badge = ' <span style="font-size:0.68rem; background:#0284c7; color:#fff; padding:1px 5px; border-radius:3px; margin-left:3px;">DU</span>' if is_me else ''
+                    
+                    name_disp = f"<a href='{p_url}' target='_blank' style='color:#f8fafc; font-weight:700;'>{p_name}</a>{me_badge}" if p_url else f"<span style='color:#f8fafc; font-weight:700;'>{p_name}</span>{me_badge}"
                     
                     club_txt = html.escape(str(p.get("club", "-")))
                     c_url = p.get("club_url", "")
-                    club_disp = f"<a href='{c_url}' target='_blank' style='color:#94a3b8; text-decoration:underline;'>{club_txt}</a>" if c_url else f"<span style='color:#94a3b8;'>{club_txt}</span>"
+                    club_disp = f"<div style='font-size:0.75rem; color:#94a3b8; margin-top:1px;'><a href='{c_url}' target='_blank' style='color:#94a3b8;'>{club_txt}</a></div>" if c_url else f"<div style='font-size:0.75rem; color:#94a3b8; margin-top:1px;'>{club_txt}</div>"
 
+                    player_cell = f"{name_disp}{club_disp}"
                     rec_disp = html.escape(str(p.get("record", "0:0")))
                     
-                    # Individuelle H2H-Zahl (anklickbar zu turnier.de)
                     h2h_str = str(p.get("h2h_str", "-")).strip()
                     h2h_link = p.get("h2h_link", "")
                     if h2h_str != "-":
                         if h2h_link:
-                            h2h_disp = f"<a href='{h2h_link}' target='_blank' style='color:#38bdf8; font-weight:700; text-decoration:underline;' title='Offiziellen direkten Vergleich öffnen'>{html.escape(h2h_str)}</a>"
+                            h2h_disp = f"<a href='{h2h_link}' target='_blank' style='color:#38bdf8; font-weight:700;' title='Direkten Vergleich öffnen'>{html.escape(h2h_str)}</a>"
                         else:
                             h2h_disp = f"<strong style='color:#e2e8f0;'>{html.escape(h2h_str)}</strong>"
                     else:
                         h2h_disp = "<span style='color:#64748b;'>-</span>"
 
                     if idx == 0:
-                        # Obere Zeile des Teams: dicke Abgrenzung nach oben
                         team_rows.append(f"""
-                        <tr style="background: {bg_color}; border-top: 1.5px solid rgba(255, 255, 255, 0.12); font-size: 0.85rem;">
-                            <td style="padding: 7px 10px; font-weight: 700;">{name_disp}</td>
-                            <td style="padding: 7px 10px;">{club_disp}</td>
-                            <td style="padding: 7px 10px; color: #cbd5e1; text-align: center;">{rec_disp}</td>
-                            <td style="padding: 7px 10px; text-align: center;">{h2h_disp}</td>
-                            <td rowspan="{rowspan}" style="padding: 7px 10px; color: #cbd5e1; text-align: center; border-left: 1px solid rgba(255, 255, 255, 0.06); vertical-align: middle;">{seed_disp}</td>
-                            <td rowspan="{rowspan}" style="padding: 7px 10px; color: {danger_color}; font-weight: 700; border-left: 1px solid rgba(255, 255, 255, 0.06); vertical-align: middle;">
+                        <tr style="background: {bg_color}; border-top: 1.5px solid rgba(255, 255, 255, 0.12); font-size: 0.83rem; {border_accent}">
+                            <td style="padding: 6px 8px; vertical-align: middle;">{player_cell}</td>
+                            <td style="padding: 6px 6px; color: #cbd5e1; text-align: center; vertical-align: middle;">{rec_disp}</td>
+                            <td style="padding: 6px 6px; text-align: center; vertical-align: middle;">{h2h_disp}</td>
+                            <td rowspan="{rowspan}" style="padding: 6px 6px; color: #cbd5e1; text-align: center; border-left: 1px solid rgba(255, 255, 255, 0.06); vertical-align: middle;">{seed_disp}</td>
+                            <td rowspan="{rowspan}" style="padding: 6px 8px; color: {danger_color}; font-weight: 700; border-left: 1px solid rgba(255, 255, 255, 0.06); vertical-align: middle; white-space: nowrap;">
                                 {html.escape(d_badge)}
                             </td>
                         </tr>
                         """)
                     else:
-                        # Untere Zeile (Partner): Keine harte Trennlinie nach oben, nahtlos verbunden
                         team_rows.append(f"""
-                        <tr style="background: {bg_color}; border-top: 1px dashed rgba(255, 255, 255, 0.03); border-bottom: 1.5px solid rgba(255, 255, 255, 0.12); font-size: 0.85rem;">
-                            <td style="padding: 7px 10px; font-weight: 700;">{name_disp}</td>
-                            <td style="padding: 7px 10px;">{club_disp}</td>
-                            <td style="padding: 7px 10px; color: #cbd5e1; text-align: center;">{rec_disp}</td>
-                            <td style="padding: 7px 10px; text-align: center;">{h2h_disp}</td>
+                        <tr style="background: {bg_color}; border-top: 1px dashed rgba(255, 255, 255, 0.05); border-bottom: 1.5px solid rgba(255, 255, 255, 0.12); font-size: 0.83rem; {border_accent}">
+                            <td style="padding: 6px 8px; vertical-align: middle;">{player_cell}</td>
+                            <td style="padding: 6px 6px; color: #cbd5e1; text-align: center; vertical-align: middle;">{rec_disp}</td>
+                            <td style="padding: 6px 6px; text-align: center; vertical-align: middle;">{h2h_disp}</td>
                         </tr>
                         """)
             
-        teams_tbody = "".join(team_rows) if team_rows else "<tr><td colspan='6' style='padding:8px; color:#64748b;'>Keine Teams erfasst</td></tr>"
+        teams_tbody = "".join(team_rows) if team_rows else "<tr><td colspan='5' style='padding:8px; color:#64748b;'>Keine Teams erfasst</td></tr>"
 
-        # Cleane Headline ohne Emoticons, ohne CTA-Text, schlichter Pfeil ganz rechts
         scouting_html = f"""
         <details style="background: #141923; border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 8px; margin-top: 10px; margin-bottom: 8px; padding: 8px 12px; cursor: pointer;">
             <summary style="font-size: 0.88rem; font-weight: 700; color: #cbd5e1; outline: none; display: flex; justify-content: space-between; align-items: center; user-select: none;">
@@ -1109,13 +1129,12 @@ def render_styled_tournament_card(item, occupied_dates, vacation_dates, vacation
             <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08); overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: 'Inter', sans-serif;">
                     <thead>
-                        <tr style="border-bottom: 1.5px solid rgba(255, 255, 255, 0.15); font-size: 0.78rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px;">
-                            <th style="padding: 6px 10px;">Spieler</th>
-                            <th style="padding: 6px 10px;">Verein</th>
-                            <th style="padding: 6px 10px; text-align: center;">Karriere (W:L)</th>
-                            <th style="padding: 6px 10px; text-align: center;">H2H gegen dich</th>
-                            <th style="padding: 6px 10px; text-align: center;">Setzplatz</th>
-                            <th style="padding: 6px 10px;">Einstufung (Team)</th>
+                        <tr style="border-bottom: 1.5px solid rgba(255, 255, 255, 0.15); font-size: 0.74rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px;">
+                            <th style="padding: 6px 8px;">Spieler & Verein</th>
+                            <th style="padding: 6px 6px; text-align: center;">Bilanz</th>
+                            <th style="padding: 6px 6px; text-align: center;">H2H</th>
+                            <th style="padding: 6px 6px; text-align: center;" title="Setzplatz">#</th>
+                            <th style="padding: 6px 8px;">Einstufung</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1365,7 +1384,7 @@ def render_season_chart(df, today):
     )
 
 
-# --- HORIZONTALE ZEIT-STYLE BALKEN ---
+# --- HORIZONTALE ZEIT-STYLE BALKEN (VOLLE LÄNGE, KEIN INNERES SCROLLEN) ---
 def render_city_hotspots(df, today):
     df_played = get_played_tournaments(df, today)
     total_played = len(df_played)
@@ -1446,12 +1465,98 @@ def render_city_hotspots(df, today):
     card_html = f"""
     <div class="zeit-header-title">
         <span>Austragungsorte • Ranking</span>
-        <span class="zeit-kpi-tag" style="border-color:#22d3ee; color:#22d3ee;">Hotspots</span>
     </div>
     <div class="zeit-hero-number">{len(city_stats)} Städte</div>
     <div class="zeit-hero-sub">{total_played} gespielte Turniere in {len(city_stats)} Städten</div>
-    <div style="margin-top: 10px; max-height: 200px; overflow-y: auto; padding-right: 4px;">
+    <div style="margin-top: 10px;">
         {''.join(rows_html)}
+    </div>
+    """
+    st.markdown(clean_html(card_html), unsafe_allow_html=True)
+
+
+# --- NEUE KACHEL: LIEBLINGSGEGNER & ANGSTGEGNER (TOP 5 / FLOP 5) ---
+def render_opponents_stats():
+    opp_history = load_opponents_data()
+    if not opp_history:
+        st.info("Noch keine Gegner-Historie verfügbar.")
+        return
+
+    opp_stats = []
+    for opp_name, matches in opp_history.items():
+        wins = sum(1 for m in matches if m.get("won"))
+        losses = len(matches) - wins
+        total = wins + losses
+        if total == 0:
+            continue
+        
+        opp_stats.append({
+            "name": opp_name,
+            "wins": wins,
+            "losses": losses,
+            "total": total,
+            "win_ratio": wins / total,
+            "diff": wins - losses
+        })
+
+    if not opp_stats:
+        st.info("Keine Begegnungen im Match-Archiv gefunden.")
+        return
+
+    # Lieblingsgegner: Meiste Siege gegen den Gegner (mind. 1 Sieg)
+    favs = [o for o in opp_stats if o["wins"] > 0]
+    favs.sort(key=lambda x: (x["wins"], x["diff"], x["win_ratio"]), reverse=True)
+    favs = favs[:5]
+
+    # Angstgegner: Meiste Niederlagen gegen den Gegner (mind. 1 Niederlage)
+    nemeses = [o for o in opp_stats if o["losses"] > 0]
+    nemeses.sort(key=lambda x: (x["losses"], -x["diff"], -x["win_ratio"]), reverse=True)
+    nemeses = nemeses[:5]
+
+    def build_list_html(items, is_fav=True):
+        if not items:
+            return "<div style='color:#64748b; font-size:0.8rem; padding:6px 0;'>Noch keine Daten vorhanden</div>"
+        
+        rows = []
+        for i, o in enumerate(items):
+            color = "#4ade80" if is_fav else "#f87171"
+            score_txt = f"{o['wins']}:{o['losses']}"
+            name_txt = html.escape(o['name'])
+            
+            rows.append(f"""
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:0.83rem;">
+                <span style="color:#f8fafc; font-weight:600;">{i+1}. {name_txt}</span>
+                <span style="color:{color}; font-weight:700; font-size:0.82rem; background:rgba(255,255,255,0.04); padding:2px 8px; border-radius:4px;">{score_txt}</span>
+            </div>
+            """)
+        return "".join(rows)
+
+    favs_html = build_list_html(favs, is_fav=True)
+    nemeses_html = build_list_html(nemeses, is_fav=False)
+
+    total_opps = len(opp_stats)
+
+    card_html = f"""
+    <div class="zeit-header-title">
+        <span>Gegner-Bilanz • Head-to-Head</span>
+        <span class="zeit-kpi-tag" style="border-color:#38bdf8; color:#38bdf8;">Match-Archiv</span>
+    </div>
+    <div class="zeit-hero-number">{total_opps} Konkurrenten</div>
+    <div class="zeit-hero-sub">Persönliche Rekorde gegen direkte Gegner (Liga & Turniere)</div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 14px;">
+        <div style="background: rgba(255,255,255,0.02); padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(74, 222, 128, 0.2);">
+            <div style="font-size:0.76rem; font-weight:700; color:#4ade80; text-transform:uppercase; margin-bottom:6px;">
+                🟢 Lieblingsgegner (Top 5)
+            </div>
+            {favs_html}
+        </div>
+        <div style="background: rgba(255,255,255,0.02); padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(248, 113, 113, 0.2);">
+            <div style="font-size:0.76rem; font-weight:700; color:#f87171; text-transform:uppercase; margin-bottom:6px;">
+                🔴 Angstgegner (Flop 5)
+            </div>
+            {nemeses_html}
+        </div>
     </div>
     """
     st.markdown(clean_html(card_html), unsafe_allow_html=True)
@@ -1775,7 +1880,7 @@ elif data is not None:
                         })
 
         try:
-            today = datetime.datetime.now(ZoneInfo("Europe/Berlin")).date()
+            today = datetime.date.today()
         except Exception:
             today = datetime.date.today()
 
@@ -1946,6 +2051,11 @@ elif data is not None:
                 with st.container(border=True):
                     st.markdown('<div class="zeit-hotspot-container"></div>', unsafe_allow_html=True)
                     render_city_hotspots(df, today)
+            
+            st.write("")
+            with st.container(border=True):
+                st.markdown('<div class="zeit-opponents-container"></div>', unsafe_allow_html=True)
+                render_opponents_stats()
 
     else:
         st.info("Die Datenbank ist erreichbar, enthält aber aktuell noch keine Turniere.")

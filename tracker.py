@@ -185,8 +185,6 @@ def clean_badminton_scores(text, won):
     return ", ".join(valid_sets[:3])
 
 
-# --- DIREKTER PROFIL-PFAD: BILANZ, VEREIN & LINKS AUSLESEN ---
-
 def fetch_player_profile_details(session, player_name, tournament_id=None, tournament_player_id=None, cache=None):
     if cache is None:
         cache = {}
@@ -202,7 +200,6 @@ def fetch_player_profile_details(session, player_name, tournament_id=None, tourn
 
     profile_url = known_profiles.get(c_name)
 
-    # 1. Klickpfad: Turnier-Spielerkarte -> Link /player/{OrgCode}/{Base64ID}
     if not profile_url and tournament_id and tournament_player_id:
         try:
             t_p_url = f"https://dbv.turnier.de/tournament/{tournament_id}/player/{tournament_player_id}"
@@ -215,7 +212,6 @@ def fetch_player_profile_details(session, player_name, tournament_id=None, tourn
         except Exception:
             pass
 
-    # 2. Fallback: Suche per POST
     if not profile_url:
         try:
             search_url = "https://dbv.turnier.de/find/player/DoSearch"
@@ -243,22 +239,18 @@ def fetch_player_profile_details(session, player_name, tournament_id=None, tourn
         try:
             r = session.get(profile_url, headers=get_headers(), timeout=8)
             if r.status_code == 200:
-                # Echte finale Redirect-URL sichern
                 profile_url = r.url
 
-                # Mitgliedsnummer / Passnummer auslesen (z. B. 01-164149)
                 m_mem = re.search(r'\((\d{2}-\d{4,8})\)', r.text)
                 if m_mem:
                     member_id = m_mem.group(1)
 
-                # Karriere-Bilanz abgreifen
                 m = re.search(r'Karriere[^\d]*?(\d+)\s*/\s*(\d+)', r.text, re.I)
                 if m:
                     record_str = f"{m.group(1)}:{m.group(2)}"
 
                 soup_p = BeautifulSoup(r.content, 'html.parser')
                 
-                # Verein & Vereins-Link finden
                 for a in soup_p.find_all('a', href=re.compile(r'/club/|/team/|club\.aspx|team\.aspx', re.I)):
                     c_txt = a.get_text().strip()
                     if len(c_txt) > 3 and not re.search(r'ausrichter|suche|find|deutschland|verband', c_txt, re.I):
@@ -273,7 +265,6 @@ def fetch_player_profile_details(session, player_name, tournament_id=None, tourn
                             club_name = re.sub(r'\s*\d+$', '', t).strip()
                             break
 
-                # Liga-Level
                 txt_low = r.text.lower()
                 if "landesliga" in txt_low: detected_tier = "Landesliga"
                 elif "bezirksliga" in txt_low: detected_tier = "Bezirksliga"
@@ -294,8 +285,6 @@ def fetch_player_profile_details(session, player_name, tournament_id=None, tourn
     cache[c_name] = details
     return details
 
-
-# --- MATCH-ARCHIV FÜR H2H ---
 
 def harvest_opponent_history(session):
     history = {}
@@ -430,10 +419,7 @@ def harvest_opponent_history(session):
     return history
 
 
-# --- EINSTUFUNGS-LOGIK PRO EINZELNEM SPIELER ---
-
 def evaluate_single_player(details, h2h_matches):
-    # 1. H2H PRIORITÄT (Höchste Gewichtung)
     if len(h2h_matches) > 0:
         h2h_wins = sum(1 for m in h2h_matches if m["won"])
         h2h_losses = len(h2h_matches) - h2h_wins
@@ -446,7 +432,6 @@ def evaluate_single_player(details, h2h_matches):
         elif h2h_losses > 0:
             return "🔴 Wird schwer", 75
 
-    # 2. KEIN H2H VORHANDEN
     rec_str = details.get("record", "0:0")
     tier = details.get("league_tier", "")
 
@@ -483,8 +468,6 @@ def evaluate_single_player(details, h2h_matches):
 
     return "🟡 Schlagbar", 45
 
-
-# --- DYNAMISCHES EVENT-, GEGNER- & NIVEAU-SCRAPING ---
 
 def check_player_subpages(session, t_id, existing_entry, opp_history=None, player_records=None):
     if not opp_history or not isinstance(opp_history, dict):
@@ -538,7 +521,7 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                                 if field_name: updates["field_mx"] = field_name
                                 if found_partner: updates["partner_mx"] = found_partner
 
-                    # 2. AUSSCHLIESSLICH ECHTE STARTERLISTE AUSLESEN
+                    # 2. Starterliste auslesen (inklusive eigenem Team!)
                     tables = soup_ev.find_all('table')
                     target_table = None
                     for tbl in tables:
@@ -570,7 +553,7 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                                     p_name = clean_player_name(a.get_text().strip())
                                     m_pid = re.search(r'player=(\d+)', a.get('href', ''))
                                     pid = m_pid.group(1) if m_pid else None
-                                    if p_name and (is_real_player_name(p_name) or any(p.search(p_name) for p in PLAYER_CONFIG["patterns"])):
+                                    if p_name:
                                         team_players_raw.append({"name": p_name, "pid": pid})
                                 
                                 if not team_players_raw:
@@ -591,19 +574,16 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                                 if seed_str:
                                     seeds_count += 1
 
-                                team_opponents = [p for p in team_players_raw if not any(pat.search(p["name"]) for pat in PLAYER_CONFIG["patterns"]) and p["name"] != updates.get("partner_hd") and p["name"] != updates.get("partner_mx")]
-                                
-                                if not is_my_team and team_opponents:
-                                    raw_teams.append({
-                                        "opponents": team_opponents,
-                                        "seed": seed_str
-                                    })
+                                raw_teams.append({
+                                    "players": team_players_raw,
+                                    "seed": seed_str,
+                                    "is_my_team": is_my_team
+                                })
 
-                    # 3. DETAILS, PROFILE & H2H PRO SPIELER ERMITTELN
+                    # 3. Details, Profile & H2H pro Spieler ermitteln
                     scored_teams = []
                     overall_h2h_wins = 0
                     overall_h2h_losses = 0
-                    known_duels_summary = []
 
                     for t_item in raw_teams:
                         players_info = []
@@ -611,10 +591,12 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                         max_player_score = 0
                         team_has_loss = False
                         team_has_win = False
+                        is_mine = t_item["is_my_team"]
 
-                        for p_obj in t_item["opponents"]:
+                        for p_obj in t_item["players"]:
                             p_name = p_obj["name"]
                             p_pid = p_obj["pid"]
+                            is_marco = any(pat.search(p_name) for pat in PLAYER_CONFIG["patterns"])
                             
                             p_details = fetch_player_profile_details(
                                 session, 
@@ -624,36 +606,40 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                                 cache=player_records
                             )
                             
-                            # Individuelle H2H-Bilanz dieses Spielers gegen Marco
-                            p_h2h = opp_history.get(p_name, [])
+                            p_h2h = opp_history.get(p_name, []) if not is_marco else []
                             p_w = sum(1 for m in p_h2h if m["won"])
                             p_l = len(p_h2h) - p_w
-                            overall_h2h_wins += p_w
-                            overall_h2h_losses += p_l
-                            
-                            if p_l > 0: team_has_loss = True
-                            if p_w > 0: team_has_win = True
+                            if not is_mine:
+                                overall_h2h_wins += p_w
+                                overall_h2h_losses += p_l
+                                if p_l > 0: team_has_loss = True
+                                if p_w > 0: team_has_win = True
 
-                            # Saubere H2H-Zahl (ohne Satzklammern!)
-                            p_h2h_str = f"{p_w}-{p_l}" if len(p_h2h) > 0 else "-"
+                            p_h2h_str = f"{p_w}-{p_l}" if (len(p_h2h) > 0 and not is_marco) else "-"
 
-                            # Direkter H2H-Vergleichslink
                             h2h_link = ""
                             opp_mid = p_details.get("member_id", "")
-                            if opp_mid and PLAYER_CONFIG.get("member_id"):
+                            if opp_mid and PLAYER_CONFIG.get("member_id") and not is_marco:
                                 h2h_link = f"https://dbv.turnier.de/head-2-head?OrganizationCode={PLAYER_CONFIG['org_code']}&T1P1MemberID={opp_mid}&T2P1MemberID={PLAYER_CONFIG['member_id']}"
 
-                            badge, p_score = evaluate_single_player(p_details, p_h2h)
+                            if is_mine:
+                                badge, p_score = ("👤 Dein Team", 0)
+                            else:
+                                badge, p_score = evaluate_single_player(p_details, p_h2h)
+
                             team_evals.append((badge, p_score))
                             if p_score > max_player_score:
                                 max_player_score = p_score
 
                             club_found = p_details.get("club", "-")
                             if club_found in ["-", ""]:
-                                for m in p_h2h:
-                                    if m.get("club"):
-                                        club_found = m["club"]
-                                        break
+                                if is_marco:
+                                    club_found = PLAYER_CONFIG["club"]
+                                else:
+                                    for m in p_h2h:
+                                        if m.get("club"):
+                                            club_found = m["club"]
+                                            break
 
                             players_info.append({
                                 "name": p_name,
@@ -662,29 +648,20 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                                 "club_url": p_details.get("club_url", ""),
                                 "record": p_details.get("record", "0:0"),
                                 "h2h_str": p_h2h_str,
-                                "h2h_link": h2h_link
+                                "h2h_link": h2h_link,
+                                "is_me": is_marco
                             })
 
-                        # Setzplatz-Bonus
                         team_final_score = max_player_score
                         if t_item["seed"] == "1": team_final_score += 35
                         elif t_item["seed"] == "2": team_final_score += 25
                         elif t_item["seed"] in ["3", "4", "3/4"]: team_final_score += 18
 
-                        # Karriere-Siege als Tiebreaker
-                        for p in players_info:
-                            rec = p.get("record", "0:0")
-                            if ":" in rec:
-                                try:
-                                    w_cnt = int(rec.split(":")[0])
-                                    team_final_score += min(35, w_cnt // 8)
-                                except ValueError:
-                                    pass
-
-                        # KONSERVATIVE KOMBINATION FÜR DAS TEAM
                         badges_in_team = [e[0] for e in team_evals]
                         
-                        if team_has_loss and not team_has_win:
+                        if is_mine:
+                            team_badge = "👤 Dein Team"
+                        elif team_has_loss and not team_has_win:
                             team_badge = "🔴 Wird schwer"
                         elif team_has_win and not team_has_loss:
                             team_badge = "🟢 Pflichtsieg"
@@ -703,33 +680,35 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
                             "players_info": players_info,
                             "seed": t_item["seed"],
                             "threat_score": team_final_score,
-                            "danger_badge": team_badge
+                            "danger_badge": team_badge,
+                            "is_my_team": is_mine
                         })
 
-                    # Sortierung: Höchster Score an die Spitze
-                    def get_team_sorting_weight(team_item):
-                        score = team_item.get("threat_score", 0)
-                        career_wins = 0
-                        for p in team_item.get("players_info", []):
-                            rec = p.get("record", "0:0")
-                            if ":" in rec:
-                                try:
-                                    career_wins += int(rec.split(":")[0])
-                                except ValueError:
-                                    pass
-                        return (score + career_wins, career_wins)
+                    # Sortierung: Primär nach Setzplatz (1, 2, 3/4...), ungesetzte danach
+                    def get_seed_rank(seed_val):
+                        s = str(seed_val).strip()
+                        if not s:
+                            return 9999
+                        m = re.search(r'\d+', s)
+                        return int(m.group(0)) if m else 9999
 
-                    scored_teams.sort(key=get_team_sorting_weight, reverse=True)
+                    scored_teams.sort(key=lambda t: (get_seed_rank(t.get("seed", "")), -t.get("threat_score", 0)))
 
-                    # GENAU 1 TOP-FAVORIT!
-                    if scored_teams and (scored_teams[0]["threat_score"] >= 45 or scored_teams[0]["seed"] in ["1", "2"]):
-                        scored_teams[0]["danger_badge"] = "👑 Top-Favorit"
+                    # 1 Top-Favorit (sofern nicht das eigene Team)
+                    for st in scored_teams:
+                        if not st["is_my_team"] and (st["threat_score"] >= 45 or st["seed"] in ["1", "2"]):
+                            st["danger_badge"] = "👑 Top-Favorit"
+                            break
 
-                    top_fav_name = " / ".join([p["name"] for p in scored_teams[0]["players_info"]]) if scored_teams and "👑" in scored_teams[0]["danger_badge"] else "Ausgeglichen"
-                    teams_total = len(scored_teams) + (1 if updates.get("registered") else 0)
+                    top_fav_name = "Ausgeglichen"
+                    for st in scored_teams:
+                        if "👑" in st["danger_badge"]:
+                            top_fav_name = " / ".join([p["name"] for p in st["players_info"]])
+                            break
 
-                    # Zusammenfassung
-                    h2h_known_count = sum(1 for t in scored_teams if any(p["h2h_str"] != "-" for p in t["players_info"]))
+                    teams_total = len(scored_teams)
+
+                    h2h_known_count = sum(1 for t in scored_teams if not t["is_my_team"] and any(p["h2h_str"] != "-" for p in t["players_info"]))
                     if h2h_known_count == 0:
                         matchup_badge = "⚪ Unbekanntes Feld"
                         matchup_desc = "Noch keine bisherigen Duelle"
@@ -807,8 +786,6 @@ def check_player_subpages(session, t_id, existing_entry, opp_history=None, playe
     return updates
 
 
-# --- HAUPT-SCRAPER ---
-
 def scrape_tournaments(s):
     url = "https://dbv.turnier.de/find/tournament/DoSearch"
     headers = {
@@ -823,11 +800,12 @@ def scrape_tournaments(s):
     max_pages = 25
 
     today = datetime.date.today()
-    start_filter = f"{today.year}-01-01T00:00"
-    end_filter = f"{today.year + 1}-12-31T23:59"
+    # DELTA-LOAD: Scrapt ab 01.11.2026 bis Ende 2027
+    start_filter = "2026-11-01T00:00"
+    end_filter = f"{max(today.year + 1, 2027)}-12-31T23:59"
 
     while page <= max_pages:
-        print(f"Scraping Seite {page} ({today.year} - {today.year + 1})...")
+        print(f"Scraping Seite {page} ({start_filter} bis {end_filter})...")
         payload = {
             "Page": str(page),
             "TournamentExtendedFilter.SportID": "2",
@@ -1037,7 +1015,7 @@ def check_for_updates_generator():
         player_records = {}
 
     today = datetime.date.today()
-    yield f"Suche nach Turnieren für {today.year} & {today.year + 1} auf turnier.de..."
+    yield "Suche nach Turnieren ab November 2026 bis 2027 auf turnier.de (Delta-Load)..."
     
     try:
         current_list = scrape_tournaments(session)
@@ -1049,7 +1027,7 @@ def check_for_updates_generator():
     new_tournaments = []
     found_registrations = 0
     
-    yield f"Gleiche Konkurrenzen, Zeitpläne & H2H-Gegner für Marco Mainz ab..."
+    yield "Gleiche Konkurrenzen, Starterlisten & H2H-Duelle für Marco Mainz ab..."
     
     for idx, t in enumerate(current_list):
         t_id = t["id"]
@@ -1135,7 +1113,7 @@ def check_for_updates_generator():
         yield f"Fertig! {len(new_tournaments)} neue(s) Turnier(e) gefunden."
         send_push_notification(new_tournaments)
     else:
-        yield f"Fertig! Alle Meldungen, Zeitpläne & H2H-Duelle synchronisiert."
+        yield "Fertig! Alle Starterlisten, Zeitpläne & Duelle synchronisiert."
 
 
 if __name__ == "__main__":
